@@ -3,7 +3,7 @@
 // ============================================================
 
 // 🔴 TODO: Replace with your actual Google Apps Script Web App ID/URL after Deployment
-const GAS_URL = "https://script.google.com/macros/s/AKfycbxyz.../exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbxnRTEb5Q09UkPPiKgx2nzee7ZTogtomaeUzQoj8FJ_0AlfOvJxNt0lPQwhYHLz-OEweg/exec";
 
 var API = (function () {
   var apiObj = {
@@ -28,18 +28,18 @@ var API = (function () {
           },
           body: JSON.stringify(payload)
         })
-        .then(function(res) {
-          if (!res.ok) throw new Error("Network Error: " + res.status);
-          return res.json(); // GAS should return JSON string via ContentService.createTextOutput
-        })
-        .then(function(res) {
-          if (res && res.success) resolve(res);
-          else reject(res ? res.message : 'Unknown error');
-        })
-        .catch(function(err) {
-          console.error('API Error [' + action + ']:', err);
-          reject(err.message || 'Failed to contact database.');
-        });
+          .then(function (res) {
+            if (!res.ok) throw new Error("Network Error: " + res.status);
+            return res.json(); // GAS should return JSON string via ContentService.createTextOutput
+          })
+          .then(function (res) {
+            if (res && res.success) resolve(res);
+            else reject(res ? res.message : 'Unknown error');
+          })
+          .catch(function (err) {
+            console.error('API Error [' + action + ']:', err);
+            reject(err.message || 'Failed to contact database.');
+          });
       });
     },
 
@@ -77,7 +77,7 @@ var API = (function () {
     updateStock: function (productId, qty, adminId) { return this._call('updateStock', { productId: productId, qty: qty, adminId: adminId }); },
     receiveStock: function (data) { return this._call('receiveStock', data); },
     receiveSubStock: function (data) { return this._call('receiveSubStock', data); },
-    deductSubStock: function (productId, qty) { return this._call('deductSubStock', {productId: productId, qty: qty}); },
+    deductSubStock: function (productId, qty) { return this._call('deductSubStock', { productId: productId, qty: qty }); },
     transferSubStock: function (data) { return this._call('transferSubStock', data); },
     returnToMainStock: function (data) { return this._call('returnToMainStock', data); },
     manageProduct: function (op, data) { return this._call('manageProduct', { op: op, data: data }); }
