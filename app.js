@@ -38,6 +38,14 @@ function updateDarkModeUI(isDark) {
   if (icon) icon.innerHTML = isDark ? '<i data-lucide="sun"></i>' : '<i data-lucide="moon"></i>';
 }
 
+function refreshIcons() {
+  if (typeof lucide !== 'undefined' && lucide.createIcons) {
+    lucide.createIcons();
+  } else if (window.lucide && window.lucide.createIcons) {
+    window.lucide.createIcons();
+  }
+}
+
 function checkAuth() {
   var stored = localStorage.getItem('_user');
   if (stored) {
