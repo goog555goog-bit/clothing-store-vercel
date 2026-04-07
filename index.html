@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMETIX STORE - Digital Procurement</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/lucide@latest" defer></script>
+</head>
+
+<body>
+
+  <!-- ══════════════════════════════════════════
+       HEADER — Logo | Search | User Actions
+  ══════════════════════════════════════════ -->
+  <header class="app-header">
+    <div class="container header-container">
+
+      <!-- Logo -->
+      <div class="logo" onclick="switchView('store')">
+        <div class="logo-icon"><i data-lucide="package"></i></div>
+        <span style="font-size:1.35rem;font-weight:800;letter-spacing:-1px;color:#fff;">EMETIX <span
+            style="font-weight:300;opacity:0.6;color:var(--primary);">STORE</span></span>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="search-wrapper">
+        <div class="search-box glass">
+          <i data-lucide="search" style="width:18px;height:18px;color:var(--text3);margin-left:1rem;"></i>
+          <input id="searchInput" type="text" placeholder="ค้นหาสินค้า..." autocomplete="off"
+            onfocus="handleSearchInput(this.value)" onclick="handleSearchInput(this.value)"
+            oninput="handleSearchInput(this.value)" onkeyup="if(event.key==='Enter') renderProductGrid()"
+            style="padding-left:0.5rem;background:transparent;border:none;height:100%;color:var(--text);min-width:80px;">
+        </div>
+        <div class="search-options hide-mobile">
+          <select id="searchType" class="search-select-minimal glass">
+            <option value="all">ทั้งหมด</option>
+            <option value="name">ชื่อสินค้า</option>
+            <option value="productId">รหัสสินค้า</option>
+            <option value="description">รายละเอียด</option>
+          </select>
+          <select id="stockFilter" class="search-select-minimal glass" onchange="renderProductGrid()">
+            <option value="all">ทุกสถานะ</option>
+            <option value="instock">มีในคลัง</option>
+          </select>
+          <button class="search-btn" onclick="renderProductGrid()" title="ค้นหา">
+            <i data-lucide="search" style="width:16px;height:16px;"></i> <span>ค้นหา</span>
+          </button>
+        </div>
+        <div id="searchSuggestions" class="search-suggestions-dropdown"></div>
+      </div>
+
+      <!-- User Actions (compact — nav tabs live in mobile nav) -->
+      <div class="nav-actions">
+        <button id="adminPaneBtn" class="btn btn-accent btn-sm hidden" onclick="showToast('เข้าใช้งาน Admin ทางลิงก์เฉพาะ', 'info')">
+          <i data-lucide="settings"></i> <span class="hide-mobile">แอดมิน</span>
+        </button>
+        <button id="mgrPaneBtn" class="btn btn-warning btn-sm hidden" onclick="showToast('เข้าใช้งาน Manager ทางลิงก์เฉพาะ', 'info')">
+          <i data-lucide="scale"></i> <span class="hide-mobile">ผู้อนุมัติ</span>
+        </button>
+        <button id="loginBtn" class="btn btn-outline btn-sm" onclick="showToast('ยังไม่ได้เชื่อมหหน้า Login เข้ากับ Vercel', 'info')">
+          <i data-lucide="log-in" style="width:15px;height:15px;"></i> <span>เข้าสู่ระบบ</span>
+        </button>
+        <button id="logoutBtn" class="btn btn-ghost btn-sm hidden" onclick="logout()">
+          <span id="navUserName"></span> <i data-lucide="log-out"></i>
+        </button>
+        <button class="btn btn-ghost hide-mobile" style="position:relative" onclick="toggleDrawer('cartDrawer')"
+          title="ตะกร้าสินค้า">
+          <i data-lucide="shopping-bag"></i>
+          <div id="cartBadge" class="cart-badge" style="display:none">0</div>
+        </button>
+        <button class="btn btn-ghost" onclick="toggleDarkMode()" title="เปลี่ยนธีม">
+          <span id="darkModeIcon"><i data-lucide="moon"></i></span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ══════════════════════════════════════════
+       HERO BANNER — Compact (200px)
+  ══════════════════════════════════════════ -->
+  <section id="hero-banner" style="padding:0.75rem 0 0;display:block;">
+    <div class="container">
+      <div class="card glass"
+        style="padding:0;min-height:200px;position:relative;overflow:hidden;display:flex;align-items:center;border:1px solid rgba(251,191,36,0.2);background:linear-gradient(135deg,#0a0a16,#12122b);">
+        <div style="flex:1;padding:1.75rem 2.5rem;z-index:5;position:relative;">
+          <div
+            style="display:inline-flex;align-items:center;gap:0.4rem;background:var(--glass-gold);color:var(--primary);padding:0.25rem 0.75rem;border-radius:99px;font-size:0.72rem;font-weight:700;margin-bottom:0.75rem;border:1px solid var(--glass-border);">
+            <i data-lucide="sparkles" style="width:11px;height:11px;"></i> พรีเมียมสโตร์
+          </div>
+          <h1
+            style="font-size:clamp(1.4rem,3.5vw,2.2rem);font-weight:900;line-height:1.15;margin-bottom:0.5rem;letter-spacing:-1.5px;color:#fff;">
+            EMETIX <span style="color:var(--primary);text-shadow:0 0 20px rgba(251,191,36,0.35);">PREMIUM</span>
+          </h1>
+          <p style="font-size:0.9rem;color:var(--text2);margin-bottom:1.25rem;line-height:1.5;">ระบบเบิกพัสดุดิจิทัล
+            รวดเร็ว ปลอดภัย</p>
+          <button class="btn btn-primary" style="height:40px;padding:0 1.5rem;font-size:0.88rem;"
+            onclick="document.getElementById('productGrid').scrollIntoView({behavior:'smooth'})">
+            เริ่มเบิกพัสดุ <i data-lucide="arrow-down"></i>
+          </button>
+        </div>
+        <div style="position:absolute;right:-40px;top:0;bottom:0;width:50%;pointer-events:none;opacity:0.55;">
+          <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&q=60&w=800"
+            style="width:100%;height:100%;object-fit:cover;mask-image:linear-gradient(to left,black 40%,transparent);">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       STORE VIEW
+  ══════════════════════════════════════════ -->
+  <main id="view-store" style="display:block;">
+    <div class="container" style="padding-top:2rem;">
+      <!-- Category Navigation -->
+      <div id="categoryNav" class="cat-filter" style="margin-bottom:2rem;"></div>
+      <!-- Product Grid -->
+      <div id="productGrid" class="product-grid">
+        <div class="skeleton-card skeleton" style="border-radius:var(--radius);"></div>
+        <div class="skeleton-card skeleton" style="border-radius:var(--radius);"></div>
+        <div class="skeleton-card skeleton" style="border-radius:var(--radius);"></div>
+        <div class="skeleton-card skeleton" style="border-radius:var(--radius);"></div>
+      </div>
+      <!-- Pagination -->
+      <div id="productPagination" style="padding-bottom:6rem;text-align:center;margin-top:1rem;"></div>
+    </div>
+  </main>
+
+  <!-- ══════════════════════════════════════════
+       ORDERS VIEW — with Filter Bar
+  ══════════════════════════════════════════ -->
+  <main id="view-orders" style="display:none;">
+    <div class="container" style="padding-top:2rem;">
+      <div
+        style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem;">
+        <h2 style="font-size:1.25rem;font-weight:700;display:flex;align-items:center;gap:0.5rem;">
+          <i data-lucide="clipboard-list" style="width:20px;height:20px;color:var(--primary);"></i> ประวัติการเบิก
+        </h2>
+        <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
+          <button class="orders-filter-btn active" data-filter="all" onclick="filterOrders('all')">ทั้งหมด</button>
+          <button class="orders-filter-btn" data-filter="Pending" onclick="filterOrders('Pending')">รออนุมัติ</button>
+          <button class="orders-filter-btn" data-filter="Approved"
+            onclick="filterOrders('Approved')">อนุมัติแล้ว</button>
+          <button class="orders-filter-btn" data-filter="Dispatched"
+            onclick="filterOrders('Dispatched')">รอรับของ</button>
+          <button class="orders-filter-btn" data-filter="Received" onclick="filterOrders('Received')">รับแล้ว</button>
+          <button class="orders-filter-btn" data-filter="Rejected" onclick="filterOrders('Rejected')"
+            style="color:var(--danger);">ปฏิเสธ</button>
+        </div>
+      </div>
+      <div id="myOrdersList" class="flex flex-col gap-2">
+        <div class="empty-state">
+          <i data-lucide="clipboard-list" style="width:48px;height:48px;"></i>
+          <p>ยังไม่มีรายการเบิก</p>
+          <small>เข้าสู่ระบบเพื่อดูประวัติ</small>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ══════════════════════════════════════════
+       SUB-STOCK VIEW
+  ══════════════════════════════════════════ -->
+  <main id="view-substock" style="display:none;">
+    <div class="container" style="padding-top:2rem;">
+      <h2 style="font-size:1.25rem;font-weight:700;margin-bottom:1.5rem;display:flex;align-items:center;gap:0.5rem;">
+        <i data-lucide="package-search" style="width:20px;height:20px;color:var(--primary);"></i> คลังย่อยของฉัน
+      </h2>
+      <div id="subStockGrid" class="product-grid" style="padding-bottom:3rem;">
+        <div class="empty-state" style="grid-column:1/-1;">
+          <i data-lucide="package" style="width:48px;height:48px;"></i>
+          <p>กำลังโหลดข้อมูลคลังย่อย</p>
+          <small>กรุณารอสักครู่...</small>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ══════════════════════════════════════════
+       CART DRAWER — with swipe handle
+  ══════════════════════════════════════════ -->
+  <div id="drawerOverlay" class="drawer-overlay" onclick="toggleDrawer('cartDrawer')"></div>
+  <aside id="cartDrawer" class="cart-drawer">
+    <!-- Swipe-to-close handle (mobile) -->
+    <div class="cart-swipe-handle" id="cartSwipeHandle">
+      <div class="cart-swipe-bar"></div>
+    </div>
+    <div class="cart-header">
+      <div style="font-weight:600;font-size:1rem;display:flex;align-items:center;gap:0.5rem;">
+        <i data-lucide="shopping-cart"></i> ตะกร้าสินค้าเบิก
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="toggleDrawer('cartDrawer')">✕</button>
+    </div>
+    <div id="cartItems" class="cart-body">
+      <div class="empty-state">
+        <i data-lucide="shopping-bag" style="width:48px;height:48px;opacity:0.2;margin-bottom:1rem;"></i>
+        <p>ตะกร้าว่างเปล่า</p>
+      </div>
+    </div>
+    <div class="cart-footer">
+      <div class="flex justify-between items-center" style="margin-bottom:1rem;">
+        <span style="color:var(--text2);">ยอดรวมทั้งสิ้น</span>
+        <span id="cartTotal" style="font-size:1.3rem;font-weight:700;color:var(--accent);">฿0</span>
+      </div>
+      <button id="checkoutBtn" class="btn btn-primary w-full btn-lg" style="justify-content:center;" disabled
+        onclick="showCheckoutModal()">
+        <i data-lucide="check-circle-2"></i> ยืนยันการเบิก
+      </button>
+    </div>
+  </aside>
+
+  <!-- ══════════════════════════════════════════
+       PRODUCT DETAIL MODAL
+  ══════════════════════════════════════════ -->
+  <div id="productDetailModal" class="modal-overlay" onclick="if(event.target===this) closeModal('productDetailModal')">
+    <div class="modal" style="max-width:700px;">
+      <div class="modal-header">
+        <div style="font-weight:600;">รายละเอียดพัสดุ</div>
+        <button class="btn btn-ghost btn-sm" onclick="closeModal('productDetailModal')">✕</button>
+      </div>
+      <div id="productDetailBody" class="modal-body" style="padding:0;"></div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeModal('productDetailModal')">กลับ</button>
+        <button id="detailAddToCartBtn" class="btn btn-accent flex-1">เพิ่มลงตะกร้า</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       ORDER DETAIL MODAL
+  ══════════════════════════════════════════ -->
+  <div id="orderDetailModal" class="modal-overlay" onclick="if(event.target===this) closeModal('orderDetailModal')">
+    <div class="modal">
+      <div class="modal-header">
+        <div style="font-weight:600;">รายละเอียดใบเบิก</div>
+        <button class="btn btn-ghost btn-sm" onclick="closeModal('orderDetailModal')">✕</button>
+      </div>
+      <div class="modal-body" id="orderDetailBody"></div>
+      <div id="signatureSection" class="modal-footer hidden" style="flex-direction:column;align-items:stretch;">
+        <p
+          style="font-size:0.85rem;color:var(--text2);margin-bottom:0.5rem;display:flex;align-items:center;gap:0.5rem;">
+          <i data-lucide="pen-tool"></i> กรุณาเซ็นชื่อรับพัสดุ:
+        </p>
+        <div class="signature-pad-wrap">
+          <canvas id="signatureCanvas" class="signature-pad-canvas"></canvas>
+        </div>
+        <div class="flex gap-2">
+          <button class="btn btn-outline btn-sm" onclick="clearSignature()">ล้าง</button>
+          <button class="btn btn-accent btn-sm flex-1" onclick="submitReceipt()">ยืนยันการรับของ</button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost btn-sm" onclick="closeModal('orderDetailModal')">ปิด</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       LOGIN GATE MODAL (#4 — login-gate UX)
+  ══════════════════════════════════════════ -->
+  <div id="loginGateModal" class="modal-overlay" onclick="if(event.target===this) closeModal('loginGateModal')">
+    <div class="modal" style="max-width:420px;text-align:center;">
+      <div class="modal-body" style="padding:2.5rem 2rem;">
+        <div
+          style="width:64px;height:64px;background:var(--glass-gold);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;border:1px solid rgba(251,191,36,0.3);">
+          <i data-lucide="lock" style="width:28px;height:28px;color:var(--primary);"></i>
+        </div>
+        <h3 style="font-size:1.25rem;font-weight:800;margin-bottom:0.5rem;">ต้องเข้าสู่ระบบก่อนเบิก</h3>
+        <p style="color:var(--text2);font-size:0.9rem;margin-bottom:2rem;line-height:1.6;">
+          คุณต้องเข้าสู่ระบบด้วยรหัสพนักงานก่อน<br>จึงจะสามารถเบิกพัสดุได้
+        </p>
+        <div style="display:flex;gap:0.75rem;">
+          <button class="btn btn-ghost flex-1" onclick="closeModal('loginGateModal')">ดูสินค้าต่อ</button>
+          <button class="btn btn-primary flex-1" onclick="showToast('โหมด Login จะถูกเพิ่มในภายหลัง', 'info')">
+            <i data-lucide="log-in" style="width:16px;height:16px;"></i> เข้าสู่ระบบ
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       CHECKOUT CONFIRM MODAL (#4 — replace confirm())
+  ══════════════════════════════════════════ -->
+  <div id="checkoutModal" class="modal-overlay" onclick="if(event.target===this) closeModal('checkoutModal')">
+    <div class="modal" style="max-width:500px;">
+      <div class="modal-header">
+        <div style="font-weight:700;display:flex;align-items:center;gap:0.5rem;">
+          <i data-lucide="check-circle-2" style="width:18px;height:18px;color:var(--primary);"></i>
+          ยืนยันการขอเบิก
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="closeModal('checkoutModal')">✕</button>
+      </div>
+      <div class="modal-body" id="checkoutModalBody" style="padding:1.5rem;"></div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('checkoutModal')">ยกเลิก</button>
+        <button class="btn btn-primary flex-1" style="justify-content:center;" id="confirmCheckoutBtn"
+          onclick="confirmCheckout()">
+          <i data-lucide="send" style="width:16px;height:16px;"></i> ส่งคำขอเบิก
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       ACTION MODAL (SubStock Prompt Replacement)
+  ══════════════════════════════════════════ -->
+  <div id="actionModal" class="modal-overlay" onclick="if(event.target===this) closeModal('actionModal')">
+    <div class="modal" style="max-width:400px;">
+      <div class="modal-header">
+        <div style="font-weight:700;display:flex;align-items:center;gap:0.5rem;" id="actionModalTitle">
+          <i data-lucide="info" style="width:18px;height:18px;color:var(--primary);"></i> ดำเนินการ
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="closeModal('actionModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <p id="actionModalDesc" style="color:var(--text2);font-size:0.9rem;margin-bottom:1rem;"></p>
+
+        <div id="actionModalInputWrap" class="form-group hidden">
+          <label class="form-label" id="actionModalInputLabel">ใส่ข้อมูล</label>
+          <input type="text" id="actionModalInput" class="form-input" autocomplete="off">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">จำนวน</label>
+          <div class="qty-control"
+            style="background:var(--bg);border-radius:var(--radius-sm);border:1px solid var(--border);padding:0.25rem;">
+            <button class="qty-btn" style="flex:1"
+              onclick="var i=document.getElementById('actionModalQty'); i.value=Math.max(1, (Number(i.value)||1)-1)"><i
+                data-lucide="minus"></i></button>
+            <input type="number" id="actionModalQty" value="1" min="1" class="form-input"
+              style="flex:2;text-align:center;border:none;background:transparent;padding:0.25rem;font-weight:700">
+            <button class="qty-btn" style="flex:1"
+              onclick="var i=document.getElementById('actionModalQty'); i.value=(Number(i.value)||1)+1"><i
+                data-lucide="plus"></i></button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('actionModal')">ยกเลิก</button>
+        <button class="btn btn-primary flex-1" style="justify-content:center;" id="actionModalBtn">
+          ยืนยัน
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Global Loader -->
+  <div id="globalLoader" class="global-loader">
+    <div class="spinner"></div>
+    <p style="margin-top:1rem;color:var(--text2);font-size:0.9rem;">กำลังเตรียมข้อมูล...</p>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- ══════════════════════════════════════════
+       MOBILE BOTTOM NAV
+  ══════════════════════════════════════════ -->
+  <nav class="mobile-nav">
+    <button class="mobile-nav-item active main-tab" data-view="store" onclick="switchView('store')">
+      <i data-lucide="shopping-bag"></i>
+      <span>หน้าร้าน</span>
+    </button>
+    <button class="mobile-nav-item main-tab" data-view="orders" onclick="switchView('orders')">
+      <i data-lucide="clipboard-list"></i>
+      <span>รายการ</span>
+    </button>
+    <button class="mobile-nav-item main-tab" data-view="substock" onclick="switchView('substock')">
+      <i data-lucide="package-search"></i>
+      <span>คลังย่อย</span>
+    </button>
+    <button id="adminMobileBtn" class="mobile-nav-item hidden" data-view="admin"
+      onclick="showToast('โหมด Admin ต้องเข้าใช้งานผ่านลิงก์เฉพาะ', 'info')">
+      <i data-lucide="shield-check"></i>
+      <span>แอดมิน</span>
+    </button>
+    <button id="mgrMobileBtn" class="mobile-nav-item hidden" data-view="manager"
+      onclick="showToast('โหมด Manager ต้องเข้าใช้งานผ่านลิงก์เฉพาะ', 'info')">
+      <i data-lucide="scale"></i>
+      <span>ผู้อนุมัติ</span>
+    </button>
+    <button class="mobile-nav-item" onclick="toggleDrawer('cartDrawer')">
+      <div style="position:relative;">
+        <i data-lucide="shopping-cart"></i>
+        <span id="cartCountMobile" class="cart-badge" style="display:none;">0</span>
+      </div>
+      <span>ตะกร้า</span>
+    </button>
+  </nav>
+
+  <script src="api.js"></script>
+  <script src="cart.js"></script>
+  <script src="app.js"></script>
+</body>
+
+</html>
