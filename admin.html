@@ -572,7 +572,71 @@
     </div>
   </div>
 
+  <!-- QR SCANNER MODAL (LIVE VIDEO MODAL) -->
+  <div id="scannerModal" class="modal-overlay" onclick="if(event.target===this) closeScanner()">
+    <div class="modal scanner-modal">
+      <div class="modal-header" style="border-bottom:none; padding-bottom:0">
+        <div style="font-weight:700; font-size:1.15rem; display:flex; align-items:center; gap:0.5rem">
+          <i data-lucide="qr-code" style="color:var(--primary)"></i> สแกนรหัสสินค้า
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="closeScanner()">✕</button>
+      </div>
 
+      <div class="modal-body" style="padding:1.25rem">
+        <!-- Mode Tabs -->
+        <div class="flex justify-center p-2 mb-4" style="background: rgba(255,255,255,0.03); border-radius:14px; border: 1px solid var(--border);">
+          <div class="btn-group" style="width:100%">
+            <button id="sm-deduct" class="btn btn-sm scanner-mode-btn active" onclick="setScanMode('deduct')">
+              <i data-lucide="log-out"></i> นำออก
+            </button>
+            <button id="sm-receive" class="btn btn-sm scanner-mode-btn" onclick="setScanMode('receive')">
+              <i data-lucide="log-in"></i> รับเข้า
+            </button>
+            <button id="sm-sub" class="btn btn-sm scanner-mode-btn" onclick="setScanMode('sub')">
+              <i data-lucide="package"></i> คลังย่อย
+            </button>
+          </div>
+        </div>
+
+        <!-- Scanner Viewport -->
+        <div id="scannerViewportWrap" class="scanner-viewport-container">
+          <div id="modal-scanner-v2"></div>
+          <div class="scanner-laser"></div>
+          <div class="scanner-guide"></div>
+          
+          <!-- Static Placeholder / Instruction Overlay -->
+          <div id="scannerPlaceholder" style="position:absolute; top:0; left:0; width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; background:rgba(0,0,0,0.4); text-align:center; padding:2rem; z-index:2">
+            <div style="width:64px; height:64px; background:rgba(251,191,36,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; margin-bottom:1rem">
+              <i data-lucide="camera" style="width:32px; height:32px; color:var(--primary)"></i>
+            </div>
+            <p style="font-size:0.95rem; font-weight:600; color:white; margin-bottom:0.5rem">พร้อมเปิดกล้องสแกนสด</p>
+            <p style="font-size:0.8rem; color:var(--text3)">ส่องกล้องไปที่รหัสเพื่ออ่านค่าอัตโนมัติ</p>
+          </div>
+        </div>
+
+        <div id="scannerStatusInfo" class="text-center" style="margin-bottom:1rem; font-size:0.85rem">
+          <span class="scanner-status-dot"></span> <span id="ssText" style="color:var(--text3)">โหมดประหยัดพลังงาน - กดปุ่มด้านล่างเพื่อเริ่ม</span>
+        </div>
+
+        <!-- Floating Controls -->
+        <div class="flex flex-col gap-2">
+            <button id="modalStartBtn" class="btn btn-primary btn-lg" onclick="startLiveScan()">
+                <i data-lucide="camera"></i> เริ่มเปิดกล้องวิดีโอสด
+            </button>
+            <div class="flex gap-2">
+                <button class="btn btn-outline flex-1" onclick="document.getElementById('modalFileFallback').click()">
+                    <i data-lucide="image"></i> เลือกจากภาพ
+                </button>
+                <button class="btn btn-outline flex-1" onclick="promptManualInput()">
+                    <i data-lucide="keyboard"></i> พิมพ์เอง
+                </button>
+            </div>
+        </div>
+      </div>
+      
+      <input type="file" id="modalFileFallback" accept="image/*" style="display:none" onchange="handleModalFile(this)">
+    </div>
+  </div>
 
   <!-- ORDER APPROVAL MODAL (Quick Decision) -->
   <div id="orderApprovalModal" class="modal-overlay" onclick="if(event.target===this) closeApprovalModal()">
@@ -1919,29 +1983,20 @@
       }).catch(function (err) { showToast('เกิดข้อผิดพลาด: ' + err, 'error'); });
     }
 
-    // ─── PREMIUM INTEGRATED SCANNER LOGIC ───────────────────
-    var html5QrCode = null;
+    // ─── PREMIUM INTEGRATED MODAL SCANNER ───────────────────
+    var modalScanner = null;
     var currentScanMode = 'deduct';
     var isScannerBusy = false;
 
     function setScanMode(mode) {
       currentScanMode = mode;
       
-      // Update UI Buttons
+      // Update UI Buttons (Lucide Icons)
       document.querySelectorAll('.scanner-mode-btn').forEach(function(btn) {
-        btn.classList.toggle('active', btn.id === 'scanMode' + mode.charAt(0).toUpperCase() + mode.slice(1));
+        btn.classList.toggle('active', btn.id === 'sm-' + mode);
       });
       
-      // Update Label
-      var labels = {
-        'deduct': 'ตัดออกจาสต็อกหลัก',
-        'receive': 'รับเข้าสต็อกหลัก',
-        'sub': 'รับเข้าคลังย่อยส่วนตัว'
-      };
-      var labelEl = document.getElementById('scanModeLabel');
-      if (labelEl) labelEl.innerHTML = 'โหมด: <strong>' + labels[mode] + '</strong>';
-      
-      showToast('สลับโหมดเป็น: ' + labels[mode], 'info');
+      showToast('สลับโหมดเป็น: ' + mode, 'info');
     }
 
     function openScanner(mode) {
@@ -1952,176 +2007,169 @@
       
       modal.classList.add('open');
       document.body.style.overflow = 'hidden';
-      
-      var viewport = document.getElementById('scannerViewportParent');
-      if (viewport) viewport.classList.add('scanner-active');
+      refreshIcons();
 
-      // Start Camera
-      setTimeout(function() {
-        startLiveScanner();
-      }, 500);
-    }
-
-    function startLiveScanner() {
-      if (!html5QrCode) {
-        html5QrCode = new Html5Qrcode("scannerViewport");
+      if (!modalScanner) {
+        modalScanner = new Html5Qrcode("modal-scanner-v2");
       }
-      
-      var config = { fps: 10, qrbox: { width: 250, height: 250 } };
-      
-      html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
-        .then(function() {
-          var placeholder = document.getElementById('scannerPlaceholder');
-          if (placeholder) placeholder.style.display = 'none';
-          refreshIcons();
-        })
-        .catch(function(err) {
-          console.error("Scanner error:", err);
-          showToast('ไม่สามารถเข้าถึงกล้องได้: ' + err, 'error');
-          var placeholder = document.getElementById('scannerPlaceholder');
-          if (placeholder) {
-            placeholder.innerHTML = '<i data-lucide="camera-off" style="width:48px; height:48px; margin-bottom:1rem; color:var(--danger)"></i>' +
-                                  '<p style="color:var(--text2)">ไม่พบอุปกรณ์กล้อง หรือไม่ได้รับสิทธิ์</p>' +
-                                  '<button class="btn btn-xs btn-outline" style="margin-top:1rem" onclick="startLiveScanner()">ลองอีกครั้ง</button>';
-            refreshIcons();
-          }
-        });
     }
 
     function closeScanner() {
+      stopLiveScan();
       document.getElementById('scannerModal').classList.remove('open');
       document.body.style.overflow = 'auto';
-      
-      var viewport = document.getElementById('scannerViewportParent');
-      if (viewport) viewport.classList.remove('scanner-active');
+    }
 
-      if (html5QrCode && html5QrCode.isScanning) {
-        html5QrCode.stop().then(function() {
-          console.log("Scanner stopped.");
+    function startLiveScan() {
+      const startBtn = document.getElementById('modalStartBtn');
+      const placeholder = document.getElementById('scannerPlaceholder');
+      const dot = document.querySelector('.scanner-status-dot');
+      const statusText = document.getElementById('ssText');
+      const viewport = document.getElementById('scannerViewportWrap');
+
+      if (!startBtn) return;
+
+      startBtn.disabled = true;
+      startBtn.innerHTML = '<div class="spinner" style="width:16px;height:16px;border-width:2px"></div> กำลังเชื่อมต่อ...';
+      
+      const config = { 
+        fps: 15, 
+        qrbox: { width: 250, height: 250 },
+        aspectRatio: 1.0 
+      };
+
+      modalScanner.start(
+        { facingMode: "environment" },
+        config,
+        function(decodedText) {
+          if (isScannerBusy) return;
+          isScannerBusy = true;
+          if (window.navigator && window.navigator.vibrate) window.navigator.vibrate(100);
+          
+          processScanResult(decodedText);
+          closeScanner();
+        },
+        function(err) {}
+      ).then(function() {
+        if (placeholder) placeholder.style.display = 'none';
+        if (viewport) viewport.classList.add('scanner-active');
+        if (dot) dot.classList.add('active');
+        if (statusText) {
+          statusText.innerHTML = 'กำลังวิเคราะห์ภาพสด...';
+          statusText.style.color = 'var(--accent)';
+        }
+        startBtn.style.display = 'none';
+      }).catch(function(err) {
+        startBtn.disabled = false;
+        startBtn.innerHTML = '<i data-lucide="camera"></i> เริ่มเปิดกล้องวิดีโอสด';
+        showToast('ไม่สามารถเปิดใช้งานกล้องได้: ' + err, 'error');
+        refreshIcons();
+      });
+    }
+
+    function stopLiveScan() {
+      if (modalScanner && modalScanner.isScanning) {
+        modalScanner.stop().then(function() {
+          resetScannerUI();
         }).catch(function(err) {
-          console.warn("Failed to stop scanner:", err);
+          console.warn("Stop error:", err);
+          resetScannerUI();
         });
+      } else {
+        resetScannerUI();
       }
     }
 
-    function onScanSuccess(decodedText) {
-      if (isScannerBusy) return;
-      
-      // Visual/Audio Feedback
-      if (window.navigator && window.navigator.vibrate) window.navigator.vibrate(100);
-      
-      isScannerBusy = true;
-      processScanResult(decodedText);
+    function resetScannerUI() {
+      const placeholder = document.getElementById('scannerPlaceholder');
+      const viewport = document.getElementById('scannerViewportWrap');
+      const dot = document.querySelector('.scanner-status-dot');
+      const statusText = document.getElementById('ssText');
+      const startBtn = document.getElementById('modalStartBtn');
+
+      if (placeholder) placeholder.style.display = 'flex';
+      if (viewport) viewport.classList.remove('scanner-active');
+      if (dot) dot.classList.remove('active');
+      if (statusText) {
+        statusText.innerHTML = 'โหมดประหยัดพลังงาน - กดปุ่มด้านล่างเพื่อเริ่ม';
+        statusText.style.color = 'var(--text3)';
+      }
+      if (startBtn) {
+        startBtn.style.display = 'flex';
+        startBtn.disabled = false;
+        startBtn.innerHTML = '<i data-lucide="camera"></i> เริ่มเปิดกล้องวิดีโอสด';
+        refreshIcons();
+      }
+      isScannerBusy = false;
     }
 
-    function handleQrFallback(input) {
-      if (!input.files || input.files.length === 0) return;
-      var file = input.files[0];
-      
-      showToast('กำลังอ่านรูปภาพ...', 'info');
-      
-      if (!html5QrCode) html5QrCode = new Html5Qrcode("scannerViewport");
-      
-      html5QrCode.scanFile(file, true)
-        .then(function(decodedText) {
-          processScanResult(decodedText);
-          input.value = ''; 
-        })
-        .catch(function(err) {
-          showToast('ไม่พบรหัสในรูปภาพนี้', 'error');
-          input.value = '';
-        });
+    function handleModalFile(input) {
+        if (!input.files || input.files.length === 0) return;
+        showToast('กำลังอ่านรูปภาพ...', 'info');
+        
+        if (!modalScanner) modalScanner = new Html5Qrcode("modal-scanner-v2");
+        
+        modalScanner.scanFile(input.files[0], true)
+          .then(function(decodedText) {
+            processScanResult(decodedText);
+            closeScanner();
+          })
+          .catch(function(err) {
+            showToast('ไม่พบรหัสในรูปภาพนี้', 'error');
+          });
+        input.value = '';
     }
 
     function processScanResult(text) {
-      if (!text) {
-        isScannerBusy = false;
-        return;
-      }
+      if (!text) { isScannerBusy = false; return; }
 
-      var labels = {
+      var config = {
         'deduct': { title: 'ตัดจ่ายพัสดุ', desc: 'ระบุจำนวนที่ต้องการตัดออกจากสต็อกหลัก' },
         'receive': { title: 'รับพัสดุเข้าคลัง', desc: 'ระบุจำนวนพัสดุที่รับเข้าคลังหลัก' },
         'sub': { title: 'รับเข้าคลังย่อย (FC)', desc: 'ระบุจำนวนที่รับเข้าคลังย่อยของคุณ' }
-      };
-      
-      var config = labels[currentScanMode];
-      
+      }[currentScanMode];
+
       API.getStorefrontData().then(function(res) {
         var products = res.data && res.data.products ? res.data.products : [];
-        // Match either id or productId (SKU/Barcode)
         var prod = products.find(p => String(p.productId || p.id) === String(text));
         
         if (!prod) {
-          showToast('ไม่พบสินค้าที่มีรหัส: ' + text, 'error');
+          showToast('ไม่พบรหัสสินค้า: ' + text, 'error');
           isScannerBusy = false;
           return;
         }
 
-        openScanActionModal(prod, config.title, config.desc);
+        // Use the existing action modal to confirm quantity
+        if (typeof openScanActionModal === 'function') {
+          openScanActionModal(prod, config.title, config.desc);
+        } else {
+           // Fallback prompt if modal missing
+           var qty = prompt(config.title + '\nสินค้า: ' + prod.name + '\n' + config.desc, '1');
+           if (qty && !isNaN(qty) && parseInt(qty) > 0) {
+             performScanAction(prod.productId || prod.id, parseInt(qty));
+           } else {
+             isScannerBusy = false;
+           }
+        }
       }).catch(function(err) {
-        showToast('เกิดข้อผิดพลาดในการโหลดข้อมูลสินค้า', 'error');
+        showToast('เกิดข้อผิดพลาดในการโหลดข้อมูล', 'error');
         isScannerBusy = false;
       });
     }
 
-    function openScanActionModal(prod, title, desc) {
-      document.getElementById('scanActionTitle').textContent = title;
-      document.getElementById('sa-name').textContent = prod.name;
-      document.getElementById('sa-id').textContent = 'รหัสสินค้า: ' + (prod.productId || prod.id);
-      document.getElementById('sa-qty-label').textContent = desc;
-      document.getElementById('sa-qty-input').value = 1;
-      
-      var confirmBtn = document.getElementById('sa-confirm-btn');
-      confirmBtn.onclick = function() {
-        var qty = parseInt(document.getElementById('sa-qty-input').value);
-        if (qty && !isNaN(qty) && qty > 0) {
-          performScanAction(prod.productId || prod.id, qty);
-        } else {
-          showToast('กรุณาระบุจำนวนที่ถูกต้อง', 'warning');
-        }
-      };
-      
-      document.getElementById('scanActionModal').classList.add('open');
-      refreshIcons();
-    }
-
-    function performScanAction(prodId, qty) {
-      var action = 'quickDeductStock';
-      if (currentScanMode === 'receive') action = 'receiveStock';
-      if (currentScanMode === 'sub') action = 'receiveSubStock';
-
-      showToast('⏳ กำลังดำเนินการ...', 'info');
-      API._call(action, { productId: prodId, quantity: qty }).then(function(res) {
-        if (res.success) {
-          showToast('✅ ดำเนินการสำเร็จ: ' + prodId, 'success');
-          closeModal('scanActionModal');
-          isScannerBusy = false;
-          
-          if (typeof loadDashboard === 'function') loadDashboard();
-          if (currentAdminPage === 'inventory' && typeof loadInventory === 'function') loadInventory();
-          if (currentAdminPage === 'products' && typeof loadProducts === 'function') loadProducts();
-        } else {
-          showToast('❌ ' + (res.message || 'เกิดข้อผิดพลาด'), 'error');
-        }
-      }).catch(function(err) {
-        showToast('❌ ผิดพลาด: ' + err, 'error');
-      });
-    }
-
-
     function promptManualInput() {
-      var id = prompt('กรุณาระบุรหัสสินค้า (Manual Input):');
+      var id = prompt('กรุณาระบุรหัสสินค้า:');
       if (id && id.trim()) {
         processScanResult(id.trim());
       }
     }
 
 
+
     // ─── SUB-STOCK VIEW ───────────────────────────────────
     function showUserSubStock(empId, empName) {
       API.getSubStock({ employeeId: empId }).then(function (res) {
-        var html = '<div class="card" style="margin-top:1rem"><h3 style="margin-bottom:1rem">📦 สต็อกย่อยของ: ' + empName + '</h3>'
+        var html = '<div class="card" style="margin-top:1rem"><h3 style="margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem"><i data-lucide="package"></i> สต็อกย่อยของ: ' + empName + '</h3>'
           + '<table class="table-compact"><thead><tr><th>สินค้า</th><th>คงเหลือ</th><th>อัปเดตล่าสุด</th></tr></thead><tbody>';
 
         if (!res.data || res.data.length === 0) {
