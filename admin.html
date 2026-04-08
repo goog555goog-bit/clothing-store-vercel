@@ -702,16 +702,7 @@
   </nav>
 
   <script>
-    var scriptUrl = '<?= scriptUrl ?>';
-    var currentUser = null;
     var currentAdminPage = 'dashboard';
-
-    function navigateTo(url) {
-      if (document.getElementById('globalLoader')) {
-        document.getElementById('globalLoader').classList.add('active');
-      }
-      window.open(url, '_top');
-    }
 
     window.onload = function () {
       initDarkMode();
@@ -797,7 +788,6 @@
       loadDashboard();
     };
 
-    function adminLogout() { localStorage.removeItem('_user'); navigateTo(scriptUrl + '?page=login'); }
 
     function adminNav(page, el) {
       if (currentAdminPage === page && !el) return;

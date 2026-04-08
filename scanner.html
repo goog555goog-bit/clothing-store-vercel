@@ -1,20 +1,24 @@
 <!DOCTYPE html>
-<html>
+<html lang="th">
 
 <head>
   <base target="_top">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
-  <title>QR Scanner | EMETIX STORE</title>
+  <title>Live QR Scanner | EMETIX STORE</title>
   <script src="https://unpkg.com/html5-qrcode"></script>
   <style>
     :root {
-      --bg: #0f172a;
-      --primary: #6366f1;
+      --bg: #0a0a16;
+      --bg-surface: #12122b;
+      --primary: #fbbf24;
+      --primary-dark: #d97706;
       --accent: #10b981;
       --danger: #ef4444;
-      --text: #f8fafc;
+      --text: #ffffff;
       --text-dim: #94a3b8;
+      --glass: rgba(255, 255, 255, 0.05);
+      --glass-border: rgba(255, 255, 255, 0.1);
     }
 
     body {
@@ -22,170 +26,363 @@
       padding: 0;
       background: var(--bg);
       color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: 'Inter', -apple-system, sans-serif;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      overflow: hidden;
     }
 
-    .header {
-      padding: 1.5rem;
-      text-align: center;
-      background: rgba(255, 255, 255, 0.03);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    /* ══════════════════════════════════════════
+       HEADER
+    ══════════════════════════════════════════ */
+    .app-header {
+      padding: 1.25rem;
+      background: var(--glass);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 100;
     }
 
-    .main-content {
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 800;
+      font-size: 1.1rem;
+      letter-spacing: -0.5px;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--primary);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #000;
+    }
+
+    /* ══════════════════════════════════════════
+       SCANNER VIEW
+    ══════════════════════════════════════════ */
+    .scanner-viewport {
       flex: 1;
+      position: relative;
+      background: #000;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 2rem;
-    }
-
-    .scanner-container {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      width: 100%;
-      max-height: 50vh;
     }
 
     #reader {
       width: 100%;
       height: 100%;
+      background: #000;
+    }
+
+    /* Scanner UI Overlay */
+    .scanner-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+
+    .scan-region {
+      width: 260px;
+      height: 260px;
+      position: relative;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 24px;
+      box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Pulsing corners */
+    .corner {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      border: 4px solid var(--primary);
+      border-radius: 4px;
+    }
+    .t-l { top: -2px; left: -2px; border-right: none; border-bottom: none; }
+    .t-r { top: -2px; right: -2px; border-left: none; border-bottom: none; }
+    .b-l { bottom: -2px; left: -2px; border-right: none; border-top: none; }
+    .b-r { bottom: -2px; right: -2px; border-left: none; border-top: none; }
+
+    /* Laser line animation */
+    .laser-line {
+      position: absolute;
+      top: 0;
+      left: 10%;
+      width: 80%;
+      height: 2px;
+      background: var(--primary);
+      box-shadow: 0 0 12px var(--primary);
+      animation: scanMove 2.5s infinite ease-in-out;
+      opacity: 0.8;
+    }
+
+    @keyframes scanMove {
+      0%, 100% { top: 10%; opacity: 0.3; }
+      50% { top: 90%; opacity: 1; }
+    }
+
+    /* ══════════════════════════════════════════
+       CONTROLS
+    ══════════════════════════════════════════ */
+    .controls-panel {
+      padding: 1.5rem;
+      background: var(--bg-surface);
+      border-top: 1px solid var(--glass-border);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .status-badge {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      padding: 0.5rem;
+      background: var(--glass);
+      border-radius: 99px;
+      margin-bottom: 0.5rem;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 0.75rem;
     }
 
     .btn {
-      padding: 1rem 1.5rem;
+      flex: 1;
+      padding: 0.85rem 1rem;
       border: none;
       border-radius: 12px;
       font-weight: 700;
-      font-size: 1rem;
+      font-size: 0.95rem;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 0.5rem;
       transition: all 0.2s;
-      width: 100%;
     }
 
-    .btn-accent { background: var(--accent); color: white; }
-    .btn-primary { background: var(--primary); color: white; }
-    .btn-outline { background: transparent; border: 2px solid var(--text-dim); color: var(--text-dim); }
-    .btn:active { transform: scale(0.98); opacity: 0.9; }
+    .btn-primary { background: var(--primary); color: #000; box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3); }
+    .btn-outline { background: var(--glass); border: 1px solid var(--glass-border); color: var(--text); }
+    .btn-danger { background: var(--danger); color: white; }
+    
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn:active:not(:disabled) { transform: scale(0.96); }
 
-    #status {
-      text-align: center;
-      padding: 0.75rem;
-      font-size: 0.85rem;
-      color: var(--text-dim);
-    }
-
-    .action-area {
-      width: 100%;
-      max-width: 400px;
-      display: flex;
+    /* ══════════════════════════════════════════
+       SUCCESS OVERLAY
+    ══════════════════════════════════════════ */
+    .success-screen {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(10, 10, 22, 0.95);
+      display: none;
       flex-direction: column;
-      gap: 0.75rem;
-      padding: 1.5rem 0;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      text-align: center;
+      padding: 2rem;
+      animation: fadeIn 0.3s ease-out;
     }
 
-    .photo-icon {
-      font-size: 4rem;
-      margin-bottom: 1rem;
-    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-    .info-text {
-      font-size: 0.85rem;
-      color: var(--text-dim);
-      line-height: 1.6;
+    .check-icon {
+      width: 64px;
+      height: 64px;
+      background: var(--accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 0 30px rgba(16, 185, 129, 0.4);
     }
   </style>
 </head>
 
 <body>
-  <div class="header">
-    <div style="font-weight:800; font-size:1.2rem; letter-spacing:-0.5px">Elite QR Scanner</div>
-    <div style="font-size:0.8rem; color:var(--text-dim)">สแกน QR/Barcode ด้วยกล้องถ่ายรูป</div>
-  </div>
+  <header class="app-header">
+    <div class="logo">
+      <div class="logo-icon">QR</div>
+      <span>EMETIX <span style="color:var(--primary); font-weight:300">SCANNER</span></span>
+    </div>
+    <button class="btn btn-outline" style="flex:none; padding: 0.5rem 0.75rem; font-size: 0.8rem;" onclick="window.close()">ปิด</button>
+  </header>
 
-  <!-- Hidden mount point required for html5-qrcode library to process image files -->
-  <div id="reader" style="display:none;"></div>
+  <main class="scanner-viewport">
+    <div id="reader"></div>
+    
+    <!-- Overlay UI -->
+    <div class="scanner-overlay" id="scannerOverlay">
+      <div class="scan-region">
+        <div class="corner t-l"></div>
+        <div class="corner t-r"></div>
+        <div class="corner b-l"></div>
+        <div class="corner b-r"></div>
+        <div class="laser-line"></div>
+      </div>
+      <p style="margin-top: 2rem; font-size: 0.9rem; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">
+        ส่องกล้องไปที่ QR Code หรือ Barcode
+      </p>
+    </div>
 
-  <!-- Photo Upload Section (always visible as primary option) -->
-  <div class="main-content" id="photo-section">
-    <div class="photo-icon">📸</div>
-    <h2 style="font-size:1.3rem; font-weight:800; margin-bottom:0.5rem; text-align:center">สแกนจากภาพถ่าย</h2>
-    <p class="info-text" style="text-align:center; margin-bottom:1.5rem">
-      กดปุ่มด้านล่างเพื่อ <strong>ถ่ายรูป QR Code / Barcode</strong> แล้วระบบจะอ่านรหัสให้อัตโนมัติครับ
-    </p>
+    <!-- Success Screen -->
+    <div id="successScreen" class="success-screen">
+      <div class="check-icon">✓</div>
+      <h2 style="margin: 0 0 0.5rem; font-weight: 800;">สแกนสำเร็จ!</h2>
+      <p id="resultText" style="color: var(--primary); font-size: 1.2rem; font-weight: 700; margin-bottom: 1rem;"></p>
+      <p style="color: var(--text-dim); font-size: 0.85rem;">กำลังบันทึกข้อมูลและปิดหน้าต่างนี้...</p>
+    </div>
+  </main>
 
-    <div class="action-area">
-      <button class="btn btn-accent" style="font-size:1.15rem; padding:1.25rem" onclick="document.getElementById('file-input').click()">
-        📸 เปิดกล้องถ่ายรูป
+  <footer class="controls-panel">
+    <div id="status" class="status-badge">กดปุ่มเริ่มสแกนเพื่อเปิดกล้อง</div>
+    
+    <div class="btn-group">
+      <button id="startBtn" class="btn btn-primary" onclick="startScanner()">
+        📷 เริ่มสแกนสด
       </button>
-      <button class="btn btn-primary" onclick="document.getElementById('gallery-input').click()">
-        🖼️ เลือกรูปจากคลัง
+      <button id="stopBtn" class="btn btn-danger" onclick="stopScanner()" style="display:none">
+        ⏹️ หยุดสแกน
       </button>
     </div>
 
-    <div id="status">พร้อมสแกน — กดปุ่มด้านบนเพื่อเริ่มครับ</div>
-  </div>
+    <div style="display:flex; align-items:center; gap:0.75rem; color:var(--text-dim); font-size: 0.8rem; margin: 0.5rem 0;">
+      <hr style="flex:1; border:none; border-top:1px solid var(--glass-border)">
+      <span>หรือสแกนจากไฟล์</span>
+      <hr style="flex:1; border:none; border-top:1px solid var(--glass-border)">
+    </div>
 
-  <!-- Hidden file inputs -->
-  <input type="file" id="file-input" accept="image/*" capture="environment" style="display:none" onchange="handleFile(this)">
-  <input type="file" id="gallery-input" accept="image/*" style="display:none" onchange="handleFile(this)">
+    <div class="btn-group">
+      <button class="btn btn-outline" onclick="document.getElementById('file-input').click()">
+        🖼️ เลือกรูปภาพ
+      </button>
+    </div>
+  </footer>
+
+  <!-- Hidden file input for fallback -->
+  <input type="file" id="file-input" accept="image/*" style="display:none" onchange="handleFile(this)">
 
   <script>
-    var html5QrCode = new Html5Qrcode("reader");
+    const html5QrCode = new Html5Qrcode("reader");
+    const statusEl = document.getElementById('status');
+    const startBtn = document.getElementById('startBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const overlay = document.getElementById('scannerOverlay');
 
+    // สำหรับใช้เป็น fallback ถ้ากล้องสดเปิดไม่ได้
     function handleFile(input) {
       if (!input.files || input.files.length === 0) return;
-      document.getElementById('status').innerHTML = '⏳ กำลังวิเคราะห์รูปภาพ...';
+      statusEl.innerHTML = '⏳ กำลังวิเคราะห์รูปภาพ...';
 
       html5QrCode.scanFile(input.files[0], true)
-        .then(function(decodedText) {
-          onScanSuccess(decodedText);
-        })
-        .catch(function(err) {
-          document.getElementById('status').innerHTML = 
-            '<span style="color:' + 'var(--danger)' + '">❌ ไม่พบ QR/Barcode ในรูปนี้</span><br>'
-            + '<span style="font-size:0.8rem">ลองถ่ายภาพให้ชัดและตรงจุดมากขึ้นครับ</span>';
+        .then(decodedText => onScanSuccess(decodedText))
+        .catch(err => {
+          statusEl.innerHTML = '<span style="color:var(--danger)">❌ ไม่พบรหัสในรูปภาพนี้</span>';
         });
-
-      // Reset input value so same file can be selected again
       input.value = '';
     }
 
+    function startScanner() {
+      startBtn.disabled = true;
+      startBtn.innerHTML = '⏳ กำลังเปิดกล้อง...';
+      statusEl.innerHTML = 'กรุณากด "อนุญาต" (Allow) เพื่อเข้าถึงกล้อง';
+
+      const config = { 
+        fps: 15, 
+        qrbox: { width: 250, height: 250 },
+        aspectRatio: 1.0 
+      };
+
+      html5QrCode.start(
+        { facingMode: "environment" }, 
+        config,
+        (decodedText) => {
+          onScanSuccess(decodedText);
+          stopScanner(); // หยุดทันทีที่เจอ
+        },
+        (errorMessage) => {
+          // ignore failures while scanning
+        }
+      )
+      .then(() => {
+        statusEl.innerHTML = '🔵 กำลังสแกนสด...';
+        startBtn.style.display = 'none';
+        stopBtn.style.display = 'flex';
+        overlay.style.display = 'flex';
+      })
+      .catch(err => {
+        console.error(err);
+        startBtn.disabled = false;
+        startBtn.innerHTML = '📷 เริ่มสแกนสด';
+        statusEl.innerHTML = '<span style="color:var(--danger)">❌ ไม่สามารถเปิดกล้องได้</span>';
+        alert('ไม่สามารถเปิดใช้งานกล้องได้: ' + err);
+      });
+    }
+
+    function stopScanner() {
+      html5QrCode.stop().then(() => {
+        startBtn.style.display = 'flex';
+        startBtn.disabled = false;
+        startBtn.innerHTML = '📷 เริ่มสแกนสด';
+        stopBtn.style.display = 'none';
+        overlay.style.display = 'none';
+        statusEl.innerHTML = 'หยุดการสแกนแล้ว';
+      }).catch(err => {
+        console.warn("Unable to stop scanner", err);
+      });
+    }
+
     function onScanSuccess(decodedText) {
+      // แสดงหน้าจอสำเร็จ
+      const successScreen = document.getElementById('successScreen');
+      const resultText = document.getElementById('resultText');
+      
+      resultText.innerText = decodedText;
+      successScreen.style.display = 'flex';
 
-      document.getElementById('status').innerHTML = '<div style="background:rgba(16,185,129,0.1); padding:1rem; border-radius:12px; border:1px solid var(--accent);">'
-        + '<span style="color:var(--accent); font-weight:700">✅ สแกนสำเร็จ: ' + decodedText + '</span>'
-        + '<br><span style="font-size:0.85rem; color:var(--text-dim); margin-top:0.5rem; display:block">กำลังส่งข้อมูลกลับไปยังหน้า Admin...</span>'
-        + '</div>';
-
-      // 💾 แทนที่ postMessage ด้วย localStorage ที่แน่นอนกว่าใน GAS
-      var scanData = {
+      // บันทึกข้อมูล
+      const scanData = {
         text: decodedText,
         timestamp: Date.now()
       };
       localStorage.setItem('_qr_scan_res', JSON.stringify(scanData));
 
-      // ส่ง postMessage สำรองเผื่อไว้ (แต่อาจถูกบล็อก)
+      // ส่ง postMessage สำรอง
       if (window.opener) {
         try { window.opener.postMessage({ type: 'QR_SCAN_RESULT', text: decodedText }, "*"); } catch(e) {}
       }
 
-      setTimeout(function() {
-        document.getElementById('status').innerHTML += '<br><p style="font-size:0.8rem; color:var(--accent)">ส่งข้อมูลเรียบร้อย! ปิดหน้านี้ได้เลยครับ</p>';
+      // ปิดหน้าจออัตโนมัติ
+      setTimeout(() => {
         window.close();
       }, 1500);
     }
   </script>
 </body>
-
 </html>
