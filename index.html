@@ -54,13 +54,13 @@
 
       <!-- User Actions (compact — nav tabs live in mobile nav) -->
       <div class="nav-actions">
-        <button id="adminPaneBtn" class="btn btn-accent btn-sm hidden" onclick="showToast('เข้าใช้งาน Admin ทางลิงก์เฉพาะ', 'info')">
+        <button id="adminPaneBtn" class="btn btn-accent btn-sm hidden" onclick="navigateTo('admin.html')">
           <i data-lucide="settings"></i> <span class="hide-mobile">แอดมิน</span>
         </button>
-        <button id="mgrPaneBtn" class="btn btn-warning btn-sm hidden" onclick="showToast('เข้าใช้งาน Manager ทางลิงก์เฉพาะ', 'info')">
+        <button id="mgrPaneBtn" class="btn btn-warning btn-sm hidden" onclick="navigateTo('manager.html')">
           <i data-lucide="scale"></i> <span class="hide-mobile">ผู้อนุมัติ</span>
         </button>
-        <button id="loginBtn" class="btn btn-outline btn-sm" onclick="showToast('ยังไม่ได้เชื่อมหหน้า Login เข้ากับ Vercel', 'info')">
+        <button id="loginBtn" class="btn btn-outline btn-sm" onclick="navigateTo('login.html')">
           <i data-lucide="log-in" style="width:15px;height:15px;"></i> <span>เข้าสู่ระบบ</span>
         </button>
         <button id="logoutBtn" class="btn btn-ghost btn-sm hidden" onclick="logout()">
@@ -274,7 +274,7 @@
         </p>
         <div style="display:flex;gap:0.75rem;">
           <button class="btn btn-ghost flex-1" onclick="closeModal('loginGateModal')">ดูสินค้าต่อ</button>
-          <button class="btn btn-primary flex-1" onclick="showToast('โหมด Login จะถูกเพิ่มในภายหลัง', 'info')">
+          <button class="btn btn-primary flex-1" onclick="navigateTo('login.html')">
             <i data-lucide="log-in" style="width:16px;height:16px;"></i> เข้าสู่ระบบ
           </button>
         </div>
@@ -374,12 +374,12 @@
       <span>คลังย่อย</span>
     </button>
     <button id="adminMobileBtn" class="mobile-nav-item hidden" data-view="admin"
-      onclick="showToast('โหมด Admin ต้องเข้าใช้งานผ่านลิงก์เฉพาะ', 'info')">
+      onclick="navigateTo('admin.html')">
       <i data-lucide="shield-check"></i>
       <span>แอดมิน</span>
     </button>
     <button id="mgrMobileBtn" class="mobile-nav-item hidden" data-view="manager"
-      onclick="showToast('โหมด Manager ต้องเข้าใช้งานผ่านลิงก์เฉพาะ', 'info')">
+      onclick="navigateTo('manager.html')">
       <i data-lucide="scale"></i>
       <span>ผู้อนุมัติ</span>
     </button>
