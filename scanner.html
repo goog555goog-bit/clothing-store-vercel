@@ -295,6 +295,17 @@
     const stopBtn = document.getElementById('stopBtn');
     const overlay = document.getElementById('scannerOverlay');
 
+    // Display mode info if provided
+    const urlParams = new URLSearchParams(window.location.search);
+    const mode = urlParams.get('mode');
+    if (mode) {
+      let modeLabel = '';
+      if (mode === 'deduct') modeLabel = '📤 โหมด: นำสินค้าออก';
+      if (mode === 'receive') modeLabel = '📥 โหมด: รับสินค้าเข้า';
+      if (mode === 'sub') modeLabel = '📦 โหมด: คลังย่อย';
+      if (modeLabel) statusEl.innerHTML = '<strong style="color:var(--primary)">' + modeLabel + '</strong><br>กดปุ่มเริ่มสแกนเพื่อเปิดกล้อง';
+    }
+
     // สำหรับใช้เป็น fallback ถ้ากล้องสดเปิดไม่ได้
     function handleFile(input) {
       if (!input.files || input.files.length === 0) return;

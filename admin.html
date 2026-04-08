@@ -572,47 +572,7 @@
     </div>
   </div>
 
-  <!-- QR SCANNER MODAL (NATIVE CAMERA) -->
-  <div id="scannerModal" class="modal-overlay" onclick="if(event.target===this) closeScanner()">
-    <div class="modal" style="max-width:400px; padding:0">
-      <div class="modal-header" style="border-bottom:none; padding-bottom:0">
-        <div style="font-weight:700; font-size:1.1rem">สแกนรหัสสินค้า</div>
-        <button class="btn btn-ghost btn-sm" onclick="closeScanner()">✕</button>
-      </div>
-      <div class="modal-body" style="padding:1.5rem">
-        <div class="flex justify-center p-3 mb-4" style="background: rgba(255,255,255,0.03); border-radius:12px; border: 1px solid var(--border);">
-          <div class="btn-group" style="width:100%">
-            <button id="scanModeDeduct" style="flex:1" class="btn btn-sm btn-active" onclick="setScanMode('deduct')">📤 นำออก</button>
-            <button id="scanModeReceive" style="flex:1" class="btn btn-sm" onclick="setScanMode('receive')">📥 รับเข้า</button>
-            <button id="scanModeSub" style="flex:1" class="btn btn-sm" onclick="setScanMode('sub')">📦 คลังย่อย</button>
-          </div>
-        </div>
-        <div id="scanModeLabel" style="text-align:center; font-size:0.9rem; color:var(--primary); margin-bottom:1rem; padding: 0.5rem; background: rgba(16, 185, 129, 0.1); border-radius: 8px;">โหมด: <strong>ตัดออกจาสต็อกหลัก</strong></div>
 
-
-        <div style="text-align:center; padding:1.5rem 0; color:var(--text2)">
-          <div style="font-size:3.5rem; margin-bottom:1rem; text-shadow:0 4px 15px rgba(0,0,0,0.5)">📷</div>
-          <h3 style="margin-bottom:0.5rem; color:white; font-size:1.15rem">ระบบสแกนผ่านกล้องมือถือ</h3>
-          <p style="font-size:0.85rem; line-height:1.5; margin-bottom:1.5rem">
-            เพื่อความปลอดภัยสูงสุดและเสถียรภาพ<br>กรุณากดปุ่มด้านล่างเพื่อถ่ายภาพ QR Code นะครับ
-          </p>
-
-          <button class="btn btn-accent btn-lg w-full mb-3" onclick="document.getElementById('qrFallbackInput').click()" style="padding:1.25rem; font-size:1.1rem; box-shadow:0 10px 25px -5px rgba(16,185,129,0.4)">
-            📸 เปิดกล้อง / เลือกรูปภาพ
-          </button>
-          <button class="btn btn-outline w-full" onclick="promptManualInput()">
-            ⌨️ พิมพ์รหัสสินค้าเอง
-          </button>
-        </div>
-
-        <div id="scannerStatus" style="display:none; text-align:center; padding-top:1rem; border-top:1px dashed var(--border)">
-          <!-- Status shown here -->
-        </div>
-      </div>
-      <input type="file" id="qrFallbackInput" accept="image/*" capture="environment" style="display:none"
-        onchange="handleQrFallback(this)">
-    </div>
-  </div>
 
   <!-- ORDER APPROVAL MODAL (Quick Decision) -->
   <div id="orderApprovalModal" class="modal-overlay" onclick="if(event.target===this) closeApprovalModal()">
@@ -1877,87 +1837,94 @@
 
     // ─── SCANNER ──────────────────────────────────────────
     var html5QrCode = null;
-    var scanMode = 'deduct'; // 'deduct' or 'receive'
+    var currentScanMode = 'deduct';
 
     function setScanMode(mode) {
-      scanMode = mode;
-      document.getElementById('scanModeDeduct').classList.toggle('btn-active', mode === 'deduct');
-      document.getElementById('scanModeReceive').classList.toggle('btn-active', mode === 'receive');
-      document.getElementById('scanModeSub').classList.toggle('btn-active', mode === 'sub');
-
-      var labels = {
-        'deduct': 'ตัดออกจาสต็อกหลัก',
-        'receive': 'รับเข้าสต็อกหลัก',
-        'sub': 'รับเข้าคลังย่อยส่วนตัว'
-      };
-      document.getElementById('scanModeLabel').innerHTML = 'โหมด: <strong>' + labels[mode] + '</strong>';
+      currentScanMode = mode;
+      showToast('สลับโหมดเป็น: ' + mode, 'info');
     }
 
-    function openScanner() {
-      document.getElementById('scannerModal').classList.add('open');
-      document.getElementById('scannerStatus').style.display = 'none';
-      if (!html5QrCode) html5QrCode = new Html5Qrcode("scannerStatus"); // Just initialize for scanFile
-    }
-
-    function closeScanner() {
-      document.getElementById('scannerModal').classList.remove('open');
-      document.getElementById('scannerStatus').style.display = 'none';
-    }
-
-    function onScanSuccess(decodedText) {
-
-      var prodId = decodedText;
-      var qty = prompt('รหัสสินค้า: ' + prodId + '\nกรุณาระบุจำนวน:', '1');
-      if (!qty || isNaN(qty)) {
-        return;
+    function openScanner(mode) {
+      if (mode) currentScanMode = mode;
+      
+      const scannerUrl = 'scanner.html?mode=' + currentScanMode;
+      const w = 500, h = 800;
+      const left = (window.screen.width / 2) - (w / 2);
+      const top = (window.screen.height / 2) - (h / 2);
+      
+      const scannerWin = window.open(scannerUrl, 'EmetixScanner', 
+        `toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=${w}, height=${h}, top=${top}, left=${left}`);
+      
+      if (!scannerWin) {
+        navigateTo(scannerUrl);
       }
+    }
 
-      var action = 'quickDeductStock';
-      if (scanMode === 'receive') action = 'receiveStock';
-      if (scanMode === 'sub') action = 'receiveSubStock';
+    // Listen for scan results from separate window
+    window.addEventListener('storage', function(e) {
+      if (e.key === '_qr_scan_res' && e.newValue) {
+        try {
+          const data = JSON.parse(e.newValue);
+          if (Date.now() - data.timestamp < 60000) {
+            localStorage.removeItem('_qr_scan_res'); 
+            processScanResult(data.text);
+          }
+        } catch(err) {}
+      }
+    });
 
-      API[action]({ productId: prodId, qty: Number(qty) }).then(function (res) {
-        if (res.success) {
-          var msg = 'ดำเนินการสำเร็จ';
-          if (res.newStock !== undefined) msg += ' สต็อกปัจจุบัน: ' + res.newStock;
-          showToast(msg, 'success');
-          loadInventory();
-          closeScanner();
-        } else {
-          showToast(res.message, 'error');
+    function closeScanner() {}
+
+    function processScanResult(text) {
+      if (!text) return;
+      
+      if (currentScanMode === 'deduct') {
+        findProductAndShowAction(text, 'ตัดจ่ายพัสดุ', 'ระบุจำนวนที่ต้องการตัดออกจากสต็อกหลัก');
+      } else if (currentScanMode === 'receive') {
+        findProductAndShowAction(text, 'รับพัสดุเข้าคลัง', 'ระบุจำนวนพัสดุที่รับเข้าคลังหลัก');
+      } else if (currentScanMode === 'sub') {
+        findProductAndShowAction(text, 'รับเข้าคลังย่อย (FC)', 'ระบุจำนวนที่รับเข้าคลังย่อยของคุณ');
+      }
+    }
+
+    function findProductAndShowAction(prodId, title, desc) {
+      API.getStorefrontData().then(function(res) {
+        const prod = res.data.products.find(p => String(p.id) === String(prodId));
+        if (!prod) {
+          showToast('ไม่พบสินค้าที่มีรหัส: ' + prodId, 'error');
+          return;
         }
-      }).catch(function (err) {
-        showToast('ผิดพลาด: ' + err, 'error');
+        const qty = prompt('📦 ' + title + '\nสินค้า: ' + prod.name + '\n' + desc, '1');
+        if (qty && !isNaN(qty) && parseInt(qty) > 0) {
+          performScanAction(prodId, parseInt(qty));
+        }
       });
     }
 
-    function handleQrFallback(input) {
-      if (!input.files || input.files.length === 0) return;
-      var file = input.files[0];
-      var statusEl = document.getElementById('scannerStatus');
-      statusEl.style.display = 'block';
-      statusEl.innerHTML = '<div class="spinner"></div> กำลังอ่านรูปภาพ...';
+    function performScanAction(prodId, qty) {
+      let action = 'quickDeductStock';
+      if (currentScanMode === 'receive') action = 'receiveStock';
+      if (currentScanMode === 'sub') action = 'receiveSubStock';
 
-      if (!html5QrCode) html5QrCode = new Html5Qrcode("scannerStatus");
-
-      html5QrCode.scanFile(file, true)
-        .then(function (decodedText) {
-          statusEl.innerHTML = '<span style="color:var(--accent)">✅ อ่านรหัสสำเร็จ</span>';
-          onScanSuccess(decodedText);
-          input.value = ''; // Reset
-        })
-        .catch(function (err) {
-          statusEl.innerHTML = '<span style="color:var(--danger)">❌ ระบบไม่สามารถค้นหา QR Code ในรูปภาพนี้ กรุณาถ่ายให้ชัดเจน</span>';
-          input.value = ''; // Reset
-        });
+      API._call(action, { productId: prodId, quantity: qty }).then(function(res) {
+        if (res.success) {
+          showToast('ทำรายการสำเร็จ: ' + prodId + ' จำนวน ' + qty, 'success');
+          loadDashboard();
+          if (currentAdminPage === 'inventory') loadInventory();
+          if (currentAdminPage === 'products') loadProducts();
+        } else {
+          showToast('เกิดข้อผิดพลาด: ' + res.message, 'error');
+        }
+      });
     }
 
     function promptManualInput() {
       var id = prompt('กรุณาระบุรหัสสินค้า (Manual Input):');
       if (id && id.trim()) {
-        onScanSuccess(id.trim());
+        processScanResult(id.trim());
       }
     }
+
 
     // ─── SUB-STOCK VIEW ───────────────────────────────────
     function showUserSubStock(empId, empName) {
