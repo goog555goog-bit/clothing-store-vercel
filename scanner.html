@@ -7,6 +7,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
   <title>Live QR Scanner | EMETIX STORE</title>
   <script src="https://unpkg.com/html5-qrcode"></script>
+  <script src="https://unpkg.com/lucide@latest" defer></script>
+
   <style>
     :root {
       --bg: #0a0a16;
@@ -253,7 +255,7 @@
 
     <!-- Success Screen -->
     <div id="successScreen" class="success-screen">
-      <div class="check-icon">✓</div>
+      <div class="check-icon"><i data-lucide="check" style="width:32px;height:32px;color:white"></i></div>
       <h2 style="margin: 0 0 0.5rem; font-weight: 800;">สแกนสำเร็จ!</h2>
       <p id="resultText" style="color: var(--primary); font-size: 1.2rem; font-weight: 700; margin-bottom: 1rem;"></p>
       <p style="color: var(--text-dim); font-size: 0.85rem;">กำลังบันทึกข้อมูลและปิดหน้าต่างนี้...</p>
@@ -265,10 +267,10 @@
     
     <div class="btn-group">
       <button id="startBtn" class="btn btn-primary" onclick="startScanner()">
-        📷 เริ่มสแกนสด
+        <i data-lucide="camera"></i> เริ่มสแกนสด
       </button>
       <button id="stopBtn" class="btn btn-danger" onclick="stopScanner()" style="display:none">
-        ⏹️ หยุดสแกน
+        <i data-lucide="square"></i> หยุดสแกน
       </button>
     </div>
 
@@ -280,7 +282,7 @@
 
     <div class="btn-group">
       <button class="btn btn-outline" onclick="document.getElementById('file-input').click()">
-        🖼️ เลือกรูปภาพ
+        <i data-lucide="image"></i> เลือกรูปภาพ
       </button>
     </div>
   </footer>
@@ -300,10 +302,11 @@
     const mode = urlParams.get('mode');
     if (mode) {
       let modeLabel = '';
-      if (mode === 'deduct') modeLabel = '📤 โหมด: นำสินค้าออก';
-      if (mode === 'receive') modeLabel = '📥 โหมด: รับสินค้าเข้า';
-      if (mode === 'sub') modeLabel = '📦 โหมด: คลังย่อย';
-      if (modeLabel) statusEl.innerHTML = '<strong style="color:var(--primary)">' + modeLabel + '</strong><br>กดปุ่มเริ่มสแกนเพื่อเปิดกล้อง';
+      if (mode === 'deduct') modeLabel = '<i data-lucide="log-out"></i> โหมด: นำสินค้าออก';
+      if (mode === 'receive') modeLabel = '<i data-lucide="log-in"></i> โหมด: รับสินค้าเข้า';
+      if (mode === 'sub') modeLabel = '<i data-lucide="package"></i> โหมด: คลังย่อย';
+      if (modeLabel) statusEl.innerHTML = '<div style="color:var(--primary); display:flex; align-items:center; justify-content:center; gap:0.5rem; font-weight:700">' + modeLabel + '</div><div style="margin-top:0.25rem">กดปุ่มเริ่มสแกนเพื่อเปิดกล้อง</div>';
+      refreshIcons();
     }
 
     // สำหรับใช้เป็น fallback ถ้ากล้องสดเปิดไม่ได้
@@ -314,7 +317,8 @@
       html5QrCode.scanFile(input.files[0], true)
         .then(decodedText => onScanSuccess(decodedText))
         .catch(err => {
-          statusEl.innerHTML = '<span style="color:var(--danger)">❌ ไม่พบรหัสในรูปภาพนี้</span>';
+          statusEl.innerHTML = '<span style="color:var(--danger); display:flex; align-items:center; justify-content:center; gap:0.4rem"><i data-lucide="alert-circle" style="width:16px;height:16px"></i> ไม่พบรหัสในรูปภาพนี้</span>';
+          refreshIcons();
         });
       input.value = '';
     }
@@ -350,8 +354,9 @@
       .catch(err => {
         console.error(err);
         startBtn.disabled = false;
-        startBtn.innerHTML = '📷 เริ่มสแกนสด';
-        statusEl.innerHTML = '<span style="color:var(--danger)">❌ ไม่สามารถเปิดกล้องได้</span>';
+        startBtn.innerHTML = '<i data-lucide="camera"></i> เริ่มสแกนสด';
+        statusEl.innerHTML = '<span style="color:var(--danger); display:flex; align-items:center; justify-content:center; gap:0.4rem"><i data-lucide="alert-circle" style="width:16px;height:16px"></i> ไม่สามารถเปิดกล้องได้</span>';
+        refreshIcons();
         alert('ไม่สามารถเปิดใช้งานกล้องได้: ' + err);
       });
     }
@@ -360,10 +365,11 @@
       html5QrCode.stop().then(() => {
         startBtn.style.display = 'flex';
         startBtn.disabled = false;
-        startBtn.innerHTML = '📷 เริ่มสแกนสด';
+        startBtn.innerHTML = '<i data-lucide="camera"></i> เริ่มสแกนสด';
         stopBtn.style.display = 'none';
         overlay.style.display = 'none';
         statusEl.innerHTML = 'หยุดการสแกนแล้ว';
+        refreshIcons();
       }).catch(err => {
         console.warn("Unable to stop scanner", err);
       });
@@ -394,6 +400,8 @@
         window.close();
       }, 1500);
     }
+    function refreshIcons() { if (typeof lucide !== 'undefined') lucide.createIcons(); }
+    window.onload = function() { refreshIcons(); }
   </script>
 </body>
 </html>

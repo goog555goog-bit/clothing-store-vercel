@@ -152,10 +152,10 @@ function logout() {
 // ─── ONBOARDING ───────────────────────────────────────────
 var Onboarding = {
   steps: [
-    { target: '.logo', title: '👋 ยินดีต้อนรับ!', body: 'นี่คือระบบภาระงานเบิกพัสดุรูปแบบใหม่ ใช้งานง่ายเหมือนหน้าเว็บ E-Commerce ชั้นนำ' },
-    { target: '#loginBtn', title: '🔑 เข้าสู่ระบบ', body: 'เริ่มการใช้งานด้วยการลงชื่อเข้าใช้ด้วยรหัสพนักงานของคุณ' },
-    { target: '.search-box', title: '🔍 ค้นหาสินค้า', body: 'ค้นหาสินค้าที่คุณต้องการเบิกได้ทันทีจากช่องค้นหานี้' },
-    { target: 'button[onclick*="toggleDrawer"]', title: '🛒 ตะกร้าสินค้า', body: 'เมื่อเลือกสินค้าแล้ว รายการจะมาอยู่ในตะกร้านี้เพื่อรอการยืนยัน' }
+    { target: '.logo', title: '<i data-lucide="hand"></i> ยินดีต้อนรับ!', body: 'นี่คือระบบภาระงานเบิกพัสดุรูปแบบใหม่ ใช้งานง่ายเหมือนหน้าเว็บ E-Commerce ชั้นนำ' },
+    { target: '#loginBtn', title: '<i data-lucide="key"></i> เข้าสู่ระบบ', body: 'เริ่มการใช้งานด้วยการลงชื่อเข้าใช้ด้วยรหัสพนักงานของคุณ' },
+    { target: '.search-box', title: '<i data-lucide="search"></i> ค้นหาสินค้า', body: 'ค้นหาสินค้าที่คุณต้องการเบิกได้ทันทีจากช่องค้นหานี้' },
+    { target: 'button[onclick*="toggleDrawer"]', title: '<i data-lucide="shopping-cart"></i> ตะกร้าสินค้า', body: 'เมื่อเลือกสินค้าแล้ว รายการจะมาอยู่ในตะกร้านี้เพื่อรอการยืนยัน' }
   ],
   currentStep: 0,
   
@@ -178,7 +178,7 @@ var Onboarding = {
     
     var tooltip = document.createElement('div');
     tooltip.className = 'onboarding-tooltip';
-    tooltip.innerHTML = '<div class="onboarding-header">' + step.title + '</div>'
+    tooltip.innerHTML = '<div class="onboarding-header" style="display:flex;align-items:center;gap:0.5rem">' + step.title + '</div>'
       + '<div class="onboarding-body">' + step.body + '</div>'
       + '<div class="flex justify-between">'
       +   '<button class="btn btn-ghost btn-sm" onclick="Onboarding.skip()">ข้าม</button>'
@@ -190,6 +190,7 @@ var Onboarding = {
     tooltip.style.left = Math.max(10, Math.min(window.innerWidth - 300, rect.left)) + 'px';
     
     document.body.appendChild(tooltip);
+    refreshIcons();
     targetEl.classList.add('onboarding-highlight');
     targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
   },
@@ -683,7 +684,7 @@ function loadMyOrders() {
   }).catch(function(err) {
     if (!myOrdersCache) {
       list.innerHTML = '<div class="empty-state"> '
-        + '<p style="color:var(--danger)">⛔ โหลดข้อมูลไม่สำเร็จ</p>'
+        + '<div style="color:var(--danger); display:flex; align-items:center; gap:0.5rem; justify-content:center"><i data-lucide="alert-octagon"></i> โหลดข้อมูลไม่สำเร็จ</div>'
         + '<p style="font-size:0.8rem;margin-top:0.5rem;color:var(--text3)">' + err + '</p>'
         + '</div>';
     }
@@ -773,7 +774,7 @@ function viewOrderDetails(requestId) {
 
     if (order && order.signature) {
       html += '<div style="margin-top:1.5rem;text-align:center;border-top:1px solid var(--border);padding-top:1rem">'
-        + '<p style="font-size:0.8rem;color:var(--text3)">✍️ ลายเซ็นรับของ:</p>'
+        + '<p style="font-size:0.8rem;color:var(--text3);display:flex;align-items:center;justify-content:center;gap:0.4rem"><i data-lucide="pen-tool"></i> ลายเซ็นรับของ:</p>'
         + '<img src="' + order.signature + '" style="max-width:200px;background:#fff;border-radius:4px;margin-top:0.5rem;border:1px solid var(--border)">'
         + '<p style="font-size:0.7rem;color:var(--text3);margin-top:0.25rem">รับเมื่อ: ' + order.receivedAt + '</p>'
         + '</div>';
