@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>อนุมัติใบเบิก — EMETIX STORE</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest" defer></script>
+  <link rel="stylesheet" href="style.css">
+  <script src="api.js"></script>
+  <script>
+    function mgrLogout() {
+      localStorage.removeItem('_user');
+      localStorage.removeItem('_tok');
+      navigateTo('login.html');
+    }
+    function refreshIcons() { if (typeof lucide !== 'undefined') lucide.createIcons(); }
+    function loadAuditLogs() { console.info('Audit Logs not available in Manager view'); }
+  </script>
+</head>
+<body>
+
+  <header class="app-header glass" style="border-bottom: var(--glass-border); padding: 1.25rem 0;">
+    <div class="container" style="display:flex;align-items:center;justify-content:space-between">
+      <div class="logo" onclick="navigateTo(scriptUrl)" style="gap: 0.75rem; cursor: pointer;">
+        <div class="logo-icon" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark)); border: 1px solid rgba(251, 191, 36, 0.4);"><i data-lucide="shield-check" style="color:#000;width:18px;height:18px"></i></div>
+        <span style="font-weight: 800; letter-spacing: -1px; font-size: 1.3rem; color: #fff;">EMETIX <span style="font-weight: 300; opacity: 0.6; color: var(--primary);">MANAGER</span></span>
+      </div>
+      <div class="nav-actions" style="display:flex;gap:0.75rem;align-items:center">
+        <div id="mgrName" style="color:var(--text2); font-weight: 500; font-size: 0.9rem; background: var(--bg2); padding: 0.4rem 1rem; border-radius: 99px;"></div>
+        <button class="btn btn-ghost btn-sm" onclick="navigateTo(scriptUrl)"><i data-lucide="shopping-cart"></i> <span class="hide-mobile">ไปที่ร้านค้า</span></button>
+        <button id="adminPaneBtn" class="btn btn-accent btn-sm hidden" onclick="navigateTo(scriptUrl + '?page=admin')"><i data-lucide="shield-check"></i> แอดมิน</button>
+        <button class="btn btn-outline btn-sm" onclick="mgrLogout()" style="color: var(--danger); border-color: rgba(224, 122, 95, 0.2);"><i data-lucide="log-out"></i></button>
+      </div>
+    </div>
+  </header>
+
+  <div class="container" style="padding:1.5rem 0">
+    <h2 style="font-size:1.3rem;font-weight:700;margin-bottom:1.5rem;display:flex;align-items:center;gap:0.5rem"><i data-lucide="clipboard-list"></i> ใบเบิกรออนุมัติ</h2>
+
+    <div id="pendingList">
+      <div class="text-center" style="padding:3rem"><div class="spinner"></div><p style="margin-top:1rem;color:var(--text3)">กำลังโหลด...</p></div>
+    </div>
+  </div>
+
+  <!-- Mobile Bottom Nav (Manager) -->
+  <nav class="mobile-nav" style="border-top: 1px solid var(--glass-border); background: rgba(5, 5, 5, 0.9);">
+    <button class="mobile-nav-item active" onclick="loadPending()">
+      <i data-lucide="clipboard-list"></i>
+      <span>รออนุมัติ</span>
+    </button>
+    <button id="mgrMobileAdmin" class="mobile-nav-item hidden" onclick="navigateTo(scriptUrl + '?page=admin')">
+      <i data-lucide="shield-check"></i>
+      <span>แอดมิน</span>
+    </button>
+    <button class="mobile-nav-item" onclick="navigateTo(scriptUrl)">
+      <i data-lucide="shopping-bag"></i>
+      <span>หน้าร้าน</span>
+    </button>
+    <button class="mobile-nav-item" onclick="mgrLogout()" style="color: var(--danger);">
+      <i data-lucide="log-out"></i>
+      <span>ออก</span>
+    </button>
+  </nav>
+
+  <!-- Approve/Reject Modal -->
+  <div id="decisionModal" class="modal-overlay" onclick="if(event.target===this) closeMgrModal()">
+    <div class="modal">
+      <div class="modal-header">
+        <div id="decisionTitle" style="font-weight:600">อนุมัติใบเบิก</div>
+        <button class="btn btn-ghost btn-sm" onclick="closeMgrModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="decisionItems" style="margin-bottom:1rem"></div>
+        <div class="form-group">
+          <label class="form-label">ความคิดเห็น (ไม่จำเป็น)</label>
+          <input id="decisionComment" class="form-input" placeholder="ระบุความคิดเห็น...">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeMgrModal()">ยกเลิก</button>
+        <button id="decisionBtn" class="btn btn-primary" onclick="submitDecision()">ยืนยัน</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="globalLoader" class="global-loader">
+    <div class="spinner"></div>
+    <p style="margin-top:1rem;color:var(--text2);font-size:0.9rem">กำลังรวบรวมใบเบิกมาให้ครับ...</p>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script>
+    var scriptUrl = 'index.html';
+    var currentUser = null;
+    var pendingDecision = null; // { orderId, action: 'approve'|'reject' }
+
+    function navigateTo(url) {
+      if (document.getElementById('globalLoader')) {
+        document.getElementById('globalLoader').classList.add('active');
+      }
+      if (url.includes('?page=login')) url = 'login.html';
+      else if (url.includes('?page=manager')) url = 'manager.html';
+      else if (url.includes('?page=admin')) url = 'admin.html';
+      else if (url.includes('?page=scanner')) url = 'scanner.html';
+      else if (url === scriptUrl) url = 'index.html';
+      window.open(url, '_top');
+    }
+
+    window.onload = function() {
+      if (typeof API !== 'undefined') {
+        initManager();
+      } else {
+        var checkCount = 0;
+        var checkTimer = setInterval(function() {
+          checkCount++;
+          if (typeof API !== 'undefined') {
+            clearInterval(checkTimer);
+            initManager();
+          } else if (checkCount > 50) {
+            clearInterval(checkTimer);
+            showToast('เชื่อมต่อ API ไม่สำเร็จ กรุณารีเฟรช', 'error');
+          }
+        }, 100);
+      }
+    };
+
+    function initManager() {
+      var stored = localStorage.getItem('_user');
+      if (stored) {
+        try { currentUser = JSON.parse(stored); } catch(e) {}
+      }
+      if (!currentUser || (currentUser.role !== 'manager' && currentUser.role !== 'admin' && currentUser.role !== 'superadmin')) {
+        document.getElementById('pendingList').innerHTML = '<div class="card text-center" style="padding:3rem">'
+          + '<p style="color:var(--danger);font-size:1.1rem;display:flex;align-items:center;justify-content:center;gap:0.5rem"><i data-lucide="shield-alert"></i> ไม่มีสิทธิ์เข้าถึง</p>'
+          + '<p style="color:var(--text3);margin-top:0.5rem">กรุณาเข้าสู่ระบบด้วยบัญชีผู้จัดการ</p>'
+          + '<button class="btn btn-primary" style="margin-top:1rem" onclick="window.top.location.href=scriptUrl+\'?page=login\'">เข้าสู่ระบบ</button></div>';
+        refreshIcons();
+        return;
+      }
+      if (currentUser) {
+        document.getElementById('mgrName').textContent = currentUser.name;
+        
+        // ปุ่ม Admin (ถ้ามีสิทธิ์)
+        var isAdmin = ['superadmin', 'admin'].indexOf(currentUser.role) !== -1;
+        var adBtn = document.getElementById('adminPaneBtn');
+        var adMob = document.getElementById('mgrMobileAdmin');
+        if (isAdmin) {
+          if (adBtn) adBtn.classList.remove('hidden');
+          if (adMob) adMob.classList.remove('hidden');
+        }
+      }
+      loadPending();
+      refreshIcons();
+    }
+
+    function mgrLogout() {
+      localStorage.removeItem('_user');
+      localStorage.removeItem('_tok');
+      navigateTo(scriptUrl + '?page=login');
+    }
+
+    function loadPending() {
+      document.getElementById('pendingList').innerHTML = '<div class="text-center" style="padding:3rem"><div class="spinner"></div></div>';
+
+      API.getPendingApprovals(currentUser.employeeId).then(function(res) {
+        var list = document.getElementById('pendingList');
+        if (!res.success || res.data.length === 0) {
+          list.innerHTML = '<div class="card text-center" style="padding:3rem;color:var(--text3)">✅ ไม่มีใบเบิกรออนุมัติ</div>';
+          return;
+        }
+
+        list.innerHTML = res.data.map(function(o) {
+          return '<div class="card" style="margin-bottom:1rem">'
+            + '<div class="flex items-center justify-between" style="margin-bottom:0.75rem">'
+            +   '<div><span style="font-weight:600">' + o.orderId + '</span>'
+            +   ' <span class="badge badge-pending">' + (o.statusLabel || o.status) + '</span></div>'
+            +   '<div style="color:var(--text3);font-size:0.8rem">' + String(o.createdAt || '').split(' ')[0] + '</div>'
+            + '</div>'
+            + '<div style="font-size:0.9rem;margin-bottom:0.5rem;display:flex;align-items:center;gap:0.4rem"><i data-lucide="user" style="width:14px;height:14px"></i> ผู้เบิก: <strong>' + (o.employeeName || o.employeeId) + '</strong></div>'
+            + '<div style="font-size:0.9rem;margin-bottom:0.5rem;display:flex;align-items:center;gap:0.4rem"><i data-lucide="building" style="width:14px;height:14px"></i> แผนก: ' + o.department + '</div>'
+            + '<div style="font-size:1.1rem;font-weight:700;color:var(--accent);margin-bottom:1rem">💰 ฿' + Number(o.totalAmount).toLocaleString() + '</div>'
+            + '<div class="flex gap-1">'
+            +   '<button class="btn btn-accent btn-sm" onclick="openDecision(\'' + o.orderId + '\', \'approve\')"><i data-lucide="check-circle" style="width:14px;height:14px"></i> อนุมัติ</button>'
+            +   '<button class="btn btn-danger btn-sm" onclick="openDecision(\'' + o.orderId + '\', \'reject\')"><i data-lucide="x-circle" style="width:14px;height:14px"></i> ไม่อนุมัติ</button>'
+            +   '<button class="btn btn-outline btn-sm" onclick="viewItems(\'' + o.orderId + '\')"><i data-lucide="eye" style="width:14px;height:14px"></i> ดูรายการ</button>'
+            + '</div>'
+            + '</div>';
+        }).join('');
+        refreshIcons();
+      });
+    }
+
+    function viewItems(orderId) {
+      pendingDecision = null;
+      document.getElementById('decisionTitle').textContent = 'รายละเอียดใบเบิก ' + orderId;
+      document.getElementById('decisionComment').parentElement.style.display = 'none';
+      document.getElementById('decisionBtn').style.display = 'none';
+      var itemsDiv = document.getElementById('decisionItems');
+      itemsDiv.innerHTML = '<div class="spinner"></div>';
+      document.getElementById('decisionModal').classList.add('open');
+
+      API.getOrderItems(orderId).then(function(res) {
+        if (!res.success || res.data.length === 0) {
+          itemsDiv.innerHTML = '<p style="color:var(--text3)">ไม่พบรายการ</p>'; return;
+        }
+        itemsDiv.innerHTML = '<div class="table-wrap"><table><thead><tr><th>สินค้า</th><th>จำนวน</th><th>ราคา</th></tr></thead><tbody>'
+          + res.data.map(function(i) {
+            return '<tr><td>' + i.productName + '</td><td>' + i.quantity + '</td><td>฿' + Number(i.price).toLocaleString() + '</td></tr>';
+          }).join('') + '</tbody></table></div>';
+      });
+    }
+
+    function openDecision(orderId, action) {
+      pendingDecision = { orderId: orderId, action: action };
+      document.getElementById('decisionTitle').innerHTML = action === 'approve' 
+        ? '<i data-lucide="check-circle"></i> อนุมัติใบเบิก ' + orderId 
+        : '<i data-lucide="x-circle"></i> ไม่อนุมัติใบเบิก ' + orderId;
+      document.getElementById('decisionComment').parentElement.style.display = '';
+      document.getElementById('decisionComment').value = '';
+      document.getElementById('decisionBtn').style.display = '';
+      document.getElementById('decisionBtn').className = action === 'approve' ? 'btn btn-accent' : 'btn btn-danger';
+      document.getElementById('decisionBtn').innerHTML = action === 'approve' 
+        ? '<i data-lucide="check"></i> ยืนยันอนุมัติ' 
+        : '<i data-lucide="x"></i> ยืนยันไม่อนุมัติ';
+      document.getElementById('decisionItems').innerHTML = '';
+      document.getElementById('decisionModal').classList.add('open');
+      refreshIcons();
+    }
+
+    function closeMgrModal() {
+      document.getElementById('decisionModal').classList.remove('open');
+      pendingDecision = null;
+    }
+
+    function submitDecision() {
+      if (!pendingDecision) return;
+      var comment = document.getElementById('decisionComment').value;
+      var btn = document.getElementById('decisionBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<div class="spinner"></div>';
+
+      var promise = pendingDecision.action === 'approve'
+        ? API.approveOrder(pendingDecision.orderId, currentUser.employeeId, comment)
+        : API.rejectOrder(pendingDecision.orderId, currentUser.employeeId, comment);
+
+      promise.then(function(res) {
+        showToast(res.message || (res.success ? 'สำเร็จ' : res.error), res.success ? 'success' : 'error');
+        closeMgrModal();
+        loadPending();
+      }).catch(function(err) {
+        showToast('เกิดข้อผิดพลาด: ' + err.message, 'error');
+        btn.disabled = false;
+        btn.textContent = 'ลองใหม่';
+      });
+    }
+
+    function showToast(msg, type) {
+      var container = document.getElementById('toastContainer');
+      var t = document.createElement('div');
+      t.className = 'toast ' + (type || 'success');
+      t.textContent = msg;
+      container.appendChild(t);
+      setTimeout(function() { t.remove(); }, 4000);
+    }
+  </script>
+
+  <!-- Back to Top Button -->
+  <button id="backToTopBtn" class="btn btn-primary" style="position:fixed; bottom:2rem; right:2rem; border-radius:50%; width:50px; height:50px; display:none; align-items:center; justify-content:center; box-shadow:var(--shadow-lg); z-index:999; padding:0; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1)" onclick="window.scrollTo({top:0, behavior:'smooth'})" title="กลับขึ้นด้านบน">
+    <i data-lucide="arrow-up" style="width:24px;height:24px"></i>
+  </button>
+  <script>
+    window.addEventListener('scroll', function() {
+      var btn = document.getElementById('backToTopBtn');
+      if (btn) {
+        if (window.scrollY > 300) {
+          btn.style.display = 'flex';
+          btn.style.opacity = '1';
+        } else {
+          btn.style.display = 'none';
+          btn.style.opacity = '0';
+        }
+      }
+    });
+  </script>
+</body>
+</html>

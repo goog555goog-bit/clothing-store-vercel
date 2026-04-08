@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>เข้าสู่ระบบ — EMETIX STORE</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="api.js"></script>
+  <script src="https://unpkg.com/lucide@latest" defer></script>
+</head>
+<body>
+  <style>
+    body {
+      background: radial-gradient(circle at top right, #0d0d1a, #050505);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .login-container {
+      width: 100%;
+      padding: 1rem;
+      display: flex;
+      justify-content: center;
+      perspective: 1000px;
+    }
+    .login-card {
+      background: rgba(18, 18, 30, 0.6);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(251, 191, 36, 0.1);
+      border-radius: 28px;
+      padding: 4rem 2.5rem;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.8);
+      text-align: center;
+      animation: cardEnter 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @keyframes cardEnter {
+      from { opacity: 0; transform: translateY(50px) rotateX(-15deg); }
+      to { opacity: 1; transform: translateY(0) rotateX(0); }
+    }
+    h1 { font-size: 2.2rem; font-weight: 900; letter-spacing: -1.5px; margin-bottom: 0.5rem; background: linear-gradient(to bottom, #fff, #fbbf24); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+    p { color: #94a3b8; margin-bottom: 2.5rem; font-size: 1rem; font-weight: 500; }
+    
+    .form-input {
+      text-align: center;
+      font-size: 1.25rem !important;
+      padding: 1rem !important;
+      background: rgba(0,0,0,0.4) !important;
+      border-radius: 16px !important;
+      border: 1px solid rgba(251, 191, 36, 0.2) !important;
+      color: #ffffff !important;
+      transition: all 0.3s !important;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.5) !important;
+    }
+    .form-input:focus {
+      border-color: #fbbf24 !important;
+      background: rgba(251, 191, 36, 0.05) !important;
+      box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.1) !important;
+      outline: none;
+    }
+    
+    .logo-icon {
+      width: 80px; height: 80px; 
+      font-size: 2.2rem; 
+      margin: 0 auto 2rem; 
+      border-radius: 20px; 
+      background: linear-gradient(135deg, #fbbf24, #d97706); 
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+      box-shadow: 0 15px 30px -5px rgba(251, 191, 36, 0.4);
+      color: #000;
+    }
+  </style>
+
+  <div class="login-container">
+    <div class="login-card">
+      <div class="logo-icon" style="width:72px;height:72px;font-size:2rem;margin:0 auto 2rem; border-radius: 20px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); display: flex; align-items: center; justify-content: center; box-shadow: 0 15px 30px -5px rgba(251, 191, 36, 0.4);"><i data-lucide="package" style="width:36px;height:36px;color:#000"></i></div>
+      <h1 style="color:#fff">EMETIX <span style="color:var(--primary)">PREMIUM</span></h1>
+      <p>ระบบเบิกพัสดุพนักงานดิจิทัล</p>
+
+      <div class="form-group">
+        <input type="text" id="empIdInput" class="form-input" placeholder="รหัสพนักงานของคุณ" autocomplete="off"
+          onkeydown="if(event.key==='Enter') doLogin()">
+      </div>
+      <div id="namePreview" style="min-height:1.5rem;color:var(--primary-light);font-weight:600;margin-bottom:1.5rem; filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.3));"></div>
+
+      <button id="loginBtn" class="btn btn-primary btn-lg w-full" style="justify-content:center;" onclick="doLogin()">
+        ยืนยันตัวตน
+      </button>
+
+      <div id="loginError" style="color:var(--danger);margin-top:1.25rem;font-size:0.9rem; font-weight: 500;"></div>
+      
+      <div style="margin-top:2rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 1.5rem;">
+        <button class="btn btn-ghost btn-sm w-full" style="justify-content:center; color: var(--text3);" onclick="navigateTo('index.html')">
+          <i data-lucide="home"></i> กลับไปเลือกชมสินค้า
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="globalLoader" class="global-loader">
+    <div class="spinner"></div>
+    <p style="margin-top:1rem;color:var(--text2);font-size:0.9rem">กำลังพาทุกท่านไปยังหน้าถัดไป...</p>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script>
+    function navigateTo(url) {
+      if (document.getElementById('globalLoader')) {
+        document.getElementById('globalLoader').classList.add('active');
+      }
+      window.open(url, '_top');
+    }
+
+    // Preview ชื่อพนักงานขณะพิมพ์
+    var previewTimer;
+    document.getElementById('empIdInput').addEventListener('input', function() {
+      clearTimeout(previewTimer);
+      var val = this.value.trim();
+      if (!val) { document.getElementById('namePreview').textContent = ''; return; }
+      previewTimer = setTimeout(function() {
+        API.checkEmployee(val)
+          .then(function(res) {
+            document.getElementById('namePreview').innerHTML = (res && res.success) ? '<i data-lucide="user" style="width:14px;height:14px;display:inline-block;vertical-align:middle;margin-right:4px"></i> ' + res.name : '';
+            if (res && res.success && typeof lucide !== 'undefined') lucide.createIcons();
+          })
+          .catch(function(err) {});
+      }, 400);
+    });
+    
+    window.onload = function() {
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function doLogin() {
+      var empId = document.getElementById('empIdInput').value.trim();
+      if (!empId) {
+        document.getElementById('loginError').textContent = 'กรุณากรอกรหัสพนักงาน';
+        return;
+      }
+
+      var btn = document.getElementById('loginBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<div class="spinner"></div> กำลังเข้าสู่ระบบ...';
+      document.getElementById('loginError').textContent = '';
+
+      API.login(empId)
+        .then(function(res) {
+          if (res && res.success) {
+            // เก็บ session
+            localStorage.setItem('_user', JSON.stringify(res.data));
+            localStorage.setItem('_tok', res.data.employeeId);
+
+            // redirect ตาม role
+            var role = res.data.role;
+            var page = 'index.html';
+            if (role === 'admin' || role === 'superadmin') page = 'admin.html';
+            else if (role === 'manager') page = 'manager.html';
+
+            navigateTo(page);
+          } else {
+            btn.disabled = false;
+            btn.textContent = 'เข้าสู่ระบบ';
+            document.getElementById('loginError').textContent = (res && res.message) || 'ไม่สามารถเข้าสู่ระบบได้';
+          }
+        })
+        .catch(function(err) {
+          btn.disabled = false;
+          btn.textContent = 'เข้าสู่ระบบ';
+          document.getElementById('loginError').textContent = 'เกิดข้อผิดพลาด: ' + (err.message || err);
+        });
+    }
+  </script>
+</body>
+</html>

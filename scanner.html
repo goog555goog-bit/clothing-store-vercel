@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+  <title>QR Scanner | EMETIX STORE</title>
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --primary: #6366f1;
+      --accent: #10b981;
+      --danger: #ef4444;
+      --text: #f8fafc;
+      --text-dim: #94a3b8;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      padding: 1.5rem;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.03);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .scanner-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      width: 100%;
+      max-height: 50vh;
+    }
+
+    #reader {
+      width: 100%;
+      height: 100%;
+    }
+
+    .btn {
+      padding: 1rem 1.5rem;
+      border: none;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+      width: 100%;
+    }
+
+    .btn-accent { background: var(--accent); color: white; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-outline { background: transparent; border: 2px solid var(--text-dim); color: var(--text-dim); }
+    .btn:active { transform: scale(0.98); opacity: 0.9; }
+
+    #status {
+      text-align: center;
+      padding: 0.75rem;
+      font-size: 0.85rem;
+      color: var(--text-dim);
+    }
+
+    .action-area {
+      width: 100%;
+      max-width: 400px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      padding: 1.5rem 0;
+    }
+
+    .photo-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+
+    .info-text {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="header">
+    <div style="font-weight:800; font-size:1.2rem; letter-spacing:-0.5px">Elite QR Scanner</div>
+    <div style="font-size:0.8rem; color:var(--text-dim)">สแกน QR/Barcode ด้วยกล้องถ่ายรูป</div>
+  </div>
+
+  <!-- Hidden mount point required for html5-qrcode library to process image files -->
+  <div id="reader" style="display:none;"></div>
+
+  <!-- Photo Upload Section (always visible as primary option) -->
+  <div class="main-content" id="photo-section">
+    <div class="photo-icon">📸</div>
+    <h2 style="font-size:1.3rem; font-weight:800; margin-bottom:0.5rem; text-align:center">สแกนจากภาพถ่าย</h2>
+    <p class="info-text" style="text-align:center; margin-bottom:1.5rem">
+      กดปุ่มด้านล่างเพื่อ <strong>ถ่ายรูป QR Code / Barcode</strong> แล้วระบบจะอ่านรหัสให้อัตโนมัติครับ
+    </p>
+
+    <div class="action-area">
+      <button class="btn btn-accent" style="font-size:1.15rem; padding:1.25rem" onclick="document.getElementById('file-input').click()">
+        📸 เปิดกล้องถ่ายรูป
+      </button>
+      <button class="btn btn-primary" onclick="document.getElementById('gallery-input').click()">
+        🖼️ เลือกรูปจากคลัง
+      </button>
+    </div>
+
+    <div id="status">พร้อมสแกน — กดปุ่มด้านบนเพื่อเริ่มครับ</div>
+  </div>
+
+  <!-- Hidden file inputs -->
+  <input type="file" id="file-input" accept="image/*" capture="environment" style="display:none" onchange="handleFile(this)">
+  <input type="file" id="gallery-input" accept="image/*" style="display:none" onchange="handleFile(this)">
+
+  <script>
+    var html5QrCode = new Html5Qrcode("reader");
+
+    function handleFile(input) {
+      if (!input.files || input.files.length === 0) return;
+      document.getElementById('status').innerHTML = '⏳ กำลังวิเคราะห์รูปภาพ...';
+
+      html5QrCode.scanFile(input.files[0], true)
+        .then(function(decodedText) {
+          onScanSuccess(decodedText);
+        })
+        .catch(function(err) {
+          document.getElementById('status').innerHTML = 
+            '<span style="color:' + 'var(--danger)' + '">❌ ไม่พบ QR/Barcode ในรูปนี้</span><br>'
+            + '<span style="font-size:0.8rem">ลองถ่ายภาพให้ชัดและตรงจุดมากขึ้นครับ</span>';
+        });
+
+      // Reset input value so same file can be selected again
+      input.value = '';
+    }
+
+    function onScanSuccess(decodedText) {
+
+      document.getElementById('status').innerHTML = '<div style="background:rgba(16,185,129,0.1); padding:1rem; border-radius:12px; border:1px solid var(--accent);">'
+        + '<span style="color:var(--accent); font-weight:700">✅ สแกนสำเร็จ: ' + decodedText + '</span>'
+        + '<br><span style="font-size:0.85rem; color:var(--text-dim); margin-top:0.5rem; display:block">กำลังส่งข้อมูลกลับไปยังหน้า Admin...</span>'
+        + '</div>';
+
+      // 💾 แทนที่ postMessage ด้วย localStorage ที่แน่นอนกว่าใน GAS
+      var scanData = {
+        text: decodedText,
+        timestamp: Date.now()
+      };
+      localStorage.setItem('_qr_scan_res', JSON.stringify(scanData));
+
+      // ส่ง postMessage สำรองเผื่อไว้ (แต่อาจถูกบล็อก)
+      if (window.opener) {
+        try { window.opener.postMessage({ type: 'QR_SCAN_RESULT', text: decodedText }, "*"); } catch(e) {}
+      }
+
+      setTimeout(function() {
+        document.getElementById('status').innerHTML += '<br><p style="font-size:0.8rem; color:var(--accent)">ส่งข้อมูลเรียบร้อย! ปิดหน้านี้ได้เลยครับ</p>';
+        window.close();
+      }, 1500);
+    }
+  </script>
+</body>
+
+</html>
