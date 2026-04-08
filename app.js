@@ -14,8 +14,53 @@ var currentView = 'store';  // store | orders | substock
 window.onload = function() {
   initDarkMode();
   checkAuth();
-  initCartSwipe(); // attach swipe after DOM is ready
+  initCartSwipe();
+  initMouseGlow();
 };
+
+function initMouseGlow() {
+  document.addEventListener('mousemove', function(e) {
+    var cards = document.querySelectorAll('.mouse-glow-card');
+    cards.forEach(function(card) {
+      if (!card.matches(':hover')) return;
+      var rect = card.getBoundingClientRect();
+      var x = e.clientX - rect.left;
+      var y = e.clientY - rect.top;
+      card.style.setProperty('--x', x + 'px');
+      card.style.setProperty('--y', y + 'px');
+    });
+  });
+}
+
+function triggerConfetti() {
+  const container = document.body;
+  const colors = ['#fbbf24', '#fff', '#fbbf24', '#f59e0b', '#d97706'];
+  for (let i = 0; i < 100; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.left = Math.random() * 100 + 'vw';
+    c.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+    c.style.transform = `rotate(${Math.random() * 360}deg)`;
+    c.style.width = Math.random() * 10 + 5 + 'px';
+    c.style.height = c.style.width;
+    container.appendChild(c);
+
+    const destX = (Math.random() - 0.5) * 200;
+    const duration = Math.random() * 2 + 3;
+    
+    c.animate([
+      { transform: `translate(0, 0) rotate(0deg)`, opacity: 1 },
+      { transform: `translate(${destX}px, 100vh) rotate(720deg)`, opacity: 0 }
+    ], {
+      duration: duration * 1000,
+      easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+      fill: 'forwards'
+    });
+    
+    setTimeout(() => c.remove(), duration * 1000);
+  }
+}
+
 
 function initDarkMode() {
   var isDark = localStorage.getItem('darkMode') === 'true';
@@ -1039,10 +1084,29 @@ function showToast(msg, type) {
   if (!container) return;
   var t = document.createElement('div');
   t.className = 'toast ' + (type || 'success');
-  t.textContent = msg;
+  
+  var iconMap = {
+    'success': 'check-circle',
+    'error': 'alert-circle',
+    'warning': 'alert-triangle',
+    'info': 'info'
+  };
+  var icon = iconMap[type] || 'info';
+  
+  t.innerHTML = '<div style="display:flex;align-items:center;gap:0.75rem">'
+    + '<i data-lucide="' + icon + '" style="width:18px;height:18px"></i>'
+    + '<span>' + msg + '</span>'
+    + '</div>';
+    
   container.appendChild(t);
-  setTimeout(function() { t.remove(); }, 4000);
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+  
+  setTimeout(function() {
+    t.classList.add('fade-out');
+    setTimeout(function() { t.remove(); }, 500);
+  }, 4000);
 }
+
 
 // ─── ORDERS FILTER ────────────────────────────────────────
 
@@ -1098,8 +1162,10 @@ function confirmCheckout() {
   API.createRequest(payload)
     .then(function(res) {
       closeModal('checkoutModal');
+      triggerConfetti();
       showToast('ส่งคำขอเบิกเรียบร้อย รหัส: ' + res.requestId, 'success');
       Cart.clear();
+
       toggleDrawer('cartDrawer');
       if (typeof loadMyOrders === 'function') loadMyOrders();
     })

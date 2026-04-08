@@ -242,8 +242,9 @@
       btn.innerHTML = '<div class="spinner"></div>';
 
       var promise = pendingDecision.action === 'approve'
-        ? API.approveOrder(pendingDecision.orderId, currentUser.employeeId, comment)
-        : API.rejectOrder(pendingDecision.orderId, currentUser.employeeId, comment);
+        ? API.approveRequest(pendingDecision.orderId, comment)
+        : API.rejectRequest(pendingDecision.orderId, comment);
+
 
       promise.then(function(res) {
         showToast(res.message || (res.success ? 'สำเร็จ' : res.error), res.success ? 'success' : 'error');

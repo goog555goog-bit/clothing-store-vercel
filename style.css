@@ -727,8 +727,131 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   animation: blink 1s infinite;
 }
 
-@keyframes blink {
-  0% { opacity: 1; }
-  50% { opacity: 0.4; }
-  100% { opacity: 1; }
+/* ─── Premium UX Enhancements ─────────────────────── */
+.mouse-glow-card {
+  position: relative;
+  overflow: hidden;
+}
+.mouse-glow-card::before {
+  content: "";
+  position: absolute;
+  top: var(--y, 0);
+  left: var(--x, 0);
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(251, 191, 36, 0.08) 0%, transparent 70%);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 0;
+  transition: opacity 0.5s;
+  opacity: 0;
+}
+.mouse-glow-card:hover::before {
+  opacity: 1;
+}
+
+/* Sparkline Micro-charts */
+.sparkline-container {
+  height: 40px;
+  width: 100%;
+  margin-top: 5px;
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+}
+.sparkline-bar {
+  flex: 1;
+  background: var(--primary);
+  opacity: 0.2;
+  border-radius: 2px 2px 0 0;
+  transition: height 1s ease-out, opacity 0.3s;
+}
+.stat-card:hover .sparkline-bar {
+  opacity: 0.5;
+}
+
+/* Confetti Particles */
+.confetti {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  background-color: var(--primary);
+  top: -10px;
+  z-index: 9999;
+  pointer-events: none;
+  border-radius: 2px;
+}
+
+/* Smoother Transitions */
+.view-section {
+  transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.view-section:not(.active) {
+  transform: translateY(10px);
+}
+
+/* Advanced Skeletons */
+.skeleton-circle { width: 40px; height: 40px; border-radius: 50%; }
+.skeleton-pill { height: 30px; border-radius: 99px; width: 80px; }
+
+/* Dashboard Card Enhancements */
+.db-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.db-card-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: #fff;
+}
+
+.btn-pill {
+  border-radius: 99px;
+  padding: 0.4rem 1.2rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+/* Custom Scrollbar for Premium Feel */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 10px;
+  border: 2px solid var(--bg);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text3);
+}
+
+/* Toast Progress Bar */
+.toast {
+  position: relative;
+  overflow: hidden;
+}
+.toast::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  background: rgba(255,255,255,0.2);
+  transform-origin: left;
+  animation: toastProgress 4s linear forwards;
+}
+@keyframes toastProgress {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
 }

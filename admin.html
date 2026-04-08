@@ -1122,9 +1122,23 @@
       });
     }
     function statCard(iconName, label, value, color) {
-      return '<div class="stat-card"><div class="stat-label"><i data-lucide="' + iconName + '"></i> ' + label + '</div>'
-        + '<div class="stat-value" ' + (color ? 'style="color:var(--' + color + ')"' : '') + '>' + value + '</div></div>';
+      // Create virtual sparkline bars
+      var bars = '';
+      for (var i = 0; i < 15; i++) {
+        var h = Math.floor(Math.random() * 80) + 20; 
+        bars += '<div class="sparkline-bar" style="height:' + h + '%"></div>';
+      }
+
+      var colorStyle = color ? 'style="color:var(--' + color + ')"' : '';
+      var activeClass = (color === 'danger' || color === 'warning') ? 'active' : '';
+
+      return '<div class="stat-card mouse-glow-card">'
+        + '<div class="stat-label"><i data-lucide="' + iconName + '"></i> ' + label + '</div>'
+        + '<div class="stat-value" ' + colorStyle + '>' + value + '</div>'
+        + '<div class="sparkline-container">' + bars + '</div>'
+        + '</div>';
     }
+
 
     // ─── PRODUCTS ─────────────────────────────────────────
     // ─── PAGINATION HELPERS ───────────────────────────────
@@ -1529,11 +1543,13 @@
 
       showToast('กำลังบันทึก...', 'info');
       API.signForReceipt(currentSigningRequestId, signatureCanvas.toDataURL('image/png')).then(function(res) {
-        showToast('บันทึกการรับของเรียบร้อย', 'success');
+        showToast('✅ บันทึกการรับของเรียบร้อย', 'success');
+        if (typeof triggerConfetti === 'function') triggerConfetti();
         closeModal('orderDetailModal');
         loadAdminOrders();
       }).catch(function(err) { showToast('ข้อผิดพลาด: ' + err, 'error'); });
     }
+
 
 
     var currentProcessingOrderId = null;
@@ -1581,9 +1597,11 @@
       requestPromise.then(function(res) {
         if (res.success) {
           showToast('✅ ดำเนินการ ' + (action === 'approve' ? 'อนุมัติ' : 'ปฏิเสธ') + ' เรียบร้อย', 'success');
+          if (action === 'approve' && typeof triggerConfetti === 'function') triggerConfetti();
           closeApprovalModal();
           loadAdminOrders();
-          loadDashboard(); // Refresh stats
+          loadDashboard(); 
+
         } else {
           showToast('❌ ' + res.message, 'error');
         }
