@@ -60,6 +60,9 @@
         <button id="mgrPaneBtn" class="btn btn-warning btn-sm hidden" onclick="navigateTo('manager.html')">
           <i data-lucide="scale"></i> <span class="hide-mobile">ผู้อนุมัติ</span>
         </button>
+        <button id="substockBtn" class="btn btn-primary btn-sm hidden" onclick="switchView('substock')">
+          <i data-lucide="package-search"></i> <span class="hide-mobile">คลังย่อย</span>
+        </button>
         <button id="loginBtn" class="btn btn-outline btn-sm" onclick="navigateTo('login.html')">
           <i data-lucide="log-in" style="width:15px;height:15px;"></i> <span>เข้าสู่ระบบ</span>
         </button>
@@ -330,6 +333,18 @@
           <input type="text" id="actionModalInput" class="form-input" autocomplete="off">
         </div>
 
+        <div id="actionModalBranchWrap" class="form-group hidden" style="position:relative;">
+          <label class="form-label">สาขา/หน่วยงาน (Search)</label>
+          <div class="search-box glass" style="margin-bottom:0;">
+            <i data-lucide="map-pin" style="width:16px;height:16px;color:var(--primary);margin-left:0.75rem;"></i>
+            <input type="text" id="actionModalBranch" class="form-input" placeholder="ค้นหาสาขา..." 
+              autocomplete="off" oninput="handleBranchSearch(this.value)"
+              style="border:none;background:transparent;padding-left:0.5rem;">
+          </div>
+          <div id="branchSuggestions" class="search-suggestions-dropdown" style="top:100%; width:100%;"></div>
+        </div>
+
+
         <div class="form-group">
           <label class="form-label">จำนวน</label>
           <div class="qty-control"
@@ -375,7 +390,7 @@
       <i data-lucide="clipboard-list"></i>
       <span>รายการ</span>
     </button>
-    <button class="mobile-nav-item main-tab" data-view="substock" onclick="switchView('substock')">
+    <button id="substockMob" class="mobile-nav-item main-tab hidden" data-view="substock" onclick="switchView('substock')">
       <i data-lucide="package-search"></i>
       <span>คลังย่อย</span>
     </button>

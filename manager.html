@@ -9,31 +9,28 @@
   <link rel="stylesheet" href="style.css">
   <script src="api.js"></script>
   <script>
-    function mgrLogout() {
-      localStorage.removeItem('_user');
-      localStorage.removeItem('_tok');
-      navigateTo('login.html');
-    }
     function refreshIcons() { if (typeof lucide !== 'undefined') lucide.createIcons(); }
     function loadAuditLogs() { console.info('Audit Logs not available in Manager view'); }
   </script>
 </head>
 <body>
 
-  <header class="app-header glass" style="border-bottom: var(--glass-border); padding: 1.25rem 0;">
-    <div class="container" style="display:flex;align-items:center;justify-content:space-between">
-      <div class="logo" onclick="navigateTo(scriptUrl)" style="gap: 0.75rem; cursor: pointer;">
-        <div class="logo-icon" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark)); border: 1px solid rgba(251, 191, 36, 0.4);"><i data-lucide="shield-check" style="color:#000;width:18px;height:18px"></i></div>
-        <span style="font-weight: 800; letter-spacing: -1px; font-size: 1.3rem; color: #fff;">EMETIX <span style="font-weight: 300; opacity: 0.6; color: var(--primary);">MANAGER</span></span>
+  <header class="app-header">
+    <div class="container header-container">
+      <div class="logo" onclick="navigateTo(scriptUrl)">
+        <div class="logo-icon"><i data-lucide="shield-check"></i></div>
+        <span style="font-size:1.35rem;font-weight:800;letter-spacing:-1px;color:#fff;">EMETIX <span
+            style="font-weight:300;opacity:0.6;color:var(--primary);">MANAGER</span></span>
       </div>
-      <div class="nav-actions" style="display:flex;gap:0.75rem;align-items:center">
-        <div id="mgrName" style="color:var(--text2); font-weight: 500; font-size: 0.9rem; background: var(--bg2); padding: 0.4rem 1rem; border-radius: 99px;"></div>
-        <button class="btn btn-ghost btn-sm" onclick="navigateTo(scriptUrl)"><i data-lucide="shopping-cart"></i> <span class="hide-mobile">ไปที่ร้านค้า</span></button>
+      <div class="nav-actions">
+        <div id="mgrName" class="hide-mobile" style="color:var(--text2); font-weight: 500; font-size: 0.9rem; background: var(--surface); padding: 0.4rem 1rem; border-radius: 99px; border: 1px solid var(--border);"></div>
+        <button class="btn btn-ghost btn-sm" onclick="navigateTo(scriptUrl)"><i data-lucide="shopping-bag"></i> <span class="hide-mobile">หน้าร้าน</span></button>
         <button id="adminPaneBtn" class="btn btn-accent btn-sm hidden" onclick="navigateTo(scriptUrl + '?page=admin')"><i data-lucide="shield-check"></i> แอดมิน</button>
-        <button class="btn btn-outline btn-sm" onclick="mgrLogout()" style="color: var(--danger); border-color: rgba(224, 122, 95, 0.2);"><i data-lucide="log-out"></i></button>
+        <button class="btn btn-outline btn-sm" onclick="mgrLogout()" style="color: var(--danger); border-color: rgba(239, 68, 68, 0.2);"><i data-lucide="log-out"></i></button>
       </div>
     </div>
   </header>
+
 
   <div class="container" style="padding:1.5rem 0">
     <h2 style="font-size:1.3rem;font-weight:700;margin-bottom:1.5rem;display:flex;align-items:center;gap:0.5rem"><i data-lucide="clipboard-list"></i> ใบเบิกรออนุมัติ</h2>
@@ -162,7 +159,9 @@
     }
 
     function loadPending() {
-      document.getElementById('pendingList').innerHTML = '<div class="text-center" style="padding:3rem"><div class="spinner"></div></div>';
+      var list = document.getElementById('pendingList');
+      list.innerHTML = Array(3).fill('<div class="skeleton-card skeleton" style="border-radius:var(--radius);height:180px;margin-bottom:1rem"></div>').join('');
+
 
       API.getPendingApprovals(currentUser.employeeId).then(function(res) {
         var list = document.getElementById('pendingList');
@@ -261,10 +260,19 @@
       var container = document.getElementById('toastContainer');
       var t = document.createElement('div');
       t.className = 'toast ' + (type || 'success');
-      t.textContent = msg;
+      
+      var icon = 'check-circle';
+      if(type === 'error') icon = 'alert-circle';
+      if(type === 'warning') icon = 'alert-triangle';
+      
+      t.innerHTML = '<i data-lucide="' + icon + '" style="width:18px;height:18px"></i>'
+        + '<span>' + msg + '</span>';
+        
       container.appendChild(t);
+      refreshIcons();
       setTimeout(function() { t.remove(); }, 4000);
     }
+
   </script>
 
   <!-- Back to Top Button -->

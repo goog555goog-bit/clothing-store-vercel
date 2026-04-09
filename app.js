@@ -6,6 +6,8 @@
 var currentUser = null;
 var allProducts = [];
 var allCategories = [];
+var allBranches = []; 
+var myOrdersCache = null;
 var currentCategory = 'all';
 var currentView = 'store';  // store | orders | substock
 
@@ -142,10 +144,12 @@ function updateUserUI() {
     
     // แสดงปุ่มคลังย่อยสำหรับ FC/Technician/Admin
     var substockBtn = document.getElementById('substockBtn');
-    if (substockBtn) {
-      var allowed = ['fc', 'technician', 'hr'];
-      if (allowed.indexOf(currentUser.role) !== -1) substockBtn.classList.remove('hidden');
-      else substockBtn.classList.add('hidden');
+    var substockMob = document.querySelector('.mobile-nav-item[data-view="substock"]');
+    if (substockBtn || substockMob) {
+      var allowed = ['fc', 'technician', 'hr', 'admin', 'superadmin'];
+      var isAllowed = allowed.indexOf(currentUser.role) !== -1;
+      if (substockBtn) substockBtn.classList.toggle('hidden', !isAllowed);
+      if (substockMob) substockMob.classList.toggle('hidden', !isAllowed);
     }
 
     // ปุ่ม Admin
@@ -275,19 +279,49 @@ function loadStorefrontData() {
       allCategories = res.categories || [];
       renderCategories();
       renderProductGrid();
+      
+      // Load Branches/Departments for Sub-Stock Usage
+      API.getReportData('Departments').then(function(r) {
+        if (r.success) allBranches = r.data || [];
+      });
+
     }
   }).catch(function(err) {
     showToast('โหลดข้อมูลไม่สำเร็จ: ' + err, 'error');
   });
 }
 
-function handleSearchInput(val) {
+// Global state for suggestion index
+var currentSuggestionIdx = -1;
+
+function handleSearchInput(val, e) {
   var dropdown = document.getElementById('searchSuggestions');
+  var input = document.getElementById('searchInput');
   if (!dropdown) return;
   
-  // Close if we lose focus on a container basis (handled by click listener)
-  // Show nothing if empty
+  // Handle Keyboard Navigation
+  if (e && (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter')) {
+    var items = dropdown.querySelectorAll('.suggestion-item');
+    if (items.length > 0) {
+      if (e.key === 'ArrowDown') {
+        currentSuggestionIdx = (currentSuggestionIdx + 1) % items.length;
+        updateSuggestionFocus(items);
+        e.preventDefault();
+      } else if (e.key === 'ArrowUp') {
+        currentSuggestionIdx = (currentSuggestionIdx - 1 + items.length) % items.length;
+        updateSuggestionFocus(items);
+        e.preventDefault();
+      } else if (e.key === 'Enter' && currentSuggestionIdx > -1) {
+        items[currentSuggestionIdx].click();
+        e.preventDefault();
+      }
+      return;
+    }
+  }
+
   var q = (val || '').toLowerCase().trim();
+  currentSuggestionIdx = -1; 
+
   if (!q) {
     dropdown.classList.remove('active');
     return;
@@ -308,10 +342,9 @@ function handleSearchInput(val) {
   var headerIcon = q ? 'search' : 'star';
   var headerHtml = '<div class="suggestion-header"><i data-lucide="' + headerIcon + '"></i><span>' + headerText + '</span></div>';
   
-  dropdown.innerHTML = headerHtml + matches.map(function(p) {
+  dropdown.innerHTML = headerHtml + matches.map(function(p, i) {
     var name = (p.name || '').toString();
     var productId = (p.productId || '').toString();
-    
     var displayName = name;
     var displayId = productId;
     
@@ -322,34 +355,70 @@ function handleSearchInput(val) {
         displayId = productId.replace(regex, '<span style="color:var(--primary); font-weight:800">$1</span>');
       } catch(e) {}
     }
-    
-    var escapedName = name.replace(/'/g, "\\'").replace(/"/g, "&quot;");
-    
-    return '<div class="suggestion-item" onclick="selectSuggestion(\'' + escapedName + '\')">' + 
-           '<div style="display:flex; justify-content:space-between; align-items:center; width:100%">' +
-           '<span style="font-weight:600">' + displayName + '</span>' +
-           '<span class="sku-pill">' + displayId + '</span>' +
-           '</div></div>';
+
+    return '<div class="suggestion-item" data-index="' + i + '" onclick="selectSuggestion(\'' + productId + '\')">'
+      + '<i data-lucide="package" style="width:14px;height:14px;opacity:0.6"></i>'
+      + '<span>' + displayName + '</span>'
+      + '<small style="margin-left:auto;opacity:0.5">' + displayId + '</small>'
+      + '</div>';
   }).join('');
   
   dropdown.classList.add('active');
-  if (window.lucide) lucide.createIcons();
+  refreshIcons();
 }
 
-function selectSuggestion(name) {
-  var input = document.getElementById('searchInput');
-  var typeSelect = document.getElementById('searchType');
-  
-  if (input) {
-    input.value = name;
-    // Force search type to 'name' or 'all' to ensure the product appears
-    if (typeSelect && typeSelect.value !== 'all') {
-      typeSelect.value = 'name';
-    }
+
+function updateSuggestionFocus(items) {
+  items.forEach(function(item, i) {
+    item.classList.toggle('focused', i === currentSuggestionIdx);
+    if (i === currentSuggestionIdx) item.scrollIntoView({ block: 'nearest' });
+  });
+}
+
+function selectSuggestion(pid) {
+  var p = allProducts.find(function(x) { return String(x.productId) === String(pid); });
+  if (p) {
+    document.getElementById('searchInput').value = p.name;
+    document.getElementById('searchSuggestions').classList.remove('active');
     renderProductGrid();
   }
+}
+
+// ─── BRANCH SEARCH LOGIC ──────────────────────────────────────
+
+function handleBranchSearch(val) {
+  var dropdown = document.getElementById('branchSuggestions');
+  if (!dropdown) return;
   
-  var dropdown = document.getElementById('searchSuggestions');
+  var q = (val || '').toLowerCase().trim();
+  if (!q) {
+    dropdown.classList.remove('active');
+    return;
+  }
+  
+  var matches = allBranches.filter(function(b) {
+    return (b.name || b).toLowerCase().indexOf(q) !== -1;
+  }).slice(0, 5);
+  
+  if (matches.length > 0) {
+    dropdown.innerHTML = matches.map(function(b) {
+      var name = b.name || b;
+      return '<div class="suggestion-item" onclick="selectBranch(\'' + name.replace(/'/g, "\\'") + '\')">'
+        + '<i data-lucide="map-pin" style="width:14px;height:14px;opacity:0.6"></i>'
+        + '<span>' + name + '</span>'
+        + '</div>';
+    }).join('');
+    dropdown.classList.add('active');
+    refreshIcons();
+  } else {
+    dropdown.classList.remove('active');
+  }
+}
+
+function selectBranch(name) {
+  var input = document.getElementById('actionModalBranch');
+  if (input) input.value = name;
+  var dropdown = document.getElementById('branchSuggestions');
   if (dropdown) dropdown.classList.remove('active');
 }
 
@@ -706,8 +775,6 @@ function animateFlyToCart(e, imgUrl) {
 }
 
 // ─── MY ORDERS ────────────────────────────────────────────
-
-var myOrdersCache = null;
 function loadMyOrders() {
   var list = document.getElementById('myOrdersList');
   if (!list) return;
@@ -1002,12 +1069,17 @@ function openActionModal(action, productId, productName, maxQty) {
   qtyEl.value = '1';
   qtyEl.max = maxQty;
   inputWrap.classList.add('hidden');
+  document.getElementById('actionModalBranchWrap').classList.add('hidden');
   inputEl.value = '';
+  document.getElementById('actionModalBranch').value = '';
+
   
   if (action === 'use') {
     mTitle.innerHTML = '<i data-lucide="sparkles" style="width:18px;height:18px;color:var(--primary);"></i> นำไปใช้งานจริง';
     mDesc.innerHTML = 'คุณกำลังจะตัดยอด <b>' + productName + '</b> ออกจากคลังย่อยเพื่อนำไปใช้งาน';
+    document.getElementById('actionModalBranchWrap').classList.remove('hidden');
   } else if (action === 'transfer') {
+
     mTitle.innerHTML = '<i data-lucide="repeat" style="width:18px;height:18px;color:var(--primary);"></i> โอนให้เพื่อนร่วมงาน';
     mDesc.innerHTML = 'โอน <b>' + productName + '</b> ให้พนักงานท่านอื่น';
     inputWrap.classList.remove('hidden');
@@ -1039,8 +1111,11 @@ function executeSubStockAction() {
   var targetData = null;
   
   if (_activeAction.type === 'use') {
-    promise = API.deductSubStock(_activeAction.productId, qty);
+    var branch = document.getElementById('actionModalBranch').value.trim();
+    if (!branch) { btn.disabled=false; btn.innerHTML='ยืนยัน'; showToast('กรุณาระบุสาขาหรือหน่วยงาน', 'warning'); return; }
+    promise = API.deductSubStock(_activeAction.productId, qty, branch);
   } else if (_activeAction.type === 'transfer') {
+
     var toId = document.getElementById('actionModalInput').value.trim();
     if (!toId) { btn.disabled=false; btn.innerHTML='ยืนยัน'; showToast('กรุณาระบุรหัสพนักงานเป้าหมาย', 'warning'); return; }
     promise = API.transferSubStock({ toEmployeeId: toId, productId: _activeAction.productId, qty: qty });
@@ -1204,4 +1279,4 @@ function initCartSwipe() {
   });
 }
 
-var scriptUrl = '<?= scriptUrl ?>';
+var scriptUrl = 'index.html';

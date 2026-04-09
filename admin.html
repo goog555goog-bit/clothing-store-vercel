@@ -33,29 +33,22 @@
 
 <body>
 
-  <header class="app-header glass" style="border-bottom: var(--glass-border); padding: 1.25rem 0;">
-    <div class="container" style="display:flex;align-items:center;justify-content:space-between">
-      <div class="logo" onclick="navigateTo(scriptUrl)" style="gap: 0.75rem; cursor: pointer;">
-        <div class="logo-icon"
-          style="background: linear-gradient(135deg, var(--primary), var(--primary-dark)); box-shadow: 0 8px 16px rgba(251, 191, 36, 0.3); border-radius: 12px; border: 1px solid rgba(251, 191, 36, 0.4);">
-          <i data-lucide="shield-check" style="width:18px;height:18px;color:#000;stroke-width:2.5px"></i>
-        </div>
-        <span style="font-weight: 800; letter-spacing: -1px; font-size: 1.3rem; color: #fff;">EMETIX <span
-            style="font-weight: 300; opacity: 0.6; color: var(--primary);">ADMIN</span></span>
+  <header class="app-header">
+    <div class="container header-container">
+      <div class="logo" onclick="navigateTo(scriptUrl)">
+        <div class="logo-icon"><i data-lucide="shield-check"></i></div>
+        <span style="font-size:1.35rem;font-weight:800;letter-spacing:-1px;color:#fff;">EMETIX <span
+            style="font-weight:300;opacity:0.6;color:var(--primary);">ADMIN</span></span>
       </div>
-      <div class="nav-actions" style="display:flex;gap:0.75rem;align-items:center">
-        <div id="adminName" class="hide-mobile"
-          style="color:var(--text2); font-weight: 500; font-size: 0.9rem; background: var(--bg2); padding: 0.4rem 1rem; border-radius: 99px;">
-        </div>
-        <button class="btn btn-ghost btn-sm" onclick="navigateTo(scriptUrl)"><i data-lucide="external-link"></i> <span
-            class="hide-mobile">ไปที่ร้านค้า</span></button>
-        <button id="mgrPaneBtn" class="btn btn-warning btn-sm hidden hide-mobile"
-          onclick="navigateTo(scriptUrl + '?page=manager')"><i data-lucide="scale"></i> ผู้อนุมัติ</button>
-        <button class="btn btn-outline btn-sm" onclick="adminLogout()"
-          style="color: var(--danger); border-color: rgba(224, 122, 95, 0.2);"><i data-lucide="log-out"></i></button>
+      <div class="nav-actions">
+        <div id="adminName" class="hide-mobile" style="color:var(--text2); font-weight: 500; font-size: 0.9rem; background: var(--surface); padding: 0.4rem 1rem; border-radius: 99px; border: 1px solid var(--border);"></div>
+        <button class="btn btn-ghost btn-sm" onclick="navigateTo(scriptUrl)"><i data-lucide="shopping-bag"></i> <span class="hide-mobile">หน้าร้าน</span></button>
+        <button id="mgrPaneBtn" class="btn btn-warning btn-sm hidden hide-mobile" onclick="navigateTo(scriptUrl + '?page=manager')"><i data-lucide="scale"></i> ผู้อนุมัติ</button>
+        <button class="btn btn-outline btn-sm" onclick="adminLogout()" style="color: var(--danger); border-color: rgba(239, 68, 68, 0.2);"><i data-lucide="log-out"></i></button>
       </div>
     </div>
   </header>
+
 
   <div class="container" style="padding:1rem 0; margin-bottom: 80px;">
     <!-- Iframe Warning / Fullscreen Unlock -->
@@ -1067,12 +1060,19 @@
         }
         body.innerHTML = res.data.logs.slice(0, 8).map(function (l) {
           var time = l.timestamp ? String(l.timestamp).split(' ')[1].substring(0, 5) : '--:--';
+          var markerClass = 'status-dot';
+          if (l.action.indexOf('เบิก') !== -1) markerClass += ' info';
+          if (l.action.indexOf('อนุมัติ') !== -1) markerClass += ' success';
+          if (l.action.indexOf('ปฏิเสธ') !== -1) markerClass += ' danger';
+          if (l.action.indexOf('อัปเดต') !== -1) markerClass += ' warning';
+          
           return '<tr>'
             + '<td style="color:var(--text3);font-size:0.75rem">' + time + '</td>'
-            + '<td style="font-weight:500;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + l.action + '</td>'
+            + '<td style="font-weight:500;"><div class="flex items-center gap-2"><span class="' + markerClass + '"></span>' + l.action + '</div></td>'
             + '<td style="font-size:0.8rem">' + (l.user || 'SYSTEM') + '</td>'
             + '</tr>';
         }).join('');
+
       }).catch(function () {
         body.innerHTML = '<tr><td colspan="3" class="text-center" style="padding:1rem;color:var(--danger)">เกิดข้อผิดพลาด</td></tr>';
       });
@@ -2138,6 +2138,56 @@
         input.value = '';
     }
 
+    function openScanActionModal(prod, title, desc) {
+      document.getElementById('scanActionTitle').textContent = title;
+      document.getElementById('sa-name').textContent = prod.name;
+      document.getElementById('sa-id').textContent = 'SKU: ' + (prod.productId || prod.id);
+      document.getElementById('sa-qty-input').value = '1';
+      
+      var btn = document.getElementById('sa-confirm-btn');
+      btn.onclick = function() {
+        var qty = parseInt(document.getElementById('sa-qty-input').value);
+        if (qty > 0) {
+          performScanAction(prod.productId || prod.id, qty);
+        }
+      };
+      
+      document.getElementById('scanActionModal').classList.add('open');
+      refreshIcons();
+    }
+
+    function performScanAction(id, qty) {
+      var mode = currentScanMode; // 'deduct' | 'receive' | 'sub'
+      showToast('กำลังดำเนินการ...', 'info');
+      
+      var promise;
+      if (mode === 'deduct') {
+        promise = API.updateStock(id, -qty, currentUser.employeeId);
+      } else if (mode === 'receive') {
+        promise = API.updateStock(id, qty, currentUser.employeeId);
+      } else if (mode === 'sub') {
+        // รับเข้าคลังย่อย (FC)
+        promise = API.addToSubStock({ productId: id, qty: qty });
+      }
+
+      if (promise) {
+        promise.then(function(res) {
+          if (res.success) {
+            showToast('✅ ดำเนินการสำเร็จ: ' + (res.message || ''), 'success');
+            closeModal('scanActionModal');
+            loadInventory();
+            loadDashboard();
+          } else {
+            showToast('❌ ' + res.message, 'error');
+          }
+        }).catch(function(err) {
+          showToast('❌ ข้อผิดพลาด: ' + err, 'error');
+        }).finally(function() {
+          isScannerBusy = false;
+        });
+      }
+    }
+
     function processScanResult(text) {
       if (!text) { isScannerBusy = false; return; }
 
@@ -2158,17 +2208,8 @@
         }
 
         // Use the existing action modal to confirm quantity
-        if (typeof openScanActionModal === 'function') {
-          openScanActionModal(prod, config.title, config.desc);
-        } else {
-           // Fallback prompt if modal missing
-           var qty = prompt(config.title + '\nสินค้า: ' + prod.name + '\n' + config.desc, '1');
-           if (qty && !isNaN(qty) && parseInt(qty) > 0) {
-             performScanAction(prod.productId || prod.id, parseInt(qty));
-           } else {
-             isScannerBusy = false;
-           }
-        }
+        openScanActionModal(prod, config.title, config.desc);
+
       }).catch(function(err) {
         showToast('เกิดข้อผิดพลาดในการโหลดข้อมูล', 'error');
         isScannerBusy = false;

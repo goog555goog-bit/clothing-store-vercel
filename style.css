@@ -42,6 +42,17 @@
   --glass: rgba(0,0,0,0.8);
 }
 
+
+
+.hover-lift {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+}
+.hover-lift:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+}
+
+
 /* ─── Reset & Base ─────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 html { scroll-behavior: smooth; }
@@ -525,8 +536,9 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 
 /* ─── Global Loader ────────────────────────────────── */
 .global-loader {
-  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(5,5,16,0.85); backdrop-filter: blur(8px);
+  position: fixed; top: 0; left: 0; width: 100%;  height: 100%;
+  background: rgba(8, 8, 20, 0.95);
+  backdrop-filter: blur(8px);
   z-index: 9999; display: none; align-items: center; justify-content: center; flex-direction: column;
 }
 .global-loader.active { display: flex; }
@@ -591,6 +603,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   z-index: 2000; display: none; align-items: center; justify-content: center;
   opacity: 0; transition: opacity 0.3s;
 }
+
 .modal-overlay.open { display: flex; opacity: 1; }
 .modal {
   background: var(--surface); width: 95%; max-width: 600px; border-radius: var(--radius);
@@ -598,8 +611,16 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   transform: translateY(20px); transition: transform 0.3s cubic-bezier(0.23,1,0.32,1);
   max-height: 90vh; display: flex; flex-direction: column;
 }
-.modal-overlay.open .modal { transform: translateY(0); }
-.modal-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); }
+.modal-overlay.open .modal { transform: translateY(0); opacity: 1; }
+.modal-header { 
+  padding: 1.25rem 1.5rem; 
+  border-bottom: 1px solid var(--border); 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  background: linear-gradient(to right, rgba(251,191,36,0.05), transparent);
+}
+
 .modal-body { padding: 1.5rem; overflow-y: auto; flex: 1; }
 .modal-footer { padding: 1.25rem 1.5rem; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 0.75rem; background: rgba(255,255,255,0.02); }
 
@@ -854,4 +875,33 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 @keyframes toastProgress {
   from { transform: scaleX(1); }
   to { transform: scaleX(0); }
+}
+
+/* ─── Empty State Illustrations ──────────────────── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  color: var(--text3);
+}
+.empty-state i, .empty-state svg {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 1.5rem;
+  opacity: 0.2;
+  color: var(--primary);
+  filter: drop-shadow(0 0 10px rgba(251,191,36,0.1));
+}
+.empty-state p {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text2);
+  margin-bottom: 0.5rem;
+}
+.empty-state small {
+  font-size: 0.85rem;
+  max-width: 250px;
 }

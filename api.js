@@ -148,9 +148,14 @@ var API = (function () {
     getFilteredOrders: function (filters) { return this._call('getFilteredOrders', { filters: filters }); },
     receiveStock: function (data) { return this._call('receiveStock', data); },
     receiveSubStock: function (data) { return this._call('receiveSubStock', data); },
-    deductSubStock: function (productId, qty) { return this._call('deductSubStock', { productId: productId, qty: qty }); },
+    deductSubStock: function (productId, qty, branch) { return this._call('deductSubStock', { productId: productId, qty: qty, branch: branch }); },
+
     transferSubStock: function (data) { return this._call('transferSubStock', data); },
-    returnToMainStock: function (data) { return this._call('returnToMainStock', data); }
+    returnToMainStock: function (data) { return this._call('returnToMainStock', data); },
+    
+    // Aliases for better DX
+    receiveStock: function(id, qty) { return this.updateStock(id, qty); },
+    addToSubStock: function(data) { return this.receiveSubStock(data); }
   };
   
   window.API = apiObj;
