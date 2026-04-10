@@ -11,6 +11,18 @@
   <script>
     function refreshIcons() { if (typeof lucide !== 'undefined') lucide.createIcons(); }
     function loadAuditLogs() { console.info('Audit Logs not available in Manager view'); }
+    
+    function initDarkMode() {
+      var isDark = localStorage.getItem('darkMode') === 'true';
+      if (isDark) document.body.classList.add('dark-mode');
+      refreshIcons();
+    }
+    
+    function toggleDarkMode() {
+      var isDark = document.body.classList.toggle('dark-mode');
+      localStorage.setItem('darkMode', isDark);
+      refreshIcons();
+    }
   </script>
 </head>
 <body>
@@ -24,8 +36,11 @@
       </div>
       <div class="nav-actions">
         <div id="mgrName" class="hide-mobile" style="color:var(--text2); font-weight: 500; font-size: 0.9rem; background: var(--surface); padding: 0.4rem 1rem; border-radius: 99px; border: 1px solid var(--border);"></div>
+        <button class="btn btn-ghost btn-sm" onclick="toggleDarkMode()" id="darkModeBtn">
+          <i data-lucide="moon" id="darkModeIcon"></i>
+        </button>
         <button class="btn btn-ghost btn-sm" onclick="navigateTo(scriptUrl)"><i data-lucide="shopping-bag"></i> <span class="hide-mobile">หน้าร้าน</span></button>
-        <button id="adminPaneBtn" class="btn btn-accent btn-sm hidden" onclick="navigateTo(scriptUrl + '?page=admin')"><i data-lucide="shield-check"></i> แอดมิน</button>
+        <button id="adminPaneBtn" class="btn btn-accent btn-sm hidden" onclick="navigateTo('admin.html')"><i data-lucide="shield-check"></i> แอดมิน</button>
         <button class="btn btn-outline btn-sm" onclick="mgrLogout()" style="color: var(--danger); border-color: rgba(239, 68, 68, 0.2);"><i data-lucide="log-out"></i></button>
       </div>
     </div>
@@ -46,7 +61,7 @@
       <i data-lucide="clipboard-list"></i>
       <span>รออนุมัติ</span>
     </button>
-    <button id="mgrMobileAdmin" class="mobile-nav-item hidden" onclick="navigateTo(scriptUrl + '?page=admin')">
+    <button id="mgrMobileAdmin" class="mobile-nav-item hidden" onclick="navigateTo('admin.html')">
       <i data-lucide="shield-check"></i>
       <span>แอดมิน</span>
     </button>
@@ -106,6 +121,7 @@
     }
 
     window.onload = function() {
+      initDarkMode();
       if (typeof API !== 'undefined') {
         initManager();
       } else {
@@ -132,7 +148,7 @@
         document.getElementById('pendingList').innerHTML = '<div class="card text-center" style="padding:3rem">'
           + '<p style="color:var(--danger);font-size:1.1rem;display:flex;align-items:center;justify-content:center;gap:0.5rem"><i data-lucide="shield-alert"></i> ไม่มีสิทธิ์เข้าถึง</p>'
           + '<p style="color:var(--text3);margin-top:0.5rem">กรุณาเข้าสู่ระบบด้วยบัญชีผู้จัดการ</p>'
-          + '<button class="btn btn-primary" style="margin-top:1rem" onclick="window.top.location.href=scriptUrl+\'?page=login\'">เข้าสู่ระบบ</button></div>';
+          + '<button class="btn btn-primary" style="margin-top:1rem" onclick="navigateTo(\'login.html\')">เข้าสู่ระบบ</button></div>';
         refreshIcons();
         return;
       }
@@ -155,7 +171,7 @@
     function mgrLogout() {
       localStorage.removeItem('_user');
       localStorage.removeItem('_tok');
-      navigateTo(scriptUrl + '?page=login');
+      navigateTo('login.html');
     }
 
     function loadPending() {

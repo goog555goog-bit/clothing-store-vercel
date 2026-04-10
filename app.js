@@ -216,7 +216,12 @@ var Onboarding = {
   showStep: function() {
     var step = this.steps[this.currentStep];
     var targetEl = document.querySelector(step.target);
-    if (!targetEl) { this.next(); return; }
+    
+    // Skip if element doesn't exist or is hidden
+    if (!targetEl || targetEl.offsetParent === null) { 
+      this.next(); 
+      return; 
+    }
     
     this.cleanup();
     
@@ -300,7 +305,7 @@ function handleSearchInput(val, e) {
   if (!dropdown) return;
   
   // Handle Keyboard Navigation
-  if (e && (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter')) {
+  if (e && e.key && (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter')) {
     var items = dropdown.querySelectorAll('.suggestion-item');
     if (items.length > 0) {
       if (e.key === 'ArrowDown') {
@@ -465,7 +470,7 @@ function switchView(view) {
       if (gateModal) { gateModal.classList.add('open'); refreshIcons(); }
       // Show login state in orders area
       var list = document.getElementById('myOrdersList');
-      if (list) list.innerHTML = '<div class="empty-state"><i data-lucide="lock" style="width:48px;height:48px"></i><p>ต้องเข้าสู่ระบบ</p><button class="btn btn-primary btn-sm" style="margin-top:1rem" onclick="navigateTo(scriptUrl + \'?page=login\')">ไปหน้าเข้าสู่ระบบ</button></div>';
+      if (list) list.innerHTML = '<div class="empty-state"><i data-lucide="lock" style="width:48px;height:48px"></i><p>ต้องเข้าสู่ระบบ</p><button class="btn btn-primary btn-sm" style="margin-top:1rem" onclick="navigateTo(\'login.html\')">ไปหน้าเข้าสู่ระบบ</button></div>';
     } else {
       setTimeout(function() { loadMyOrders(); refreshIcons(); }, 10);
     }

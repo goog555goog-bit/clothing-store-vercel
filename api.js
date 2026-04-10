@@ -82,6 +82,7 @@ var API = (function () {
 
     // ─── AUTH & CORE ──────────────────────────────────────────
     login: function (employeeId) { return this._call('login', { employeeId: employeeId }); },
+    checkEmployee: function (employeeId) { return this._call('checkEmployee', { employeeId: employeeId }); },
     
     // ─── READ (Cached) ────────────────────────────────────────
     getProducts: function (filter) { return this._call('getProducts', { filter: filter }, true); },

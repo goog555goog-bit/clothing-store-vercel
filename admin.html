@@ -22,7 +22,6 @@
       window.open(url, '_top');
     }
     // Admin Safety placeholders
-    function adminNav() { console.warn('adminNav is not ready yet'); }
     function refreshIcons() { if (typeof lucide !== 'undefined') lucide.createIcons(); }
     function adminLogout() {
       localStorage.removeItem('_user');
@@ -43,7 +42,7 @@
       <div class="nav-actions">
         <div id="adminName" class="hide-mobile" style="color:var(--text2); font-weight: 500; font-size: 0.9rem; background: var(--surface); padding: 0.4rem 1rem; border-radius: 99px; border: 1px solid var(--border);"></div>
         <button class="btn btn-ghost btn-sm" onclick="navigateTo(scriptUrl)"><i data-lucide="shopping-bag"></i> <span class="hide-mobile">หน้าร้าน</span></button>
-        <button id="mgrPaneBtn" class="btn btn-warning btn-sm hidden hide-mobile" onclick="navigateTo(scriptUrl + '?page=manager')"><i data-lucide="scale"></i> ผู้อนุมัติ</button>
+        <button id="mgrPaneBtn" class="btn btn-warning btn-sm hidden hide-mobile" onclick="navigateTo('manager.html')"><i data-lucide="scale"></i> ผู้อนุมัติ</button>
         <button class="btn btn-outline btn-sm" onclick="adminLogout()" style="color: var(--danger); border-color: rgba(239, 68, 68, 0.2);"><i data-lucide="log-out"></i></button>
       </div>
     </div>
@@ -588,72 +587,6 @@
     </div>
   </div>
 
-  <!-- QR SCANNER MODAL (LIVE VIDEO MODAL) -->
-  <div id="scannerModal" class="modal-overlay" onclick="if(event.target===this) closeScanner()">
-    <div class="modal scanner-modal">
-      <div class="modal-header" style="border-bottom:none; padding-bottom:0">
-        <div style="font-weight:700; font-size:1.15rem; display:flex; align-items:center; gap:0.5rem">
-          <i data-lucide="qr-code" style="color:var(--primary)"></i> สแกนรหัสสินค้า
-        </div>
-        <button class="btn btn-ghost btn-sm" onclick="closeScanner()">✕</button>
-      </div>
-
-      <div class="modal-body" style="padding:1.25rem">
-        <!-- Mode Tabs -->
-        <div class="flex justify-center p-2 mb-4" style="background: rgba(255,255,255,0.03); border-radius:14px; border: 1px solid var(--border);">
-          <div class="btn-group" style="width:100%">
-            <button id="sm-deduct" class="btn btn-sm scanner-mode-btn active" onclick="setScanMode('deduct')">
-              <i data-lucide="log-out"></i> นำออก
-            </button>
-            <button id="sm-receive" class="btn btn-sm scanner-mode-btn" onclick="setScanMode('receive')">
-              <i data-lucide="log-in"></i> รับเข้า
-            </button>
-            <button id="sm-sub" class="btn btn-sm scanner-mode-btn" onclick="setScanMode('sub')">
-              <i data-lucide="package"></i> คลังย่อย
-            </button>
-          </div>
-        </div>
-
-        <!-- Scanner Viewport -->
-        <div id="scannerViewportWrap" class="scanner-viewport-container">
-          <div id="modal-scanner-v2"></div>
-          <div class="scanner-laser"></div>
-          <div class="scanner-guide"></div>
-          
-          <!-- Static Placeholder / Instruction Overlay -->
-          <div id="scannerPlaceholder" style="position:absolute; top:0; left:0; width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; background:rgba(0,0,0,0.4); text-align:center; padding:2rem; z-index:2">
-            <div style="width:64px; height:64px; background:rgba(251,191,36,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; margin-bottom:1rem">
-              <i data-lucide="camera" style="width:32px; height:32px; color:var(--primary)"></i>
-            </div>
-            <p style="font-size:0.95rem; font-weight:600; color:white; margin-bottom:0.5rem">พร้อมเปิดกล้องสแกนสด</p>
-            <p style="font-size:0.8rem; color:var(--text3)">ส่องกล้องไปที่รหัสเพื่ออ่านค่าอัตโนมัติ</p>
-          </div>
-        </div>
-
-        <div id="scannerStatusInfo" class="text-center" style="margin-bottom:1rem; font-size:0.85rem">
-          <span class="scanner-status-dot"></span> <span id="ssText" style="color:var(--text3)">โหมดประหยัดพลังงาน - กดปุ่มด้านล่างเพื่อเริ่ม</span>
-        </div>
-
-        <!-- Floating Controls -->
-        <div class="flex flex-col gap-2">
-            <button id="modalStartBtn" class="btn btn-primary btn-lg" onclick="startLiveScan()">
-                <i data-lucide="camera"></i> เริ่มเปิดกล้องวิดีโอสด
-            </button>
-            <div class="flex gap-2">
-                <button class="btn btn-outline flex-1" onclick="document.getElementById('modalFileFallback').click()">
-                    <i data-lucide="image"></i> เลือกจากภาพ
-                </button>
-                <button class="btn btn-outline flex-1" onclick="promptManualInput()">
-                    <i data-lucide="keyboard"></i> พิมพ์เอง
-                </button>
-            </div>
-        </div>
-      </div>
-      
-      <input type="file" id="modalFileFallback" accept="image/*" style="display:none" onchange="handleModalFile(this)">
-    </div>
-  </div>
-
   <!-- ORDER APPROVAL MODAL (Quick Decision) -->
   <div id="orderApprovalModal" class="modal-overlay" onclick="if(event.target===this) closeApprovalModal()">
     <div class="modal" style="max-width:500px">
@@ -881,7 +814,7 @@
       <i data-lucide="pie-chart" style="width:20px; height:20px"></i>
       <span>รายงาน</span>
     </button>
-    <button id="mgrMobileBtn" class="mobile-nav-item hidden" onclick="navigateTo(scriptUrl + '?page=manager')">
+    <button id="mgrMobileBtn" class="mobile-nav-item hidden" onclick="navigateTo('manager.html')">
       <i data-lucide="scale" style="width:20px; height:20px"></i>
       <span>ผู้อนุมัติ</span>
     </button>
@@ -944,7 +877,7 @@
       if (!currentUser || !currentUser.role) {
         document.querySelector('.container').innerHTML = '<div class="card text-center" style="padding:3rem;margin-top:2rem">'
           + '<p style="color:var(--danger);font-size:1.1rem">⛔ ไม่มีสิทธิ์เข้าถึงหน้าแอดมิน</p>'
-          + '<button class="btn btn-primary" style="margin-top:1rem" onclick="navigateTo(scriptUrl+\'?page=login\')">เข้าสู่ระบบ</button></div>';
+          + '<button class="btn btn-primary" style="margin-top:1rem" onclick="navigateTo(\'login.html\')">เข้าสู่ระบบ</button></div>';
         return;
       }
 
@@ -2009,37 +1942,6 @@
       }).catch(function (err) { showToast('เกิดข้อผิดพลาด: ' + err, 'error'); });
     }
 
-    // ─── IMAGE UPLOAD ─────────────────────────────────────
-    function handleImageUpload(input) {
-      var file = input.files[0];
-      if (!file) return;
-
-      var statusEl = document.getElementById('pf-upload-status');
-      var previewWrap = document.getElementById('pf-preview-wrap');
-      var previewImg = document.getElementById('pf-preview');
-      var imgInput = document.getElementById('pf-img');
-
-      statusEl.textContent = '⏳ กำลังอัปโหลด...';
-      previewWrap.style.display = 'flex';
-      previewImg.style.opacity = '0.5';
-
-      var reader = new FileReader();
-      reader.onload = function (e) {
-        var base64 = e.target.result;
-        API.uploadToDrive(base64, file.name).then(function (res) {
-          if (res.success) {
-            imgInput.value = res.directLink;
-            previewImg.src = res.directLink;
-            previewImg.style.opacity = '1';
-            statusEl.innerHTML = '<span style="color:var(--accent)">✅ อัปโหลดสำเร็จ!</span>';
-            showToast('อัปโหลดรูปภาพเรียบร้อย', 'success');
-          } else {
-            statusEl.innerHTML = '<span style="color:var(--danger)">❌ ' + res.message + '</span>';
-            showToast('อัปโหลดล้มเหลว', 'error');
-          }
-        });
-      };
-      reader.readAsDataURL(file);
     }
 
     // ─── INVENTORY ────────────────────────────────────────
@@ -2502,31 +2404,6 @@
 
 
 
-    // ─── SUB-STOCK VIEW ───────────────────────────────────
-    function showUserSubStock(empId, empName) {
-      API.getSubStock({ employeeId: empId }).then(function (res) {
-        var html = '<div class="card" style="margin-top:1rem"><h3 style="margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem"><i data-lucide="package"></i> สต็อกย่อยของ: ' + empName + '</h3>'
-          + '<table class="table-compact"><thead><tr><th>สินค้า</th><th>คงเหลือ</th><th>อัปเดตล่าสุด</th></tr></thead><tbody>';
-
-        if (!res.data || res.data.length === 0) {
-          html += '<tr><td colspan="3" style="text-align:center;padding:1rem;color:var(--text3)">ไม่มีสินค้าติดตัว</td></tr>';
-        } else {
-          html += res.data.map(function (s) {
-            return '<tr><td>' + s.productName + '</td><td style="font-weight:700">' + s.quantity + '</td><td style="font-size:0.75rem">' + s.lastUpdate + '</td></tr>';
-          }).join('');
-        }
-        html += '</tbody></table></div>';
-
-        var container = document.getElementById('p-employees');
-        var existing = document.getElementById('substock-view');
-        if (existing) existing.remove();
-
-        var div = document.createElement('div');
-        div.id = 'substock-view';
-        div.innerHTML = html + '<button class="btn btn-outline btn-sm w-full" style="margin-top:1rem" onclick="this.parentElement.remove()">ปิดหน้านี้</button>';
-        container.appendChild(div);
-        div.scrollIntoView({ behavior: 'smooth' });
-      });
     }
 
     // ─── SYSTEM SETTINGS LOGIC ───

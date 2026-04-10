@@ -30,8 +30,8 @@
         <div class="search-box glass">
           <i data-lucide="search" style="width:18px;height:18px;color:var(--text3);margin-left:1rem;"></i>
           <input id="searchInput" type="text" placeholder="ค้นหาสินค้า..." autocomplete="off"
-            onfocus="handleSearchInput(this.value)" onclick="handleSearchInput(this.value)"
-            oninput="handleSearchInput(this.value)" onkeyup="if(event.key==='Enter') renderProductGrid()"
+            onfocus="handleSearchInput(this.value, event)" onclick="handleSearchInput(this.value, event)"
+            oninput="handleSearchInput(this.value, event)" onkeyup="if(event.key==='Enter') renderProductGrid()"
             style="padding-left:0.5rem;background:transparent;border:none;height:100%;color:var(--text);min-width:80px;">
         </div>
         <div class="search-options hide-mobile">
@@ -59,6 +59,9 @@
         </button>
         <button id="mgrPaneBtn" class="btn btn-warning btn-sm hidden" onclick="navigateTo('manager.html')">
           <i data-lucide="scale"></i> <span class="hide-mobile">ผู้อนุมัติ</span>
+        </button>
+        <button id="ordersBtn" class="btn btn-ghost btn-sm hidden" onclick="switchView('orders')">
+          <i data-lucide="clipboard-list"></i> <span class="hide-mobile">รายการเบิก</span>
         </button>
         <button id="substockBtn" class="btn btn-primary btn-sm hidden" onclick="switchView('substock')">
           <i data-lucide="package-search"></i> <span class="hide-mobile">คลังย่อย</span>
@@ -90,7 +93,7 @@
       <div class="card glass mouse-glow-card"
         style="padding:0;min-height:200px;position:relative;overflow:hidden;display:flex;align-items:center;border:1px solid rgba(251,191,36,0.2);background:linear-gradient(135deg,#0a0a16,#12122b);">
 
-        <div style="flex:1;padding:1.75rem 2.5rem;z-index:5;position:relative;">
+        <div class="hero-content" style="flex:1;padding:1.75rem 2.5rem;z-index:5;position:relative;">
           <div
             style="display:inline-flex;align-items:center;gap:0.4rem;background:var(--glass-gold);color:var(--primary);padding:0.25rem 0.75rem;border-radius:99px;font-size:0.72rem;font-weight:700;margin-bottom:0.75rem;border:1px solid var(--glass-border);">
             <i data-lucide="sparkles" style="width:11px;height:11px;"></i> พรีเมียมสโตร์
@@ -106,7 +109,7 @@
             เริ่มเบิกพัสดุ <i data-lucide="arrow-down"></i>
           </button>
         </div>
-        <div style="position:absolute;right:-40px;top:0;bottom:0;width:50%;pointer-events:none;opacity:0.55;">
+        <div class="hero-image-wrap" style="position:absolute;right:-40px;top:0;bottom:0;width:50%;pointer-events:none;opacity:0.55;">
           <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&q=60&w=800"
             style="width:100%;height:100%;object-fit:cover;mask-image:linear-gradient(to left,black 40%,transparent);">
         </div>
