@@ -143,6 +143,7 @@ var API = (function () {
     getAdvancedDashboardData: function (filters) { return this._call('getAdvancedDashboardData', { filters: filters }, true); },
 
     getSubStock: function (data) { return this._call('getSubStock', data || {}); },
+    getTeams: function () { return this._call('getTeams', {}, true); },
     addEmployee: function (employee) { return this._call('addEmployee', { employee: employee }); },
     deleteEmployee: function (targetEmployeeId) { return this._call('deleteEmployee', { targetEmployeeId: targetEmployeeId }); },
     getFilteredOrders: function (filters) { return this._call('getFilteredOrders', { filters: filters }); },
@@ -152,10 +153,20 @@ var API = (function () {
 
     transferSubStock: function (data) { return this._call('transferSubStock', data); },
     returnToMainStock: function (data) { return this._call('returnToMainStock', data); },
+
+    manageTeam: function (op, data) { 
+      this.invalidateCache('getTeams');
+      return this._call('manageTeam', { op: op, data: data }); 
+    },
+    swapTeamLead: function (data) { 
+      this.invalidateCache('getTeams');
+      return this._call('swapTeamLead', data); 
+    },
     
     // Aliases for better DX
     receiveStock: function(id, qty) { return this.updateStock(id, qty); },
     addToSubStock: function(data) { return this.receiveSubStock(data); }
+
   };
   
   window.API = apiObj;

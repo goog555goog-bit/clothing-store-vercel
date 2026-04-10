@@ -1015,20 +1015,35 @@ function loadSubStock() {
       + '</div></div>').join('');
   }
 
-  API.getSubStock().then(function(res) {
+  var options = {};
+  if (currentUser && currentUser.teamId) {
+    options.teamId = currentUser.teamId;
+  }
+
+  API.getSubStock(options).then(function(res) {
     subStockCache = res.data;
-    renderSubStock(res.data);
+    renderSubStock(res.data, res.teamName);
   }).catch(function(err) {
     showToast('โหลดสต๊อกย่อยไม่สำเร็จ: ' + err, 'error');
   });
 }
 
-function renderSubStock(data) {
+function renderSubStock(data, teamName) {
   var grid = document.getElementById('subStockGrid');
   if (!grid) return;
 
+  var titleEl = document.querySelector('#view-substock h2');
+  if (titleEl) {
+    if (teamName) {
+      titleEl.innerHTML = '<i data-lucide="users" style="color:var(--primary)"></i> คลังย่อยทีม: ' + teamName;
+    } else {
+      titleEl.innerHTML = '<i data-lucide="package-search"></i> คลังย่อยของฉัน';
+    }
+    refreshIcons();
+  }
+
   if (!data || data.length === 0) {
-    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><p>ไม่มีสินค้าในคลังย่อยของคุณ</p></div>';
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><p>ไม่มีสินค้าในคลังย่อย' + (teamName ? 'ของทีม' : '') + '</p></div>';
     return;
   }
 
