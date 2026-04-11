@@ -180,8 +180,8 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   justify-content: space-between;
   gap: 0.5rem; overflow: visible; width: 100%;
 }
-/* ≤1024px: search bar drops to second row */
-@media (max-width: 1024px) {
+/* ≤1200px: search bar drops to second row */
+@media (max-width: 1200px) {
   .app-header { padding-bottom: 0.625rem; }
   .app-header .header-container { flex-wrap: wrap; row-gap: 0.5rem; }
 }
@@ -231,7 +231,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   background: rgba(10,10,22,0.75);
 }
 /* Tablet → full-width second row */
-@media (max-width: 1024px) {
+@media (max-width: 1200px) {
   .search-wrapper {
     order: 3;
     flex: 0 0 100%; /* full width, don't grow/shrink to fill */
@@ -913,3 +913,13 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   font-size: 0.85rem;
   max-width: 250px;
 }
+
+/* ─── Orders Filter Buttons ───────────────────── */
+.orders-filter-btn {
+  padding: 0.35rem 0.9rem; border-radius: 99px; font-size: 0.8rem;
+  font-weight: 600; background: transparent; border: 1px solid var(--border);
+  color: var(--text2); cursor: pointer; transition: all 0.2s; font-family: inherit;
+  white-space: nowrap;
+}
+.orders-filter-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--glass-gold); }
+.orders-filter-btn.active { background: var(--primary); color: #000; border-color: var(--primary); }
