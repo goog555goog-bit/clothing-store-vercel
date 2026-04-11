@@ -168,7 +168,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 
 /* ─── Header ───────────────────────────────────────── */
 .app-header {
-  position: sticky; top: 0; z-index: 2000;
+  position: sticky; top: 0; z-index: 1000;
   background: rgba(8,8,20,0.97);
   backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
   border-bottom: 1px solid var(--glass-border);
@@ -223,7 +223,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
   box-shadow: 0 4px 20px rgba(0,0,0,0.3);
   flex: 1; max-width: 580px; min-width: 220px; margin: 0 1rem;
-  position: relative; z-index: 100;
+  position: relative; z-index: 10;
 }
 .search-wrapper:focus-within {
   border-color: var(--primary);
@@ -293,7 +293,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   position: absolute; top: calc(100% + 10px); left: 0; width: 100%; min-width: 300px;
   background: rgba(10,10,28,0.98); border: 1px solid var(--primary); border-radius: 16px;
   box-shadow: 0 24px 64px rgba(0,0,0,0.9), 0 0 0 1px rgba(251,191,36,0.2);
-  z-index: 3000; display: none; max-height: 340px; overflow-y: auto;
+  z-index: 4000; display: none; max-height: 340px; overflow-y: auto;
   backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
   animation: slideDownIn 0.22s cubic-bezier(0.16,1,0.3,1);
 }
@@ -440,13 +440,13 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 .drawer-overlay {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
   background: rgba(5,5,5,0.8); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-  z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.4s ease;
+  z-index: 2000; opacity: 0; visibility: hidden; transition: all 0.4s ease;
 }
 .drawer-overlay.open { opacity: 1; visibility: visible; }
 
 .cart-drawer {
   position: fixed; top: 0; right: -430px; width: 420px; height: 100%;
-  background: var(--surface); z-index: 1001; box-shadow: -20px 0 50px rgba(0,0,0,0.5);
+  background: var(--surface); z-index: 2100; box-shadow: -20px 0 50px rgba(0,0,0,0.5);
   transition: right 0.4s cubic-bezier(0.23,1,0.32,1); display: flex; flex-direction: column;
 }
 .cart-drawer.open { right: 0; }
@@ -512,7 +512,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 .mobile-nav {
   position: fixed; bottom: 0; left: 0; right: 0; height: 60px;
   display: flex; justify-content: space-around; align-items: stretch;
-  z-index: 1500;
+  z-index: 1100;
   background: rgba(6,6,16,0.97);
   backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
   border-top: 1px solid rgba(251,191,36,0.15);
@@ -547,14 +547,14 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   position: fixed; top: 0; left: 0; width: 100%;  height: 100%;
   background: rgba(8, 8, 20, 0.95);
   backdrop-filter: blur(8px);
-  z-index: 9999; display: none; align-items: center; justify-content: center; flex-direction: column;
+  z-index: 9000; display: none; align-items: center; justify-content: center; flex-direction: column;
 }
 .global-loader.active { display: flex; }
 .spinner { width: 46px; height: 46px; border: 4px solid rgba(251,191,36,0.1); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* ─── Toasts ───────────────────────────────────────── */
-.toast-container { position: fixed; bottom: 2rem; right: 2rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.75rem; pointer-events: none; }
+.toast-container { position: fixed; bottom: 2rem; right: 2rem; z-index: 9100; display: flex; flex-direction: column; gap: 0.75rem; pointer-events: none; }
 .toast {
   background: var(--surface); color: var(--text); padding: 1rem 1.5rem;
   border-radius: var(--radius); border-left: 4px solid var(--primary);
@@ -583,12 +583,12 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
 
 /* ─── Onboarding ───────────────────────────────────── */
-.onboarding-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.7); z-index: 2000; opacity: 0; pointer-events: none; transition: opacity 0.4s; }
+.onboarding-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.7); z-index: 5000; opacity: 0; pointer-events: none; transition: opacity 0.4s; }
 .onboarding-overlay.active { opacity: 1; pointer-events: auto; }
-.onboarding-tooltip { position: fixed; z-index: 2001; width: 300px; background: var(--surface); color: var(--text); padding: 1.5rem; border-radius: var(--radius); box-shadow: var(--shadow-lg); animation: slideUp 0.3s ease-out; }
+.onboarding-tooltip { position: fixed; z-index: 5100; width: 300px; background: var(--surface); color: var(--text); padding: 1.5rem; border-radius: var(--radius); box-shadow: var(--shadow-lg); animation: slideUp 0.3s ease-out; }
 .onboarding-header { font-weight: 700; font-size: 1.1rem; margin-bottom: 0.5rem; color: var(--primary); }
 .onboarding-body { font-size: 0.9rem; color: var(--text2); margin-bottom: 1rem; }
-.onboarding-highlight { position: relative; z-index: 2002 !important; box-shadow: 0 0 0 10px rgba(251,191,36,0.25); border-radius: 8px; }
+.onboarding-highlight { position: relative; z-index: 5200 !important; box-shadow: 0 0 0 10px rgba(251,191,36,0.25); border-radius: 8px; }
 @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
 /* ─── Flying Item Animation ────────────────────────── */
@@ -608,7 +608,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 .modal-overlay {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
   background: rgba(0,0,0,0.87); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-  z-index: 2000; display: none; align-items: center; justify-content: center;
+  z-index: 3000; display: none; align-items: center; justify-content: center;
   opacity: 0; transition: opacity 0.3s;
 }
 
