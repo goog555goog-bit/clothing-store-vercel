@@ -11,7 +11,7 @@ var API = (function () {
   var apiObj = {
     isPending: false,
     
-    _call: function (action, data, useCache = false) {
+    _call: function (action, data, useCache = false, invalidateGroups = []) {
       var self = this;
       
       // 1. Check Cache
@@ -41,7 +41,7 @@ var API = (function () {
           controller.abort();
           self.isPending = false;
           reject('Request timeout (server not responding)');
-        }, 10000); // 10 second timeout
+        }, 15000); // 15 second timeout
 
         fetch(GAS_URL, {
           method: "POST",
@@ -60,6 +60,10 @@ var API = (function () {
             // 2. Save to Cache if needed
             if (useCache) {
               _cache[action] = { data: res, time: Date.now() };
+            }
+            // 3. Invalidate Groups
+            if (invalidateGroups && invalidateGroups.length > 0) {
+              invalidateGroups.forEach(function(g) { self.invalidateCache(g); });
             }
             resolve(res);
           } else {
@@ -97,18 +101,15 @@ var API = (function () {
 
     // ─── WRITE / ACTION ───────────────────────────────────────
     createRequest: function (items) { 
-      this.invalidateCache('getStorefrontData');
-      return this._call('createRequest', { items: items }); 
+      return this._call('createRequest', { items: items }, false, ['getStorefrontData', 'getProducts', 'getMyRequests', 'getDashboardStats']); 
     },
     
     // Unified Approval/Rejection
     approveRequest: function (requestId, comment) { 
-      this.invalidateCache('getReportData');
-      return this._call('approveRequest', { requestId: requestId, comment: comment }); 
+      return this._call('approveRequest', { requestId: requestId, comment: comment }, false, ['getReportData', 'getPendingApprovals', 'getAllOrders', 'getDashboardStats', 'getStorefrontData']); 
     },
     rejectRequest: function (requestId, comment) { 
-      this.invalidateCache('getReportData');
-      return this._call('rejectRequest', { requestId: requestId, comment: comment }); 
+      return this._call('rejectRequest', { requestId: requestId, comment: comment }, false, ['getReportData', 'getPendingApprovals', 'getAllOrders', 'getDashboardStats']); 
     },
     
     // Re-mapped for compatibility with older code if any
@@ -125,43 +126,38 @@ var API = (function () {
     updateEmployeeRole: function (targetEmployeeId, newRole) { return this._call('updateEmployeeRole', { targetEmployeeId: targetEmployeeId, newRole: newRole }); },
     uploadToDrive: function (base64, fileName) { return this._call('uploadToDrive', { base64: base64, fileName: fileName }); },
     updateStock: function (productId, qty, adminId) { 
-      this.invalidateCache('getProducts');
-      return this._call('updateStock', { productId: productId, qty: qty, adminId: adminId }); 
+      return this._call('updateStock', { productId: productId, qty: qty, adminId: adminId }, false, ['getProducts', 'getStorefrontData', 'getDashboardStats']); 
     },
     manageProduct: function (op, data) { 
-      this.invalidateCache('getProducts');
-      return this._call('manageProduct', { op: op, data: data }); 
+      return this._call('manageProduct', { op: op, data: data }, false, ['getProducts', 'getStorefrontData']); 
     },
     manageCategory: function (op, data) { 
-      this.invalidateCache('getCategories');
-      return this._call('manageCategory', { op: op, data: data }); 
+      return this._call('manageCategory', { op: op, data: data }, false, ['getCategories', 'getStorefrontData']); 
     },
     
-    // Legacy / Specialized
-    quickDeductStock: function (d) { return this._call('quickDeductStock', d); },
+    // Actions
+    quickDeductStock: function (d) { return this._call('quickDeductStock', d, false, ['getProducts', 'getStorefrontData', 'getDashboardStats']); },
     exportToCSV: function (sheetName) { return this._call('exportToCSV', { sheetName: sheetName }); },
     getAllOrders: function () { return this._call('getAllOrders', {}, true); },
     getAdvancedDashboardData: function (filters) { return this._call('getAdvancedDashboardData', { filters: filters }, true); },
 
     getSubStock: function (data) { return this._call('getSubStock', data || {}); },
     getTeams: function () { return this._call('getTeams', {}, true); },
-    addEmployee: function (employee) { return this._call('addEmployee', { employee: employee }); },
-    deleteEmployee: function (targetEmployeeId) { return this._call('deleteEmployee', { targetEmployeeId: targetEmployeeId }); },
+    addEmployee: function (employee) { return this._call('addEmployee', { employee: employee }, false, ['getEmployees']); },
+    deleteEmployee: function (targetEmployeeId) { return this._call('deleteEmployee', { targetEmployeeId: targetEmployeeId }, false, ['getEmployees']); },
     getFilteredOrders: function (filters) { return this._call('getFilteredOrders', { filters: filters }); },
-    receiveStock: function (data) { return this._call('receiveStock', data); },
-    receiveSubStock: function (data) { return this._call('receiveSubStock', data); },
-    deductSubStock: function (productId, qty, branch) { return this._call('deductSubStock', { productId: productId, qty: qty, branch: branch }); },
+    receiveStock: function (data) { return this._call('receiveStock', data, false, ['getProducts', 'getStorefrontData']); },
+    receiveSubStock: function (data) { return this._call('receiveSubStock', data, false, ['getStorefrontData', 'getSubStock']); },
+    deductSubStock: function (productId, qty, branch) { return this._call('deductSubStock', { productId: productId, qty: qty, branch: branch }, false, ['getStorefrontData', 'getSubStock']); },
 
     transferSubStock: function (data) { return this._call('transferSubStock', data); },
     returnToMainStock: function (data) { return this._call('returnToMainStock', data); },
 
     manageTeam: function (op, data) { 
-      this.invalidateCache('getTeams');
-      return this._call('manageTeam', { op: op, data: data }); 
+      return this._call('manageTeam', { op: op, data: data }, false, ['getTeams']); 
     },
     swapTeamLead: function (data) { 
-      this.invalidateCache('getTeams');
-      return this._call('swapTeamLead', data); 
+      return this._call('swapTeamLead', data, false, ['getTeams']); 
     },
     
     // Aliases for better DX
