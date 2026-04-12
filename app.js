@@ -34,81 +34,6 @@ window.onload = function() {
   checkAuth();
   initCartSwipe();
   initMouseGlow();
-};
-
-function initMouseGlow() {
-  document.addEventListener('mousemove', function(e) {
-    var cards = document.querySelectorAll('.mouse-glow-card');
-    cards.forEach(function(card) {
-      if (!card.matches(':hover')) return;
-      var rect = card.getBoundingClientRect();
-      var x = e.clientX - rect.left;
-      var y = e.clientY - rect.top;
-      card.style.setProperty('--x', x + 'px');
-      card.style.setProperty('--y', y + 'px');
-    });
-  });
-}
-
-function triggerConfetti() {
-  const container = document.body;
-  const colors = ['#fbbf24', '#fff', '#fbbf24', '#f59e0b', '#d97706'];
-  for (let i = 0; i < 100; i++) {
-    const c = document.createElement('div');
-    c.className = 'confetti';
-    c.style.left = Math.random() * 100 + 'vw';
-    c.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-    c.style.transform = `rotate(${Math.random() * 360}deg)`;
-    c.style.width = Math.random() * 10 + 5 + 'px';
-    c.style.height = c.style.width;
-    container.appendChild(c);
-
-    const destX = (Math.random() - 0.5) * 200;
-    const duration = Math.random() * 2 + 3;
-    
-    c.animate([
-      { transform: `translate(0, 0) rotate(0deg)`, opacity: 1 },
-      { transform: `translate(${destX}px, 100vh) rotate(720deg)`, opacity: 0 }
-    ], {
-      duration: duration * 1000,
-      easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-      fill: 'forwards'
-    });
-    
-    setTimeout(() => c.remove(), duration * 1000);
-  }
-}
-
-
-function initDarkMode() {
-  var isDark = localStorage.getItem('darkMode') === 'true';
-  if (isDark) {
-    document.body.classList.add('dark-mode');
-    updateDarkModeUI(true);
-  }
-  refreshIcons();
-}
-
-function toggleDarkMode() {
-  var isDark = document.body.classList.toggle('dark-mode');
-  localStorage.setItem('darkMode', isDark);
-  updateDarkModeUI(isDark);
-  refreshIcons();
-}
-
-function updateDarkModeUI(isDark) {
-  var icon = document.getElementById('darkModeIcon');
-  if (icon) icon.innerHTML = isDark ? '<i data-lucide="sun"></i>' : '<i data-lucide="moon"></i>';
-}
-
-function refreshIcons() {
-  if (typeof lucide !== 'undefined' && lucide.createIcons) {
-    lucide.createIcons();
-  } else if (window.lucide && window.lucide.createIcons) {
-    window.lucide.createIcons();
-  }
-}
-
   updateUserUI();
   
   // Robust API Initialization - safer retry logic
@@ -122,9 +47,9 @@ function refreshIcons() {
         if (typeof API !== 'undefined' && API.getProducts) {
           clearInterval(retryTimer);
           loadStorefrontData();
-        } else if (retryCount > 30) { // 3 seconds timeout
+        } else if (retryCount > 60) { // 6 seconds timeout
           clearInterval(retryTimer);
-          showToast('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณารีเฟรช', 'error');
+          showToast('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณารีเฟรชหน้าเว็บ', 'error');
         }
       }, 100);
     }
@@ -210,6 +135,79 @@ function logout() {
   updateUserUI();
   showToast('ออกจากระบบแล้ว', 'success');
   switchView('store');
+}
+
+function initMouseGlow() {
+  document.addEventListener('mousemove', function(e) {
+    var cards = document.querySelectorAll('.mouse-glow-card');
+    cards.forEach(function(card) {
+      if (!card.matches(':hover')) return;
+      var rect = card.getBoundingClientRect();
+      var x = e.clientX - rect.left;
+      var y = e.clientY - rect.top;
+      card.style.setProperty('--x', x + 'px');
+      card.style.setProperty('--y', y + 'px');
+    });
+  });
+}
+
+function triggerConfetti() {
+  const container = document.body;
+  const colors = ['#fbbf24', '#fff', '#fbbf24', '#f59e0b', '#d97706'];
+  for (let i = 0; i < 100; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.left = Math.random() * 100 + 'vw';
+    c.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+    c.style.transform = 'rotate(' + (Math.random() * 360) + 'deg)';
+    c.style.width = (Math.random() * 10 + 5) + 'px';
+    c.style.height = c.style.width;
+    container.appendChild(c);
+
+    const destX = (Math.random() - 0.5) * 200;
+    const duration = Math.random() * 2 + 3;
+    
+    // Fallback animation for older browsers if needed, but modern CSS animate works
+    c.animate([
+      { transform: 'translate(0, 0) rotate(0deg)', opacity: 1 },
+      { transform: 'translate(' + destX + 'px, 100vh) rotate(720deg)', opacity: 0 }
+    ], {
+      duration: duration * 1000,
+      easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+      fill: 'forwards'
+    });
+    
+    setTimeout(function() { c.remove(); }, duration * 1000);
+  }
+}
+
+function initDarkMode() {
+  var isDark = localStorage.getItem('darkMode') === 'true';
+  if (isDark) {
+    document.body.classList.add('dark-mode');
+    updateDarkModeUI(true);
+  }
+  refreshIcons();
+}
+
+function toggleDarkMode() {
+  var isDark = document.body.classList.toggle('dark-mode');
+  localStorage.setItem('darkMode', isDark);
+  updateDarkModeUI(isDark);
+  refreshIcons();
+}
+
+function updateDarkModeUI(isDark) {
+  var icon = document.getElementById('darkModeIcon');
+  if (icon) icon.innerHTML = isDark ? '<i data-lucide="sun"></i>' : '<i data-lucide="moon"></i>';
+}
+
+function refreshIcons() {
+  if (typeof lucide !== 'undefined' && lucide.createIcons) {
+    lucide.createIcons();
+  } else if (window.lucide && window.lucide.createIcons) {
+    window.lucide.createIcons();
+  }
 }
 
 // ─── ONBOARDING ───────────────────────────────────────────
