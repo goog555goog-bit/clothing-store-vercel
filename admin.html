@@ -11,6 +11,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
   <script src="https://unpkg.com/html5-qrcode" defer></script>
   <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:,">
   <script src="api.js"></script>
   <script>
     var scriptUrl = 'index.html'; // Mock scriptUrl for compat
@@ -994,6 +995,8 @@
     }
 
     function loadDashboard() {
+      if (typeof API === 'undefined' || !API.getAdvancedDashboardData) return;
+      
       // 0. Setup Filters
       var period = 'month';
       var dept = 'all';
@@ -1018,96 +1021,96 @@
         filters.endDate = formatDateLocal(now);
       } 
 
-      // Load Depts dropdown once
-      if (!_dbDeptsLoaded && dEl) {
-        API.getReportData('Departments').then(function(res) {
-           if (res.success && res.data) {
-             var currentVal = dEl.value;
-             var opts = '<option value="all">ทุกแผนก (All Departments)</option>';
-             res.data.forEach(function(dep) { opts += '<option value="'+dep.name+'">'+dep.name+'</option>'; });
-             dEl.innerHTML = opts;
-             dEl.value = currentVal;
-           }
-           _dbDeptsLoaded = true;
-        });
-      }
-
-      // 1. Initial State UI
+      // 1. Initial State UI - Setup Spinners
       var statsGrid = document.getElementById('statsGrid');
       var dbTopList = document.getElementById('dbTopProductsList');
       var dbDeptList = document.getElementById('dbDeptSpendingList');
 
-      if (statsGrid && !statsGrid.innerHTML.includes('stat-card')) statsGrid.innerHTML = '<div class="spinner" style="grid-column:1/-1;margin:auto;"></div>';
+      if (statsGrid) statsGrid.innerHTML = '<div class="spinner" style="grid-column:1/-1;margin:2rem auto;"></div>';
+      if (dbTopList) dbTopList.innerHTML = '<div class="spinner" style="margin:2rem auto;"></div>';
+      if (dbDeptList) dbDeptList.innerHTML = '<div class="spinner" style="margin:2rem auto;"></div>';
+
+      // 2. Sequential Data Fetching (Prevent backend congestion)
       
-      // 2. Load Stats via new Advanced API
-      API.getAdvancedDashboardData(filters).then(function (res) {
+      // Step A: Load Depts Dropdown if needed
+      var deptPromise = (_dbDeptsLoaded || !dEl) ? Promise.resolve() : API.getReportData('Departments').then(function(res) {
+          if (res.success && res.data) {
+            var currentVal = dEl.value;
+            var opts = '<option value="all">ทุกแผนก (All Departments)</option>';
+            res.data.forEach(function(dep) { opts += '<option value="'+dep.name+'">'+dep.name+'</option>'; });
+            dEl.innerHTML = opts;
+            dEl.value = currentVal;
+          }
+          _dbDeptsLoaded = true;
+      });
+
+      deptPromise.then(function() {
+        // Step B: Load Main Dashboard Stats (Heavy)
+        return API.getAdvancedDashboardData(filters);
+      }).then(function (res) {
         if (!res.success || !res.data) throw (res.message || res.error || 'โหลดข้อมูลแดชบอร์ดล้มเหลว');
         
         var d = res.data.stats || {};
-        statsGrid.innerHTML =
-          statCard('clipboard-list', 'ใบเบิกตามช่วงเวลา', d.totalOrders || 0) +
-          '<div onclick="adminNav(\'orders\', document.querySelector(\'[data-admin-page=orders]\'))" style="cursor:pointer">' + statCard('clock', 'รออนุมัติทั้งหมด', d.pendingCount || 0, 'warning') + '</div>' +
-          statCard('check-circle', 'อนุมัติแล้ว', d.approvedCount || 0, 'success') +
-          statCard('package-check', 'แจกจ่ายแล้ว', d.receivedCount || 0, 'primary') +
-          statCard('coins', 'ยอดการเบิก', '฿' + (Number(d.totalVolume) || 0).toLocaleString(), 'accent') +
-          statCard('package', 'สินค้าในระบบ', d.totalProducts || 0) +
-          statCard('alert-octagon', 'สต๊อกต่ำ', d.lowStockCount || 0, (d.lowStockCount > 0 ? 'danger' : ''));
-        
-        if (window.self !== window.top) {
-          var warn = document.getElementById('iframe-warning');
-          if (warn) warn.style.display = 'flex';
+        if (statsGrid) {
+          statsGrid.innerHTML =
+            statCard('clipboard-list', 'ใบเบิกตามช่วงเวลา', d.totalOrders || 0) +
+            '<div onclick="adminNav(\'orders\', document.querySelector(\'[data-admin-page=orders]\'))" style="cursor:pointer">' + statCard('clock', 'รออนุมัติทั้งหมด', d.pendingCount || 0, 'warning') + '</div>' +
+            statCard('check-circle', 'อนุมัติแล้ว', d.approvedCount || 0, 'success') +
+            statCard('package-check', 'แจกจ่ายแล้ว', d.receivedCount || 0, 'primary') +
+            statCard('coins', 'ยอดการเบิก', '฿' + (Number(d.totalVolume) || 0).toLocaleString(), 'accent') +
+            statCard('package', 'สินค้าในระบบ', d.totalProducts || 0) +
+            statCard('alert-octagon', 'สต๊อกต่ำ', d.lowStockCount || 0, (d.lowStockCount > 0 ? 'danger' : ''));
         }
-
+        
         var badge = document.getElementById('ordersTabBadge');
         if (badge) {
           if (d.pendingCount > 0) {
             badge.textContent = d.pendingCount;
             badge.style.display = 'inline-block';
-          } else {
-            badge.style.display = 'none';
-          }
+          } else { badge.style.display = 'none'; }
         }
 
         // Render Top Products
-        if (res.data.topProducts && res.data.topProducts.length > 0) {
-          dbTopList.innerHTML = '<div class="flex flex-col gap-2" style="padding:0 1rem 1rem;">' + 
-            res.data.topProducts.map(function(tp, idx) {
-              return '<div class="flex justify-between items-center" style="padding:0.75rem; background:rgba(255,255,255,0.02); border-radius:8px; border:1px solid var(--border)">' +
-                '<div style="flex:1"><strong style="color:var(--text1)">#'+(idx+1)+ ' ' + tp.productName + '</strong><div style="font-size:0.8rem;color:var(--text3)">รหัส: ' + tp.productId + '</div></div>' +
-                '<div class="text-right"><div style="font-weight:700; color:var(--accent)">' + tp.totalQty + ' ชิ้น</div><div style="font-size:0.8rem; color:var(--text3)">฿' + (Number(tp.totalValue) || 0).toLocaleString() + '</div></div>' +
-                '</div>';
-            }).join('') + '</div>';
-        } else {
-          dbTopList.innerHTML = '<div class="text-center" style="padding:2rem; color:var(--text3)">ไม่พบข้อมูลการเบิกในช่วงเวลานี้</div>';
+        if (dbTopList) {
+          if (res.data.topProducts && res.data.topProducts.length > 0) {
+            dbTopList.innerHTML = '<div class="flex flex-col gap-2" style="padding:0 1rem 1rem;">' + 
+              res.data.topProducts.map(function(tp, idx) {
+                return '<div class="flex justify-between items-center" style="padding:0.75rem; background:rgba(255,255,255,0.02); border-radius:8px; border:1px solid var(--border)">' +
+                  '<div style="flex:1"><strong style="color:var(--text1)">#'+(idx+1)+ ' ' + tp.productName + '</strong><div style="font-size:0.8rem;color:var(--text3)">รหัส: ' + tp.productId + '</div></div>' +
+                  '<div class="text-right"><div style="font-weight:700; color:var(--accent)">' + tp.totalQty + ' ชิ้น</div><div style="font-size:0.8rem; color:var(--text3)">฿' + (Number(tp.totalValue) || 0).toLocaleString() + '</div></div>' +
+                  '</div>';
+              }).join('') + '</div>';
+          } else {
+            dbTopList.innerHTML = '<div class="text-center" style="padding:2rem; color:var(--text3)">ไม่พบข้อมูลการเบิกในช่วงเวลานี้</div>';
+          }
         }
 
         // Render Dept Spending
-        if (res.data.deptSpending && res.data.deptSpending.length > 0) {
-           var maxSpend = Math.max.apply(Math, res.data.deptSpending.map(function(ds){ return ds.totalSpending; }));
-           dbDeptList.innerHTML = '<div class="flex flex-col gap-2" style="padding:0 1rem 1rem;">' + 
-            res.data.deptSpending.map(function(ds) {
-              var spendAmt = Number(ds.totalSpending) || 0;
-              var pct = maxSpend > 0 ? (spendAmt / maxSpend * 100) : 0;
-              return '<div style="margin-bottom:0.75rem;">' +
-                '<div class="flex justify-between" style="font-size:0.85rem; margin-bottom:0.25rem"><span style="font-weight:600">' + ds.department + '</span><span style="color:var(--primary-light); font-weight:700">฿' + spendAmt.toLocaleString() + '</span></div>' +
-                '<div style="width:100%; height:8px; background:var(--bg3); border-radius:4px; overflow:hidden;"><div style="width:' + pct + '%; height:100%; background:var(--primary); transition: width 0.5s ease;"></div></div>' +
-                '</div>';
-            }).join('') + '</div>';
-        } else {
-          dbDeptList.innerHTML = '<div class="text-center" style="padding:2rem; color:var(--text3)">ไม่พบข้อมูลการเบิกในช่วงเวลานี้</div>';
+        if (dbDeptList) {
+          if (res.data.deptSpending && res.data.deptSpending.length > 0) {
+             var maxSpend = Math.max.apply(Math, res.data.deptSpending.map(function(ds){ return ds.totalSpending; }));
+             dbDeptList.innerHTML = '<div class="flex flex-col gap-2" style="padding:0 1rem 1rem;">' + 
+              res.data.deptSpending.map(function(ds) {
+                var spendAmt = Number(ds.totalSpending) || 0;
+                var pct = maxSpend > 0 ? (spendAmt / maxSpend * 100) : 0;
+                return '<div style="margin-bottom:0.75rem;">' +
+                  '<div class="flex justify-between" style="font-size:0.85rem; margin-bottom:0.25rem"><span style="font-weight:600">' + ds.department + '</span><span style="color:var(--primary-light); font-weight:700">฿' + spendAmt.toLocaleString() + '</span></div>' +
+                  '<div style="width:100%; height:8px; background:rgba(255,255,255,0.05); border-radius:4px; overflow:hidden;"><div style="width:' + pct + '%; height:100%; background:var(--primary); transition: width 0.5s ease;"></div></div>' +
+                  '</div>';
+              }).join('') + '</div>';
+          } else {
+            dbDeptList.innerHTML = '<div class="text-center" style="padding:2rem; color:var(--text3)">ไม่พบข้อมูลการเบิกในช่วงเวลานี้</div>';
+          }
         }
-
-        refreshIcons();
       }).catch(function (err) {
-        console.error('loadDashboard Error:', err);
-        if (statsGrid) statsGrid.innerHTML = '<div class="card" style="grid-column: 1/-1; color: var(--danger); padding:2rem; text-align:center;">⚠️ ขออภัย ไม่สามารถโหลดข้อมูลได้ในขณะนี้<br><small style="opacity:0.6">' + err + '</small></div>';
+        console.error('loadDashboard Stats Error:', err);
+        if (statsGrid) statsGrid.innerHTML = '<div class="card" style="grid-column: 1/-1; color: var(--danger); padding:2rem; text-align:center;">⚠️ ไม่สามารถโหลดข้อมูลสรุปได้ในขณะนี้<br><small style="opacity:0.6">' + err + '</small></div>';
+      }).finally(function() {
+        // Step C: Load Secondary Widgets independently but after main stats
+        loadDashboardLogs();
+        setTimeout(initTrendsChart, 500); 
+        refreshIcons();
       });
-
-      // 3. Load Recent Activities
-      loadDashboardLogs();
-
-      // 4. Load Trends
-      initTrendsChart();
     }
 
     function loadDashboardLogs() {

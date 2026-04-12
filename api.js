@@ -44,13 +44,18 @@ var API = (function () {
       self.isPending = true;
 
       return new Promise(function (resolve, reject) {
-        // Implementation of timeout
+        // Implementation of timeout - Dashboard/Reports get more time
+        var timeoutMs = 30000; // Default 30s
+        if (action.indexOf('Report') !== -1 || action.indexOf('Dashboard') !== -1 || action.indexOf('Trends') !== -1) {
+          timeoutMs = 45000; // 45s for heavy data
+        }
+
         var controller = new AbortController();
         var timeoutId = setTimeout(function() {
           controller.abort();
           self.isPending = false;
-          reject('Request timeout (server not responding)');
-        }, 15000); // 15 second timeout
+          reject('Request timeout (server not responding in ' + (timeoutMs/1000) + 's). Please try again.');
+        }, timeoutMs);
 
         fetch(GAS_URL, {
           method: "POST",
