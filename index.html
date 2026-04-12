@@ -5,6 +5,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>EMETIX STORE - Digital Procurement</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://unpkg.com">
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <script src="https://unpkg.com/lucide@latest" defer></script>
@@ -45,7 +49,7 @@
             <option value="all">ทุกสถานะ</option>
             <option value="instock">มีในคลัง</option>
           </select>
-          <button class="search-btn" onclick="renderProductGrid()" title="ค้นหา">
+          <button class="search-btn" onclick="renderProductGrid()" title="ค้นหา" aria-label="ค้นหาสินค้า">
             <i data-lucide="search" style="width:16px;height:16px;"></i> <span>ค้นหา</span>
           </button>
         </div>
@@ -73,11 +77,11 @@
           <span id="navUserName"></span> <i data-lucide="log-out"></i>
         </button>
         <button class="btn btn-ghost hide-mobile" style="position:relative" onclick="toggleDrawer('cartDrawer')"
-          title="ตะกร้าสินค้า">
+          title="ตะกร้าสินค้า" aria-label="เปิดตะกร้าสินค้า">
           <i data-lucide="shopping-bag"></i>
           <div id="cartBadge" class="cart-badge" style="display:none">0</div>
         </button>
-        <button class="btn btn-ghost" onclick="toggleDarkMode()" title="เปลี่ยนธีม">
+        <button class="btn btn-ghost" onclick="toggleDarkMode()" title="เปลี่ยนธีม" aria-label="สลับโหมดมืด/สว่าง">
           <span id="darkModeIcon"><i data-lucide="moon"></i></span>
         </button>
       </div>
@@ -202,7 +206,7 @@
       <div style="font-weight:600;font-size:1rem;display:flex;align-items:center;gap:0.5rem;">
         <i data-lucide="shopping-cart"></i> ตะกร้าสินค้าเบิก
       </div>
-      <button class="btn btn-ghost btn-sm" onclick="toggleDrawer('cartDrawer')">✕</button>
+      <button class="btn btn-ghost btn-sm" onclick="toggleDrawer('cartDrawer')" aria-label="ปิดตะกร้า">✕</button>
     </div>
     <div id="cartItems" class="cart-body">
       <div class="empty-state">
@@ -229,7 +233,7 @@
     <div class="modal" style="max-width:700px;">
       <div class="modal-header">
         <div style="font-weight:600;">รายละเอียดพัสดุ</div>
-        <button class="btn btn-ghost btn-sm" onclick="closeModal('productDetailModal')">✕</button>
+        <button class="btn btn-ghost btn-sm" onclick="closeModal('productDetailModal')" aria-label="ปิด">✕</button>
       </div>
       <div id="productDetailBody" class="modal-body" style="padding:0;"></div>
       <div class="modal-footer">
@@ -407,7 +411,7 @@
       <i data-lucide="scale"></i>
       <span>ผู้อนุมัติ</span>
     </button>
-    <button class="mobile-nav-item" onclick="toggleDrawer('cartDrawer')">
+    <button class="mobile-nav-item" onclick="toggleDrawer('cartDrawer')" aria-label="ดูตะกร้าสินค้า">
       <div style="position:relative;">
         <i data-lucide="shopping-cart"></i>
         <span id="cartCountMobile" class="cart-badge" style="display:none;">0</span>

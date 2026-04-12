@@ -3,13 +3,29 @@
 //  app.js.html — Core App Logic (Employee Storefront)
 // ============================================================
 
-var currentUser = null;
+var currentUser = (function() {
+  try {
+    var stored = localStorage.getItem('_user');
+    return stored ? JSON.parse(stored) : null;
+  } catch(e) { return null; }
+})();
 var allProducts = [];
 var allCategories = [];
 var allBranches = []; 
 var myOrdersCache = null;
 var currentCategory = 'all';
 var currentView = 'store';  // store | orders | substock
+
+// ─── UTILS ────────────────────────────────────────────────
+function escapeHTML(str) {
+  if (!str) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
 
 // ─── INIT ─────────────────────────────────────────────────
 
@@ -93,29 +109,27 @@ function refreshIcons() {
   }
 }
 
-function checkAuth() {
-  var stored = localStorage.getItem('_user');
-  if (stored) {
-    try { currentUser = JSON.parse(stored); } catch(e) {}
-  }
   updateUserUI();
   
-  // รอจนกว่า API object จะสมบูรณ์ (กรณีโหลดแบบ async) มีการ timeout หลัง 10 วินาที
-  if (typeof API !== 'undefined' && API.getProducts) {
-    loadStorefrontData();
-  } else {
-    var checkCount = 0;
-    var checkTimer = setInterval(function() {
-      checkCount++;
-      if (typeof API !== 'undefined' && API.getProducts) {
-        clearInterval(checkTimer);
-        loadStorefrontData();
-      } else if (checkCount > 100) { // timeout after 10s (100 x 100ms)
-        clearInterval(checkTimer);
-        showToast('โหลดข้อมูลไม่สำเร็จ กรุณารีเฟรช', 'error');
-      }
-    }, 100);
+  // Robust API Initialization - safer retry logic
+  function startApp() {
+    if (typeof API !== 'undefined' && API.getProducts) {
+      loadStorefrontData();
+    } else {
+      var retryCount = 0;
+      var retryTimer = setInterval(function() {
+        retryCount++;
+        if (typeof API !== 'undefined' && API.getProducts) {
+          clearInterval(retryTimer);
+          loadStorefrontData();
+        } else if (retryCount > 30) { // 3 seconds timeout
+          clearInterval(retryTimer);
+          showToast('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณารีเฟรช', 'error');
+        }
+      }, 100);
+    }
   }
+  startApp();
   
   if (typeof Cart !== 'undefined') {
     Cart.renderBadge();
@@ -275,7 +289,17 @@ var Onboarding = {
 function loadStorefrontData() {
   var grid = document.getElementById('productGrid');
   if (grid && (!allProducts || allProducts.length === 0)) {
-    grid.innerHTML = Array(8).fill('<div class="skeleton-card skeleton" style="border-radius:var(--radius);height:300px"></div>').join('');
+    grid.innerHTML = Array(8).fill('<div class="skeleton-card">'
+      + '<div class="skeleton-image skeleton"></div>'
+      + '<div class="product-info" style="gap:0.75rem">'
+      +   '<div class="skeleton-title skeleton"></div>'
+      +   '<div class="skeleton-title skeleton" style="width:60%"></div>'
+      +   '<div class="flex items-center justify-between" style="margin-top:auto">'
+      +     '<div class="skeleton-price skeleton" style="width:80px"></div>'
+      +     '<div class="skeleton-price skeleton" style="width:90px;border-radius:99px"></div>'
+      +   '</div>'
+      + '</div>'
+      + '</div>').join('');
   }
   
   API.getStorefrontData().then(function(res) {
@@ -628,14 +652,14 @@ function renderProductGrid(pageNum) {
       : '<div class="product-img-placeholder"><i data-lucide="package" style="width:32px;height:32px;opacity:0.3"></i></div>';
 
     return '<div class="product-card" ' + (outOfStock ? 'style="opacity:0.6"' : '') + '>'
-      + '<div class="product-img-wrap" onclick="openProductDetail(\'' + p.productId + '\')">' + imgHtml + '</div>'
+      + '<div class="product-img-wrap" onclick="openProductDetail(\'' + escapeHTML(p.productId) + '\')">' + imgHtml + '</div>'
       + '<div class="product-info">'
-      +   '<div class="product-name" style="cursor:pointer" onclick="openProductDetail(\'' + p.productId + '\')">' + p.name + '</div>'
-      +   '<div class="product-stock"><span class="product-stock-dot' + (outOfStock ? ' out' : '') + '"></span>' + (outOfStock ? '<span style="color:var(--danger)">หมดสต็อก</span>' : 'คงเหลือ: ' + p.stock + ' ชิ้น') + '</div>'
+      +   '<div class="product-name" style="cursor:pointer" onclick="openProductDetail(\'' + escapeHTML(p.productId) + '\')">' + escapeHTML(p.name) + '</div>'
+      +   '<div class="product-stock"><span class="product-stock-dot' + (outOfStock ? ' out' : '') + '"></span>' + (outOfStock ? '<span style="color:var(--danger)">หมดสต็อก</span>' : 'คงเหลือ: ' + Number(p.stock) + ' ชิ้น') + '</div>'
       +   '<div class="flex items-center justify-between" style="margin-top:auto">'
       +     '<div class="product-price">฿' + Number(p.price).toLocaleString() + '</div>'
       +     '<button class="btn btn-sm ' + (outOfStock ? 'btn-outline' : 'btn-accent') + '" '
-      +       (outOfStock ? 'disabled' : 'onclick="addToCart(\'' + p.productId + '\', event)"')
+      +       (outOfStock ? 'disabled' : 'onclick="addToCart(\'' + escapeHTML(p.productId) + '\', event)"')
       +     ' style="border-radius:99px; padding: 0.4rem 1rem;">' + (outOfStock ? 'หมด' : '+ เบิกสินค้า') + '</button>'
       +   '</div>'
       + '</div>'

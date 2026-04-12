@@ -23,6 +23,16 @@
     }
     // Admin Safety placeholders
     function refreshIcons() { if (typeof lucide !== 'undefined') lucide.createIcons(); }
+    
+    function escapeHTML(str) {
+      if (!str) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
     function adminLogout() {
       localStorage.removeItem('_user');
       navigateTo('login.html');
@@ -49,7 +59,7 @@
   </header>
 
 
-  <div class="container" style="padding:1rem 0; margin-bottom: 80px;">
+  <div class="container" style="margin-bottom: 80px;">
     <!-- Iframe Warning / Fullscreen Unlock -->
     <div id="iframe-warning" style="display:none; margin-bottom:1.5rem; padding:1.25rem; background:rgba(99,102,241,0.1); border:1px solid rgba(99,102,241,0.2); border-radius:12px; display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap">
        <div style="display:flex; align-items:center; gap:1rem">
@@ -101,8 +111,8 @@
       
       <!-- Dashboard Filters -->
       <div class="card glass" style="margin-bottom: 1.5rem; padding: 1.25rem;">
-        <div class="flex items-center gap-2" style="flex-wrap: wrap;">
-          <div style="flex:1; min-width:150px">
+        <div class="grid grid-2-tablet gap-2">
+          <div>
             <label class="form-label" style="font-size:0.85rem; margin-bottom:0.25rem; color:var(--text2); font-weight:600;"><i data-lucide="calendar" style="width:14px;height:14px;display:inline-block;vertical-align:middle;margin-right:4px;"></i>ช่วงเวลา</label>
             <select id="dbFilterPeriod" class="input w-full" onchange="loadDashboard()">
               <option value="today">วันนี้</option>
@@ -111,7 +121,7 @@
               <option value="all">อดีตจนถึงปัจจุบัน (All Time)</option>
             </select>
           </div>
-          <div style="flex:1; min-width:150px">
+          <div>
             <label class="form-label" style="font-size:0.85rem; margin-bottom:0.25rem; color:var(--text2); font-weight:600;"><i data-lucide="building-2" style="width:14px;height:14px;display:inline-block;vertical-align:middle;margin-right:4px;"></i>แผนก (Department)</label>
             <select id="dbFilterDept" class="input w-full" onchange="loadDashboard()">
               <option value="all">ทุกแผนก (All Departments)</option>
@@ -1261,14 +1271,14 @@
       
       body.innerHTML = paginated.map(function (p) {
         return '<tr>'
-          + '<td class="hide-mobile" style="font-size:0.8rem;color:var(--text3)">' + p.productId + '</td>'
-          + '<td style="font-weight:500">' + p.name + '</td>'
-          + '<td class="hide-mobile">' + (p.categoryId || '-') + '</td>'
+          + '<td class="hide-mobile" style="font-size:0.8rem;color:var(--text3)">' + escapeHTML(p.productId) + '</td>'
+          + '<td style="font-weight:500">' + escapeHTML(p.name) + '</td>'
+          + '<td class="hide-mobile">' + escapeHTML(p.categoryId || '-') + '</td>'
           + '<td>฿' + Number(p.price).toLocaleString() + '</td>'
-          + '<td class="hide-mobile">' + p.stock + '</td>'
+          + '<td class="hide-mobile">' + Number(p.stock) + '</td>'
           + '<td><span class="badge ' + (p.status === 'active' ? 'badge-approved' : 'badge-rejected') + '">' + (p.status === 'active' ? 'เปิด' : 'ปิด') + '</span></td>'
-          + '<td><button class="btn btn-sm btn-ghost" onclick="editProduct(\'' + p.productId + '\')"><i data-lucide="edit" style="width:14px;height:14px"></i></button>'
-          + '<button class="btn btn-sm btn-ghost hide-mobile" style="color:var(--danger)" onclick="delProduct(\'' + p.productId + '\')"><i data-lucide="trash-2" style="width:14px;height:14px"></i></button></td>'
+          + '<td><button class="btn btn-sm btn-ghost" onclick="editProduct(\'' + escapeHTML(p.productId) + '\')"><i data-lucide="edit" style="width:14px;height:14px"></i></button>'
+          + '<button class="btn btn-sm btn-ghost hide-mobile" style="color:var(--danger)" onclick="delProduct(\'' + escapeHTML(p.productId) + '\')"><i data-lucide="trash-2" style="width:14px;height:14px"></i></button></td>'
           + '</tr>';
       }).join('');
       
@@ -1283,10 +1293,10 @@
         if (!res.data || res.data.length === 0) { body.innerHTML = '<tr><td colspan="3" class="text-center" style="padding:2rem;color:var(--text3)">ยังไม่มีหมวดหมู่</td></tr>'; return; }
         body.innerHTML = res.data.map(function (c) {
           return '<tr>'
-            + '<td>' + c.categoryId + '</td>'
-            + '<td style="font-weight:600">' + c.name + '</td>'
-            + '<td><button class="btn btn-sm btn-ghost" onclick="editCategory(\'' + c.categoryId + '\', \'' + c.name + '\')"><i data-lucide="edit" style="width:14px;height:14px"></i> แก้ไข</button>'
-            + '<button class="btn btn-sm btn-ghost" style="color:var(--danger)" onclick="delCategory(\'' + c.categoryId + '\')"><i data-lucide="trash-2" style="width:14px;height:14px"></i> ลบ</button></td>'
+            + '<td>' + escapeHTML(c.categoryId) + '</td>'
+            + '<td style="font-weight:600">' + escapeHTML(c.name) + '</td>'
+            + '<td><button class="btn btn-sm btn-ghost" onclick="editCategory(\'' + escapeHTML(c.categoryId) + '\', \'' + escapeHTML(c.name).replace(/'/g, "\\'") + '\')"><i data-lucide="edit" style="width:14px;height:14px"></i> แก้ไข</button>'
+            + '<button class="btn btn-sm btn-ghost" style="color:var(--danger)" onclick="delCategory(\'' + escapeHTML(c.categoryId) + '\')"><i data-lucide="trash-2" style="width:14px;height:14px"></i> ลบ</button></td>'
             + '</tr>';
         }).join('');
         refreshIcons();
@@ -1312,8 +1322,11 @@
     function delCategory(id) {
       if (!confirm('ยืนยันการลบหมวดหมู่ ' + id + '? (เฉพาะหมวดที่ไม่มีสินค้าเท่านั้น)')) return;
       API.manageCategory('delete', { categoryId: id }).then(function (res) {
-        if (res.success) { showToast('ลบหมวดหมู่เรียบร้อย', 'success'); loadAdminCategories(); }
-        else { showToast(res.message, 'error'); }
+        if (res && res.success) { 
+          showToast('ลบหมวดหมู่เรียบร้อย', 'success'); 
+          loadAdminCategories(); 
+        }
+        else { showToast(res.message || 'ไม่สามารถลบหมวดหมู่ได้', 'error'); }
       });
     }
 
@@ -1400,8 +1413,12 @@
     function delProduct(id) {
       if (!confirm('ลบสินค้า ' + id + ' ?')) return;
       API.manageProduct('delete', { productId: id }).then(function (res) {
-        showToast('ลบเรียบร้อย', 'success');
-        loadProducts();
+        if (res && res.success) {
+          showToast('ลบเรียบร้อย', 'success');
+          loadProducts();
+        } else {
+          showToast(res.message || 'ไม่สามารถลบสินค้าได้', 'error');
+        }
       });
     }
 
@@ -2125,7 +2142,14 @@
       API.getTopRequestedItems(month).then(function (res) {
         if (!res.success || !res.data) return;
         var data = res.data.slice(0, 5);
-        var ctx = document.getElementById('topProductsChart').getContext('2d');
+        var ctxId = 'topProductsChart';
+        var canvas = document.getElementById(ctxId);
+        if(!canvas) return;
+        var ctx = canvas.getContext('2d');
+
+        var goldGradient = ctx.createLinearGradient(0, 0, 0, 400);
+        goldGradient.addColorStop(0, 'rgba(251, 191, 36, 0.8)');
+        goldGradient.addColorStop(1, 'rgba(217, 119, 6, 0.2)');
 
         if (charts.top) charts.top.destroy();
         charts.top = new Chart(ctx, {
@@ -2135,19 +2159,38 @@
             datasets: [{
               label: 'จำนวนที่เบิก (ชิ้น)',
               data: data.map(function (i) { return i.totalQty; }),
-              backgroundColor: 'rgba(139, 92, 246, 0.6)',
-              borderColor: '#8b5cf6',
-              borderWidth: 1
+              backgroundColor: goldGradient,
+              borderColor: '#fbbf24',
+              borderWidth: 1,
+              borderRadius: 6,
+              hoverBackgroundColor: '#fbbf24'
             }]
           },
           options: {
             responsive: true,
             maintainAspectRatio: false,
             scales: {
-              y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor } },
-              x: { grid: { display: false }, ticks: { color: textColor } }
+              y: { 
+                beginAtZero: true, 
+                grid: { color: gridColor, drawBorder: false }, 
+                ticks: { color: textColor, font: { family: "'Inter', sans-serif", size: 11 } } 
+              },
+              x: { 
+                grid: { display: false }, 
+                ticks: { color: textColor, font: { family: "'Inter', sans-serif", size: 11 } } 
+              }
             },
-            plugins: { legend: { display: false } }
+            plugins: { 
+              legend: { display: false },
+              tooltip: {
+                backgroundColor: 'rgba(0,0,0,0.85)',
+                titleFont: { size: 13, weight: 'bold' },
+                padding: 12,
+                cornerRadius: 10,
+                borderColor: 'rgba(251, 191, 36, 0.3)',
+                borderWidth: 1
+              }
+            }
           }
         });
         refreshIcons();
@@ -2164,16 +2207,33 @@
             datasets: [{
               data: res.data.map(function (d) { return d.totalSpending; }),
               backgroundColor: [
-                '#8b5cf6', '#10b981', '#f43f5e', '#fbbf24', '#0ea5e9', '#f97316'
+                '#fbbf24', '#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#ef4444'
               ],
-              borderWidth: 0
+              borderColor: isDark ? '#12121e' : '#fff',
+              borderWidth: 2,
+              hoverOffset: 15
             }]
           },
           options: {
             responsive: true,
             maintainAspectRatio: false,
+            cutout: '70%',
             plugins: {
-              legend: { position: 'right', labels: { color: textColor, boxWidth: 12 } }
+              legend: { 
+                position: 'right', 
+                labels: { 
+                  color: textColor, 
+                  boxWidth: 12,
+                  font: { family: "'Inter', sans-serif", size: 12 }
+                } 
+              },
+              tooltip: {
+                backgroundColor: 'rgba(0,0,0,0.85)',
+                padding: 12,
+                cornerRadius: 10,
+                borderColor: 'rgba(255,255,255,0.1)',
+                borderWidth: 1
+              }
             }
           }
         });

@@ -59,11 +59,6 @@ var API = (function () {
           signal: controller.signal
         })
         .then(function (res) {
-          clearTimeout(timeoutId);
-          if (!res.ok) throw new Error("Network Error: " + res.status);
-          return res.json();
-        })
-        .then(function (res) {
           if (!useCache) _locks.delete(lockKey);
           self.isPending = false;
           if (res && res.success) {
@@ -77,15 +72,26 @@ var API = (function () {
             }
             resolve(res);
           } else {
-            reject(res ? res.message : 'Unknown error');
+            var msg = res ? (res.message || res.error || 'เซิร์ฟเวอร์แจ้งข้อผิดพลาด') : 'ไม่ได้รับข้อมูลที่ถูกต้อง';
+            reject(msg);
           }
         })
         .catch(function (err) {
           if (!useCache) _locks.delete(lockKey);
           clearTimeout(timeoutId);
           self.isPending = false;
+          
+          let friendlyMsg = "การเชื่อมต่อขัดข้อง กรุณาลองใหม่อีกครั้ง";
+          if (err.name === 'AbortError') {
+            friendlyMsg = "การเชื่อมต่อใช้เวลานานเกินไป (Timeout) กรุณาตรวจสอบอินเทอร์เน็ต";
+          } else if (err.message && err.message.indexOf('NetworkError') !== -1) {
+            friendlyMsg = "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ (Network Error)";
+          } else if (typeof err === 'string') {
+            friendlyMsg = err;
+          }
+
           console.error('API Error [' + action + ']:', err);
-          reject(err.name === 'AbortError' ? 'Server is too slow, please try again.' : (err.message || 'Connection failed.'));
+          reject(friendlyMsg);
         });
       });
     },

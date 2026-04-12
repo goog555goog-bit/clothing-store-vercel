@@ -59,14 +59,26 @@ var Cart = {
 
   updateQty: function(productId, delta) {
     var items = this.getItems();
+    // Fetch latest stock from global cache before updating
+    var currentStock = null;
+    if (typeof allProducts !== 'undefined' && allProducts) {
+      var p = allProducts.find(function(x) { return String(x.productId) === String(productId); });
+      if (p) currentStock = Number(p.stock);
+    }
+
     for (var i = 0; i < items.length; i++) {
       if (items[i].productId === productId) {
-        items[i].qty += delta;
-        if (items[i].qty <= 0) {
+        // Sync maxStock if we found fresh data
+        if (currentStock !== null) items[i].maxStock = currentStock;
+
+        var nextQty = items[i].qty + delta;
+        if (nextQty <= 0) {
           items.splice(i, 1);
-        } else if (items[i].qty > items[i].maxStock) {
+        } else if (nextQty > items[i].maxStock) {
           items[i].qty = items[i].maxStock;
-          showToast('จำนวนเกินสต๊อก', 'warning');
+          showToast('ขออภัย พัสดุในคลังมีเพียง ' + items[i].maxStock + ' ชิ้น', 'warning');
+        } else {
+          items[i].qty = nextQty;
         }
         break;
       }
@@ -87,11 +99,15 @@ var Cart = {
   },
 
   getTotal: function() {
-    return this.getItems().reduce(function(sum, i) { return sum + i.price * i.qty; }, 0);
+    var total = this.getItems().reduce(function(sum, i) { 
+      return sum + (Number(i.price) * Number(i.qty)); 
+    }, 0);
+    // Round to 2 decimal places to avoid floating point issues
+    return Math.round(total * 100) / 100;
   },
 
   getTotalQty: function() {
-    return this.getItems().reduce(function(sum, i) { return sum + i.qty; }, 0);
+    return this.getItems().reduce(function(sum, i) { return sum + Number(i.qty); }, 0);
   },
 
   renderBadge: function() {
