@@ -545,7 +545,7 @@
       </div>
       <div class="modal-footer">
         <button class="btn btn-outline" onclick="closeEmployeeModal()">ยกเลิก</button>
-        <button class="btn btn-primary" onclick="saveEmployee()">บันทึก</button>
+        <button id="saveEmployeeBtn" class="btn btn-primary" onclick="saveEmployee()">บันทึก</button>
       </div>
     </div>
   </div>
@@ -582,7 +582,7 @@
       </div>
       <div class="modal-footer">
         <button class="btn btn-outline" onclick="closeExportModal()">ยกเลิก</button>
-        <button class="btn btn-primary" onclick="doDetailedExport()">ดาวน์โหลด Excel</button>
+        <button id="doExportBtn" class="btn btn-primary" onclick="doDetailedExport()">ดาวน์โหลด Excel</button>
       </div>
     </div>
   </div>
@@ -613,6 +613,28 @@
     </div>
   </div>
 
+  <!-- STOCK ADJUST MODAL -->
+  <div id="stockModal" class="modal-overlay" onclick="if(event.target===this) closeStockModal()">
+    <div class="modal" style="max-width:350px; background:var(--surface)">
+      <div class="modal-header">
+        <div style="font-weight:700">ปรับปรุงสต๊อกสินค้า</div>
+        <button class="btn btn-ghost btn-sm" onclick="closeStockModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="stockProductName" style="font-weight:800; font-size:1.1rem; color:var(--primary); margin-bottom:1.5rem">--</div>
+        <input type="hidden" id="stockProductId">
+        <div class="form-group">
+          <label class="form-label">ระบุจำนวน (บวกเพิ่มกดยอดบวก เช่น 10, ตัดออกใช้เครื่องหมายลบ เช่น -5) *</label>
+          <input type="number" id="stockAdjust" class="form-input" placeholder="0" style="font-size:1.5rem; text-align:center; font-weight:700">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeStockModal()">ยกเลิก</button>
+        <button id="doStockAdjustBtn" class="btn btn-primary" onclick="doStockAdjust()" style="flex:1">บันทึกยอด</button>
+      </div>
+    </div>
+  </div>
+
   <!-- TEAM MODAL -->
   <div id="teamModal" class="modal-overlay" onclick="if(event.target===this) closeTeamModal()">
     <div class="modal" style="max-width:400px">
@@ -639,7 +661,7 @@
       </div>
       <div class="modal-footer">
         <button class="btn btn-outline" onclick="closeTeamModal()">ยกเลิก</button>
-        <button class="btn btn-primary" onclick="saveTeam()">บันทึกข้อมูลทีม</button>
+        <button id="saveTeamBtn" class="btn btn-primary" onclick="saveTeam()">บันทึกข้อมูลทีม</button>
       </div>
     </div>
   </div>
@@ -1009,15 +1031,16 @@
       
       // 2. Load Stats via new Advanced API
       API.getAdvancedDashboardData(filters).then(function (res) {
-        if (!res.success) throw res.error || 'โหลดข้อมูลแดชบอร์ดล้มเหลว';
-        var d = res.data.stats;
+        if (!res.success || !res.data) throw (res.message || res.error || 'โหลดข้อมูลแดชบอร์ดล้มเหลว');
+        
+        var d = res.data.stats || {};
         statsGrid.innerHTML =
-          statCard('clipboard-list', 'ใบเบิกตามช่วงเวลา', d.totalOrders) +
-          '<div onclick="adminNav(\'orders\', document.querySelector(\'[data-admin-page=orders]\'))" style="cursor:pointer">' + statCard('clock', 'รออนุมัติทั้งหมด', d.pendingCount, 'warning') + '</div>' +
-          statCard('check-circle', 'อนุมัติแล้ว', d.approvedCount, 'success') +
-          statCard('package-check', 'แจกจ่ายแล้ว', d.receivedCount, 'primary') +
-          statCard('coins', 'ยอดการเบิก', '฿' + (d.totalVolume || 0).toLocaleString(), 'accent') +
-          statCard('package', 'สินค้าในระบบ', d.totalProducts) +
+          statCard('clipboard-list', 'ใบเบิกตามช่วงเวลา', d.totalOrders || 0) +
+          '<div onclick="adminNav(\'orders\', document.querySelector(\'[data-admin-page=orders]\'))" style="cursor:pointer">' + statCard('clock', 'รออนุมัติทั้งหมด', d.pendingCount || 0, 'warning') + '</div>' +
+          statCard('check-circle', 'อนุมัติแล้ว', d.approvedCount || 0, 'success') +
+          statCard('package-check', 'แจกจ่ายแล้ว', d.receivedCount || 0, 'primary') +
+          statCard('coins', 'ยอดการเบิก', '฿' + (Number(d.totalVolume) || 0).toLocaleString(), 'accent') +
+          statCard('package', 'สินค้าในระบบ', d.totalProducts || 0) +
           statCard('alert-octagon', 'สต๊อกต่ำ', d.lowStockCount || 0, (d.lowStockCount > 0 ? 'danger' : ''));
         
         if (window.self !== window.top) {
@@ -1027,8 +1050,12 @@
 
         var badge = document.getElementById('ordersTabBadge');
         if (badge) {
-          if (d.pendingCount > 0) { badge.textContent = d.pendingCount; badge.style.display = 'inline-block'; }
-          else { badge.style.display = 'none'; }
+          if (d.pendingCount > 0) {
+            badge.textContent = d.pendingCount;
+            badge.style.display = 'inline-block';
+          } else {
+            badge.style.display = 'none';
+          }
         }
 
         // Render Top Products
@@ -1037,7 +1064,7 @@
             res.data.topProducts.map(function(tp, idx) {
               return '<div class="flex justify-between items-center" style="padding:0.75rem; background:rgba(255,255,255,0.02); border-radius:8px; border:1px solid var(--border)">' +
                 '<div style="flex:1"><strong style="color:var(--text1)">#'+(idx+1)+ ' ' + tp.productName + '</strong><div style="font-size:0.8rem;color:var(--text3)">รหัส: ' + tp.productId + '</div></div>' +
-                '<div class="text-right"><div style="font-weight:700; color:var(--accent)">' + tp.totalQty + ' ชิ้น</div><div style="font-size:0.8rem; color:var(--text3)">฿' + tp.totalValue.toLocaleString() + '</div></div>' +
+                '<div class="text-right"><div style="font-weight:700; color:var(--accent)">' + tp.totalQty + ' ชิ้น</div><div style="font-size:0.8rem; color:var(--text3)">฿' + (Number(tp.totalValue) || 0).toLocaleString() + '</div></div>' +
                 '</div>';
             }).join('') + '</div>';
         } else {
@@ -1049,9 +1076,10 @@
            var maxSpend = Math.max.apply(Math, res.data.deptSpending.map(function(ds){ return ds.totalSpending; }));
            dbDeptList.innerHTML = '<div class="flex flex-col gap-2" style="padding:0 1rem 1rem;">' + 
             res.data.deptSpending.map(function(ds) {
-              var pct = maxSpend > 0 ? (ds.totalSpending / maxSpend * 100) : 0;
+              var spendAmt = Number(ds.totalSpending) || 0;
+              var pct = maxSpend > 0 ? (spendAmt / maxSpend * 100) : 0;
               return '<div style="margin-bottom:0.75rem;">' +
-                '<div class="flex justify-between" style="font-size:0.85rem; margin-bottom:0.25rem"><span style="font-weight:600">' + ds.department + '</span><span style="color:var(--primary-light); font-weight:700">฿' + ds.totalSpending.toLocaleString() + '</span></div>' +
+                '<div class="flex justify-between" style="font-size:0.85rem; margin-bottom:0.25rem"><span style="font-weight:600">' + ds.department + '</span><span style="color:var(--primary-light); font-weight:700">฿' + spendAmt.toLocaleString() + '</span></div>' +
                 '<div style="width:100%; height:8px; background:var(--bg3); border-radius:4px; overflow:hidden;"><div style="width:' + pct + '%; height:100%; background:var(--primary); transition: width 0.5s ease;"></div></div>' +
                 '</div>';
             }).join('') + '</div>';
@@ -1061,7 +1089,8 @@
 
         refreshIcons();
       }).catch(function (err) {
-        statsGrid.innerHTML = '<div class="card" style="grid-column: 1/-1; color: var(--danger)">⚠️ ผิดพลาด: ' + err + '</div>';
+        console.error('loadDashboard Error:', err);
+        if (statsGrid) statsGrid.innerHTML = '<div class="card" style="grid-column: 1/-1; color: var(--danger); padding:2rem; text-align:center;">⚠️ ขออภัย ไม่สามารถโหลดข้อมูลได้ในขณะนี้<br><small style="opacity:0.6">' + err + '</small></div>';
       });
 
       // 3. Load Recent Activities
@@ -1323,27 +1352,49 @@
     function closeProductModal() { document.getElementById('productModal').classList.remove('open'); }
 
     function editProduct(id) {
-      API.getProducts().then(function (res) {
-        var p = res.data.filter(function (x) { return String(x.productId) === String(id); })[0];
-        if (p) openProductModal(p);
-      });
+      var p = allAdminProducts.filter(function (x) { return String(x.productId) === String(id); })[0];
+      if (p) {
+        openProductModal(p);
+      } else {
+        // Fallback if not in cache
+        API.getProducts().then(function (res) {
+          var p2 = res.data.filter(function (x) { return String(x.productId) === String(id); })[0];
+          if (p2) openProductModal(p2);
+        });
+      }
     }
 
     function saveProduct() {
       var data = {
         productId: document.getElementById('pf-id').value,
-        name: document.getElementById('pf-name').value,
+        name: document.getElementById('pf-name').value.trim(),
         categoryId: document.getElementById('pf-cat').value,
-        price: document.getElementById('pf-price').value,
-        stock: document.getElementById('pf-stock').value,
-        minStock: document.getElementById('pf-min').value,
-        imageUrl: document.getElementById('pf-img').value
+        price: Number(document.getElementById('pf-price').value),
+        stock: Number(document.getElementById('pf-stock').value),
+        minStock: Number(document.getElementById('pf-min').value),
+        imageUrl: document.getElementById('pf-img').value.trim()
       };
+      if (!data.name || isNaN(data.price)) { showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warning'); return; }
+
+      var btn = document.getElementById('saveProductBtn');
+      var oldHtml = btn.innerHTML;
+      btn.innerHTML = '<div class="spinner" style="width:16px;height:16px"></div> กำลังบันทึก...';
+      btn.disabled = true;
+
       var op = data.productId ? 'update' : 'add';
       API.manageProduct(op, data).then(function (res) {
-        showToast('บันทึกเรียบร้อย', 'success');
-        closeProductModal(); loadProducts();
-      }).catch(function (err) { showToast(err, 'error'); });
+        if (res.success) {
+          showToast('บันทึกเรียบร้อย', 'success');
+          closeProductModal(); loadProducts();
+        } else {
+          showToast(res.message, 'error');
+        }
+      }).catch(function (err) { 
+        showToast(err, 'error'); 
+      }).finally(function() {
+        btn.innerHTML = oldHtml;
+        btn.disabled = false;
+      });
     }
 
     function delProduct(id) {
@@ -1724,6 +1775,11 @@
       };
       if (!data.employeeId || !data.name) { showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warning'); return; }
 
+      var btn = document.getElementById('saveEmployeeBtn');
+      var oldHtml = btn.innerHTML;
+      btn.innerHTML = '<div class="spinner" style="width:16px;height:16px"></div> กำลังบันทึก...';
+      btn.disabled = true;
+
       API.addEmployee(data).then(function (res) {
         if (res.success) {
           showToast('เพิ่มพนักงานเรียบร้อย', 'success');
@@ -1732,6 +1788,11 @@
         } else {
           showToast(res.message, 'error');
         }
+      }).catch(function(err) {
+        showToast(err, 'error');
+      }).finally(function() {
+        btn.innerHTML = oldHtml;
+        btn.disabled = false;
       });
     }
 
@@ -1808,12 +1869,26 @@
       };
       if (!data.teamName || !data.leadId) { showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warning'); return; }
 
+      var btn = document.getElementById('saveTeamBtn');
+      var oldHtml = btn.innerHTML;
+      btn.innerHTML = '<div class="spinner" style="width:16px;height:16px"></div> กำลังบันทึก...';
+      btn.disabled = true;
+
       var op = data.teamId ? 'update' : 'add';
       API.manageTeam(op, data).then(function(res) {
-        showToast('บันทึกข้อมูลทีมเรียบร้อย', 'success');
-        closeTeamModal();
-        loadTeams();
-      }).catch(function(err) { showToast(err, 'error'); });
+        if (res.success) {
+          showToast('บันทึกข้อมูลทีมเรียบร้อย', 'success');
+          closeTeamModal();
+          loadTeams();
+        } else {
+          showToast(res.message, 'error');
+        }
+      }).catch(function(err) { 
+        showToast(err, 'error'); 
+      }).finally(function() {
+        btn.innerHTML = oldHtml;
+        btn.disabled = false;
+      });
     }
 
     function delTeam(id) {
@@ -1928,7 +2003,11 @@
         status: document.getElementById('ex-status').value
       };
 
-      showToast('⏳ กำลังรวบรวมข้อมูล...', 'info');
+      var btn = document.getElementById('doExportBtn');
+      var oldHtml = btn.innerHTML;
+      btn.innerHTML = '<div class="spinner" style="width:16px;height:16px"></div> กำลังเตรียมข้อมูล...';
+      btn.disabled = true;
+
       API.getFilteredOrders(filters).then(function (res) {
         if (!res.data || res.data.length === 0) { showToast('ไม่มีข้อมูลตามเงื่อนไขที่เลือก', 'warning'); return; }
 
@@ -1939,9 +2018,12 @@
         XLSX.writeFile(wb, 'Detailed_Requisition_' + new Date().getTime() + '.xlsx');
         showToast('✅ ดาวน์โหลดเรียบร้อย', 'success');
         closeExportModal();
-      }).catch(function (err) { showToast('เกิดข้อผิดพลาด: ' + err, 'error'); });
-    }
-
+      }).catch(function (err) { 
+        showToast('เกิดข้อผิดพลาด: ' + err, 'error'); 
+      }).finally(function() {
+        btn.innerHTML = oldHtml;
+        btn.disabled = false;
+      });
     }
 
     // ─── INVENTORY ────────────────────────────────────────
@@ -1977,9 +2059,22 @@
       var adj = Number(document.getElementById('stockAdjust').value);
       if (!adj) { showToast('กรุณากรอกจำนวน', 'warning'); return; }
 
+      var btn = document.getElementById('doStockAdjustBtn');
+      var oldHtml = btn.innerHTML;
+      btn.innerHTML = '<div class="spinner" style="width:16px;height:16px"></div> กำลังบันทึก...';
+      btn.disabled = true;
+
       API.updateStock(id, adj, currentUser ? currentUser.employeeId : 'SYSTEM').then(function (res) {
         showToast(res.message || res.error, res.success ? 'success' : 'error');
-        if (res.success) { closeStockModal(); loadInventory(); }
+        if (res.success) { 
+          closeStockModal(); 
+          loadInventory(); 
+        }
+      }).catch(function(err) {
+        showToast(err, 'error');
+      }).finally(function() {
+        btn.innerHTML = oldHtml;
+        btn.disabled = false;
       });
     }
 
@@ -1994,11 +2089,19 @@
           return;
         }
         body.innerHTML = res.data.logs.map(function (l) {
+          var detailDisplay = l.detail;
+          try {
+            if (l.detail && l.detail.indexOf('{') === 0) {
+              var parsed = JSON.parse(l.detail);
+              detailDisplay = '<pre style="font-size:0.7rem; margin:0; opacity:0.7; overflow:auto; max-width:200px">' + JSON.stringify(parsed, null, 2) + '</pre>';
+            }
+          } catch(e) {}
+
           return '<tr>'
             + '<td>' + l.logId + '</td>'
             + '<td>' + (l.user || 'SYSTEM') + '</td>'
             + '<td>' + l.action + '</td>'
-            + '<td style="font-size:0.85rem">' + l.detail + '</td>'
+            + '<td style="font-size:0.85rem">' + detailDisplay + '</td>'
             + '<td style="font-size:0.75rem">' + l.timestamp + '</td>'
             + '</tr>';
         }).join('');
@@ -2404,7 +2507,7 @@
 
 
 
-    }
+
 
     // ─── SYSTEM SETTINGS LOGIC ───
     function loadSystemSettings() {

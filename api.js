@@ -6,6 +6,7 @@ const GAS_URL = "https://script.google.com/macros/s/AKfycbxnRTEb5Q09UkPPiKgx2nze
 
 var API = (function () {
   var _cache = {};
+  var _locks = new Set();
   var _cacheTTL = 60000; // 60 seconds
 
   var apiObj = {
@@ -13,6 +14,14 @@ var API = (function () {
     
     _call: function (action, data, useCache = false, invalidateGroups = []) {
       var self = this;
+      
+      // 1. Double-Submission Protection (Locking)
+      var lockKey = action + JSON.stringify(data || {});
+      if (_locks.has(lockKey) && !useCache) {
+        console.warn('⚠️ Request block: Concurrent identical action [' + action + ']');
+        return Promise.reject('กรุณารอสักครู่ กำลังประมวลผลคำสั่งเดิมของคุณ...');
+      }
+      if (!useCache) _locks.add(lockKey);
       
       // 1. Check Cache
       if (useCache && _cache[action] && (Date.now() - _cache[action].time < _cacheTTL)) {
@@ -55,6 +64,7 @@ var API = (function () {
           return res.json();
         })
         .then(function (res) {
+          if (!useCache) _locks.delete(lockKey);
           self.isPending = false;
           if (res && res.success) {
             // 2. Save to Cache if needed
@@ -71,6 +81,7 @@ var API = (function () {
           }
         })
         .catch(function (err) {
+          if (!useCache) _locks.delete(lockKey);
           clearTimeout(timeoutId);
           self.isPending = false;
           console.error('API Error [' + action + ']:', err);
