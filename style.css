@@ -179,15 +179,15 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 }
 .app-header .header-container {
   display: grid; 
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 0.5rem; width: 100%;
 }
-@media (min-width: 1441px) {
+@media (min-width: 1601px) {
   .search-wrapper { justify-self: center; width: 100%; }
 }
-/* ≤1440px: search bar drops to second row (to accommodate many buttons) */
-@media (max-width: 1440px) {
+/* ≤1600px: search bar drops to second row (to accommodate many buttons) */
+@media (max-width: 1600px) {
   .app-header { padding-bottom: 0.625rem; }
   .app-header .header-container { display: flex; flex-wrap: wrap; row-gap: 0.5rem; justify-content: space-between; }
 }
@@ -208,9 +208,10 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 
 /* ─── Nav Actions ──────────────────────────────────── */
 .nav-actions {
-  display: flex; align-items: center; gap: 0.2rem;
+  display: flex; align-items: center; gap: 0.15rem;
   justify-self: end; overflow: visible;
   min-width: 0;
+  position: relative;
 }
 #navUserName {
   display: inline-block;
@@ -223,12 +224,36 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 @media (max-width: 1600px) {
   #navUserName { max-width: 90px; }
 }
-/* Compact button text early (at 1440px) to prevent overlap */
-@media (max-width: 1440px) and (min-width: 768px) {
+/* Compact button text early (at 1600px) to prevent overlap */
+@media (max-width: 1600px) and (min-width: 768px) {
   .nav-actions .btn-sm span:not(.force-show) { display: none; }
   .nav-actions .btn-ghost span:not(#navUserName):not(.force-show) { display: none; }
-  .nav-actions .btn-sm { padding: 0 0.6rem; min-width: 38px; }
+  .nav-actions .btn-sm { padding: 0 0.5rem; min-width: 38px; overflow: visible; }
+  .nav-actions .btn-ghost { overflow: visible; }
+
+  /* Premium Tooltip on Hover */
+  .nav-actions .btn-sm:hover span:not(.force-show),
+  .nav-actions .btn-ghost:hover span:not(#navUserName):not(.force-show) {
+    display: block !important;
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--surface);
+    color: var(--primary);
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    border: 1px solid var(--primary);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    white-space: nowrap;
+    z-index: 1010;
+    font-size: 0.75rem;
+    font-weight: 700;
+    pointer-events: none;
+    animation: tooltipFadeIn 0.2s ease-out;
+  }
 }
+@keyframes tooltipFadeIn { from { opacity: 0; transform: translate(-50%, 5px); } to { opacity: 1; transform: translate(-50%, 0); } }
 
 /* ─── Search Bar ───────────────────────────────────── */
 .search-wrapper {
@@ -247,7 +272,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   background: rgba(10,10,22,0.75);
 }
 /* Tablet → full-width second row */
-@media (max-width: 1440px) {
+@media (max-width: 1600px) {
   .search-wrapper {
     order: 3;
     flex: 0 0 100%; /* full width, don't grow/shrink to fill */
