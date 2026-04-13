@@ -310,6 +310,11 @@ function loadStorefrontData() {
       renderCategories();
       renderProductGrid();
       
+      // Initialize Searchable selects for header
+      initSearchableSelect('searchType');
+      initSearchableSelect('headerCategoryFilter');
+      initSearchableSelect('stockFilter');
+      
       // Load Branches/Departments for Sub-Stock Usage
       API.getReportData('Departments').then(function(r) {
         if (r.success) allBranches = r.data || [];
@@ -531,26 +536,34 @@ function navigateTo(url) {
 // ─── CATEGORIES ───────────────────────────────────────────
 
 function renderCategories() {
-  var nav = document.getElementById('categoryNav');
-  if (!nav) return;
-  // Dedup by categoryId to prevent duplicates from Sheet correctly
+  var sel = document.getElementById('headerCategoryFilter');
+  if (!sel) return;
+  
+  // Dedup by categoryId
   var seen = {};
   var unique = allCategories.filter(function(c) {
     if (!c.categoryId || seen[c.categoryId]) return false;
     seen[c.categoryId] = true;
     return true;
   });
-  var cats = [{ categoryId: 'all', name: 'สินค้าทั้งหมด' }].concat(unique);
-  nav.innerHTML = cats.map(function(c) {
-    var isActive = currentCategory === c.categoryId;
-    return '<button class="cat-pill ' + (isActive ? 'active' : '') + '" style="font-weight:' + (isActive ? '600' : '400') + '" '
-      + 'onclick="filterCategory(\'' + c.categoryId + '\')">' + c.name + '</button>';
+  
+  var cats = [{ categoryId: 'all', name: 'ทุกหมวดหมู่' }].concat(unique);
+  sel.innerHTML = cats.map(function(c) {
+    return '<option value="' + c.categoryId + '" ' + (currentCategory === c.categoryId ? 'selected' : '') + '>' + c.name + '</option>';
   }).join('');
+
+  // Reinitalize searchable select if it exists
+  if (typeof initSearchableSelect === 'function') {
+    initSearchableSelect('headerCategoryFilter');
+  }
+}
+
+function onStoreCategoryChange(catId) {
+  filterCategory(catId);
 }
 
 function filterCategory(catId) {
   currentCategory = catId;
-  renderCategories();
   renderProductGrid();
 }
 
@@ -1338,3 +1351,74 @@ function initCartSwipe() {
 }
 
 var scriptUrl = 'index.html';
+
+// ─── SEARCHABLE SELECT UTILITY ────────────────────────────
+function initSearchableSelect(selectId) {
+  var select = document.getElementById(selectId);
+  if (!select) return;
+
+  var oldWrapper = select.parentElement.querySelector('.search-select-wrapper');
+  if (oldWrapper) oldWrapper.remove();
+
+  var wrapper = document.createElement('div');
+  wrapper.className = 'search-select-wrapper minimal'; // Added minimal class for storefront
+  select.style.display = 'none';
+  select.parentNode.insertBefore(wrapper, select);
+  wrapper.appendChild(select);
+
+  var input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'search-select-input';
+  input.placeholder = 'ค้นหา...';
+  input.autocomplete = 'off';
+
+  var dropdown = document.createElement('div');
+  dropdown.className = 'search-select-dropdown';
+
+  wrapper.appendChild(input);
+  wrapper.appendChild(dropdown);
+
+  input.value = select.options[select.selectedIndex] ? select.options[select.selectedIndex].text : '';
+
+  input.addEventListener('focus', function() {
+    renderDropdown();
+    dropdown.classList.add('active');
+  });
+
+  document.addEventListener('click', function(e) {
+    if (!wrapper.contains(e.target)) {
+      dropdown.classList.remove('active');
+      input.value = select.options[select.selectedIndex] ? select.options[select.selectedIndex].text : '';
+    }
+  });
+
+  input.addEventListener('input', function() {
+    renderDropdown(input.value);
+  });
+
+  function renderDropdown(filter) {
+    var options = Array.from(select.options);
+    var filtered = options.filter(function(opt) {
+      if (!filter) return true;
+      return opt.text.toLowerCase().includes(filter.toLowerCase());
+    });
+
+    if (filtered.length === 0) {
+      dropdown.innerHTML = '<div class="search-select-item" style="opacity:0.5; cursor:default">ไม่พบข้อมูล</div>';
+    } else {
+      dropdown.innerHTML = filtered.map(function(opt) {
+        var isSelected = opt.value === select.value;
+        return '<div class="search-select-item ' + (isSelected ? 'selected' : '') + '" data-value="' + opt.value + '">' + opt.text + '</div>';
+      }).join('');
+
+      dropdown.querySelectorAll('.search-select-item').forEach(function(item) {
+        item.addEventListener('click', function() {
+          select.value = item.getAttribute('data-value');
+          input.value = item.innerText;
+          dropdown.classList.remove('active');
+          select.dispatchEvent(new Event('change'));
+        });
+      });
+    }
+  }
+}

@@ -198,6 +198,35 @@
         <h2 style="margin:0;display:flex;align-items:center;gap:0.5rem"><i data-lucide="package"></i> จัดการสินค้า</h2>
         <button class="btn btn-accent" onclick="openProductModal()"><i data-lucide="plus"></i> เพิ่มสินค้า</button>
       </div>
+
+      <!-- PRODUCT FILTERS -->
+      <div class="card glass" style="margin-bottom: 1.5rem; padding: 1.25rem;">
+        <div class="grid grid-3 gap-2">
+          <div style="position:relative">
+            <label class="form-label">ค้นหาชื่อสินค้า / รหัส</label>
+            <div class="search-select-wrapper">
+              <input type="text" id="adminProductSearch" class="form-input" placeholder="พิมพ์ชื่อสินค้าเพื่อค้นหา..." oninput="onAdminProductSearch(this.value)" onfocus="onAdminProductSearch(this.value)" onclick="onAdminProductSearch(this.value)" autocomplete="off">
+              <div id="adminProductSuggestions" class="search-select-dropdown"></div>
+            </div>
+          </div>
+          <div>
+            <label class="form-label">ตามหมวดหมู่</label>
+            <select id="adminProductCatFilter" class="input w-full" onchange="filterAdminProducts()">
+              <option value="all">ทั้งหมด</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label">สถานะคลัง</label>
+            <select id="adminProductStockFilter" class="input w-full" onchange="filterAdminProducts()">
+              <option value="all">ทั้งหมด</option>
+              <option value="low">สต๊อกต่ำ (Low Stock)</option>
+              <option value="out">สินค้าหมด (Out of Stock)</option>
+              <option value="active">เปิดขายอยู่ (Active)</option>
+              <option value="inactive">ปิดการขาย (Inactive)</option>
+            </select>
+          </div>
+        </div>
+      </div>
       <div class="card" style="padding:0;overflow:hidden">
         <div class="table-wrap">
           <table>
@@ -1324,6 +1353,7 @@
 
     // ─── PRODUCTS ─────────────────────────────────────────
     var allAdminProducts = [];
+    var filteredAdminProducts = [];
     var adminProductsPageSize = 25;
     var currentAdminProductsPage = 1;
 
@@ -1331,8 +1361,94 @@
       API.getProducts().then(function (res) {
         if (!res.data) res.data = [];
         allAdminProducts = res.data;
-        renderAdminProducts(1);
+        
+        // Load categories for filter
+        API.getCategories().then(function(cRes) {
+          var sel = document.getElementById('adminProductCatFilter');
+          if (sel) {
+            sel.innerHTML = '<option value="all">ทั้งหมด</option>' + (cRes.data || []).map(function(c) {
+              return '<option value="' + c.categoryId + '">' + c.name + '</option>';
+            }).join('');
+            initSearchableSelect('adminProductCatFilter');
+          }
+        });
+
+        filterAdminProducts(); // Initial render
       });
+    }
+
+    function onAdminProductSearch(query) {
+      showAdminProductSuggestions(query);
+      filterAdminProducts();
+    }
+
+    function showAdminProductSuggestions(query) {
+      var dropdown = document.getElementById('adminProductSuggestions');
+      
+      // If query is empty, show all active products as a dropdown
+      var suggestions = allAdminProducts;
+      if (query && query.trim().length > 0) {
+        suggestions = allAdminProducts.filter(function(p) {
+          return p.name.toLowerCase().includes(query.toLowerCase()) || 
+                 String(p.productId).toLowerCase().includes(query.toLowerCase());
+        });
+      }
+      
+      // Limit to 20 products for performance when empty, or 8 when searching
+      suggestions = query ? suggestions.slice(0, 8) : suggestions.slice(0, 20);
+
+      if (suggestions.length === 0) {
+        dropdown.innerHTML = '<div class="search-select-item" style="opacity:0.5; cursor:default">ไม่พบสินค้า</div>';
+        dropdown.classList.add('active');
+        return;
+      }
+
+      dropdown.innerHTML = suggestions.map(function(p) {
+        return '<div class="search-select-item" onclick="selectAdminProductSuggestion(\'' + p.productId + '\', \'' + p.name.replace(/'/g, "\\'") + '\')">' +
+               '<div style="font-weight:600">' + p.name + '</div>' +
+               '<div style="font-size:0.75rem; color:var(--text3)">ID: ' + p.productId + ' | ' + (p.categoryId || '-') + '</div>' +
+               '</div>';
+      }).join('');
+      dropdown.classList.add('active');
+    }
+
+    document.addEventListener('click', function(e) {
+      var dropdown = document.getElementById('adminProductSuggestions');
+      var searchInput = document.getElementById('adminProductSearch');
+      if (dropdown && dropdown.classList.contains('active') && searchInput) {
+        if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) {
+          dropdown.classList.remove('active');
+        }
+      }
+    });
+
+    function selectAdminProductSuggestion(id, name) {
+      document.getElementById('adminProductSearch').value = name;
+      document.getElementById('adminProductSuggestions').classList.remove('active');
+      filterAdminProducts();
+    }
+
+    function filterAdminProducts() {
+      var query = document.getElementById('adminProductSearch').value.toLowerCase();
+      var cat = document.getElementById('adminProductCatFilter').value;
+      var stock = document.getElementById('adminProductStockFilter').value;
+
+      filteredAdminProducts = allAdminProducts.filter(function(p) {
+        var matchText = !query || p.name.toLowerCase().includes(query) || String(p.productId).toLowerCase().includes(query);
+        var matchCat = (cat === 'all') || (p.categoryId === cat);
+        
+        var s = Number(p.stock) || 0;
+        var min = Number(p.minStock) || 5;
+        var matchStock = true;
+        if (stock === 'low') matchStock = (s > 0 && s <= min);
+        else if (stock === 'out') matchStock = (s <= 0);
+        else if (stock === 'active') matchStock = (p.status === 'active');
+        else if (stock === 'inactive') matchStock = (p.status === 'inactive');
+
+        return matchText && matchCat && matchStock;
+      });
+
+      renderAdminProducts(1);
     }
 
     function renderAdminProducts(pageNum) {
@@ -1341,18 +1457,18 @@
       var body = document.getElementById('productsBody');
       var container = document.getElementById('productsPagination');
       
-      if (allAdminProducts.length === 0) { 
-        body.innerHTML = '<tr><td colspan="8" class="text-center" style="padding:2rem;color:var(--text3)">ยังไม่มีสินค้า</td></tr>'; 
+      if (filteredAdminProducts.length === 0) { 
+        body.innerHTML = '<tr><td colspan="8" class="text-center" style="padding:2rem;color:var(--text3)">ไม่พบสินค้าที่ตรงตามเงื่อนไข</td></tr>'; 
         if(container) container.innerHTML = '';
         return; 
       }
       
-      var totalPages = Math.ceil(allAdminProducts.length / adminProductsPageSize);
+      var totalPages = Math.ceil(filteredAdminProducts.length / adminProductsPageSize);
       if (currentAdminProductsPage > totalPages) currentAdminProductsPage = totalPages;
       if (currentAdminProductsPage < 1) currentAdminProductsPage = 1;
       
       var startIdx = (currentAdminProductsPage - 1) * adminProductsPageSize;
-      var paginated = allAdminProducts.slice(startIdx, startIdx + adminProductsPageSize);
+      var paginated = filteredAdminProducts.slice(startIdx, startIdx + adminProductsPageSize);
       
       body.innerHTML = paginated.map(function (p) {
         var stock = Number(p.stock) || 0;

@@ -673,6 +673,40 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   font-size: 0.85rem;
 }
 
+/* Minimal variant for Storefront Header */
+.search-select-wrapper.minimal {
+  max-width: 140px;
+  background: transparent;
+  border: none;
+}
+.search-select-wrapper.minimal .search-select-input {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 99px;
+  height: 34px;
+  padding: 0 0.75rem;
+  font-size: 0.78rem;
+  color: var(--text3);
+  width: 100%;
+}
+.search-select-wrapper.minimal .search-select-input:focus {
+  background: rgba(251,191,36,0.1);
+  border-color: rgba(251,191,36,0.3);
+  color: var(--primary);
+}
+.search-select-wrapper.minimal .search-select-dropdown {
+  width: 220px;
+  left: 0;
+  top: calc(100% + 5px);
+  background: rgba(15,15,30,0.98);
+  backdrop-filter: blur(15px);
+  border-color: var(--primary);
+}
+.search-select-wrapper.minimal .search-select-item {
+  padding: 0.6rem 0.875rem;
+  font-size: 0.85rem;
+}
+
 /* ─── Skeleton Loaders ─────────────────────────────── */
 .skeleton {
   background: linear-gradient(90deg, 

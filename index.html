@@ -45,6 +45,9 @@
             <option value="productId">รหัสสินค้า</option>
             <option value="description">รายละเอียด</option>
           </select>
+          <select id="headerCategoryFilter" class="search-select-minimal glass" onchange="onStoreCategoryChange(this.value)">
+            <option value="all">ทุกหมวดหมู่</option>
+          </select>
           <select id="stockFilter" class="search-select-minimal glass" onchange="renderProductGrid()">
             <option value="all">ทุกสถานะ</option>
             <option value="instock">มีในคลัง</option>
@@ -127,8 +130,7 @@
   <main id="view-store" class="view-section" style="display:block;">
 
     <div class="container" style="padding-top:2rem;">
-      <!-- Category Navigation -->
-      <div id="categoryNav" class="cat-filter" style="margin-bottom:2rem;"></div>
+      <!-- Product Grid -->
       <!-- Product Grid -->
       <div id="productGrid" class="product-grid">
         <div class="skeleton-card skeleton" style="border-radius:var(--radius);"></div>
