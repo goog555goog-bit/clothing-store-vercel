@@ -361,41 +361,44 @@ function handleSearchInput(val, e) {
   var q = (val || '').toLowerCase().trim();
   currentSuggestionIdx = -1; 
 
-  if (!q) {
-    dropdown.classList.remove('active');
-    renderProductGrid(); // Reset grid if empty
-    return;
-  }
-
-  // Wait 400ms after typing before searching
+  // Wait 400ms after typing before searching (or fast if empty)
   searchDebounceTimer = setTimeout(function() {
-    // Show 8 products: matches if typing
-    var matches = allProducts.filter(function(p) {
-      var searchStr = ((p.name || '') + ' ' + (p.productId || '')).toLowerCase();
-      return searchStr.indexOf(q) !== -1;
-    }).slice(0, 8);
+    var matches = allProducts;
     
-    if (matches.length === 0) {
-      dropdown.classList.remove('active');
-      renderProductGrid(); // Also update grid to show "no results"
+    if (q) {
+      matches = allProducts.filter(function(p) {
+        var searchStr = ((p.name || '') + ' ' + (p.productId || '')).toLowerCase();
+        return searchStr.indexOf(q) !== -1;
+      });
+    }
+    
+    // Limits
+    var displayMatches = q ? matches.slice(0, 8) : matches.slice(0, 20);
+    
+    if (displayMatches.length === 0) {
+      dropdown.innerHTML = '<div class="suggestion-item" style="opacity:0.5; padding:1rem; text-align:center; cursor:default">ไม่พบสินค้า</div>';
+      dropdown.classList.add('active');
+      renderProductGrid(); 
       return;
     }
     
-    var headerText = 'ผลการค้นหา';
-    var headerIcon = 'search';
+    var headerText = q ? 'ผลการค้นหา' : 'รายการสินค้าแนะนำ';
+    var headerIcon = q ? 'search' : 'list';
     var headerHtml = '<div class="suggestion-header"><i data-lucide="' + headerIcon + '"></i><span>' + headerText + '</span></div>';
     
-    dropdown.innerHTML = headerHtml + matches.map(function(p, i) {
+    dropdown.innerHTML = headerHtml + displayMatches.map(function(p, i) {
       var name = (p.name || '').toString();
       var productId = (p.productId || '').toString();
       var displayName = name;
       var displayId = productId;
       
-      try {
-        var regex = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
-        displayName = name.replace(regex, '<span style="color:var(--primary); font-weight:800">$1</span>');
-        displayId = productId.replace(regex, '<span style="color:var(--primary); font-weight:800">$1</span>');
-      } catch(e) {}
+      if (q) {
+        try {
+          var regex = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+          displayName = name.replace(regex, '<span style="color:var(--primary); font-weight:800">$1</span>');
+          displayId = productId.replace(regex, '<span style="color:var(--primary); font-weight:800">$1</span>');
+        } catch(e) {}
+      }
 
       return '<div class="suggestion-item" data-index="' + i + '" onclick="selectSuggestion(\'' + productId + '\')">'
         + '<i data-lucide="package" style="width:14px;height:14px;opacity:0.6"></i>'
@@ -405,9 +408,9 @@ function handleSearchInput(val, e) {
     }).join('');
     
     dropdown.classList.add('active');
-    renderProductGrid(); // Automatically filter the main grid as well
+    renderProductGrid(); 
     refreshIcons();
-  }, 400); // 400ms debounce delay
+  }, q ? 400 : 50);
 }
 
 
