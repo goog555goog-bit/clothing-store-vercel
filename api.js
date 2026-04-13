@@ -156,6 +156,7 @@ var API = (function () {
     rejectOrder: function(id, _, comment) { return this.rejectRequest(id, comment); },
 
     signForReceipt: function (requestId, signature) { return this._call('signForReceipt', { requestId: requestId, signature: signature }); },
+    setReady: function (requestId) { return this._call('setReady', { requestId: requestId }); },
     dispatchRequest: function (requestId) { return this._call('dispatchRequest', { requestId: requestId }); },
     
     // ─── OTHERS ───────────────────────────────────────────────

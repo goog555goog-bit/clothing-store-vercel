@@ -501,6 +501,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 .badge-pending  { background: rgba(251,191,36,0.15); color: var(--primary); border: 1px solid rgba(251,191,36,0.3); }
 .badge-approved { background: rgba(16,185,129,0.2); color: #34d399;  border: 1px solid rgba(16,185,129,0.4); }
 .badge-complete { background: rgba(59,130,246,0.2); color: #60a5fa;  border: 1px solid rgba(59,130,246,0.4); }
+.badge-ready    { background: rgba(251,191,36,0.15); color: var(--primary); border: 1px solid rgba(251,191,36,0.3); }
 .badge-rejected { background: rgba(239,68,68,0.2);  color: #f87171;  border: 1px solid rgba(239,68,68,0.4);  }
 
 /* ─── Order Card ───────────────────────────────────── */

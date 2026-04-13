@@ -1517,15 +1517,21 @@
       var paginated = allAdminOrders.slice(startIdx, startIdx + adminOrdersPageSize);
       
       body.innerHTML = paginated.map(function (o) {
-        var bc = 'badge-pending';
-        if (o.status === 'Approved' || o.status === 'Dispatched') bc = 'badge-approved';
-        if (o.status === 'Received') bc = 'badge-complete';
-        if (o.status === 'Rejected') bc = 'badge-rejected';
+         var bc = 'badge-pending';
+         if (o.status === 'Approved' || o.status === 'Dispatched') bc = 'badge-approved';
+         if (o.status === 'READY' || o.status === 'Ready') bc = 'badge-ready';
+         if (o.status === 'Received') bc = 'badge-complete';
+         if (o.status === 'Rejected') bc = 'badge-rejected';
 
         var actions = '';
         if (o.status === 'Pending') {
           actions = '<button class="btn btn-sm btn-accent" onclick="doApprove(\'' + o.orderId + '\', \'' + (o.employeeName || o.employeeId) + '\')"><i data-lucide="check" style="width:14px;height:14px"></i> อนุมัติ</button>';
         } else if (o.status === 'Approved') {
+          actions = '<div class="flex gap-1">' +
+            '<button class="btn btn-sm btn-warning" onclick="doReady(\'' + o.orderId + '\')"><i data-lucide="package-check" style="width:14px;height:14px"></i> จัดเสร็จแล้ว</button>' +
+            '<button class="btn btn-sm btn-primary" onclick="doDispatch(\'' + o.orderId + '\')"><i data-lucide="package" style="width:14px;height:14px"></i> จ่ายทันที</button>' +
+            '</div>';
+        } else if (o.status === 'Ready') {
           actions = '<button class="btn btn-sm btn-primary" onclick="doDispatch(\'' + o.orderId + '\')"><i data-lucide="package" style="width:14px;height:14px"></i> จ่ายของ</button>';
         } else if (o.status === 'Dispatched') {
           actions = '<button class="btn btn-primary btn-sm" onclick="openSignatureModal(\'' + o.orderId + '\')"><i data-lucide="edit-3" style="width:14px;height:14px"></i> เซ็นรับของ</button>';
@@ -1611,8 +1617,8 @@
         }
 
         // Add Status Timeline
-        var statuses = ['Pending', 'Approved', 'Dispatched', 'Received'];
-        var labels = ['รออนุมัติ', 'อนุมัติแล้ว', 'จ่ายของ', 'รับของแล้ว'];
+        var statuses = ['Pending', 'Approved', 'Ready', 'Dispatched', 'Received'];
+        var labels = ['รออนุมัติ', 'อนุมัติแล้ว', 'จัดเสร็จ', 'จ่ายของ', 'รับของแล้ว'];
         var currentIdx = statuses.indexOf(order.status);
         if (order.status === 'Rejected') {
            html = '<div class="badge badge-rejected" style="width:100%;padding:1rem;margin-bottom:1rem;justify-content:center">🚫 รายการนี้ถูกปฏิเสธ: ' + (order.reason || 'ไม่ระบุเหตุผล') + '</div>' + html;
@@ -1622,7 +1628,9 @@
              var active = idx <= currentIdx ? 'active' : '';
              var icon = 'circle';
              if (idx < currentIdx) icon = 'check-circle';
-             else if (idx === currentIdx) icon = 'clock';
+             else if (idx === currentIdx) {
+               icon = (st === 'Ready') ? 'package-check' : 'clock';
+             }
              timelineHtml += '<div class="status-step ' + active + '"><div class="status-dot"><i data-lucide="' + icon + '" style="width:16px;height:16px"></i></div><div class="status-label">' + labels[idx] + '</div></div>';
            });
            timelineHtml += '</div>';
@@ -1741,7 +1749,15 @@
 
     function doDispatch(id) {
       if (!confirm('ยืนยันการจ่ายพัสดุและตัดสต๊อกใบเบิก ' + id + ' ?')) return;
-      API.dispatchRequest(id).then(function () { showToast('ส่งพัสดุเรียบร้อย', 'success'); loadAdminOrders(); });
+      API.dispatchRequest(id).then(function () { showToast('ส่งพัสดุเรียบร้อย', 'success'); loadAdminOrders(); }).catch(function(err) { showToast('ข้อผิดพลาด: ' + err, 'error'); });
+    }
+
+    function doReady(id) {
+      showToast('กำลังส่งแจ้งเตือน...', 'info');
+      API.setReady(id).then(function() { 
+        showToast('จัดสำนักเสร็จแล้วและแจ้งเตือนผู้เบิกเรียบร้อย', 'success'); 
+        loadAdminOrders(); 
+      }).catch(function(err) { showToast('ข้อผิดพลาด: ' + err, 'error'); });
     }
 
     // ─── EMPLOYEES ────────────────────────────────────────
