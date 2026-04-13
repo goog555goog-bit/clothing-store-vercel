@@ -34,6 +34,9 @@ window.onload = function() {
   checkAuth();
   initCartSwipe();
   initMouseGlow();
+};
+
+function checkAuth() {
   updateUserUI();
   
   // Robust API Initialization - safer retry logic
@@ -67,7 +70,7 @@ window.onload = function() {
       if (typeof Onboarding !== 'undefined') Onboarding.start();
     }
   }, 1500);
-};
+}
 
 function updateUserUI() {
   var nameEl = document.getElementById('navUserName');
