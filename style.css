@@ -997,3 +997,120 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 .premium-table tr:hover td {
   background: rgba(251,191,36,0.03); color: var(--text);
 }
+
+/* ─── CATEGORY PILLS (Horizontal Scroll UX) ───────── */
+.categories-container {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding: 0.5rem 0.25rem;
+  margin-bottom: 2rem;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.categories-container::-webkit-scrollbar {
+  display: none;
+}
+
+.category-pill {
+  white-space: nowrap;
+  padding: 0.65rem 1.4rem;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  color: var(--text3);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  font-family: inherit;
+}
+.category-pill:hover {
+  border-color: var(--primary);
+  color: var(--text1);
+  transform: translateY(-2px);
+}
+.category-pill.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #000;
+  font-weight: 700;
+  box-shadow: 0 4px 15px rgba(251, 191, 36, 0.25);
+}
+
+/* ─── BUTTON MICRO-INTERACTIONS (Haptic Feel) ──────── */
+button, .btn, .nav-item, .category-pill, .cart-item-btn, .mobile-nav-item {
+  transition: transform 0.1s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+button:active, .btn:active, .nav-item:active, .category-pill:active, .cart-item-btn:active, .mobile-nav-item:active {
+  transform: scale(0.95);
+}
+
+/* ─── INVENTORY HEATMAP (Visual Cues) ─────────────── */
+.stock-safe { color: #10b981; }
+.stock-warning { color: #f59e0b; font-weight: 700; }
+.stock-danger { color: #ef4444; font-weight: 800; animation: pulse-slow 2s infinite; }
+
+@keyframes pulse-slow {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+tr.row-stock-danger { background: rgba(239, 68, 68, 0.04) !important; }
+tr.row-stock-warning { background: rgba(245, 158, 11, 0.02) !important; }
+
+/* ─── STATUS TIMELINE (Visual Order Track) ────────── */
+.status-timeline {
+  display: flex;
+  justify-content: space-between;
+  margin: 1.5rem 0;
+  position: relative;
+  padding: 0 1rem;
+}
+.status-timeline::before {
+  content: "";
+  position: absolute;
+  top: 15px;
+  left: 10%;
+  right: 10%;
+  height: 2px;
+  background: var(--border);
+  z-index: 0;
+}
+.status-step {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+.status-dot {
+  width: 32px;
+  height: 32px;
+  background: var(--bg3);
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text3);
+  transition: all 0.3s;
+}
+.status-step.active .status-dot {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #000;
+  box-shadow: 0 0 15px rgba(251, 191, 36, 0.4);
+}
+.status-step.active .status-label {
+  color: var(--primary);
+  font-weight: 700;
+}
+.status-label {
+  font-size: 0.7rem;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}

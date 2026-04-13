@@ -318,15 +318,16 @@ function loadStorefrontData() {
   });
 }
 
-// Global state for suggestion index
+// Global state for suggestion index and debounce
 var currentSuggestionIdx = -1;
+var searchDebounceTimer = null;
 
 function handleSearchInput(val, e) {
   var dropdown = document.getElementById('searchSuggestions');
   var input = document.getElementById('searchInput');
   if (!dropdown) return;
   
-  // Handle Keyboard Navigation
+  // Handle Keyboard Navigation (Keep synchronous for responsiveness)
   if (e && e.key && (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter')) {
     var items = dropdown.querySelectorAll('.suggestion-item');
     if (items.length > 0) {
@@ -346,52 +347,59 @@ function handleSearchInput(val, e) {
     }
   }
 
+  // Clear existing timer for debouncing
+  if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
+  
   var q = (val || '').toLowerCase().trim();
   currentSuggestionIdx = -1; 
 
   if (!q) {
     dropdown.classList.remove('active');
+    renderProductGrid(); // Reset grid if empty
     return;
   }
-  
-  // Show 8 products: matches if typing
-  var matches = allProducts.filter(function(p) {
-    var searchStr = ((p.name || '') + ' ' + (p.productId || '')).toLowerCase();
-    return searchStr.indexOf(q) !== -1;
-  }).slice(0, 8);
-  
-  if (matches.length === 0) {
-    dropdown.classList.remove('active');
-    return;
-  }
-  
-  var headerText = q ? 'ผลการค้นหา' : 'สินค้าแนะนำ';
-  var headerIcon = q ? 'search' : 'star';
-  var headerHtml = '<div class="suggestion-header"><i data-lucide="' + headerIcon + '"></i><span>' + headerText + '</span></div>';
-  
-  dropdown.innerHTML = headerHtml + matches.map(function(p, i) {
-    var name = (p.name || '').toString();
-    var productId = (p.productId || '').toString();
-    var displayName = name;
-    var displayId = productId;
+
+  // Wait 400ms after typing before searching
+  searchDebounceTimer = setTimeout(function() {
+    // Show 8 products: matches if typing
+    var matches = allProducts.filter(function(p) {
+      var searchStr = ((p.name || '') + ' ' + (p.productId || '')).toLowerCase();
+      return searchStr.indexOf(q) !== -1;
+    }).slice(0, 8);
     
-    if (q) {
+    if (matches.length === 0) {
+      dropdown.classList.remove('active');
+      renderProductGrid(); // Also update grid to show "no results"
+      return;
+    }
+    
+    var headerText = 'ผลการค้นหา';
+    var headerIcon = 'search';
+    var headerHtml = '<div class="suggestion-header"><i data-lucide="' + headerIcon + '"></i><span>' + headerText + '</span></div>';
+    
+    dropdown.innerHTML = headerHtml + matches.map(function(p, i) {
+      var name = (p.name || '').toString();
+      var productId = (p.productId || '').toString();
+      var displayName = name;
+      var displayId = productId;
+      
       try {
         var regex = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
         displayName = name.replace(regex, '<span style="color:var(--primary); font-weight:800">$1</span>');
         displayId = productId.replace(regex, '<span style="color:var(--primary); font-weight:800">$1</span>');
       } catch(e) {}
-    }
 
-    return '<div class="suggestion-item" data-index="' + i + '" onclick="selectSuggestion(\'' + productId + '\')">'
-      + '<i data-lucide="package" style="width:14px;height:14px;opacity:0.6"></i>'
-      + '<span>' + displayName + '</span>'
-      + '<small style="margin-left:auto;opacity:0.5">' + displayId + '</small>'
-      + '</div>';
-  }).join('');
-  
-  dropdown.classList.add('active');
-  refreshIcons();
+      return '<div class="suggestion-item" data-index="' + i + '" onclick="selectSuggestion(\'' + productId + '\')">'
+        + '<i data-lucide="package" style="width:14px;height:14px;opacity:0.6"></i>'
+        + '<span>' + displayName + '</span>'
+        + '<small style="margin-left:auto;opacity:0.5">' + displayId + '</small>'
+        + '</div>';
+    }).join('');
+    
+    dropdown.classList.add('active');
+    renderProductGrid(); // Automatically filter the main grid as well
+    refreshIcons();
+  }, 400); // 400ms debounce delay
 }
 
 
@@ -412,34 +420,39 @@ function selectSuggestion(pid) {
 }
 
 // ─── BRANCH SEARCH LOGIC ──────────────────────────────────────
+var branchDebounceTimer = null;
 
 function handleBranchSearch(val) {
   var dropdown = document.getElementById('branchSuggestions');
   if (!dropdown) return;
   
+  if (branchDebounceTimer) clearTimeout(branchDebounceTimer);
+
   var q = (val || '').toLowerCase().trim();
   if (!q) {
     dropdown.classList.remove('active');
     return;
   }
   
-  var matches = allBranches.filter(function(b) {
-    return (b.name || b).toLowerCase().indexOf(q) !== -1;
-  }).slice(0, 5);
-  
-  if (matches.length > 0) {
-    dropdown.innerHTML = matches.map(function(b) {
-      var name = b.name || b;
-      return '<div class="suggestion-item" onclick="selectBranch(\'' + name.replace(/'/g, "\\'") + '\')">'
-        + '<i data-lucide="map-pin" style="width:14px;height:14px;opacity:0.6"></i>'
-        + '<span>' + name + '</span>'
-        + '</div>';
-    }).join('');
-    dropdown.classList.add('active');
-    refreshIcons();
-  } else {
-    dropdown.classList.remove('active');
-  }
+  branchDebounceTimer = setTimeout(function() {
+    var matches = allBranches.filter(function(b) {
+      return (b.name || b).toLowerCase().indexOf(q) !== -1;
+    }).slice(0, 5);
+    
+    if (matches.length > 0) {
+      dropdown.innerHTML = matches.map(function(b) {
+        var name = b.name || b;
+        return '<div class="suggestion-item" onclick="selectBranch(\'' + name.replace(/'/g, "\\'") + '\')">'
+          + '<i data-lucide="map-pin" style="width:14px;height:14px;opacity:0.6"></i>'
+          + '<span>' + name + '</span>'
+          + '</div>';
+      }).join('');
+      dropdown.classList.add('active');
+      refreshIcons();
+    } else {
+      dropdown.classList.remove('active');
+    }
+  }, 300); // 300ms for branch search
 }
 
 function selectBranch(name) {

@@ -1273,13 +1273,20 @@
       var paginated = allAdminProducts.slice(startIdx, startIdx + adminProductsPageSize);
       
       body.innerHTML = paginated.map(function (p) {
-        return '<tr>'
+        var stock = Number(p.stock) || 0;
+        var min = Number(p.minStock) || 5;
+        var stockClass = 'stock-safe';
+        var rowClass = '';
+        if (stock <= 0) { stockClass = 'stock-danger'; rowClass = 'row-stock-danger'; }
+        else if (stock <= min) { stockClass = 'stock-warning'; rowClass = 'row-stock-warning'; }
+
+        return '<tr class="' + rowClass + '">'
           + '<td class="hide-mobile" style="font-size:0.8rem;color:var(--text3)">' + escapeHTML(p.productId) + '</td>'
           + '<td style="font-weight:500">' + escapeHTML(p.name) + '</td>'
           + '<td class="hide-mobile">' + escapeHTML(p.categoryId || '-') + '</td>'
           + '<td>฿' + Number(p.price).toLocaleString() + '</td>'
-          + '<td class="hide-mobile">' + Number(p.stock) + '</td>'
-          + '<td><span class="badge ' + (p.status === 'active' ? 'badge-approved' : 'badge-rejected') + '">' + (p.status === 'active' ? 'เปิด' : 'ปิด') + '</span></td>'
+          + '<td class="hide-mobile ' + stockClass + '">' + stock + '</td>'
+          + '<td><span class="badge ' + (p.status === 'active' ? 'badge-approved' : 'badge-rejected') + '" style="cursor:pointer" onclick="toggleProductStatus(\'' + p.productId + '\', \'' + p.status + '\')">' + (p.status === 'active' ? 'เปิด' : 'ปิด') + '</span></td>'
           + '<td><button class="btn btn-sm btn-ghost" onclick="editProduct(\'' + escapeHTML(p.productId) + '\')"><i data-lucide="edit" style="width:14px;height:14px"></i></button>'
           + '<button class="btn btn-sm btn-ghost hide-mobile" style="color:var(--danger)" onclick="delProduct(\'' + escapeHTML(p.productId) + '\')"><i data-lucide="trash-2" style="width:14px;height:14px"></i></button></td>'
           + '</tr>';
@@ -1410,6 +1417,16 @@
       }).finally(function() {
         btn.innerHTML = oldHtml;
         btn.disabled = false;
+      });
+    }
+
+    function toggleProductStatus(id, current) {
+      var newStatus = current === 'active' ? 'inactive' : 'active';
+      var p = allAdminProducts.find(function(x){ return String(x.productId) === String(id); });
+      if (!p) return;
+      var data = Object.assign({}, p, { status: newStatus });
+      API.manageProduct('update', data).then(function(res) {
+        if (res.success) { showToast('อัปเดตสถานะแล้ว', 'success'); loadProducts(); }
       });
     }
 
@@ -1591,6 +1608,25 @@
             });
             html += '</ul></div>';
           }
+        }
+
+        // Add Status Timeline
+        var statuses = ['Pending', 'Approved', 'Dispatched', 'Received'];
+        var labels = ['รออนุมัติ', 'อนุมัติแล้ว', 'จ่ายของ', 'รับของแล้ว'];
+        var currentIdx = statuses.indexOf(order.status);
+        if (order.status === 'Rejected') {
+           html = '<div class="badge badge-rejected" style="width:100%;padding:1rem;margin-bottom:1rem;justify-content:center">🚫 รายการนี้ถูกปฏิเสธ: ' + (order.reason || 'ไม่ระบุเหตุผล') + '</div>' + html;
+        } else {
+           var timelineHtml = '<div class="status-timeline">';
+           statuses.forEach(function(st, idx) {
+             var active = idx <= currentIdx ? 'active' : '';
+             var icon = 'circle';
+             if (idx < currentIdx) icon = 'check-circle';
+             else if (idx === currentIdx) icon = 'clock';
+             timelineHtml += '<div class="status-step ' + active + '"><div class="status-dot"><i data-lucide="' + icon + '" style="width:16px;height:16px"></i></div><div class="status-label">' + labels[idx] + '</div></div>';
+           });
+           timelineHtml += '</div>';
+           html = timelineHtml + html;
         }
 
         body.innerHTML = html;

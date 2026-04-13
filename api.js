@@ -12,8 +12,11 @@ var API = (function () {
   var apiObj = {
     isPending: false,
     
-    _call: function (action, data, useCache = false, invalidateGroups = []) {
+    _call: function (action, data, useCache, invalidateGroups) {
       var self = this;
+      var maxRetries = 2; // Maximum 2 retries (3 total attempts)
+      useCache = !!useCache;
+      invalidateGroups = invalidateGroups || [];
       
       // 1. Double-Submission Protection (Locking)
       var lockKey = action + JSON.stringify(data || {});
@@ -23,7 +26,7 @@ var API = (function () {
       }
       if (!useCache) _locks.add(lockKey);
       
-      // 1. Check Cache
+      // 2. Check Cache
       if (useCache && _cache[action] && (Date.now() - _cache[action].time < _cacheTTL)) {
         console.log('⚡ API Cache Hit [' + action + ']');
         return Promise.resolve(_cache[action].data);
@@ -44,60 +47,74 @@ var API = (function () {
       self.isPending = true;
 
       return new Promise(function (resolve, reject) {
-        // Implementation of timeout - Dashboard/Reports get more time
-        var timeoutMs = 30000; // Default 30s
-        if (action.indexOf('Report') !== -1 || action.indexOf('Dashboard') !== -1 || action.indexOf('Trends') !== -1) {
-          timeoutMs = 45000; // 45s for heavy data
+        function executeAttempt(attempt) {
+          // Dynamic Timeout - Dashboard/Reports get more time
+          var timeoutMs = 30000; // Default 30s
+          if (action.indexOf('Report') !== -1 || action.indexOf('Dashboard') !== -1 || action.indexOf('Trends') !== -1) {
+            timeoutMs = 45000; // 45s for heavy data
+          }
+
+          var controller = new AbortController();
+          var timeoutId = setTimeout(function() {
+            controller.abort();
+          }, timeoutMs);
+
+          fetch(GAS_URL, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify(payload),
+            signal: controller.signal
+          })
+          .then(function (response) {
+            clearTimeout(timeoutId);
+            if (!useCache) _locks.delete(lockKey);
+            return response.json();
+          })
+          .then(function (res) {
+            self.isPending = false;
+            if (res && res.success) {
+              // Save to Cache if needed
+              if (useCache) {
+                _cache[action] = { data: res, time: Date.now() };
+              }
+              // Invalidate Groups
+              if (invalidateGroups && invalidateGroups.length > 0) {
+                invalidateGroups.forEach(function(g) { self.invalidateCache(g); });
+              }
+              resolve(res);
+            } else {
+              var msg = res ? (res.message || res.error || 'เซิร์ฟเวอร์แจ้งข้อผิดพลาด') : 'ไม่ได้รับข้อมูลที่ถูกต้อง';
+              reject(msg);
+            }
+          })
+          .catch(function (err) {
+            if (!useCache) _locks.delete(lockKey);
+            clearTimeout(timeoutId);
+
+            // Retry for selective transient errors (timeouts or network failures)
+            var isTransient = err.name === 'AbortError' || (err.message && err.message.indexOf('NetworkError') !== -1) || (err.message && err.message.indexOf('Failed to fetch') !== -1);
+            
+            if (isTransient && attempt < maxRetries) {
+              console.warn('[API Retry] Attempt ' + (attempt + 1) + ' for action: ' + action);
+              var backoff = (attempt + 1) * 1000;
+              setTimeout(function() { executeAttempt(attempt + 1); }, backoff);
+            } else {
+              self.isPending = false;
+              var friendlyMsg = "การเชื่อมต่อขัดข้อง กรุณาลองใหม่อีกครั้ง";
+              if (err.name === 'AbortError') {
+                friendlyMsg = "เซิร์ฟเวอร์ประมวลผลนานเกินไป (Timeout) หรืออินเทอร์เน็ตไม่เสถียร";
+              } else if (err.message && err.message.indexOf('NetworkError') !== -1) {
+                friendlyMsg = "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ (Network Error)";
+              } else if (typeof err === 'string') {
+                friendlyMsg = err;
+              }
+              console.error('API Error [' + action + ']:', err);
+              reject(friendlyMsg);
+            }
+          });
         }
 
-        var controller = new AbortController();
-        var timeoutId = setTimeout(function() {
-          controller.abort();
-          self.isPending = false;
-          reject('Request timeout (server not responding in ' + (timeoutMs/1000) + 's). Please try again.');
-        }, timeoutMs);
-
-        fetch(GAS_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify(payload),
-          signal: controller.signal
-        })
-        .then(function (res) {
-          if (!useCache) _locks.delete(lockKey);
-          self.isPending = false;
-          if (res && res.success) {
-            // 2. Save to Cache if needed
-            if (useCache) {
-              _cache[action] = { data: res, time: Date.now() };
-            }
-            // 3. Invalidate Groups
-            if (invalidateGroups && invalidateGroups.length > 0) {
-              invalidateGroups.forEach(function(g) { self.invalidateCache(g); });
-            }
-            resolve(res);
-          } else {
-            var msg = res ? (res.message || res.error || 'เซิร์ฟเวอร์แจ้งข้อผิดพลาด') : 'ไม่ได้รับข้อมูลที่ถูกต้อง';
-            reject(msg);
-          }
-        })
-        .catch(function (err) {
-          if (!useCache) _locks.delete(lockKey);
-          clearTimeout(timeoutId);
-          self.isPending = false;
-          
-          let friendlyMsg = "การเชื่อมต่อขัดข้อง กรุณาลองใหม่อีกครั้ง";
-          if (err.name === 'AbortError') {
-            friendlyMsg = "การเชื่อมต่อใช้เวลานานเกินไป (Timeout) กรุณาตรวจสอบอินเทอร์เน็ต";
-          } else if (err.message && err.message.indexOf('NetworkError') !== -1) {
-            friendlyMsg = "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ (Network Error)";
-          } else if (typeof err === 'string') {
-            friendlyMsg = err;
-          }
-
-          console.error('API Error [' + action + ']:', err);
-          reject(friendlyMsg);
-        });
+        executeAttempt(0);
       });
     },
 
