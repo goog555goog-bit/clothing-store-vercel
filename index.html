@@ -427,6 +427,24 @@
   <script src="api.js"></script>
   <script src="cart.js"></script>
   <script src="app.js"></script>
+  <!-- Back to Top Button -->
+  <button id="backToTopBtn" class="btn btn-primary" style="position:fixed; bottom:5rem; right:1.5rem; border-radius:50%; width:50px; height:50px; display:none; align-items:center; justify-content:center; box-shadow:var(--shadow-lg); z-index:1200; padding:0; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1)" onclick="window.scrollTo({top:0, behavior:'smooth'})" title="กลับขึ้นด้านบน">
+    <i data-lucide="arrow-up" style="width:24px;height:24px"></i>
+  </button>
+  <script>
+    window.addEventListener('scroll', function() {
+      var btn = document.getElementById('backToTopBtn');
+      if (btn) {
+        if (window.scrollY > 400) {
+          btn.style.display = 'flex';
+          btn.style.opacity = '1';
+        } else {
+          btn.style.display = 'none';
+          btn.style.opacity = '0';
+        }
+      }
+    });
+  </script>
 </body>
 
 </html>

@@ -200,9 +200,16 @@ var API = (function () {
       return this._call('swapTeamLead', data, false, ['getTeams']); 
     },
     
+    // --- BRANCHES ---
+    getBranches: function() { return this._call('getBranches', {}, true); },
+    manageBranch: function(op, data) { return this._call('manageBranch', { op: op, data: data }, false, ['getBranches']); },
+    
+    // --- SETTINGS ---
+    getSystemSettings: function() { return this._call('getSystemSettings', {}, true); },
+    saveSystemSettings: function(settings) { return this._call('saveSystemSettings', { settings: settings }, false, ['getSystemSettings']); },
+    
     // Aliases for better DX
-    receiveStock: function(id, qty) { return this.updateStock(id, qty); },
-    addToSubStock: function(data) { return this.receiveSubStock(data); }
+    addToSubStock: function(data) { return this.receiveSubStock(data.productId, data.qty); }
 
   };
   

@@ -7,6 +7,7 @@
   <title>Admin Panel - Premium</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/bwip-js@3.0.4/dist/bwip-js-min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
   <script src="https://unpkg.com/html5-qrcode" defer></script>
@@ -92,6 +93,8 @@
           จัดการทีมช่าง</button>
         <button class="tab" id="tab-settings" onclick="adminNav('settings', this)"><i data-lucide="settings"></i>
           ตั้งค่าระบบ</button>
+        <button class="tab" id="tab-branches" onclick="adminNav('branches', this)"><i data-lucide="building-2"></i>
+          จัดการสาขา</button>
         <button class="tab" onclick="adminNav('audit', this)"><i data-lucide="activity"></i> ประวัติกิจกรรม</button>
       </div>
     </div>
@@ -243,7 +246,18 @@
     <div id="p-orders" class="admin-page" style="display:none">
       <div class="flex items-center justify-between" style="margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem">
         <h3>📋 รายการใบเบิกทั้งหมด</h3>
-        <button class="btn btn-outline btn-sm" onclick="downloadCSV('Orders')">📥 Export CSV</button>
+        <div class="flex gap-2">
+          <select id="adminOrderFilter" class="input btn-sm" onchange="loadOrdersBasedOnFilter()" style="font-size:0.85rem; padding: 0.4rem 0.8rem; height: 38px;">
+            <option value="all">ทุกสถานะ</option>
+            <option value="Pending">รออนุมัติ</option>
+            <option value="Approved">อนุมัติแล้ว</option>
+            <option value="Ready">จัดเสร็จแล้ว</option>
+            <option value="Dispatched">จ่ายของแล้ว</option>
+            <option value="Received">รับของแล้ว</option>
+            <option value="Rejected">ไม่อนุมัติ</option>
+          </select>
+          <button class="btn btn-outline btn-sm" onclick="downloadCSV('Orders')">📥 Export CSV</button>
+        </div>
       </div>
       <div class="table-wrap">
         <table>
@@ -437,6 +451,29 @@
         </form>
       </div>
     </section>
+
+    <!-- BRANCHES SECTION -->
+    <section id="p-branches" class="admin-page" style="display:none">
+      <div class="flex justify-between items-center" style="margin-bottom:1.5rem">
+        <h2 style="margin:0;display:flex;align-items:center;gap:0.5rem"><i data-lucide="building-2"></i> จัดการสาขา (Branches)</h2>
+        <button class="btn btn-accent" onclick="openBranchModal()"><i data-lucide="plus"></i> เพิ่มสาขาใหม่</button>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>รหัสสาขา</th>
+                <th>ชื่อสาขา</th>
+                <th>สถานะ</th>
+                <th>จัดการ</th>
+              </tr>
+            </thead>
+            <tbody id="branchesBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
   </div>
 
   <!-- แถบเมนูด้านล่างสำหรับมือถือ (Admin) -->
@@ -517,6 +554,49 @@
       <div class="modal-footer">
         <button class="btn btn-outline" onclick="closeProductModal()">ยกเลิก</button>
         <button id="saveProductBtn" class="btn btn-primary" onclick="saveProduct()">บันทึก</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BARCODE MODAL -->
+  <div id="barcodeModal" class="modal-overlay" onclick="if(event.target===this) closeBarcodeModal()">
+    <div class="modal" style="max-width:350px">
+      <div class="modal-header">
+        <div style="font-weight:600">บาร์โค้ดสินค้า</div>
+        <button class="btn btn-ghost btn-sm" onclick="closeBarcodeModal()">✕</button>
+      </div>
+      <div class="modal-body text-center" style="padding:2rem">
+        <canvas id="barcodeCanvas" style="max-width:100%"></canvas>
+        <div id="barcodeLabel" style="margin-top:1rem; font-weight:700; font-size:1.1rem; color:var(--text1)"></div>
+        <p style="font-size:0.8rem; color:var(--text3); margin-top:0.5rem">รหัสสินค้าสำหรับพิมพ์ติดพัสดุ</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary w-full" onclick="printBarcode()"><i data-lucide="printer"></i> พิมพ์บาร์โค้ด</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD/EDIT BRANCH MODAL -->
+  <div id="branchModal" class="modal-overlay" onclick="if(event.target===this) closeBranchModal()">
+    <div class="modal" style="max-width:350px">
+      <div class="modal-header">
+        <div id="branchModalTitle" style="font-weight:600">จัดการสาขา</div>
+        <button class="btn btn-ghost btn-sm" onclick="closeBranchModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group"><label class="form-label">รหัสสาขา *</label><input id="bf-id" class="form-input" placeholder="BR-001"></div>
+        <div class="form-group"><label class="form-label">ชื่อสาขา *</label><input id="bf-name" class="form-input" placeholder="ชื่อสาขา"></div>
+        <div class="form-group">
+          <label class="form-label">สถานะ</label>
+          <select id="bf-status" class="input w-full">
+            <option value="active">เปิดใช้งาน</option>
+            <option value="inactive">ปิดใช้งาน</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeBranchModal()">ยกเลิก</button>
+        <button id="saveBranchBtn" class="btn btn-primary" onclick="saveBranch()">บันทึก</button>
       </div>
     </div>
   </div>
@@ -976,6 +1056,8 @@
         'inventory': loadInventory,
         'reports': loadReports,
         'employees': loadAdminEmployees,
+        'teams': loadTeams,
+        'branches': loadBranches,
         'audit': loadAuditLogs,
         'settings': loadSystemSettings
       };
@@ -1287,7 +1369,8 @@
           + '<td>฿' + Number(p.price).toLocaleString() + '</td>'
           + '<td class="hide-mobile ' + stockClass + '">' + stock + '</td>'
           + '<td><span class="badge ' + (p.status === 'active' ? 'badge-approved' : 'badge-rejected') + '" style="cursor:pointer" onclick="toggleProductStatus(\'' + p.productId + '\', \'' + p.status + '\')">' + (p.status === 'active' ? 'เปิด' : 'ปิด') + '</span></td>'
-          + '<td><button class="btn btn-sm btn-ghost" onclick="editProduct(\'' + escapeHTML(p.productId) + '\')"><i data-lucide="edit" style="width:14px;height:14px"></i></button>'
+          + '<td><button class="btn btn-sm btn-ghost" onclick="generateBarcode(\'' + escapeHTML(p.productId) + '\', \'' + escapeHTML(p.name).replace(/'/g, "\\'") + '\')" title="ดูบาร์โค้ด"><i data-lucide="barcode" style="width:14px;height:14px"></i></button>'
+          + '<button class="btn btn-sm btn-ghost" onclick="editProduct(\'' + escapeHTML(p.productId) + '\')"><i data-lucide="edit" style="width:14px;height:14px"></i></button>'
           + '<button class="btn btn-sm btn-ghost hide-mobile" style="color:var(--danger)" onclick="delProduct(\'' + escapeHTML(p.productId) + '\')"><i data-lucide="trash-2" style="width:14px;height:14px"></i></button></td>'
           + '</tr>';
       }).join('');
@@ -1350,6 +1433,7 @@
         sel.innerHTML = (res.data || []).map(function (c) {
           return '<option value="' + c.categoryId + '" ' + (product && product.categoryId === c.categoryId ? 'selected' : '') + '>' + c.name + '</option>';
         }).join('');
+        initSearchableSelect('pf-cat');
       });
 
       document.getElementById('pf-price').value = product ? product.price : '';
@@ -1487,12 +1571,22 @@
 
     // ─── ORDERS ───────────────────────────────────────────
     var allAdminOrders = [];
+    var masterAdminOrders = []; // Full list for filtering
     var adminOrdersPageSize = 25;
     var currentAdminOrdersPage = 1;
 
     function loadAdminOrders() {
       API.getAllOrders().then(function (res) {
-        allAdminOrders = res.data || [];
+        masterAdminOrders = res.data || [];
+        
+        // Apply current filter if any
+        var filter = document.getElementById('adminOrderFilter') ? document.getElementById('adminOrderFilter').value : 'all';
+        if (filter === 'all') {
+          allAdminOrders = masterAdminOrders;
+        } else {
+          allAdminOrders = masterAdminOrders.filter(function(o) { return o.status === filter; });
+        }
+        
         renderAdminOrders(1);
       }).catch(function (err) { showToast(err, 'error'); });
     }
@@ -1831,6 +1925,7 @@
         teamSel.innerHTML = '<option value="">-- ไม่สังกัดทีม --</option>' + allAdminTeams.map(function(t) {
           return '<option value="' + t.teamId + '">' + t.teamName + '</option>';
         }).join('');
+        initSearchableSelect('ef-team');
       }
 
       document.getElementById('employeeModal').classList.add('open');
@@ -1913,6 +2008,7 @@
         leadSel.innerHTML = '<option value="">-- เลือกหัวหน้าทีม --</option>' + technicians.map(function(e) {
           return '<option value="' + e.employeeId + '" ' + (team && team.leadId === e.employeeId ? 'selected' : '') + '>' + e.name + ' (' + e.employeeId + ')</option>';
         }).join('');
+        initSearchableSelect('tf-lead');
       });
 
       document.getElementById('tf-members').innerHTML = '';
@@ -1977,6 +2073,8 @@
       var opStr = '<option value="">-- เลือกทีม --</option>' + allAdminTeams.map(t => '<option value="' + t.teamId + '">' + t.teamName + '</option>').join('');
       s1.innerHTML = opStr;
       s2.innerHTML = opStr;
+      initSearchableSelect('swap-t1');
+      initSearchableSelect('swap-t2');
       document.getElementById('swapPreview').style.display = 'none';
       document.getElementById('swapLeadModal').classList.add('open');
       refreshIcons();
@@ -2062,6 +2160,7 @@
         sel.innerHTML = '<option value="all">ทั้งหมด</option>' + (res.data || []).map(function (d) {
           return '<option value="' + d.name + '">' + d.name + '</option>';
         }).join('');
+        initSearchableSelect('ex-dept');
       });
       document.getElementById('exportModal').classList.add('open');
     }
@@ -2719,6 +2818,233 @@
         }
       }
     });
+  </script>
+  <!-- Back to Top Button -->
+  <button id="backToTopBtn" class="btn btn-primary" style="position:fixed; bottom:2rem; right:2rem; border-radius:50%; width:50px; height:50px; display:none; align-items:center; justify-content:center; box-shadow:var(--shadow-lg); z-index:1200; padding:0; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1)" onclick="window.scrollTo({top:0, behavior:'smooth'})" title="กลับขึ้นด้านบน">
+    <i data-lucide="arrow-up" style="width:24px;height:24px"></i>
+  </button>
+  <script>
+    window.addEventListener('scroll', function() {
+      var btn = document.getElementById('backToTopBtn');
+      if (btn) {
+        if (window.scrollY > 400) {
+          btn.style.display = 'flex';
+          btn.style.opacity = '1';
+        } else {
+          btn.style.display = 'none';
+          btn.style.opacity = '0';
+        }
+      }
+    });
+
+    function loadOrdersBasedOnFilter() {
+      var filter = document.getElementById('adminOrderFilter').value;
+      if (filter === 'all') {
+        allAdminOrders = masterAdminOrders; // Use a master list to filter from
+      } else {
+        allAdminOrders = masterAdminOrders.filter(function(o) { return o.status === filter; });
+      }
+      renderAdminOrders(1);
+    }
+
+    // --- SYSTEM SETTINGS LOGIC ---
+    function saveSystemSettings() {
+      var inputs = document.querySelectorAll('.notify-time-input');
+      var times = [];
+      inputs.forEach(function(i) { if(i.value) times.push(i.value); });
+      
+      var btn = document.getElementById('saveSetBtn');
+      var oldHtml = btn.innerHTML;
+      btn.innerHTML = '<div class="spinner" style="width:16px;height:16px"></div> กำลังบันทึก...';
+      btn.disabled = true;
+
+      API.saveSystemSettings(times).then(function(res) {
+        if(res.success) showToast('บันทึกการตั้งค่าระบบเรียบร้อยแล้ว', 'success');
+        else showToast(res.message, 'error');
+      }).catch(function(err) {
+        showToast(err, 'error');
+      }).finally(function() {
+        btn.innerHTML = oldHtml;
+        btn.disabled = false;
+        refreshIcons();
+      });
+    }
+
+    // --- BRANCH MANAGEMENT LOGIC ---
+    var allBranches = [];
+    function loadBranches() {
+      var body = document.getElementById('branchesBody');
+      body.innerHTML = '<tr><td colspan="4" class="text-center" style="padding:2rem"><div class="spinner"></div></td></tr>';
+      
+      API.getBranches().then(function(res) {
+        allBranches = res.data || [];
+        if(allBranches.length === 0) {
+          body.innerHTML = '<tr><td colspan="4" class="text-center" style="padding:2rem; color:var(--text3)">ไม่พบข้อมูลสาขา</td></tr>';
+          return;
+        }
+        body.innerHTML = allBranches.map(function(b) {
+          return '<tr>' +
+            '<td>' + escapeHTML(b.branchId) + '</td>' +
+            '<td style="font-weight:500">' + escapeHTML(b.name) + '</td>' +
+            '<td><span class="badge ' + (b.status === 'active' ? 'badge-approved' : 'badge-rejected') + '">' + (b.status === 'active' ? 'ปกติ' : 'ปิด') + '</span></td>' +
+            '<td class="flex gap-1">' +
+              '<button class="btn btn-xs btn-outline" onclick="editBranch(\'' + escapeHTML(b.branchId) + '\')"><i data-lucide="edit-2"></i></button>' +
+              '<button class="btn btn-xs btn-ghost" style="color:var(--danger)" onclick="delBranch(\'' + escapeHTML(b.branchId) + '\')"><i data-lucide="trash"></i></button>' +
+            '</td>' +
+          '</tr>';
+        }).join('');
+        refreshIcons();
+      });
+    }
+
+    function openBranchModal(b) {
+      document.getElementById('bf-id').value = b ? b.branchId : '';
+      document.getElementById('bf-id').disabled = !!b;
+      document.getElementById('bf-name').value = b ? b.name : '';
+      document.getElementById('bf-status').value = b ? b.status : 'active';
+      document.getElementById('branchModalTitle').textContent = b ? 'แก้ไขข้อมูลสาขา' : 'เพิ่มสาขาใหม่';
+      document.getElementById('branchModal').classList.add('open');
+    }
+    function closeBranchModal() { document.getElementById('branchModal').classList.remove('open'); }
+    function editBranch(id) { var b = allBranches.find(x => x.branchId === id); if(b) openBranchModal(b); }
+
+    function saveBranch() {
+      var data = {
+        branchId: document.getElementById('bf-id').value.trim(),
+        name: document.getElementById('bf-name').value.trim(),
+        status: document.getElementById('bf-status').value
+      };
+      if(!data.branchId || !data.name) { showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warning'); return; }
+      
+      var op = allBranches.some(x => x.branchId === data.branchId) ? 'update' : 'add';
+      API.manageBranch(op, data).then(function(res) {
+        showToast(res.message, res.success ? 'success' : 'error');
+        if(res.success) { closeBranchModal(); loadBranches(); }
+      });
+    }
+
+    function delBranch(id) {
+      if(!confirm('ยืนยันการลบสาขา ' + id + ' ?')) return;
+      API.manageBranch('delete', { branchId: id }).then(function(res) {
+        showToast('ลบสาขาเรียบร้อย', 'success');
+        loadBranches();
+      });
+    }
+
+    // --- BARCODE LOGIC ---
+    function generateBarcode(id, name) {
+      document.getElementById('barcodeLabel').textContent = name;
+      document.getElementById('barcodeModal').classList.add('open');
+      
+      setTimeout(function() {
+        try {
+          bwipjs.toCanvas('barcodeCanvas', {
+            bcid: 'code128',
+            text: id,
+            scale: 3,
+            height: 10,
+            includetext: true,
+            textxalign: 'center',
+            textcolor: '000000',
+            barcolor: '000000'
+          });
+        } catch (e) {
+          console.error(e);
+          showToast('ไม่สามารถสร้างบาร์โค้ดได้', 'error');
+        }
+      }, 100);
+      refreshIcons();
+    }
+    function closeBarcodeModal() { document.getElementById('barcodeModal').classList.remove('open'); }
+    function printBarcode() {
+      var canvas = document.getElementById('barcodeCanvas');
+      var win = window.open('', '_blank');
+      win.document.write('<html><head><title>Print Barcode</title><style>body{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;font-family:sans-serif}</style></head><body>');
+      win.document.write('<h2>' + document.getElementById('barcodeLabel').textContent + '</h2>');
+      win.document.write('<img src="' + canvas.toDataURL() + '" style="width:300px">');
+      win.document.write('<script>setTimeout(function(){window.print();window.close();},500);<\/script></body></html>');
+      win.document.close();
+    }
+
+    // --- SEARCHABLE SELECT UTILITY ---
+    function initSearchableSelect(selectId) {
+      var select = document.getElementById(selectId);
+      if (!select) return;
+
+      // Clean up old wrapper if exists
+      var oldWrapper = select.parentElement.querySelector('.search-select-wrapper');
+      if (oldWrapper) oldWrapper.remove();
+
+      var wrapper = document.createElement('div');
+      wrapper.className = 'search-select-wrapper';
+      select.style.display = 'none';
+      select.parentElement.insertBefore(wrapper, select);
+
+      var input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'form-input search-select-input';
+      input.placeholder = select.options[0] ? select.options[0].text : 'พิมพ์เพื่อค้นหา...';
+      input.autocomplete = 'off';
+      
+      // If a value is already selected, show it
+      if (select.selectedIndex > 0) {
+        input.value = select.options[select.selectedIndex].text;
+      }
+
+      var dropdown = document.createElement('div');
+      dropdown.className = 'search-select-dropdown';
+
+      wrapper.appendChild(input);
+      wrapper.appendChild(dropdown);
+
+      function updateDropdown(filter) {
+        var options = Array.from(select.options);
+        var filtered = options.filter(function(o, i) {
+          if (i === 0) return false; // skip placeholder
+          if (!filter) return true;
+          return o.text.toLowerCase().includes(filter.toLowerCase());
+        });
+
+        if (filtered.length === 0) {
+          dropdown.innerHTML = '<div class="search-select-empty">ไม่พบตัวเลือกที่ตรงกัน</div>';
+        } else {
+          dropdown.innerHTML = filtered.map(function(o) {
+            return '<div class="search-select-item ' + (o.value === select.value ? 'selected' : '') + '" data-value="' + o.value + '">' + o.text + '</div>';
+          }).join('');
+        }
+
+        dropdown.querySelectorAll('.search-select-item').forEach(function(item) {
+          item.onclick = function() {
+            select.value = this.dataset.value;
+            input.value = this.textContent;
+            dropdown.classList.remove('active');
+            // Trigger change event IF it's one of the swap leads
+            if (selectId === 'swap-t1' || selectId === 'swap-t2') updateSwapPreview();
+          };
+        });
+      }
+
+      input.onfocus = function() {
+        this.value = ''; // clear on focus to allow fresh search
+        updateDropdown('');
+        dropdown.classList.add('active');
+      };
+
+      input.oninput = function() {
+        updateDropdown(this.value);
+        dropdown.classList.add('active');
+      };
+
+      input.onblur = function() {
+        setTimeout(function() {
+          dropdown.classList.remove('active');
+          // If no selection was made and input was cleared, revert to current select text
+          if (!input.value && select.selectedIndex >= 0) {
+            input.value = select.options[select.selectedIndex].text;
+          }
+        }, 200);
+      };
+    }
   </script>
 </body>
 </html>
