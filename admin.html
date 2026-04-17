@@ -363,6 +363,40 @@
           </table>
         </div>
       </div>
+
+      <!-- FORECAST SECTION -->
+      <div class="card forecast-card" style="margin-top:1.5rem; border-color:rgba(251,191,36,0.15); position:relative; overflow:hidden">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg, var(--primary), var(--accent), var(--primary));opacity:0.6"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem">
+          <div style="display:flex;align-items:center;gap:0.6rem">
+            <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg, rgba(251,191,36,0.2), rgba(16,185,129,0.15));display:flex;align-items:center;justify-content:center">
+              <i data-lucide="trending-up" style="width:18px;height:18px;color:var(--primary)"></i>
+            </div>
+            <div>
+              <h4 style="font-size:1rem;margin:0">พยากรณ์และแนะนำการสั่งซื้อ</h4>
+              <span style="font-size:0.7rem;color:var(--accent);font-weight:700;text-transform:uppercase;letter-spacing:0.08em">Restock AI</span>
+            </div>
+          </div>
+          <button class="btn btn-outline btn-xs" onclick="loadForecast()" style="gap:0.3rem"><i data-lucide="refresh-cw" style="width:12px;height:12px"></i> รีเฟรช</button>
+        </div>
+        <p style="font-size:0.82rem; color:var(--text3); margin-bottom:1rem; padding-left:0.25rem; line-height:1.5">วิเคราะห์จากอัตราการเบิกย้อนหลัง 30 วัน เพื่อพยากรณ์วันที่ของจะหมดและแจ้งจำนวนแนะนำที่ควรเติม</p>
+        <div class="table-wrap table-compact">
+          <table>
+            <thead>
+              <tr>
+                <th>สินค้า</th>
+                <th style="text-align:center">สต๊อก</th>
+                <th style="text-align:center">ใช้/วัน</th>
+                <th style="text-align:center">หมดใน (วัน)</th>
+                <th style="text-align:center">แนะนำเติม</th>
+              </tr>
+            </thead>
+            <tbody id="forecastBody">
+              <tr><td colspan="5" class="text-center" style="padding:2rem"><div class="spinner"></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </section>
 
     <!-- INVENTORY -->
@@ -479,6 +513,27 @@
             </div>
         </form>
       </div>
+
+      <!-- Data Archiving -->
+      <div class="card" style="margin-top:1.5rem; border-color:rgba(239,68,68,0.12); position:relative; overflow:hidden">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg, var(--warning), var(--danger), var(--warning));opacity:0.5"></div>
+        <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.75rem">
+          <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg, rgba(245,158,11,0.2), rgba(239,68,68,0.15));display:flex;align-items:center;justify-content:center">
+            <i data-lucide="archive" style="width:18px;height:18px;color:var(--warning)"></i>
+          </div>
+          <div>
+            <h4 style="font-size:1rem;margin:0">จัดเก็บและล้างข้อมูลเก่า</h4>
+            <span style="font-size:0.7rem;color:var(--warning);font-weight:700;text-transform:uppercase;letter-spacing:0.08em">Data Archiving</span>
+          </div>
+        </div>
+        <p style="font-size:0.82rem; color:var(--text3); margin-bottom:1rem; line-height:1.6; padding-left:0.25rem">
+          ย้ายข้อมูลใบเบิก, ประวัติคลัง, และรายการอนุมัติที่เก่ากว่า <strong style="color:var(--primary)">1 ปี</strong> ไปยังชีต Archive โดยอัตโนมัติ เพื่อให้ระบบทำงานเร็วขึ้น ข้อมูลจะไม่ถูกลบ แต่จะถูกย้ายไปเก็บที่ชีตสำรอง
+        </p>
+        <div id="archiveResult" style="display:none; padding:1rem; border-radius:12px; margin-bottom:1rem; font-size:0.9rem; border:1px solid var(--border); background:rgba(255,255,255,0.02)"></div>
+        <button id="archiveBtn" class="btn btn-outline" onclick="runArchive()" style="gap:0.5rem; border-color:var(--warning); color:var(--warning)">
+          <i data-lucide="hard-drive-download"></i> เริ่มล้างข้อมูลเก่า (ย้ายประวัติ > 1 ปี)
+        </button>
+      </div>
     </section>
 
     <!-- BRANCHES SECTION -->
@@ -533,7 +588,8 @@
         <button class="btn btn-ghost btn-sm" onclick="closeProductModal()">✕</button>
       </div>
       <div class="modal-body">
-        <input type="hidden" id="pf-id">
+        <input type="hidden" id="pf-old-id">
+        <div class="form-group"><label class="form-label">รหัสสินค้า / บาร์โค้ด (เว้นว่างเพื่อสร้างอัตโนมัติ)</label><input id="pf-id" class="form-input" placeholder="PRD-XXXX หรือยิงบาร์โค้ดมาใส่ตรงนี้"></div>
         <div class="form-group"><label class="form-label">ชื่อสินค้า *</label><input id="pf-name" class="form-input"
             placeholder="ชื่อสินค้า"></div>
         <div class="form-group">
@@ -846,6 +902,40 @@
     </div>
   </div>
 
+  <!-- LOW STOCK DETAILS MODAL -->
+  <div id="lowStockModal" class="modal-overlay" onclick="if(event.target===this) closeModal('lowStockModal')">
+    <div class="modal" style="max-width:650px">
+      <div class="modal-header">
+        <div style="font-weight:700; display:flex; align-items:center; gap:0.5rem">
+          <i data-lucide="alert-triangle" style="color:var(--danger)"></i> รายการสินค้าสต๊อกต่ำ
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="closeModal('lowStockModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:0.85rem; color:var(--text3); margin-bottom:1.5rem">รายการสินค้าที่จำนวนคงเหลือเท่ากับหรือน้อยกว่าเกณฑ์ที่กำหนด (Minimum Stock)</p>
+        <div class="table-wrap">
+          <table class="table-compact">
+            <thead>
+              <tr>
+                <th>สินค้า</th>
+                <th style="text-align:center">คงเหลือ</th>
+                <th style="text-align:center">เกณฑ์ขั้นต่ำ</th>
+                <th style="text-align:center">สถานะ</th>
+              </tr>
+            </thead>
+            <tbody id="lowStockBody">
+              <!-- Dynamically rendered -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="adminNav('inventory'); closeModal('lowStockModal')">ไปที่คลังสินค้า</button>
+        <button class="btn btn-outline" onclick="closeModal('lowStockModal')">ปิด</button>
+      </div>
+    </div>
+  </div>
+
   <!-- PREMIUM INTEGRATED SCANNER MODAL -->
   <div id="scannerModal" class="modal-overlay" onclick="if(event.target===this) closeScanner()">
     <div class="modal scanner-modal">
@@ -887,6 +977,9 @@
         <div class="flex gap-2">
           <button class="btn btn-outline flex-1" onclick="document.getElementById('qrFallbackInput').click()">
             <i data-lucide="image"></i> อัปโหลดรูปภาพ
+          </button>
+          <button id="modalTorchBtn" class="btn btn-outline" onclick="toggleModalTorch()" style="flex:0.3; padding:0.5rem">
+            <i data-lucide="flashlight"></i>
           </button>
           <button class="btn btn-primary flex-1" onclick="promptManualInput()">
             <i data-lucide="keyboard"></i> ใส่รหัสเอง
@@ -935,7 +1028,7 @@
     <p style="margin-top:1rem;color:var(--text2);font-size:0.9rem">กำลังรวบรวมข้อมูลหลังบ้าน...</p>
   </div>
 
-  <div class="toast-container" id="toastContainer"></div>
+  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 
   <!-- แถบเมนูด้านล่างสำหรับมือถือ (Admin) -->
   <nav class="mobile-nav" style="border-top: 1px solid var(--glass-border); background: rgba(5, 5, 5, 0.9);">
@@ -1162,6 +1255,9 @@
         if (!res.success || !res.data) throw (res.message || res.error || 'โหลดข้อมูลแดชบอร์ดล้มเหลว');
         
         var d = res.data.stats || {};
+        // Store for modal
+        window._lowStockItems = d.lowStockItems || [];
+
         if (statsGrid) {
           statsGrid.innerHTML =
             statCard('clipboard-list', 'ใบเบิกตามช่วงเวลา', d.totalOrders || 0) +
@@ -1170,7 +1266,9 @@
             statCard('package-check', 'แจกจ่ายแล้ว', d.receivedCount || 0, 'primary') +
             statCard('coins', 'ยอดการเบิก', '฿' + (Number(d.totalVolume) || 0).toLocaleString(), 'accent') +
             statCard('package', 'สินค้าในระบบ', d.totalProducts || 0) +
-            statCard('alert-octagon', 'สต๊อกต่ำ', d.lowStockCount || 0, (d.lowStockCount > 0 ? 'danger' : ''));
+            '<div onclick="showLowStockDetails()" style="cursor:pointer">' + 
+              statCard('alert-octagon', 'สต๊อกต่ำ', d.lowStockCount || 0, (d.lowStockCount > 0 ? 'danger' : '')) + 
+            '</div>';
         }
         
         var badge = document.getElementById('ordersTabBadge');
@@ -1314,6 +1412,30 @@
         + '</div>';
     }
 
+    function showLowStockDetails() {
+      var items = window._lowStockItems || [];
+      var body = document.getElementById('lowStockBody');
+      if (!body) return;
+
+      if (items.length === 0) {
+        body.innerHTML = '<tr><td colspan="4" class="text-center" style="padding:2rem; color:var(--text3)">ยินดีด้วย! ไม่มีสินค้าที่สต๊อกต่ำกว่าเกณฑ์</td></tr>';
+      } else {
+        body.innerHTML = items.map(function(item) {
+          var urgency = Number(item.stock) <= 0 ? 'color:var(--danger); font-weight:700' : 'color:var(--warning)';
+          var statusText = Number(item.stock) <= 0 ? '<span class="badge badge-rejected">ของหมด</span>' : '<span class="badge badge-warning">ควรเติม</span>';
+          
+          return '<tr>' +
+            '<td><div style="font-weight:600">' + item.name + '</div><div style="font-size:0.75rem; color:var(--text3)">' + item.productId + '</div></td>' +
+            '<td style="text-align:center;' + urgency + '">' + item.stock + '</td>' +
+            '<td style="text-align:center; color:var(--text2)">' + item.minStock + '</td>' +
+            '<td style="text-align:center">' + statusText + '</td>' +
+          '</tr>';
+        }).join('');
+      }
+
+      document.getElementById('lowStockModal').classList.add('open');
+      refreshIcons();
+    }
 
     // ─── PRODUCTS ─────────────────────────────────────────
     // ─── PAGINATION HELPERS ───────────────────────────────
@@ -1540,6 +1662,7 @@
     }
 
     function openProductModal(product) {
+      document.getElementById('pf-old-id').value = product ? product.productId : '';
       document.getElementById('pf-id').value = product ? product.productId : '';
       document.getElementById('pf-name').value = product ? product.name : '';
 
@@ -1589,7 +1712,8 @@
 
     function saveProduct() {
       var data = {
-        productId: document.getElementById('pf-id').value,
+        oldProductId: document.getElementById('pf-old-id').value || '',
+        productId: document.getElementById('pf-id').value.trim(),
         name: document.getElementById('pf-name').value.trim(),
         categoryId: document.getElementById('pf-cat').value,
         price: Number(document.getElementById('pf-price').value),
@@ -1599,15 +1723,30 @@
       };
       if (!data.name || isNaN(data.price)) { showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warning'); return; }
 
+      // Detect barcode change → show confirm
+      var isUpdate = !!data.oldProductId;
+      var isBarcodeChanged = isUpdate && data.productId && data.oldProductId !== data.productId;
+
+      if (isBarcodeChanged) {
+        if (!confirm('⚠️ คุณกำลังเปลี่ยนรหัสบาร์โค้ดจาก\n\n"' + data.oldProductId + '" → "' + data.productId + '"\n\nระบบจะอัปเดตรหัสนี้ในทุกใบเบิก, ประวัติคลัง, และคลังย่อยของช่างโดยอัตโนมัติ (Cascade Update)\n\nยืนยันการเปลี่ยนรหัส?')) {
+          return;
+        }
+      }
+
+      // BUG-04 fix: Don't send oldProductId for new products
+      if (!isUpdate) {
+        delete data.oldProductId;
+      }
+
       var btn = document.getElementById('saveProductBtn');
       var oldHtml = btn.innerHTML;
       btn.innerHTML = '<div class="spinner" style="width:16px;height:16px"></div> กำลังบันทึก...';
       btn.disabled = true;
 
-      var op = data.productId ? 'update' : 'add';
+      var op = isUpdate ? 'update' : 'add';
       API.manageProduct(op, data).then(function (res) {
         if (res.success) {
-          showToast('บันทึกเรียบร้อย', 'success');
+          showToast(isBarcodeChanged ? 'เปลี่ยนรหัสบาร์โค้ดและอัปเดตข้อมูลทั้งระบบสำเร็จ!' : 'บันทึกเรียบร้อย', 'success');
           closeProductModal(); loadProducts();
         } else {
           showToast(res.message, 'error');
@@ -2542,6 +2681,78 @@
             + '</div>';
         }).join('');
       });
+
+      // Trigger Forecast AI
+      loadForecast();
+    }
+
+    function loadForecast() {
+      var body = document.getElementById('forecastBody');
+      if (!body) return;
+      body.innerHTML = '<tr><td colspan="5" class="text-center" style="padding:2rem"><div class="spinner"></div></td></tr>';
+
+      API.getInventoryForecast().then(function(res) {
+        if (!res.success || !res.data || res.data.length === 0) {
+          body.innerHTML = '<tr><td colspan="5" class="text-center" style="padding:2rem;color:var(--text3)">ไม่มีข้อมูลพยากรณ์</td></tr>';
+          return;
+        }
+
+        body.innerHTML = res.data.map(function(item) {
+          var dtz = item.daysToZero !== null ? Math.round(item.daysToZero) : '-';
+          var burn = item.dailyBurnRate !== null ? item.dailyBurnRate.toFixed(2) : '0';
+          var urgency = dtz !== '-' && dtz <= 7 ? 'color:var(--danger);font-weight:700' : (dtz <= 14 ? 'color:var(--warning)' : '');
+          
+          var rowBg = dtz !== '-' && dtz <= 7 ? 'background:rgba(239,68,68,0.05);' : '';
+          
+          return '<tr style="' + rowBg + '">'
+            + '<td><div style="font-weight:600">' + item.name + '</div><div style="font-size:0.72rem;color:var(--text3);font-family:monospace">' + item.productId + '</div></td>'
+            + '<td style="text-align:center;font-weight:600">' + item.stock + '</td>'
+            + '<td style="text-align:center">' + burn + '</td>'
+            + '<td style="text-align:center;' + urgency + '">' + (dtz !== '-' && dtz <= 7 ? '⚠️ ' : '') + dtz + '</td>'
+            + '<td style="text-align:center">' + (item.suggestedRestock > 0 ? '<span class="badge badge-approved" style="font-size:0.78rem">+' + item.suggestedRestock + '</span>' : '<span style="color:var(--text3)">—</span>') + '</td>'
+            + '</tr>';
+        }).join('');
+      }).catch(function(err) {
+        body.innerHTML = '<tr><td colspan="5" class="text-center" style="padding:2rem;color:var(--danger)">เกิดข้อผิดพลาด: ' + err + '</td></tr>';
+      });
+    }
+
+    function runArchive() {
+      if (!confirm('ยืนยันการจัดเก็บข้อมูลเก่า (Archive)?\n\nระบบจะย้ายข้อมูลที่มีอายุมากกว่า 1 ปีไปยังชีตสำรอง\nขั้นตอนนี้อาจใช้เวลาสักครู่และไม่สามารถย้อนกลับได้ง่ายๆ')) return;
+      
+      var btn = document.getElementById('archiveBtn');
+      var result = document.getElementById('archiveResult');
+      var oldHtml = btn.innerHTML;
+      
+      btn.disabled = true;
+      btn.innerHTML = '<div class="spinner" style="width:16px;height:16px"></div> กำลังจัดเก็บและล้างข้อมูลเก่า...';
+      result.style.display = 'block';
+      result.style.borderColor = 'var(--border)';
+      result.innerHTML = '<p style="color:var(--text2)"><i data-lucide="loader" class="spinner"></i> เริ่มกระบวนการจัดเก็บข้อมูล... กรุณาอย่าปิดหน้านี้</p>';
+      refreshIcons();
+
+      API.archiveOldData(12).then(function(res) {
+        if (res.success) {
+          result.style.borderColor = 'var(--success)';
+          result.innerHTML = '<p style="color:var(--success);font-weight:600"><i data-lucide="check-circle"></i> ' + res.message + '</p>'
+            + '<ul style="margin-top:0.5rem;padding-left:1.5rem;color:var(--text2);font-size:0.85rem">'
+            + (res.details ? res.details.map(function(d) { return '<li>' + d + '</li>'; }).join('') : '')
+            + '</ul>';
+          showToast('จัดเก็บข้อมูลเก่าเรียบร้อยแล้ว', 'success');
+        } else {
+          result.style.borderColor = 'var(--danger)';
+          result.innerHTML = '<p style="color:var(--danger)"><i data-lucide="alert-circle"></i> เกิดข้อผิดพลาด: ' + (res.message || res.error) + '</p>';
+          showToast('เกิดข้อผิดพลาดในการจัดเก็บข้อมูล', 'error');
+        }
+      }).catch(function(err) {
+        result.style.borderColor = 'var(--danger)';
+        result.innerHTML = '<p style="color:var(--danger)"><i data-lucide="alert-circle"></i> เกิดข้อผิดพลาดทางเทคนิค: ' + err + '</p>';
+        showToast('เกิดข้อผิดพลาดในการจัดเก็บข้อมูล', 'error');
+      }).finally(function() {
+        btn.disabled = false;
+        btn.innerHTML = oldHtml;
+        refreshIcons();
+      });
     }
 
     function showToast(msg, type) {
@@ -2695,6 +2906,26 @@
         showToast('ไม่สามารถเปิดใช้งานกล้องได้: ' + err, 'error');
         refreshIcons();
       });
+    }
+
+    let isModalTorchOn = false;
+    function toggleModalTorch() {
+      if (modalScanner && modalScanner.getState() === 2 /* SCANNING */) {
+        isModalTorchOn = !isModalTorchOn;
+        var btn = document.getElementById('modalTorchBtn');
+        modalScanner.applyVideoConstraints({ advanced: [{ torch: isModalTorchOn }] }).then(function() {
+          if(isModalTorchOn) {
+            btn.style.background = 'var(--primary)';
+            btn.style.color = '#000';
+          } else {
+            btn.style.background = 'transparent';
+            btn.style.color = 'var(--text)';
+          }
+        }).catch(function(err) {
+          showToast('อุปกรณ์นี้/เบราว์เซอร์นี้ ไม่รองรับการเปิดไฟแฟลช', 'error');
+          isModalTorchOn = false;
+        });
+      }
     }
 
     function stopLiveScan() {
@@ -2934,24 +3165,6 @@
         }
       }
     });
-  </script>
-  <!-- Back to Top Button -->
-  <button id="backToTopBtn" class="btn btn-primary" style="position:fixed; bottom:2rem; right:2rem; border-radius:50%; width:50px; height:50px; display:none; align-items:center; justify-content:center; box-shadow:var(--shadow-lg); z-index:1200; padding:0; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1)" onclick="window.scrollTo({top:0, behavior:'smooth'})" title="กลับขึ้นด้านบน">
-    <i data-lucide="arrow-up" style="width:24px;height:24px"></i>
-  </button>
-  <script>
-    window.addEventListener('scroll', function() {
-      var btn = document.getElementById('backToTopBtn');
-      if (btn) {
-        if (window.scrollY > 400) {
-          btn.style.display = 'flex';
-          btn.style.opacity = '1';
-        } else {
-          btn.style.display = 'none';
-          btn.style.opacity = '0';
-        }
-      }
-    });
 
     function loadOrdersBasedOnFilter() {
       var filter = document.getElementById('adminOrderFilter').value;
@@ -3078,7 +3291,7 @@
       win.document.write('<html><head><title>Print Barcode</title><style>body{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;font-family:sans-serif}</style></head><body>');
       win.document.write('<h2>' + document.getElementById('barcodeLabel').textContent + '</h2>');
       win.document.write('<img src="' + canvas.toDataURL() + '" style="width:300px">');
-      win.document.write('<script>setTimeout(function(){window.print();window.close();},500);<\/script></body></html>');
+      win.document.write('<' + 'script>setTimeout(function(){window.print();window.close();},500);<' + '/script></body></html>');
       win.document.close();
     }
 
@@ -3161,6 +3374,15 @@
         }, 200);
       };
     }
+    // Global Keyboard Accessibility
+    window.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        var openModal = document.querySelector('.modal-overlay.open');
+        if (openModal) {
+          openModal.classList.remove('open');
+        }
+      }
+    });
   </script>
 </body>
 </html>

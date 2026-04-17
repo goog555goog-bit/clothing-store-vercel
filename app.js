@@ -678,8 +678,8 @@ function renderProductGrid(pageNum) {
     
     // Premium image rendering with glass fallback
     var imgHtml = imgUrl
-      ? '<img src="' + imgUrl + '" class="product-img' + (outOfStock ? ' out-of-stock-img' : '') + '" loading="lazy" onerror="this.onerror=null;this.src=\'\';this.parentElement.innerHTML=\'<div class=\\\'product-img-placeholder\\\'><i data-lucide=\\\'package\\\' style=\\\'width:32px;height:32px;opacity:0.3\\\'></i></div>\'">'
-      : '<div class="product-img-placeholder"><i data-lucide="package" style="width:32px;height:32px;opacity:0.3"></i></div>';
+      ? '<img src="' + imgUrl + '" class="product-img' + (outOfStock ? ' out-of-stock-img' : '') + '" alt="' + escapeHTML(p.name) + '" loading="lazy" onerror="this.onerror=null;this.src=\'\';this.parentElement.innerHTML=\'<div class=\\\'product-img-placeholder\\\'><i data-lucide=\\\'package\\\' style=\\\'width:32px;height:32px;opacity:0.3\\\'></i></div>\'">'
+      : '<div class="product-img-placeholder"><i data-lucide="package" aria-hidden="true" style="width:32px;height:32px;opacity:0.3"></i></div>';
 
     return '<div class="product-card" ' + (outOfStock ? 'style="opacity:0.6"' : '') + '>'
       + '<div class="product-img-wrap" onclick="openProductDetail(\'' + escapeHTML(p.productId) + '\')">' + imgHtml + '</div>'
@@ -1425,3 +1425,19 @@ function initSearchableSelect(selectId) {
     }
   }
 }
+
+// Global Keyboard Accessibility
+window.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') {
+    // Close any open modal
+    var openModal = document.querySelector('.modal-overlay.open');
+    if (openModal) {
+      closeModal(openModal.id);
+    }
+    // Close cart drawer if open
+    var drawer = document.getElementById('cartDrawer');
+    if (drawer && drawer.classList.contains('open')) {
+      toggleDrawer('cartDrawer');
+    }
+  }
+});

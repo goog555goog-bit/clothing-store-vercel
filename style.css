@@ -102,7 +102,20 @@ h1,h2,h3,h4 { letter-spacing: -0.025em; font-weight: 700; }
   border: 1px solid var(--border); background: var(--surface);
   color: var(--text); font-size: 0.95rem; transition: all 0.2s; font-family: inherit;
 }
-.form-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(251,191,36,0.1); }
+.form-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(251,191,36,0.25); }
+
+/* Unified Visible Focus Ring for Accessibility */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.4);
+}
+
+/* Remove default focus for mouse users on certain elements if needed, but keep it for keyboard */
+[role="button"]:focus:not(:focus-visible),
+button:focus:not(:focus-visible) {
+  outline: none;
+}
 
 /* ─── Tables ───────────────────────────────────────── */
 .table-wrap {
@@ -1230,4 +1243,32 @@ tr.row-stock-warning { background: rgba(245, 158, 11, 0.02) !important; }
   color: var(--text3);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+}
+
+/* ─── Forecast & Premium Cards ─────────────────────── */
+.forecast-card {
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+}
+.forecast-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 50px -15px rgba(251,191,36,0.15), 0 0 0 1px rgba(251,191,36,0.3);
+  border-color: rgba(251,191,36,0.4) !important;
+}
+
+.table-compact tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.table-compact tr:hover td {
+  background: rgba(251, 191, 36, 0.05) !important;
+  color: #fff;
+}
+
+#forecastBody tr {
+  transition: all 0.25s ease;
+}
+
+#forecastBody td {
+  padding: 0.75rem 0.5rem;
 }

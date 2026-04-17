@@ -90,7 +90,7 @@
       <p>ระบบเบิกพัสดุพนักงานดิจิทัล</p>
 
       <div class="form-group">
-        <input type="text" id="empIdInput" class="form-input" placeholder="รหัสพนักงานของคุณ" autocomplete="off"
+        <input type="text" id="empIdInput" class="form-input" placeholder="รหัสพนักงานของคุณ" aria-label="กรอกรหัสพนักงาน" autocomplete="off"
           onkeydown="if(event.key==='Enter') doLogin()">
       </div>
       <div id="namePreview" style="min-height:1.5rem;color:var(--primary-light);font-weight:600;margin-bottom:1.5rem; filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.3));"></div>
@@ -179,7 +179,7 @@
         .catch(function(err) {
           btn.disabled = false;
           btn.textContent = 'เข้าสู่ระบบ';
-          document.getElementById('loginError').textContent = 'เกิดข้อผิดพลาด: ' + (err.message || err);
+          document.getElementById('loginError').textContent = typeof err === 'string' ? err : (err && err.message ? err.message : 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้');
         });
     }
   </script>

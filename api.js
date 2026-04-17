@@ -204,9 +204,11 @@ var API = (function () {
     getBranches: function() { return this._call('getBranches', {}, true); },
     manageBranch: function(op, data) { return this._call('manageBranch', { op: op, data: data }, false, ['getBranches']); },
     
-    // --- SETTINGS ---
+    // --- SETTINGS & ADVANCED ---
     getSystemSettings: function() { return this._call('getSystemSettings', {}, true); },
     saveSystemSettings: function(settings) { return this._call('saveSystemSettings', { settings: settings }, false, ['getSystemSettings']); },
+    archiveOldData: function(monthsThreshold) { return this._call('archiveOldData', { monthsThreshold: monthsThreshold || 12 }); },
+    getInventoryForecast: function() { return this._call('getInventoryForecast', {}, true); },
     
     // Aliases for better DX
     addToSubStock: function(data) { return this.receiveSubStock(data.productId, data.qty); }

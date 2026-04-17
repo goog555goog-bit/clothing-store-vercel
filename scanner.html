@@ -266,10 +266,13 @@
     <div id="status" class="status-badge">กดปุ่มเริ่มสแกนเพื่อเปิดกล้อง</div>
     
     <div class="btn-group">
-      <button id="startBtn" class="btn btn-primary" onclick="startScanner()">
+      <button id="startBtn" class="btn btn-primary" onclick="startScanner()" aria-label="เริ่มการสแกนผ่านกล้อง">
         <i data-lucide="camera"></i> เริ่มสแกนสด
       </button>
-      <button id="stopBtn" class="btn btn-danger" onclick="stopScanner()" style="display:none">
+      <button id="torchBtn" class="btn btn-outline" onclick="toggleTorch()" style="display:none; padding: 0.5rem; flex: 0.3;" aria-label="เปิด/ปิดไฟฉาย">
+        <i data-lucide="flashlight"></i>
+      </button>
+      <button id="stopBtn" class="btn btn-danger" onclick="stopScanner()" style="display:none" aria-label="หยุดการสแกน">
         <i data-lucide="square"></i> หยุดสแกน
       </button>
     </div>
@@ -295,7 +298,27 @@
     const statusEl = document.getElementById('status');
     const startBtn = document.getElementById('startBtn');
     const stopBtn = document.getElementById('stopBtn');
+    const torchBtn = document.getElementById('torchBtn');
     const overlay = document.getElementById('scannerOverlay');
+    let isTorchOn = false;
+
+    function toggleTorch() {
+      if (html5QrCode.getState() === 2 /* SCANNING */) {
+        isTorchOn = !isTorchOn;
+        html5QrCode.applyVideoConstraints({ advanced: [{ torch: isTorchOn }] }).then(() => {
+          if(isTorchOn) {
+            torchBtn.style.background = 'var(--primary)';
+            torchBtn.style.color = '#000';
+          } else {
+            torchBtn.style.background = 'var(--glass)';
+            torchBtn.style.color = 'var(--text)';
+          }
+        }).catch(err => {
+          alert('อุปกรณ์นี้ทรรศนวิสัยไม่รองรับการเปิดไฟแฟลช');
+          isTorchOn = false;
+        });
+      }
+    }
 
     // Display mode info if provided
     const urlParams = new URLSearchParams(window.location.search);
@@ -349,6 +372,7 @@
         statusEl.innerHTML = '🔵 กำลังสแกนสด...';
         startBtn.style.display = 'none';
         stopBtn.style.display = 'flex';
+        torchBtn.style.display = 'flex';
         overlay.style.display = 'flex';
       })
       .catch(err => {
@@ -366,6 +390,7 @@
         startBtn.disabled = false;
         startBtn.innerHTML = '<i data-lucide="camera"></i> เริ่มสแกนสด';
         stopBtn.style.display = 'none';
+        torchBtn.style.display = 'none';
         overlay.style.display = 'none';
         statusEl.innerHTML = 'หยุดการสแกนแล้ว';
         refreshIcons();
