@@ -56,10 +56,10 @@
         <div id="adminName" class="hide-mobile" style="color:var(--text2); font-weight: 500; font-size: 0.9rem; background: var(--surface); padding: 0.4rem 1rem; border-radius: 99px; border: 1px solid var(--border);"></div>
         <button class="btn btn-ghost btn-sm" onclick="navigateTo(scriptUrl)"><i data-lucide="shopping-bag"></i> <span class="hide-mobile">หน้าร้าน</span></button>
         <button id="mgrPaneBtn" class="btn btn-warning btn-sm hidden" onclick="navigateTo('manager.html')"><i data-lucide="scale"></i> <span class="hide-mobile">ผู้อนุมัติ</span></button>
-        <button class="btn btn-ghost btn-sm" onclick="toggleDarkMode()" title="เปลี่ยนธีม">
+        <button class="btn btn-ghost btn-sm" onclick="toggleDarkMode()" aria-label="สลับโหมดมืด/สว่าง">
           <span id="darkModeIcon" class="force-show"><i data-lucide="moon"></i></span>
         </button>
-        <button class="btn btn-outline btn-sm" onclick="adminLogout()" style="color: var(--danger); border-color: rgba(239, 68, 68, 0.2);" aria-label="ออกจากระบบ" title="ออกจากระบบ"><i data-lucide="log-out"></i></button>
+        <button class="btn btn-outline btn-sm" onclick="adminLogout()" style="color: var(--danger); border-color: rgba(239, 68, 68, 0.2);" aria-label="ออกจากระบบ"><i data-lucide="log-out"></i></button>
       </div>
     </div>
   </header>

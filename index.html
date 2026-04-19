@@ -53,7 +53,7 @@
             <option value="all">ทุกสถานะ</option>
             <option value="instock">มีในคลัง</option>
           </select>
-          <button class="search-btn" onclick="renderProductGrid()" title="ค้นหา" aria-label="ค้นหาสินค้า">
+          <button class="search-btn" onclick="renderProductGrid()" aria-label="ค้นหาสินค้า">
             <i data-lucide="search" style="width:16px;height:16px;"></i> <span>ค้นหา</span>
           </button>
         </div>
@@ -81,11 +81,11 @@
           <span id="navUserName"></span> <i data-lucide="log-out"></i>
         </button>
         <button class="btn btn-ghost hide-mobile" style="position:relative" onclick="toggleDrawer('cartDrawer')"
-          title="ตะกร้าสินค้า" aria-label="เปิดตะกร้าสินค้า">
+          aria-label="เปิดตะกร้าสินค้า">
           <i data-lucide="shopping-bag"></i>
           <div id="cartBadge" class="cart-badge" style="display:none">0</div>
         </button>
-        <button class="btn btn-ghost" onclick="toggleDarkMode()" title="เปลี่ยนธีม" aria-label="สลับโหมดมืด/สว่าง">
+        <button class="btn btn-ghost" onclick="toggleDarkMode()" aria-label="สลับโหมดมืด/สว่าง">
           <span id="darkModeIcon" class="force-show"><i data-lucide="moon"></i></span>
         </button>
       </div>
