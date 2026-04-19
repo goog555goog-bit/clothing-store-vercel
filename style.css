@@ -232,6 +232,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   justify-self: end; overflow: visible;
   min-width: 0;
   position: relative;
+  z-index: 100; /* Ensures buttons and tooltips stay above the search bar (z:10) */
 }
 #navUserName {
   display: inline-block;
@@ -259,12 +260,12 @@ tr:hover td { background: rgba(255,255,255,0.01); }
     top: calc(100% + 12px);
     left: 50%;
     transform: translateX(-50%);
-    background: #1a1a2e;
+    background: #0a0a1a; /* Solid dark background */
     color: var(--primary);
     padding: 0.5rem 0.9rem;
     border-radius: 10px;
     border: 1px solid var(--primary);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.9);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.95);
     white-space: nowrap;
     z-index: 9999;
     font-size: 0.78rem;
