@@ -158,7 +158,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 }
 .btn:hover::after { left: 100%; }
 .btn:active { transform: scale(0.95) translateY(1px); }
-.btn i, .btn svg { pointer-events: none; } /* Ensure icons don't block button clicks */
+.btn i, .btn svg { pointer-events: none !important; } /* Ensure icons don't block button clicks */
 
 .btn-primary { background: var(--primary); color: #000; border-color: var(--primary-light); box-shadow: 0 8px 20px -5px rgba(251,191,36,0.4); }
 .btn-primary:hover { background: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 14px 28px -5px rgba(251,191,36,0.5); }
