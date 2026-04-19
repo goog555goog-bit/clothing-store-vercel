@@ -426,7 +426,8 @@
     <i data-lucide="arrow-up" style="width:24px;height:24px"></i>
   </button>
   <script>
-    // --- SEARCHABLE SELECT HELPER ---
+    // --- SEARCHABLE SELECT HELPER (Optimized) ---
+    var _ssDebounceTimer = null;
     function initSearchSelect(selectId) {
       var select = document.getElementById(selectId);
       if (!select) return;
@@ -442,7 +443,18 @@
       var input = document.createElement('input');
       input.type = 'text';
       input.className = 'form-input search-select-input';
-      input.placeholder = select.options[0] ? select.options[0].text : 'พิมพ์เพื่อค้นหา...';
+      
+      // Fix Placeholder Logic: Only set value if it's NOT the placeholder option
+      var initialOpt = select.options[select.selectedIndex];
+      var placeholderText = select.options[0] ? select.options[0].text : 'พิมพ์เพื่อค้นหา...';
+      input.placeholder = placeholderText;
+      
+      if (select.value && select.selectedIndex > 0) {
+        input.value = initialOpt.text;
+      } else {
+        input.value = ''; // Ensure placeholder shows
+      }
+      
       input.autocomplete = 'off';
       
       var chevron = document.createElement('div');
@@ -459,22 +471,34 @@
 
       function updateDropdown(filter) {
         var options = Array.from(select.options);
+        var filterLower = (filter || '').toLowerCase().trim();
+        
         var filtered = options.filter(function(o, i) {
-          if (i === 0 && !o.value) return false; 
-          if (!filter) return true;
-          return o.text.toLowerCase().includes(filter.toLowerCase());
+          if (i === 0 && !o.value) return false; // skip placeholder
+          if (!filterLower) return true;
+          return o.text.toLowerCase().includes(filterLower);
         });
+
+        // Optimization: limit visible items to prevent flickering from huge DOM updates
+        var displayLimit = 20;
+        var shown = filtered.slice(0, displayLimit);
 
         if (filtered.length === 0) {
           dropdown.innerHTML = '<div class="search-select-empty">ไม่พบตัวเลือกที่ตรงกัน</div>';
         } else {
-          dropdown.innerHTML = filtered.map(function(o) {
+          var html = shown.map(function(o) {
             return '<div class="search-select-item ' + (o.value === select.value ? 'selected' : '') + '" data-value="' + o.value + '">' + o.text + '</div>';
           }).join('');
+          
+          if (filtered.length > displayLimit) {
+            html += '<div class="search-select-empty" style="font-size:0.75rem; border-top:1px solid var(--border)">... และอีก ' + (filtered.length - displayLimit) + ' รายการ (โปรดพิมพ์เพื่อกรองเพิ่มเติม)</div>';
+          }
+          dropdown.innerHTML = html;
         }
 
         dropdown.querySelectorAll('.search-select-item').forEach(function(item) {
-          item.onclick = function() {
+          item.onclick = function(e) {
+            e.stopPropagation();
             select.value = this.dataset.value;
             input.value = this.textContent;
             dropdown.classList.remove('active');
@@ -485,7 +509,8 @@
 
       input.onfocus = function() {
         if (!dropdown.classList.contains('active')) {
-          this.value = '';
+          // If current value is placeholder-ish, clear it to show placeholder
+          if (select.selectedIndex <= 0) this.value = '';
           updateDropdown('');
           dropdown.classList.add('active');
         }
@@ -495,25 +520,39 @@
         e.stopPropagation();
         if (dropdown.classList.contains('active')) {
           dropdown.classList.remove('active');
-          if (select.selectedIndex >= 0) input.value = select.options[select.selectedIndex].text;
+          restoreValue();
         } else {
-          this.value = '';
+          if (select.selectedIndex <= 0) this.value = '';
           updateDropdown('');
           dropdown.classList.add('active');
         }
       };
 
+      function restoreValue() {
+        if (select.selectedIndex > 0) {
+          input.value = select.options[select.selectedIndex].text;
+        } else {
+          input.value = '';
+        }
+      }
+
       input.oninput = function() {
-        updateDropdown(this.value);
-        dropdown.classList.add('active');
+        var val = this.value;
+        if (_ssDebounceTimer) clearTimeout(_ssDebounceTimer);
+        _ssDebounceTimer = setTimeout(function() {
+          updateDropdown(val);
+          dropdown.classList.add('active');
+        }, 250); // 250ms Debounce
       };
 
       document.addEventListener('click', function(e) {
         if (!wrapper.contains(e.target)) {
-          dropdown.classList.remove('active');
-          if (select.selectedIndex >= 0) input.value = select.options[select.selectedIndex].text;
+          if (dropdown.classList.contains('active')) {
+            dropdown.classList.remove('active');
+            restoreValue();
+          }
         }
-      });
+      }, true);
     }
 
     window.addEventListener('scroll', function() {
