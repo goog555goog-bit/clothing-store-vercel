@@ -5,12 +5,48 @@
 const GAS_URL = "https://script.google.com/macros/s/AKfycbxnRTEb5Q09UkPPiKgx2nzee7ZTogtomaeUzQoj8FJ_0AlfOvJxNt0lPQwhYHLz-OEweg/exec";
 
 var API = (function () {
-  var _cache = {};
+  var CACHE_KEY = '_api_cache_v1';
   var _locks = new Set();
-  var _cacheTTL = 60000; // 60 seconds
+  var _cacheTTL = 300000; // 5 minutes for persistent cache
+
+  // 0. Initialize Cache from LocalStorage
+  var _cache = {};
+  try {
+    var storedCache = localStorage.getItem(CACHE_KEY);
+    if (storedCache) _cache = JSON.parse(storedCache);
+    
+    // Cleanup expired items on start
+    var now = Date.now();
+    for (var k in _cache) {
+      if (now - _cache[k].time > _cacheTTL) delete _cache[k];
+    }
+  } catch (e) { _cache = {}; }
 
   var apiObj = {
     isPending: false,
+    
+    _saveCache: function() {
+      try { 
+        localStorage.setItem(CACHE_KEY, JSON.stringify(_cache)); 
+      } catch(e) {
+        console.warn('⚠️ LocalStorage Error:', e);
+        if (e.name === 'QuotaExceededError') {
+          // If storage is full, clear 50% oldest cache items
+          var keys = Object.keys(_cache).sort(function(a, b) { 
+            return (_cache[a].time || 0) - (_cache[b].time || 0); 
+          });
+          keys.slice(0, Math.ceil(keys.length / 2)).forEach(function(k) { delete _cache[k]; });
+          try { localStorage.setItem(CACHE_KEY, JSON.stringify(_cache)); } catch(e2) {}
+        }
+      }
+    },
+
+    getCached: function(action) {
+      if (_cache[action] && (Date.now() - _cache[action].time < _cacheTTL)) {
+        return _cache[action].data;
+      }
+      return null;
+    },
     
     _call: function (action, data, useCache, invalidateGroups) {
       var self = this;
@@ -26,10 +62,11 @@ var API = (function () {
       }
       if (!useCache) _locks.add(lockKey);
       
-      // 2. Check Cache
-      if (useCache && _cache[action] && (Date.now() - _cache[action].time < _cacheTTL)) {
+      // 2. Check Cache (Memory/Local)
+      var cachedData = self.getCached(action);
+      if (useCache && cachedData) {
         console.log('⚡ API Cache Hit [' + action + ']');
-        return Promise.resolve(_cache[action].data);
+        return Promise.resolve(cachedData);
       }
 
       var user = null;
@@ -76,6 +113,7 @@ var API = (function () {
               // Save to Cache if needed
               if (useCache) {
                 _cache[action] = { data: res, time: Date.now() };
+                self._saveCache();
               }
               // Invalidate Groups
               if (invalidateGroups && invalidateGroups.length > 0) {
@@ -118,9 +156,21 @@ var API = (function () {
       });
     },
 
-    invalidateCache: function(action) {
-      if (action) delete _cache[action];
-      else _cache = {};
+    invalidateCache: function(actionOrGroups) {
+      if (!actionOrGroups) {
+        _cache = {};
+      } else if (Array.isArray(actionOrGroups)) {
+        var self = this;
+        actionOrGroups.forEach(function(g) { 
+          delete _cache[g]; 
+          // Match dynamic keys starting with group name
+          for (var k in _cache) { if (k.startsWith(g)) delete _cache[k]; }
+        });
+      } else {
+        delete _cache[actionOrGroups];
+        for (var k in _cache) { if (k.startsWith(actionOrGroups)) delete _cache[k]; }
+      }
+      this._saveCache();
     },
 
     // ─── AUTH & CORE ──────────────────────────────────────────

@@ -219,6 +219,9 @@
             + '</div>';
         }).join('');
         refreshIcons();
+      }).catch(function(err) {
+        showToast('ไม่สามารถโหลดข้อมูลใบเบิกได้: ' + err, 'error');
+        if (list) list.innerHTML = '<div class="card text-center" style="padding:2rem">เกิดข้อผิดพลาดในการโหลดข้อมูล</div>';
       });
     }
 
@@ -239,6 +242,9 @@
           + res.data.map(function(i) {
             return '<tr><td>' + i.productName + '</td><td>' + i.quantity + '</td><td>฿' + Number(i.price).toLocaleString() + '</td></tr>';
           }).join('') + '</tbody></table></div>';
+      }).catch(function(err) {
+        itemsDiv.innerHTML = '<p style="color:var(--danger)">เกิดข้อผิดพลาดในการโหลดรายการ</p>';
+        showToast('โหลดรายการไม่สำเร็จ: ' + err, 'error');
       });
     }
 

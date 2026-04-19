@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="data:;base64,iVBORw0KGgo= ">
   <title>Admin Panel - Premium</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest" defer></script>
@@ -73,7 +74,7 @@
            <p style="font-size:0.8rem; color:var(--text3); margin:0">พบว่าคุณกำลังใช้งานในกรอบจำกัดของ Google กรุณากดปลดล็อกเพื่อใช้กล้องสดได้ 100%</p>
          </div>
        </div>
-       <button onclick="window.open('admin.html', '_blank')" class="btn btn-accent" style="white-space:nowrap; padding:0.75rem 1.5rem">🔓 ปลดล็อกเดี๋ยวนี้</button>
+       <button onclick="window.open('admin.html', '_blank')" class="btn btn-primary" style="white-space:nowrap; padding:0.75rem 1.5rem; background:var(--gradient-gold); color:#000; border:none; box-shadow:0 10px 30px rgba(251,191,36,0.3)">🔓 ปลดล็อกเดี๋ยวนี้</button>
     </div>
     <!-- TABS (Desktop only) -->
     <div class="tabs-scroll-wrap hide-mobile"
@@ -1204,7 +1205,6 @@
       // 0. Setup Filters
       var period = 'month';
       var dept = 'all';
-      
       var pEl = document.getElementById('dbFilterPeriod');
       var dEl = document.getElementById('dbFilterDept');
       if (pEl) period = pEl.value;
@@ -1225,100 +1225,176 @@
         filters.endDate = formatDateLocal(now);
       } 
 
-      // 1. Initial State UI - Setup Spinners
-      var statsGrid = document.getElementById('statsGrid');
-      var dbTopList = document.getElementById('dbTopProductsList');
-      var dbDeptList = document.getElementById('dbDeptSpendingList');
+      // 1. Instant Render from Cache (SWR)
+      var cachedStats = API.getCached('getAdvancedDashboardData');
+      if (cachedStats && cachedStats.success) {
+        console.log('⚡ Dashboard SWR: Rendering from cache');
+        renderDashboardStats(cachedStats.data);
+      } else {
+        // Show Skeletons if no cache
+        var statsGrid = document.getElementById('statsGrid');
+        if (statsGrid) {
+          statsGrid.innerHTML = Array(4).fill('<div class="skeleton-stat"></div>').join('');
+        }
+        var dbTopList = document.getElementById('dbTopProductsList');
+        var dbDeptList = document.getElementById('dbDeptSpendingList');
+        if (dbTopList) dbTopList.innerHTML = '<div class="skeleton" style="height:280px; margin:0 1rem 1rem;"></div>';
+        if (dbDeptList) dbDeptList.innerHTML = '<div class="skeleton" style="height:280px; margin:0 1rem 1rem;"></div>';
+      }
 
-      if (statsGrid) statsGrid.innerHTML = '<div class="spinner" style="grid-column:1/-1;margin:2rem auto;"></div>';
-      if (dbTopList) dbTopList.innerHTML = '<div class="spinner" style="margin:2rem auto;"></div>';
-      if (dbDeptList) dbDeptList.innerHTML = '<div class="spinner" style="margin:2rem auto;"></div>';
-
-      // 2. Sequential Data Fetching (Prevent backend congestion)
+      // 2. Parallel Fetching
+      var promises = [
+        API.getAdvancedDashboardData(filters),
+        API.getReportData('auditActivities'),
+        API.getMonthlyTrends()
+      ];
       
-      // Step A: Load Depts Dropdown if needed
-      var deptPromise = (_dbDeptsLoaded || !dEl) ? Promise.resolve() : API.getReportData('Departments').then(function(res) {
+      // Load departments once
+      if (!_dbDeptsLoaded && dEl) {
+        promises.push(API.getReportData('Departments').then(function(res) {
           if (res.success && res.data) {
             var currentVal = dEl.value;
             var opts = '<option value="all">ทุกแผนก (All Departments)</option>';
             res.data.forEach(function(dep) { opts += '<option value="'+dep.name+'">'+dep.name+'</option>'; });
             dEl.innerHTML = opts;
             dEl.value = currentVal;
+            _dbDeptsLoaded = true;
           }
-          _dbDeptsLoaded = true;
-      });
+        }));
+      }
 
-      deptPromise.then(function() {
-        // Step B: Load Main Dashboard Stats (Heavy)
-        return API.getAdvancedDashboardData(filters);
-      }).then(function (res) {
-        if (!res.success || !res.data) throw (res.message || res.error || 'โหลดข้อมูลแดชบอร์ดล้มเหลว');
+      Promise.all([
+        API.getAdvancedDashboardData(filters).catch(function(e) { return { success: false, error: e }; }),
+        API.getReportData('auditActivities').catch(function(e) { return { success: false, error: e }; }),
+        API.getMonthlyTrends().catch(function(e) { return { success: false, error: e }; })
+      ]).then(function(results) {
+        var resStats = results[0];
+        var resLogs = results[1];
+        var resTrends = results[2];
+
+        if (resStats && resStats.success) renderDashboardStats(resStats.data);
+        else if (resStats.error) console.warn('Dashboard stats load failed', resStats.error);
         
-        var d = res.data.stats || {};
-        // Store for modal
-        window._lowStockItems = d.lowStockItems || [];
-
-        if (statsGrid) {
-          statsGrid.innerHTML =
-            statCard('clipboard-list', 'ใบเบิกตามช่วงเวลา', d.totalOrders || 0) +
-            '<div onclick="adminNav(\'orders\', document.querySelector(\'[data-admin-page=orders]\'))" style="cursor:pointer">' + statCard('clock', 'รออนุมัติทั้งหมด', d.pendingCount || 0, 'warning') + '</div>' +
-            statCard('check-circle', 'อนุมัติแล้ว', d.approvedCount || 0, 'success') +
-            statCard('package-check', 'แจกจ่ายแล้ว', d.receivedCount || 0, 'primary') +
-            statCard('coins', 'ยอดการเบิก', '฿' + (Number(d.totalVolume) || 0).toLocaleString(), 'accent') +
-            statCard('package', 'สินค้าในระบบ', d.totalProducts || 0) +
-            '<div onclick="showLowStockDetails()" style="cursor:pointer">' + 
-              statCard('alert-octagon', 'สต๊อกต่ำ', d.lowStockCount || 0, (d.lowStockCount > 0 ? 'danger' : '')) + 
-            '</div>';
-        }
+        if (resLogs && resLogs.success) renderDashboardLogsUI(resLogs.data);
+        else if (resLogs.error) console.warn('Dashboard logs load failed', resLogs.error);
         
-        var badge = document.getElementById('ordersTabBadge');
-        if (badge) {
-          if (d.pendingCount > 0) {
-            badge.textContent = d.pendingCount;
-            badge.style.display = 'inline-block';
-          } else { badge.style.display = 'none'; }
-        }
-
-        // Render Top Products
-        if (dbTopList) {
-          if (res.data.topProducts && res.data.topProducts.length > 0) {
-            dbTopList.innerHTML = '<div class="flex flex-col gap-2" style="padding:0 1rem 1rem;">' + 
-              res.data.topProducts.map(function(tp, idx) {
-                return '<div class="flex justify-between items-center" style="padding:0.75rem; background:rgba(255,255,255,0.02); border-radius:8px; border:1px solid var(--border)">' +
-                  '<div style="flex:1"><strong style="color:var(--text1)">#'+(idx+1)+ ' ' + tp.productName + '</strong><div style="font-size:0.8rem;color:var(--text3)">รหัส: ' + tp.productId + '</div></div>' +
-                  '<div class="text-right"><div style="font-weight:700; color:var(--accent)">' + tp.totalQty + ' ชิ้น</div><div style="font-size:0.8rem; color:var(--text3)">฿' + (Number(tp.totalValue) || 0).toLocaleString() + '</div></div>' +
-                  '</div>';
-              }).join('') + '</div>';
-          } else {
-            dbTopList.innerHTML = '<div class="text-center" style="padding:2rem; color:var(--text3)">ไม่พบข้อมูลการเบิกในช่วงเวลานี้</div>';
-          }
-        }
-
-        // Render Dept Spending
-        if (dbDeptList) {
-          if (res.data.deptSpending && res.data.deptSpending.length > 0) {
-             var maxSpend = Math.max.apply(Math, res.data.deptSpending.map(function(ds){ return ds.totalSpending; }));
-             dbDeptList.innerHTML = '<div class="flex flex-col gap-2" style="padding:0 1rem 1rem;">' + 
-              res.data.deptSpending.map(function(ds) {
-                var spendAmt = Number(ds.totalSpending) || 0;
-                var pct = maxSpend > 0 ? (spendAmt / maxSpend * 100) : 0;
-                return '<div style="margin-bottom:0.75rem;">' +
-                  '<div class="flex justify-between" style="font-size:0.85rem; margin-bottom:0.25rem"><span style="font-weight:600">' + ds.department + '</span><span style="color:var(--primary-light); font-weight:700">฿' + spendAmt.toLocaleString() + '</span></div>' +
-                  '<div style="width:100%; height:8px; background:rgba(255,255,255,0.05); border-radius:4px; overflow:hidden;"><div style="width:' + pct + '%; height:100%; background:var(--primary); transition: width 0.5s ease;"></div></div>' +
-                  '</div>';
-              }).join('') + '</div>';
-          } else {
-            dbDeptList.innerHTML = '<div class="text-center" style="padding:2rem; color:var(--text3)">ไม่พบข้อมูลการเบิกในช่วงเวลานี้</div>';
-          }
-        }
-      }).catch(function (err) {
-        console.error('loadDashboard Stats Error:', err);
-        if (statsGrid) statsGrid.innerHTML = '<div class="card" style="grid-column: 1/-1; color: var(--danger); padding:2rem; text-align:center;">⚠️ ไม่สามารถโหลดข้อมูลสรุปได้ในขณะนี้<br><small style="opacity:0.6">' + err + '</small></div>';
-      }).finally(function() {
-        // Step C: Load Secondary Widgets independently but after main stats
-        loadDashboardLogs();
-        setTimeout(initTrendsChart, 500); 
+        if (resTrends && resTrends.success) renderTrendsChartUI(resTrends);
+        else if (resTrends.error) console.warn('Dashboard trends load failed', resTrends.error);
+        
         refreshIcons();
+      }).catch(function(err) {
+        console.error('Fatal Dashboard Error:', err);
+        showToast('เกิดข้อผิดพลาดในการโหลดข้อมูลหน้าแดชบอร์ด', 'error');
+      });
+    }
+
+    function renderDashboardStats(data) {
+      if (!data) return;
+      var statsGrid = document.getElementById('statsGrid');
+      var dbTopList = document.getElementById('dbTopProductsList');
+      var dbDeptList = document.getElementById('dbDeptSpendingList');
+      var d = data.stats || {};
+      window._lowStockItems = d.lowStockItems || [];
+
+      if (statsGrid) {
+        statsGrid.innerHTML =
+          statCard('clipboard-list', 'ใบเบิกตามช่วงเวลา', d.totalOrders || 0) +
+          '<div onclick="adminNav(\'orders\', document.querySelector(\'[data-admin-page=orders]\'))" style="cursor:pointer">' + statCard('clock', 'รออนุมัติทั้งหมด', d.pendingCount || 0, 'warning') + '</div>' +
+          statCard('check-circle', 'อนุมัติแล้ว', d.approvedCount || 0, 'success') +
+          statCard('package-check', 'แจกจ่ายแล้ว', d.receivedCount || 0, 'primary') +
+          statCard('coins', 'ยอดการเบิก', '฿' + (Number(d.totalVolume) || 0).toLocaleString(), 'accent') +
+          statCard('package', 'สินค้าในระบบ', d.totalProducts || 0) +
+          '<div onclick="showLowStockDetails()" style="cursor:pointer">' + 
+            statCard('alert-octagon', 'สต๊อกต่ำ', d.lowStockCount || 0, (d.lowStockCount > 0 ? 'danger' : '')) + 
+          '</div>';
+      }
+      
+      var badge = document.getElementById('ordersTabBadge');
+      if (badge) {
+        if (d.pendingCount > 0) {
+          badge.textContent = d.pendingCount;
+          badge.style.display = 'inline-block';
+        } else { badge.style.display = 'none'; }
+      }
+
+      if (dbTopList) {
+        if (data.topProducts && data.topProducts.length > 0) {
+          dbTopList.innerHTML = '<div class="flex flex-col gap-2" style="padding:0 1rem 1rem;">' + 
+            data.topProducts.map(function(tp, idx) {
+              return '<div class="flex justify-between items-center" style="padding:0.75rem; background:rgba(255,255,255,0.02); border-radius:8px; border:1px solid var(--border)">' +
+                '<div style="flex:1"><strong style="color:var(--text1)">#'+(idx+1)+ ' ' + tp.productName + '</strong><div style="font-size:0.8rem;color:var(--text3)">รหัส: ' + tp.productId + '</div></div>' +
+                '<div class="text-right"><div style="font-weight:700; color:var(--accent)">' + tp.totalQty + ' ชิ้น</div><div style="font-size:0.8rem; color:var(--text3)">฿' + (Number(tp.totalValue) || 0).toLocaleString() + '</div></div>' +
+                '</div>';
+            }).join('') + '</div>';
+        } else {
+          dbTopList.innerHTML = '<div class="empty-state" style="margin:0 1rem 1rem;"><i data-lucide="package-search"></i><p>ไม่พบรายการที่ต้องการ</p><small>ลองปรับเปลี่ยนช่วงเวลาหรือแผนกค้นหาดูนะครับ</small></div>';
+        }
+      }
+
+      if (dbDeptList) {
+        if (data.deptSpending && data.deptSpending.length > 0) {
+           var maxSpend = Math.max.apply(Math, data.deptSpending.map(function(ds){ return ds.totalSpending; }));
+           dbDeptList.innerHTML = '<div class="flex flex-col gap-2" style="padding:0 1rem 1rem;">' + 
+            data.deptSpending.map(function(ds) {
+              var spendAmt = Number(ds.totalSpending) || 0;
+              var pct = maxSpend > 0 ? (spendAmt / maxSpend * 100) : 0;
+              return '<div style="margin-bottom:0.75rem;">' +
+                '<div class="flex justify-between" style="font-size:0.85rem; margin-bottom:0.25rem"><span style="font-weight:600">' + ds.department + '</span><span style="color:var(--primary-light); font-weight:700">฿' + spendAmt.toLocaleString() + '</span></div>' +
+                '<div style="width:100%; height:8px; background:rgba(255,255,255,0.05); border-radius:4px; overflow:hidden;"><div style="width:' + pct + '%; height:100%; background:var(--primary); transition: width 0.5s ease;"></div></div>' +
+                '</div>';
+            }).join('') + '</div>';
+        } else {
+          dbDeptList.innerHTML = '<div class="empty-state" style="margin:0 1rem 1rem;"><i data-lucide="bar-chart-3"></i><p>ไม่พบข้อมูลการใช้จ่าย</p><small>ลองปรับเปลี่ยนช่วงเวลาค้นหาใหม่ได้ครับ</small></div>';
+        }
+      }
+    }
+
+    function renderDashboardLogsUI(data) {
+      var body = document.getElementById('dashboardActivitiesBody');
+      if (!body || !data || !data.logs) return;
+      body.innerHTML = data.logs.slice(0, 8).map(function (l) {
+        var time = l.timestamp ? String(l.timestamp).split(' ')[1].substring(0, 5) : '--:--';
+        var markerClass = 'status-dot';
+        if (l.action.indexOf('เบิก') !== -1) markerClass += ' info';
+        if (l.action.indexOf('อนุมัติ') !== -1) markerClass += ' success';
+        if (l.action.indexOf('ปฏิเสธ') !== -1) markerClass += ' danger';
+        if (l.action.indexOf('อัปเดต') !== -1) markerClass += ' warning';
+        return '<tr><td style="color:var(--text3);font-size:0.75rem">' + time + '</td><td style="font-weight:500;"><div class="flex items-center gap-2"><span class="' + markerClass + '"></span>' + l.action + '</div></td><td style="font-size:0.8rem">' + (l.user || 'SYSTEM') + '</td></tr>';
+      }).join('');
+    }
+
+    function renderTrendsChartUI(res) {
+      var ctxEl = document.getElementById('trendsChart');
+      if (!ctxEl) return;
+      var ctx = ctxEl.getContext('2d');
+      if (chartInstance) chartInstance.destroy();
+      chartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: res.labels,
+          datasets: [{
+            label: 'ยอดการเบิก (บาท)',
+            data: res.data,
+            borderColor: '#fbbf24',
+            backgroundColor: 'rgba(251, 191, 36, 0.1)',
+            borderWidth: 3,
+            tension: 0.4,
+            fill: true,
+            pointBackgroundColor: '#fbbf24',
+            pointRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } },
+            x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+          },
+          plugins: { legend: { display: false } }
+        }
+      });
+    }
       });
     }
 
@@ -1328,7 +1404,7 @@
 
       API.getReportData('auditActivities').then(function (res) {
         if (!res.success || !res.data || !res.data.logs) {
-          body.innerHTML = '<tr><td colspan="3" class="text-center" style="padding:1rem;color:var(--text3)">ไม่มีกิจกรรม</td></tr>';
+          body.innerHTML = '<tr><td colspan="3" class="text-center" style="padding:3rem 1rem;"><div class="flex flex-col items-center gap-2" style="opacity:0.4"><i data-lucide="activity" style="width:32px;height:32px"></i><div style="font-size:0.9rem">ไม่มีประวัติกิจกรรม</div></div></td></tr>';
           return;
         }
         body.innerHTML = res.data.logs.slice(0, 8).map(function (l) {
@@ -1480,6 +1556,7 @@
     var currentAdminProductsPage = 1;
 
     function loadProducts() {
+      var body = document.getElementById('productsBody');
       API.getProducts().then(function (res) {
         if (!res.data) res.data = [];
         allAdminProducts = res.data;
@@ -1493,9 +1570,12 @@
             }).join('');
             initSearchableSelect('adminProductCatFilter');
           }
-        });
+        }).catch(function(err) { console.warn('Categories load failed', err); });
 
         filterAdminProducts(); // Initial render
+      }).catch(function(err) {
+        showToast('โหลดสินค้าไม่สำเร็จ: ' + err, 'error');
+        if (body) body.innerHTML = '<tr><td colspan="8" class="text-center">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>';
       });
     }
 
@@ -1619,8 +1699,8 @@
 
     // ─── CATEGORIES ───────────────────────────────────────
     function loadAdminCategories() {
+      var body = document.getElementById('categoriesBody');
       API.getCategories().then(function (res) {
-        var body = document.getElementById('categoriesBody');
         if (!res.data || res.data.length === 0) { body.innerHTML = '<tr><td colspan="3" class="text-center" style="padding:2rem;color:var(--text3)">ยังไม่มีหมวดหมู่</td></tr>'; return; }
         body.innerHTML = res.data.map(function (c) {
           return '<tr>'
@@ -1631,6 +1711,9 @@
             + '</tr>';
         }).join('');
         refreshIcons();
+      }).catch(function(err) {
+        showToast('โหลดหมวดหมู่ไม่สำเร็จ: ' + err, 'error');
+        if (body) body.innerHTML = '<tr><td colspan="3" class="text-center">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>';
       });
     }
 
@@ -2113,12 +2196,12 @@
     var allAdminTeams = [];
 
     function loadAdminEmployees() {
+      var body = document.getElementById('employeesBody');
       Promise.all([API.getEmployees(), API.getTeams()]).then(function (results) {
         var resEmp = results[0];
         var resTeams = results[1];
         allAdminTeams = resTeams.data || [];
 
-        var body = document.getElementById('employeesBody');
         if (!resEmp.data) return;
         body.innerHTML = resEmp.data.map(function (e) {
           var isMe = currentUser && e.employeeId === currentUser.employeeId;
@@ -2152,6 +2235,9 @@
             + '</tr>';
         }).join('');
         refreshIcons();
+      }).catch(function(err) {
+        showToast('โหลดข้อมูลพนักงานไม่สำเร็จ: ' + err, 'error');
+        if (body) body.innerHTML = '<tr><td colspan="7" class="text-center">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>';
       });
     }
 
@@ -2250,6 +2336,8 @@
           '</div>';
         }).join('');
         refreshIcons();
+      }).catch(function(err) {
+        showToast('โหลดข้อมูลทีมไม่สำเร็จ: ' + err, 'error');
       });
     }
 
@@ -2454,9 +2542,9 @@
 
     // ─── INVENTORY ────────────────────────────────────────
     function loadInventory() {
+      var body = document.getElementById('inventoryBody');
       API.getProducts().then(function (res) {
         if (!res.success) return;
-        var body = document.getElementById('inventoryBody');
         if (!body) return;
         body.innerHTML = res.data.map(function (p) {
           var isLow = Number(p.stock) <= Number(p.minStock);
@@ -2469,6 +2557,9 @@
             + '<td><button class="btn btn-sm btn-outline" onclick="openStockModal(\'' + p.productId + '\',\'' + p.name + '\')">ปรับ</button></td>'
             + '</tr>';
         }).join('');
+      }).catch(function(err) {
+        showToast('โหลดคลังสินค้าไม่สำเร็จ: ' + err, 'error');
+        if (body) body.innerHTML = '<tr><td colspan="6" class="text-center">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>';
       });
     }
 
@@ -2603,7 +2694,7 @@
           }
         });
         refreshIcons();
-      });
+      }).catch(function(err) { console.warn('Top requested items load failed', err); });
 
       API.getDepartmentSpending(month).then(function (res) {
         if (!res.success || !res.data) return;
@@ -3146,13 +3237,7 @@
             showToast('เกิดข้อผิดพลาด: ' + err, 'error');
         });
     }
-  </script>
 
-  <!-- Back to Top Button -->
-  <button id="backToTopBtn" class="btn btn-primary" style="position:fixed; bottom:2rem; right:2rem; border-radius:50%; width:50px; height:50px; display:none; align-items:center; justify-content:center; box-shadow:var(--shadow-lg); z-index:1200; padding:0; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1)" onclick="window.scrollTo({top:0, behavior:'smooth'})" title="กลับขึ้นด้านบน">
-    <i data-lucide="arrow-up" style="width:24px;height:24px"></i>
-  </button>
-  <script>
     window.addEventListener('scroll', function() {
       var btn = document.getElementById('backToTopBtn');
       if (btn) {
@@ -3288,10 +3373,10 @@
     function printBarcode() {
       var canvas = document.getElementById('barcodeCanvas');
       var win = window.open('', '_blank');
-      win.document.write('<html><head><title>Print Barcode</title><style>body{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;font-family:sans-serif}</style></head><body>');
-      win.document.write('<h2>' + document.getElementById('barcodeLabel').textContent + '</h2>');
-      win.document.write('<img src="' + canvas.toDataURL() + '" style="width:300px">');
-      win.document.write('<' + 'script>setTimeout(function(){window.print();window.close();},500);<' + '/script></body></html>');
+      win.document.write('\x3chtml\x3e\x3chead\x3e\x3ctitle\x3ePrint Barcode\x3c/title\x3e\x3cstyle\x3ebody{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;font-family:sans-serif}\x3c/style\x3e\x3c/head\x3e\x3cbody\x3e');
+      win.document.write('\x3ch2\x3e' + document.getElementById('barcodeLabel').textContent + '\x3c/h2\x3e');
+      win.document.write('\x3cimg src="' + canvas.toDataURL() + '" style="width:300px"\x3e');
+      win.document.write('\x3cscript\x3esetTimeout(function(){window.print();window.close();},500);\x3c/script\x3e\x3c/body\x3e\x3c/html\x3e');
       win.document.close();
     }
 
@@ -3384,5 +3469,10 @@
       }
     });
   </script>
+
+  <!-- Back to Top Button -->
+  <button id="backToTopBtn" class="btn btn-primary" style="position:fixed; bottom:2rem; right:2rem; border-radius:50%; width:50px; height:50px; display:none; align-items:center; justify-content:center; box-shadow:var(--shadow-lg); z-index:1200; padding:0; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1)" onclick="window.scrollTo({top:0, behavior:'smooth'})" title="กลับขึ้นด้านบน">
+    <i data-lucide="arrow-up" style="width:24px;height:24px"></i>
+  </button>
 </body>
 </html>

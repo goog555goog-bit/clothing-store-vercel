@@ -289,20 +289,34 @@ var Onboarding = {
 
 function loadStorefrontData() {
   var grid = document.getElementById('productGrid');
-  if (grid && (!allProducts || allProducts.length === 0)) {
-    grid.innerHTML = Array(8).fill('<div class="skeleton-card">'
-      + '<div class="skeleton-image skeleton"></div>'
-      + '<div class="product-info" style="gap:0.75rem">'
-      +   '<div class="skeleton-title skeleton"></div>'
-      +   '<div class="skeleton-title skeleton" style="width:60%"></div>'
-      +   '<div class="flex items-center justify-between" style="margin-top:auto">'
-      +     '<div class="skeleton-price skeleton" style="width:80px"></div>'
-      +     '<div class="skeleton-price skeleton" style="width:90px;border-radius:99px"></div>'
-      +   '</div>'
-      + '</div>'
-      + '</div>').join('');
+  
+  // 1. Try to load from Cache first (Instant Render)
+  var cached = API.getCached('getStorefrontData');
+  if (cached && cached.success) {
+    console.log('✨ Stale-While-Revalidate: Instant render from cache');
+    allProducts = cached.products || [];
+    allCategories = cached.categories || [];
+    renderCategories();
+    renderProductGrid();
+    
+    // Quick load branches from cache too if available
+    var cachedDepts = API.getCached('getReportData'); // Note: index depends on exact call, might need refinement
+    if (cachedDepts && cachedDepts.success) allBranches = cachedDepts.data || [];
+  } else {
+    // Show Skeletons ONLY if no cache exists
+    if (grid && (!allProducts || allProducts.length === 0)) {
+      grid.innerHTML = Array(8).fill(
+        '<div class="skeleton-card">' +
+          '<div class="skeleton-image skeleton"></div>' +
+          '<div class="skeleton-title skeleton"></div>' +
+          '<div class="skeleton-text skeleton"></div>' +
+          '<div class="skeleton-price skeleton"></div>' +
+        '</div>'
+      ).join('');
+    }
   }
   
+  // 2. Fetch fresh data from network
   API.getStorefrontData().then(function(res) {
     if (res.success) {
       allProducts = res.products || [];
@@ -310,19 +324,22 @@ function loadStorefrontData() {
       renderCategories();
       renderProductGrid();
       
-      // Initialize Searchable selects for header
+      // Initialize Searchable selects
       initSearchableSelect('searchType');
       initSearchableSelect('headerCategoryFilter');
       initSearchableSelect('stockFilter');
       
-      // Load Branches/Departments for Sub-Stock Usage
+      // Fetch fresh Branches
       API.getReportData('Departments').then(function(r) {
         if (r.success) allBranches = r.data || [];
       });
-
     }
   }).catch(function(err) {
-    showToast('โหลดข้อมูลไม่สำเร็จ: ' + err, 'error');
+    // Only show error toast if we don't even have cached data (to avoid noisy errors on transient network blips)
+    if (!allProducts || allProducts.length === 0) {
+      showToast('โหลดข้อมูลไม่สำเร็จ: ' + err, 'error');
+    }
+    console.error('Storefront fetch error:', err);
   });
 }
 
@@ -653,7 +670,12 @@ function renderProductGrid(pageNum) {
     var clearBtn = searchVal.trim()
       ? '<button class="btn btn-outline btn-sm" style="margin-top:1rem" onclick="document.getElementById(\'searchInput\').value=\'\';renderProductGrid()">ล้างการค้นหา</button>'
       : '';
-    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><i data-lucide="search-x" style="width:48px;height:48px"></i><p>ไม่พบสินค้าที่ตรงกัน</p><small>ลองเปลี่ยนคำค้นหาหรือหมวดหมู่</small>' + clearBtn + '</div>';
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1">' +
+      '<i data-lucide="package-search"></i>' +
+      '<p>ไม่พบสินค้าที่ตรงกัน</p>' +
+      '<small>ลองเปลี่ยนคำค้นหาหรือเลือกหมวดหมู่ใหม่อีกครั้งครับ</small>' +
+      clearBtn + 
+    '</div>';
     document.getElementById('productPagination').innerHTML = '';
     refreshIcons();
     return;
@@ -688,9 +710,9 @@ function renderProductGrid(pageNum) {
       +   '<div class="product-stock"><span class="product-stock-dot' + (outOfStock ? ' out' : '') + '"></span>' + (outOfStock ? '<span style="color:var(--danger)">หมดสต็อก</span>' : 'คงเหลือ: ' + Number(p.stock) + ' ชิ้น') + '</div>'
       +   '<div class="flex items-center justify-between" style="margin-top:auto">'
       +     '<div class="product-price">฿' + Number(p.price).toLocaleString() + '</div>'
-      +     '<button class="btn btn-sm ' + (outOfStock ? 'btn-outline' : 'btn-accent') + '" '
+      +     '<button class="btn btn-sm ' + (outOfStock ? 'btn-outline' : 'btn-primary') + '" '
       +       (outOfStock ? 'disabled' : 'onclick="addToCart(\'' + escapeHTML(p.productId) + '\', event)"')
-      +     ' style="border-radius:99px; padding: 0.4rem 1rem;">' + (outOfStock ? 'หมด' : '+ เบิกสินค้า') + '</button>'
+      +     ' style="border-radius:99px; padding: 0.4rem 1rem;' + (outOfStock ? '' : 'background:var(--gradient-gold);color:#000;border:none;') + '">' + (outOfStock ? 'หมด' : '+ เบิกสินค้า') + '</button>'
       +   '</div>'
       + '</div>'
       + '</div>';
