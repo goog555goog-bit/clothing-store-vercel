@@ -1251,32 +1251,31 @@
         if (dbDeptList) dbDeptList.innerHTML = '<div class="skeleton" style="height:280px; margin:0 1rem 1rem;"></div>';
       }
 
-      // 2. Parallel Fetching
-      var promises = [
-        API.getAdvancedDashboardData(filters),
-        API.getReportData('auditActivities'),
-        API.getMonthlyTrends()
+      // 2. Parallel Fetching (Optimized to avoid redundant calls)
+      var dEl = document.getElementById('dbFilterDept');
+      var _dbDeptsLoaded = window._dbDeptsLoaded || false;
+
+      var dataPromises = [
+        API.getAdvancedDashboardData(filters).catch(function(e) { return { success: false, error: e }; }),
+        API.getReportData('auditActivities').catch(function(e) { return { success: false, error: e }; }),
+        API.getMonthlyTrends().catch(function(e) { return { success: false, error: e }; })
       ];
       
-      // Load departments once
+      // Load departments once if not yet loaded
       if (!_dbDeptsLoaded && dEl) {
-        promises.push(API.getReportData('Departments').then(function(res) {
-          if (res.success && res.data) {
+        API.getReportData('Departments').then(function(res) {
+          if (res.success && res.data && Array.isArray(res.data)) {
             var currentVal = dEl.value;
             var opts = '<option value="all">ทุกแผนก (All Departments)</option>';
             res.data.forEach(function(dep) { opts += '<option value="'+dep.name+'">'+dep.name+'</option>'; });
             dEl.innerHTML = opts;
             dEl.value = currentVal;
-            _dbDeptsLoaded = true;
+            window._dbDeptsLoaded = true;
           }
-        }));
+        }).catch(function(e) { console.warn('Failed to load departments', e); });
       }
 
-      Promise.all([
-        API.getAdvancedDashboardData(filters).catch(function(e) { return { success: false, error: e }; }),
-        API.getReportData('auditActivities').catch(function(e) { return { success: false, error: e }; }),
-        API.getMonthlyTrends().catch(function(e) { return { success: false, error: e }; })
-      ]).then(function(results) {
+      Promise.all(dataPromises).then(function(results) {
         var resStats = results[0];
         var resLogs = results[1];
         var resTrends = results[2];
@@ -3334,7 +3333,7 @@
             '<td><span class="badge ' + (b.status === 'active' ? 'badge-approved' : 'badge-rejected') + '">' + (b.status === 'active' ? 'ปกติ' : 'ปิด') + '</span></td>' +
             '<td class="flex gap-1">' +
               '<button class="btn btn-xs btn-outline" onclick="editBranch(\'' + escapeHTML(b.branchId) + '\')"><i data-lucide="edit-2"></i></button>' +
-              '<button class="btn btn-xs btn-ghost" style="color:var(--danger)" onclick="delBranch(\'' + escapeHTML(b.branchId) + '\')"><i data-lucide="trash"></i></button>' +
+              '<button class="btn btn-xs btn-ghost" style="color:var(--danger)" onclick="delBranch(\'' + escapeHTML(b.branchId) + '\', this)"><i data-lucide="trash"></i></button>' +
             '</td>' +
           '</tr>';
         }).join('');
@@ -3353,28 +3352,54 @@
     function closeBranchModal() { document.getElementById('branchModal').classList.remove('open'); }
     function editBranch(id) { var b = allBranches.find(x => x.branchId === id); if(b) openBranchModal(b); }
 
-    function saveBranch() {
-      var data = {
-        branchId: document.getElementById('bf-id').value.trim(),
-        name: document.getElementById('bf-name').value.trim(),
-        status: document.getElementById('bf-status').value
-      };
-      if(!data.branchId || !data.name) { showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warning'); return; }
-      
-      var op = allBranches.some(x => x.branchId === data.branchId) ? 'update' : 'add';
-      API.manageBranch(op, data).then(function(res) {
-        showToast(res.message, res.success ? 'success' : 'error');
-        if(res.success) { closeBranchModal(); loadBranches(); }
-      });
-    }
-
-    function delBranch(id) {
-      if(!confirm('ยืนยันการลบสาขา ' + id + ' ?')) return;
-      API.manageBranch('delete', { branchId: id }).then(function(res) {
-        showToast('ลบสาขาเรียบร้อย', 'success');
-        loadBranches();
-      });
-    }
+     function saveBranch() {
+       var data = {
+         branchId: document.getElementById('bf-id').value.trim(),
+         name: document.getElementById('bf-name').value.trim(),
+         status: document.getElementById('bf-status').value
+       };
+       if(!data.branchId || !data.name) { showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warning'); return; }
+       
+       var btn = document.getElementById('saveBranchBtn');
+       var oldHtml = btn.innerHTML;
+       btn.disabled = true;
+       btn.innerHTML = '<div class="spinner" style="width:14px; height:14px"></div>';
+ 
+       var op = allBranches.some(x => x.branchId === data.branchId) ? 'update' : 'add';
+       API.manageBranch(op, data).then(function(res) {
+         showToast(res.message, res.success ? 'success' : 'error');
+         if(res.success) { 
+           closeBranchModal(); 
+           loadBranches(); 
+           // Invalidate dashboard if needed
+           API.invalidateCache('getBranches');
+         }
+       }).finally(function() {
+         btn.disabled = false;
+         btn.innerHTML = oldHtml;
+       });
+     }
+ 
+     function delBranch(id, btnEl) {
+       if(!confirm('ยืนยันการลบสาขา ' + id + ' ?')) return;
+       
+       var oldHtml = btnEl ? btnEl.innerHTML : '';
+       if(btnEl) {
+         btnEl.disabled = true;
+         btnEl.innerHTML = '<div class="spinner" style="width:12px; height:12px"></div>';
+       }
+ 
+       API.manageBranch('delete', { branchId: id }).then(function(res) {
+         showToast('ลบสาขาเรียบร้อย', 'success');
+         loadBranches();
+         API.invalidateCache('getBranches');
+       }).finally(function() {
+         if(btnEl) {
+           btnEl.disabled = false;
+           btnEl.innerHTML = oldHtml;
+         }
+       });
+     }
 
     // --- BARCODE LOGIC ---
     function generateBarcode(id, name) {
