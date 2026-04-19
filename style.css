@@ -251,6 +251,9 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   .nav-actions .btn-ghost span:not(#navUserName):not(.force-show) { display: none; }
   .nav-actions .btn-sm { padding: 0 0.5rem; min-width: 38px; overflow: visible; }
   .nav-actions .btn-ghost { overflow: visible; }
+  
+  /* Disable shine effect for buttons in this group to prevent overflow artifacts */
+  .nav-actions .btn::after { display: none !important; }
 
   /* Premium Tooltip — Positioned BELOW the button as requested */
   .nav-actions button[aria-label]:hover::before {
