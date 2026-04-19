@@ -467,48 +467,7 @@ function selectSuggestion(pid) {
   }
 }
 
-// ─── BRANCH SEARCH LOGIC ──────────────────────────────────────
-var branchDebounceTimer = null;
-
-function handleBranchSearch(val) {
-  var dropdown = document.getElementById('branchSuggestions');
-  if (!dropdown) return;
-  
-  if (branchDebounceTimer) clearTimeout(branchDebounceTimer);
-
-  var q = (val || '').toLowerCase().trim();
-  if (!q) {
-    dropdown.classList.remove('active');
-    return;
-  }
-  
-  branchDebounceTimer = setTimeout(function() {
-    var matches = allBranches.filter(function(b) {
-      return (b.name || b).toLowerCase().indexOf(q) !== -1;
-    }).slice(0, 5);
-    
-    if (matches.length > 0) {
-      dropdown.innerHTML = matches.map(function(b) {
-        var name = b.name || b;
-        return '<div class="suggestion-item" onclick="selectBranch(\'' + name.replace(/'/g, "\\'") + '\')">'
-          + '<i data-lucide="map-pin" style="width:14px;height:14px;opacity:0.6"></i>'
-          + '<span>' + name + '</span>'
-          + '</div>';
-      }).join('');
-      dropdown.classList.add('active');
-      refreshIcons();
-    } else {
-      dropdown.classList.remove('active');
-    }
-  }, 300); // 300ms for branch search
-}
-
-function selectBranch(name) {
-  var input = document.getElementById('actionModalBranch');
-  if (input) input.value = name;
-  var dropdown = document.getElementById('branchSuggestions');
-  if (dropdown) dropdown.classList.remove('active');
-}
+/* Removed handleBranchSearch and selectBranch in favor of searchable select component */
 
 // Close suggestions on outside click
 document.addEventListener('click', function(e) {
@@ -1185,9 +1144,22 @@ function openActionModal(action, productId, productName, maxQty) {
   qtyEl.value = '1';
   qtyEl.max = maxQty;
   inputWrap.classList.add('hidden');
-  document.getElementById('actionModalBranchWrap').classList.add('hidden');
+  var bWrap = document.getElementById('actionModalBranchWrap');
+  bWrap.classList.add('hidden');
   inputEl.value = '';
-  document.getElementById('actionModalBranch').value = '';
+  
+  var bSelect = document.getElementById('actionModalBranch');
+  bSelect.value = '';
+  
+  // Populate Branches
+  var opts = '<option value="">-- เลือกสาขาที่ใช้งาน --</option>';
+  if (window.allBranches && allBranches.length > 0) {
+    allBranches.forEach(function(b) {
+      var name = b.name || b;
+      opts += '<option value="' + name + '">' + name + '</option>';
+    });
+  }
+  bSelect.innerHTML = opts;
 
   
   if (action === 'use') {
@@ -1210,6 +1182,9 @@ function openActionModal(action, productId, productName, maxQty) {
   btn.innerHTML = 'ยืนยัน';
   
   document.getElementById('actionModal').classList.add('open');
+  if (_activeAction.type === 'use') {
+    initSearchSelect('actionModalBranch');
+  }
   refreshIcons();
 }
 

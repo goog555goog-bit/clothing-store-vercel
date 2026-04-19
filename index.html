@@ -345,14 +345,8 @@
         </div>
 
         <div id="actionModalBranchWrap" class="form-group hidden" style="position:relative;">
-          <label class="form-label">สาขา/หน่วยงาน (Search)</label>
-          <div class="search-box glass" style="margin-bottom:0;">
-            <i data-lucide="map-pin" style="width:16px;height:16px;color:var(--primary);margin-left:0.75rem;"></i>
-            <input type="text" id="actionModalBranch" class="form-input" placeholder="ค้นหาสาขา..." 
-              autocomplete="off" oninput="handleBranchSearch(this.value)"
-              style="border:none;background:transparent;padding-left:0.5rem;">
-          </div>
-          <div id="branchSuggestions" class="search-suggestions-dropdown" style="top:100%; width:100%;"></div>
+          <label class="form-label">สาขา/หน่วยงาน (ระบุสาขาที่นำไปใช้งาน)</label>
+          <select id="actionModalBranch" class="form-input"></select>
         </div>
 
 
@@ -432,6 +426,96 @@
     <i data-lucide="arrow-up" style="width:24px;height:24px"></i>
   </button>
   <script>
+    // --- SEARCHABLE SELECT HELPER ---
+    function initSearchSelect(selectId) {
+      var select = document.getElementById(selectId);
+      if (!select) return;
+
+      var oldWrapper = select.parentElement.querySelector('.search-select-wrapper');
+      if (oldWrapper) oldWrapper.remove();
+
+      var wrapper = document.createElement('div');
+      wrapper.className = 'search-select-wrapper';
+      select.style.display = 'none';
+      select.parentElement.insertBefore(wrapper, select);
+
+      var input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'form-input search-select-input';
+      input.placeholder = select.options[0] ? select.options[0].text : 'พิมพ์เพื่อค้นหา...';
+      input.autocomplete = 'off';
+      
+      var chevron = document.createElement('div');
+      chevron.className = 'search-select-chevron';
+      chevron.innerHTML = '<i data-lucide="chevron-down" style="width:16px;height:16px;color:var(--text3)"></i>';
+      
+      var dropdown = document.createElement('div');
+      dropdown.className = 'search-select-dropdown';
+
+      wrapper.appendChild(input);
+      wrapper.appendChild(chevron);
+      wrapper.appendChild(dropdown);
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+
+      function updateDropdown(filter) {
+        var options = Array.from(select.options);
+        var filtered = options.filter(function(o, i) {
+          if (i === 0 && !o.value) return false; 
+          if (!filter) return true;
+          return o.text.toLowerCase().includes(filter.toLowerCase());
+        });
+
+        if (filtered.length === 0) {
+          dropdown.innerHTML = '<div class="search-select-empty">ไม่พบตัวเลือกที่ตรงกัน</div>';
+        } else {
+          dropdown.innerHTML = filtered.map(function(o) {
+            return '<div class="search-select-item ' + (o.value === select.value ? 'selected' : '') + '" data-value="' + o.value + '">' + o.text + '</div>';
+          }).join('');
+        }
+
+        dropdown.querySelectorAll('.search-select-item').forEach(function(item) {
+          item.onclick = function() {
+            select.value = this.dataset.value;
+            input.value = this.textContent;
+            dropdown.classList.remove('active');
+            select.dispatchEvent(new Event('change'));
+          };
+        });
+      }
+
+      input.onfocus = function() {
+        if (!dropdown.classList.contains('active')) {
+          this.value = '';
+          updateDropdown('');
+          dropdown.classList.add('active');
+        }
+      };
+
+      input.onclick = function(e) {
+        e.stopPropagation();
+        if (dropdown.classList.contains('active')) {
+          dropdown.classList.remove('active');
+          if (select.selectedIndex >= 0) input.value = select.options[select.selectedIndex].text;
+        } else {
+          this.value = '';
+          updateDropdown('');
+          dropdown.classList.add('active');
+        }
+      };
+
+      input.oninput = function() {
+        updateDropdown(this.value);
+        dropdown.classList.add('active');
+      };
+
+      document.addEventListener('click', function(e) {
+        if (!wrapper.contains(e.target)) {
+          dropdown.classList.remove('active');
+          if (select.selectedIndex >= 0) input.value = select.options[select.selectedIndex].text;
+        }
+      });
+    }
+
     window.addEventListener('scroll', function() {
       var btn = document.getElementById('backToTopBtn');
       if (btn) {

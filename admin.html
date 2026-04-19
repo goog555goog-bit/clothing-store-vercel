@@ -148,7 +148,10 @@
             <div class="card-title text-accent"><i data-lucide="award"></i> 5 อันดับสินค้ายอดนิยม</div>
           </div>
           <div id="dbTopProductsList" style="padding: 0.5rem 0;">
-             <div class="text-center" style="padding:2rem;"><div class="spinner"></div></div>
+             <div style="height:220px; position:relative; margin-bottom:1rem; padding:0 1rem;"><canvas id="topProductsDoughnut"></canvas></div>
+             <div id="dbTopProductsInner">
+               <div class="text-center" style="padding:2rem;"><div class="spinner"></div></div>
+             </div>
           </div>
         </div>
         <div class="card">
@@ -156,7 +159,10 @@
             <div class="card-title text-primary"><i data-lucide="pie-chart"></i> สัดส่วนยอดเบิกตามแผนก</div>
           </div>
           <div id="dbDeptSpendingList" style="padding: 0.5rem 0;">
-             <div class="text-center" style="padding:2rem;"><div class="spinner"></div></div>
+             <div style="height:220px; position:relative; margin-bottom:1rem; padding:0 1rem;"><canvas id="deptSpendingDoughnut"></canvas></div>
+             <div id="dbDeptSpendingInner">
+               <div class="text-center" style="padding:2rem;"><div class="spinner"></div></div>
+             </div>
           </div>
         </div>
       </div>
@@ -1245,10 +1251,10 @@
         if (statsGrid) {
           statsGrid.innerHTML = Array(4).fill('<div class="skeleton-stat"></div>').join('');
         }
-        var dbTopList = document.getElementById('dbTopProductsList');
-        var dbDeptList = document.getElementById('dbDeptSpendingList');
-        if (dbTopList) dbTopList.innerHTML = '<div class="skeleton" style="height:280px; margin:0 1rem 1rem;"></div>';
-        if (dbDeptList) dbDeptList.innerHTML = '<div class="skeleton" style="height:280px; margin:0 1rem 1rem;"></div>';
+        var dbTopInner = document.getElementById('dbTopProductsInner');
+        var dbDeptInner = document.getElementById('dbDeptSpendingInner');
+        if (dbTopInner) dbTopInner.innerHTML = '<div class="skeleton" style="height:150px; margin:0 1rem 1rem;"></div>';
+        if (dbDeptInner) dbDeptInner.innerHTML = '<div class="skeleton" style="height:150px; margin:0 1rem 1rem;"></div>';
       }
 
       // 2. Parallel Fetching (Optimized to avoid redundant calls)
@@ -1298,9 +1304,8 @@
 
     function renderDashboardStats(data) {
       if (!data) return;
-      var statsGrid = document.getElementById('statsGrid');
-      var dbTopList = document.getElementById('dbTopProductsList');
-      var dbDeptList = document.getElementById('dbDeptSpendingList');
+      var dbTopInner = document.getElementById('dbTopProductsInner');
+      var dbDeptInner = document.getElementById('dbDeptSpendingInner');
       var d = data.stats || {};
       window._lowStockItems = d.lowStockItems || [];
 
@@ -1325,24 +1330,50 @@
         } else { badge.style.display = 'none'; }
       }
 
-      if (dbTopList) {
+      var isDark = document.body.classList.contains('dark-mode');
+      var chartTextColor = isDark ? '#cbd5e1' : '#475569';
+
+      // --- Chart: Top Products ---
+      if (dbTopInner) {
         if (data.topProducts && data.topProducts.length > 0) {
-          dbTopList.innerHTML = '<div class="flex flex-col gap-2" style="padding:0 1rem 1rem;">' + 
+          dbTopInner.innerHTML = '<div class="flex flex-col gap-2" style="padding:0 1rem 1rem;">' + 
             data.topProducts.map(function(tp, idx) {
               return '<div class="flex justify-between items-center" style="padding:0.75rem; background:rgba(255,255,255,0.02); border-radius:8px; border:1px solid var(--border)">' +
                 '<div style="flex:1"><strong style="color:var(--text1)">#'+(idx+1)+ ' ' + tp.productName + '</strong><div style="font-size:0.8rem;color:var(--text3)">รหัส: ' + tp.productId + '</div></div>' +
                 '<div class="text-right"><div style="font-weight:700; color:var(--accent)">' + tp.totalQty + ' ชิ้น</div><div style="font-size:0.8rem; color:var(--text3)">฿' + (Number(tp.totalValue) || 0).toLocaleString() + '</div></div>' +
                 '</div>';
             }).join('') + '</div>';
+          
+          // Draw Doughnut Chart
+          var ctx = document.getElementById('topProductsDoughnut').getContext('2d');
+          if (charts.topDoughnut) charts.topDoughnut.destroy();
+          charts.topDoughnut = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+              labels: data.topProducts.map(function(p){ return p.productName; }),
+              datasets: [{
+                data: data.topProducts.map(function(p){ return p.totalQty; }),
+                backgroundColor: ['#fbbf24', '#f59e0b', '#d97706', '#b45309', '#92400e'],
+                borderWidth: 2,
+                borderColor: isDark ? '#1a1a2e' : '#fff'
+              }]
+            },
+            options: {
+              responsive: true, maintainAspectRatio: false, cutout: '70%',
+              plugins: { legend: { display: false } }
+            }
+          });
         } else {
-          dbTopList.innerHTML = '<div class="empty-state" style="margin:0 1rem 1rem;"><i data-lucide="package-search"></i><p>ไม่พบรายการที่ต้องการ</p><small>ลองปรับเปลี่ยนช่วงเวลาหรือแผนกค้นหาดูนะครับ</small></div>';
+          dbTopInner.innerHTML = '<div class="empty-state" style="margin:0 1rem 1rem;"><i data-lucide="package-search"></i><p>ไม่พบรายการที่ต้องการ</p><small>ลองปรับเปลี่ยนช่วงเวลาหรือแผนกค้นหาดูนะครับ</small></div>';
+          if (charts.topDoughnut) charts.topDoughnut.destroy();
         }
       }
 
-      if (dbDeptList) {
+      // --- Chart: Dept Spending ---
+      if (dbDeptInner) {
         if (data.deptSpending && data.deptSpending.length > 0) {
            var maxSpend = Math.max.apply(Math, data.deptSpending.map(function(ds){ return ds.totalSpending; }));
-           dbDeptList.innerHTML = '<div class="flex flex-col gap-2" style="padding:0 1rem 1rem;">' + 
+           dbDeptInner.innerHTML = '<div class="flex flex-col gap-2" style="padding:0 1rem 1rem;">' + 
             data.deptSpending.map(function(ds) {
               var spendAmt = Number(ds.totalSpending) || 0;
               var pct = maxSpend > 0 ? (spendAmt / maxSpend * 100) : 0;
@@ -1351,8 +1382,29 @@
                 '<div style="width:100%; height:8px; background:rgba(255,255,255,0.05); border-radius:4px; overflow:hidden;"><div style="width:' + pct + '%; height:100%; background:var(--primary); transition: width 0.5s ease;"></div></div>' +
                 '</div>';
             }).join('') + '</div>';
+
+          // Draw Doughnut Chart
+          var ctx = document.getElementById('deptSpendingDoughnut').getContext('2d');
+          if (charts.deptDoughnut) charts.deptDoughnut.destroy();
+          charts.deptDoughnut = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+              labels: data.deptSpending.map(function(d){ return d.department; }),
+              datasets: [{
+                data: data.deptSpending.map(function(d){ return d.totalSpending; }),
+                backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#6366f1'],
+                borderWidth: 2,
+                borderColor: isDark ? '#1a1a2e' : '#fff'
+              }]
+            },
+            options: {
+              responsive: true, maintainAspectRatio: false, cutout: '70%',
+              plugins: { legend: { display: false } }
+            }
+          });
         } else {
-          dbDeptList.innerHTML = '<div class="empty-state" style="margin:0 1rem 1rem;"><i data-lucide="bar-chart-3"></i><p>ไม่พบข้อมูลการใช้จ่าย</p><small>ลองปรับเปลี่ยนช่วงเวลาค้นหาใหม่ได้ครับ</small></div>';
+          dbDeptInner.innerHTML = '<div class="empty-state" style="margin:0 1rem 1rem;"><i data-lucide="bar-chart-3"></i><p>ไม่พบข้อมูลการใช้จ่าย</p><small>ลองปรับเปลี่ยนช่วงเวลาค้นหาใหม่ได้ครับ</small></div>';
+          if (charts.deptDoughnut) charts.deptDoughnut.destroy();
         }
       }
     }
