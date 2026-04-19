@@ -569,7 +569,17 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 @media (max-width: 480px) { .stat-value { font-size: 1.75rem; } }
 
 /* ─── Tabs ─────────────────────────────────────────── */
-.tabs { display: flex; gap: 1rem; padding: 0.25rem; }
+.tabs {
+  display: flex; gap: 1rem; padding: 0.25rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.tabs:active { cursor: grabbing; }
+.tabs::-webkit-scrollbar { display: none; }
+
 .tab {
   padding: 0.75rem 1.25rem; border: none; background: transparent;
   color: var(--text2); font-weight: 600; cursor: pointer;

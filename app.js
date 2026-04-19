@@ -1517,8 +1517,8 @@ function initDragScroll(selector) {
       const x = e.pageX - slider.offsetLeft;
       const walk = (x - startX) * 2; // Scroll speed factor
       
-      // Only consider it a drag if moved more than 5px
-      if (Math.abs(x - startX) > 5) {
+      // Only consider it a drag if moved more than 10px
+      if (Math.abs(x - startX) > 10) {
         hasMoved = true;
       }
       
