@@ -35,7 +35,8 @@
           <i data-lucide="search" style="width:18px;height:18px;color:var(--text3);margin-left:1rem;"></i>
           <input id="searchInput" type="text" placeholder="ค้นหาสินค้า..." autocomplete="off"
             onfocus="handleSearchInput(this.value, event)" onclick="handleSearchInput(this.value, event)"
-            oninput="handleSearchInput(this.value, event)" onkeyup="if(event.key==='Enter') renderProductGrid()"
+            onkeydown="handleSearchInput(this.value, event)" 
+            oninput="handleSearchInput(this.value, event)"
             style="padding-left:0.5rem;background:transparent;border:none;height:100%;color:var(--text);min-width:80px;">
         </div>
         <div class="search-options hide-mobile">

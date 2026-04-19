@@ -286,7 +286,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
   box-shadow: 0 4px 20px rgba(0,0,0,0.3);
   flex: 1; max-width: 580px; min-width: 180px; margin: 0 0.5rem;
-  position: relative; z-index: 10; overflow: hidden;
+  position: relative; z-index: 10;
 }
 .search-wrapper:focus-within {
   border-color: var(--primary);

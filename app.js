@@ -34,6 +34,15 @@ window.onload = function() {
   checkAuth();
   initCartSwipe();
   initMouseGlow();
+  
+  // Close search suggestions when clicking outside
+  document.addEventListener('click', function(e) {
+    var dropdown = document.getElementById('searchSuggestions');
+    var searchBox = document.querySelector('.search-wrapper');
+    if (dropdown && searchBox && !searchBox.contains(e.target)) {
+      dropdown.classList.remove('active');
+    }
+  });
 };
 
 function checkAuth() {
@@ -364,10 +373,21 @@ function handleSearchInput(val, e) {
         currentSuggestionIdx = (currentSuggestionIdx - 1 + items.length) % items.length;
         updateSuggestionFocus(items);
         e.preventDefault();
-      } else if (e.key === 'Enter' && currentSuggestionIdx > -1) {
-        items[currentSuggestionIdx].click();
+      } else if (e.key === 'Enter') {
+        if (currentSuggestionIdx > -1) {
+          items[currentSuggestionIdx].click();
+        } else {
+          dropdown.classList.remove('active');
+          renderProductGrid();
+        }
         e.preventDefault();
       }
+      return;
+    } else if (e.key === 'Enter') {
+      // Normal enter search
+      dropdown.classList.remove('active');
+      renderProductGrid();
+      e.preventDefault();
       return;
     }
   }
