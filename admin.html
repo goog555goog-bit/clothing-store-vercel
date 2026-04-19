@@ -3523,7 +3523,6 @@
         slider.addEventListener('mousedown', (e) => {
           isDown = true;
           hasMoved = false;
-          slider.classList.add('drag-scroll-active');
           startX = e.pageX - slider.offsetLeft;
           scrollLeft = slider.scrollLeft;
         });
@@ -3546,6 +3545,7 @@
           
           if (Math.abs(x - startX) > 10) {
             hasMoved = true;
+            slider.classList.add('drag-scroll-active');
           }
           
           if (hasMoved) {

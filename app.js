@@ -1496,7 +1496,6 @@ function initDragScroll(selector) {
     slider.addEventListener('mousedown', (e) => {
       isDown = true;
       hasMoved = false;
-      slider.classList.add('drag-scroll-active');
       startX = e.pageX - slider.offsetLeft;
       scrollLeft = slider.scrollLeft;
     });
@@ -1520,6 +1519,7 @@ function initDragScroll(selector) {
       // Only consider it a drag if moved more than 10px
       if (Math.abs(x - startX) > 10) {
         hasMoved = true;
+        slider.classList.add('drag-scroll-active');
       }
       
       if (hasMoved) {
