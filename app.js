@@ -1156,7 +1156,9 @@ function openActionModal(action, productId, productName, maxQty) {
   if (window.allBranches && allBranches.length > 0) {
     allBranches.forEach(function(b) {
       var name = b.name || b;
-      opts += '<option value="' + name + '">' + name + '</option>';
+      var id = b.branchId || '';
+      var displayText = id ? '[' + id + '] ' + name : name;
+      opts += '<option value="' + (id || name) + '">' + displayText + '</option>';
     });
   }
   bSelect.innerHTML = opts;
