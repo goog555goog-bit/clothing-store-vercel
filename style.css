@@ -252,12 +252,12 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   .nav-actions .btn-sm { padding: 0 0.5rem; min-width: 38px; overflow: visible; }
   .nav-actions .btn-ghost { overflow: visible; }
 
-  /* Premium Tooltip — Positioned ABOVE the button to avoid search bar obstruction */
+  /* Premium Tooltip — Positioned BELOW the button as requested */
   .nav-actions button[aria-label]:hover::before {
     content: attr(aria-label);
     display: block !important;
     position: absolute;
-    bottom: calc(100% + 12px);
+    top: calc(100% + 12px);
     left: 50%;
     transform: translateX(-50%);
     background: #0a0a1a;
@@ -271,7 +271,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
     font-size: 0.78rem;
     font-weight: 700;
     pointer-events: none;
-    animation: tooltipFadeInUp 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: tooltipFadeInDown 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
   /* Edge alignment for Logout/End buttons */
   .nav-actions button[aria-label]:last-child:hover::before,
@@ -281,8 +281,8 @@ tr:hover td { background: rgba(255,255,255,0.01); }
     transform: none !important;
   }
 }
-@keyframes tooltipFadeInUp {
-  from { opacity: 0; transform: translateX(-50%) translateY(8px); }
+@keyframes tooltipFadeInDown {
+  from { opacity: 0; transform: translateX(-50%) translateY(-8px); }
   to { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 @keyframes tooltipFadeIn { 
