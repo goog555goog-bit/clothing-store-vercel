@@ -309,8 +309,8 @@ function loadStorefrontData() {
     renderProductGrid();
     
     // Quick load branches from cache too if available
-    var cachedDepts = API.getCached('getReportData'); // Note: index depends on exact call, might need refinement
-    if (cachedDepts && cachedDepts.success) allBranches = cachedDepts.data || [];
+    var cachedBranches = API.getCached('getBranches'); 
+    if (cachedBranches && cachedBranches.success) allBranches = cachedBranches.data || [];
   } else {
     // Show Skeletons ONLY if no cache exists
     if (grid && (!allProducts || allProducts.length === 0)) {
@@ -339,7 +339,7 @@ function loadStorefrontData() {
       initSearchableSelect('stockFilter');
       
       // Fetch fresh Branches
-      API.getReportData('Departments').then(function(r) {
+      API.getBranches().then(function(r) {
         if (r.success) allBranches = r.data || [];
       });
     }
