@@ -228,7 +228,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 
 /* ─── Nav Actions ──────────────────────────────────── */
 .nav-actions {
-  display: flex; align-items: center; gap: 0.15rem;
+  display: flex; align-items: center; gap: 0.4rem;
   justify-self: end; overflow: visible;
   min-width: 0;
   position: relative;
@@ -256,21 +256,21 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   .nav-actions .btn-ghost:hover span.hide-mobile:not(#navUserName):not(.force-show) {
     display: block !important;
     position: absolute;
-    top: calc(100% + 14px);
+    top: calc(100% + 12px);
     left: 50%;
     transform: translateX(-50%);
-    background: var(--surface);
+    background: #1a1a2e;
     color: var(--primary);
     padding: 0.5rem 0.9rem;
     border-radius: 10px;
     border: 1px solid var(--primary);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.8);
     white-space: nowrap;
     z-index: 6000;
     font-size: 0.78rem;
     font-weight: 700;
     pointer-events: none;
-    animation: tooltipFadeIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: tooltipFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
   /* Edge alignment for Logout tooltips to prevent screen overflow */
   #logoutBtn:hover span.hide-mobile,
