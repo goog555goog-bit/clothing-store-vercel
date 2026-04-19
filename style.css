@@ -251,9 +251,9 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   .nav-actions .btn-sm { padding: 0 0.5rem; min-width: 38px; overflow: visible; }
   .nav-actions .btn-ghost { overflow: visible; }
 
-  /* Premium Tooltip on Hover — target ONLY hide-mobile spans that are collapsible */
-  .nav-actions .btn-sm:hover span.hide-mobile:not(.force-show),
-  .nav-actions .btn-ghost:hover span.hide-mobile:not(#navUserName):not(.force-show) {
+  /* Premium Tooltip from aria-label — Ensures full descriptive text is visible and high on top */
+  .nav-actions button[aria-label]:hover::after {
+    content: attr(aria-label);
     display: block !important;
     position: absolute;
     top: calc(100% + 12px);
@@ -264,20 +264,21 @@ tr:hover td { background: rgba(255,255,255,0.01); }
     padding: 0.5rem 0.9rem;
     border-radius: 10px;
     border: 1px solid var(--primary);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.9);
     white-space: nowrap;
-    z-index: 6000;
+    z-index: 9999;
     font-size: 0.78rem;
     font-weight: 700;
     pointer-events: none;
     animation: tooltipFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
-  /* Edge alignment for Logout tooltips to prevent screen overflow */
-  #logoutBtn:hover span.hide-mobile,
-  .nav-actions .btn-outline:last-child:hover span.hide-mobile {
+  /* Edge alignment for Logout/End buttons */
+  .nav-actions button[aria-label]:last-child:hover::after,
+  #logoutBtn:hover::after {
     left: auto !important;
     right: 0 !important;
     transform: none !important;
+    animation: tooltipFadeInEdge 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
   }
 }
 @keyframes tooltipFadeIn { 
