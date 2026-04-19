@@ -59,7 +59,7 @@ var Cart = {
 
   updateQty: function(productId, delta) {
     var items = this.getItems();
-    // Fetch latest stock from global cache before updating
+    var currentItem = null;
     var currentStock = null;
     if (typeof allProducts !== 'undefined' && allProducts) {
       var p = allProducts.find(function(x) { return String(x.productId) === String(productId); });
@@ -68,23 +68,40 @@ var Cart = {
 
     for (var i = 0; i < items.length; i++) {
       if (items[i].productId === productId) {
-        // Sync maxStock if we found fresh data
         if (currentStock !== null) items[i].maxStock = currentStock;
 
         var nextQty = items[i].qty + delta;
         if (nextQty <= 0) {
           items.splice(i, 1);
+          this.save(items);
+          this.render(); // If removed, full render is needed
+          return;
         } else if (nextQty > items[i].maxStock) {
           items[i].qty = items[i].maxStock;
           showToast('ขออภัย พัสดุในคลังมีเพียง ' + items[i].maxStock + ' ชิ้น', 'warning');
         } else {
           items[i].qty = nextQty;
         }
+        currentItem = items[i];
         break;
       }
     }
     this.save(items);
-    this.render();
+
+    // Try targeted update to prevent flickering
+    var qtyValEl = document.getElementById('qty-val-' + productId);
+    var itemTotalEl = document.getElementById('item-total-' + productId);
+    if (qtyValEl && itemTotalEl && currentItem) {
+      qtyValEl.textContent = currentItem.qty;
+      itemTotalEl.textContent = '฿' + (currentItem.price * currentItem.qty).toLocaleString();
+      
+      // Still need to update general cart totals
+      var totalEl = document.getElementById('cartTotal');
+      if (totalEl) totalEl.textContent = '฿' + this.getTotal().toLocaleString();
+      this.renderBadge();
+    } else {
+      this.render();
+    }
   },
 
   remove: function(productId) {
@@ -154,11 +171,11 @@ var Cart = {
         +   '<button class="btn btn-ghost btn-xs" style="color:var(--danger);padding:0.25rem" onclick="Cart.remove(\'' + item.productId + '\')"><i data-lucide="trash-2" style="width:14px;height:14px"></i></button></div>'
         +   '<div class="flex items-center justify-between" style="margin-top:0.5rem">'
         +     '<div class="qty-ctrl">'
-        +       '<button class="qty-btn" onclick="Cart.updateQty(\'' + item.productId + '\', -1)"><i data-lucide="minus" style="width:12px;height:12px"></i></button>'
-        +       '<div class="qty-val">' + item.qty + '</div>'
-        +       '<button class="qty-btn" onclick="Cart.updateQty(\'' + item.productId + '\', 1)"><i data-lucide="plus" style="width:12px;height:12px"></i></button>'
+        +       '<button class="qty-btn" onclick="Cart.updateQty(\'' + item.productId + '\', -1)" aria-label="ลดจำนวน"><i data-lucide="minus" style="width:12px;height:12px"></i></button>'
+        +       '<div class="qty-val" id="qty-val-' + item.productId + '">' + item.qty + '</div>'
+        +       '<button class="qty-btn" onclick="Cart.updateQty(\'' + item.productId + '\', 1)" aria-label="เพิ่มจำนวน"><i data-lucide="plus" style="width:12px;height:12px"></i></button>'
         +     '</div>'
-        +     '<div style="font-weight:700">฿' + (item.price * item.qty).toLocaleString() + '</div>'
+        +     '<div style="font-weight:700" id="item-total-' + item.productId + '">฿' + (item.price * item.qty).toLocaleString() + '</div>'
         +   '</div>'
         + '</div>'
         + '</div>';
