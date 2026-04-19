@@ -250,29 +250,32 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   .nav-actions .btn-sm { padding: 0 0.5rem; min-width: 38px; overflow: visible; }
   .nav-actions .btn-ghost { overflow: visible; }
 
-  /* Premium Tooltip on Hover */
-  .nav-actions .btn-sm:hover span:not(.force-show),
-  .nav-actions .btn-ghost:hover span:not(#navUserName):not(.force-show) {
+  /* Premium Tooltip on Hover — target ONLY hide-mobile spans that are collapsible */
+  .nav-actions .btn-sm:hover span.hide-mobile:not(.force-show),
+  .nav-actions .btn-ghost:hover span.hide-mobile:not(#navUserName):not(.force-show) {
     display: block !important;
     position: absolute;
-    top: calc(100% + 8px);
+    top: calc(100% + 10px);
     left: 50%;
     transform: translateX(-50%);
     background: var(--surface);
     color: var(--primary);
-    padding: 0.4rem 0.8rem;
-    border-radius: 8px;
+    padding: 0.5rem 0.9rem;
+    border-radius: 10px;
     border: 1px solid var(--primary);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
     white-space: nowrap;
     z-index: 1010;
-    font-size: 0.75rem;
+    font-size: 0.78rem;
     font-weight: 700;
     pointer-events: none;
-    animation: tooltipFadeIn 0.2s ease-out;
+    animation: tooltipFadeIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 }
-@keyframes tooltipFadeIn { from { opacity: 0; transform: translate(-50%, 5px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@keyframes tooltipFadeIn { 
+  from { opacity: 0; transform: translate(-50%, 8px); } 
+  to { opacity: 1; transform: translate(-50%, 0); } 
+}
 
 /* ─── Search Bar ───────────────────────────────────── */
 .search-wrapper {
@@ -654,6 +657,20 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 }
 .search-select-input {
   cursor: pointer;
+  padding-right: 2.5rem !important;
+}
+.search-select-chevron {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  transition: transform 0.3s;
+}
+.search-select-wrapper:focus-within .search-select-chevron {
+  transform: translateY(-50%) rotate(180deg);
 }
 .search-select-dropdown {
   position: absolute;

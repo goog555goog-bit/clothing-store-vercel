@@ -55,7 +55,7 @@
       <div class="nav-actions">
         <div id="adminName" class="hide-mobile" style="color:var(--text2); font-weight: 500; font-size: 0.9rem; background: var(--surface); padding: 0.4rem 1rem; border-radius: 99px; border: 1px solid var(--border);"></div>
         <button class="btn btn-ghost btn-sm" onclick="navigateTo(scriptUrl)"><i data-lucide="shopping-bag"></i> <span class="hide-mobile">หน้าร้าน</span></button>
-        <button id="mgrPaneBtn" class="btn btn-warning btn-sm hidden hide-mobile" onclick="navigateTo('manager.html')"><i data-lucide="scale"></i> ผู้อนุมัติ</button>
+        <button id="mgrPaneBtn" class="btn btn-warning btn-sm hidden" onclick="navigateTo('manager.html')"><i data-lucide="scale"></i> <span class="hide-mobile">ผู้อนุมัติ</span></button>
         <button class="btn btn-outline btn-sm" onclick="adminLogout()" style="color: var(--danger); border-color: rgba(239, 68, 68, 0.2);" aria-label="ออกจากระบบ" title="ออกจากระบบ"><i data-lucide="log-out"></i></button>
       </div>
     </div>
@@ -1144,6 +1144,11 @@
       }
 
       document.getElementById('adminName').textContent = '👤 ' + currentUser.name;
+      
+      // Initialize static searchable selects
+      initSearchableSelect('adminProductStockFilter');
+      initSearchableSelect('adminOrderFilter');
+      
       loadDashboard();
     };
 
@@ -3424,6 +3429,10 @@
       input.placeholder = select.options[0] ? select.options[0].text : 'พิมพ์เพื่อค้นหา...';
       input.autocomplete = 'off';
       
+      var chevron = document.createElement('div');
+      chevron.className = 'search-select-chevron';
+      chevron.innerHTML = '<i data-lucide="chevron-down" style="width:16px;height:16px;color:var(--text3)"></i>';
+      
       // If a value is already selected, show it
       if (select.selectedIndex > 0) {
         input.value = select.options[select.selectedIndex].text;
@@ -3433,7 +3442,9 @@
       dropdown.className = 'search-select-dropdown';
 
       wrapper.appendChild(input);
+      wrapper.appendChild(chevron);
       wrapper.appendChild(dropdown);
+      refreshIcons();
 
       function updateDropdown(filter) {
         var options = Array.from(select.options);
@@ -3456,16 +3467,31 @@
             select.value = this.dataset.value;
             input.value = this.textContent;
             dropdown.classList.remove('active');
-            // Trigger change event IF it's one of the swap leads
-            if (selectId === 'swap-t1' || selectId === 'swap-t2') updateSwapPreview();
+            // Dispatch change event so existing onchange handlers work
+            select.dispatchEvent(new Event('change'));
           };
         });
       }
 
       input.onfocus = function() {
-        this.value = ''; // clear on focus to allow fresh search
-        updateDropdown('');
-        dropdown.classList.add('active');
+        if (!dropdown.classList.contains('active')) {
+          this.value = ''; // clear on focus to allow fresh search
+          updateDropdown('');
+          dropdown.classList.add('active');
+        }
+      };
+
+      // Toggle on click
+      input.onclick = function(e) {
+        e.stopPropagation();
+        if (dropdown.classList.contains('active')) {
+          dropdown.classList.remove('active');
+          if (select.selectedIndex >= 0) input.value = select.options[select.selectedIndex].text;
+        } else {
+          this.value = '';
+          updateDropdown('');
+          dropdown.classList.add('active');
+        }
       };
 
       input.oninput = function() {
@@ -3476,7 +3502,6 @@
       input.onblur = function() {
         setTimeout(function() {
           dropdown.classList.remove('active');
-          // If no selection was made and input was cleared, revert to current select text
           if (!input.value && select.selectedIndex >= 0) {
             input.value = select.options[select.selectedIndex].text;
           }
