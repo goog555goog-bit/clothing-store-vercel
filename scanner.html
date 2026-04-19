@@ -168,7 +168,7 @@
 
     .btn-group {
       display: flex;
-      gap: 0.75rem;
+      gap: 1rem; /* เพิ่มจาก 0.75rem ป้องกัน Fat Finger Error */
     }
 
     .btn {
@@ -184,6 +184,7 @@
       justify-content: center;
       gap: 0.5rem;
       transition: all 0.2s;
+      min-height: 48px; /* WCAG 2.5.5: min touch target 44px, ใช้ 48px เผื่อ */
     }
 
     .btn-primary { background: var(--primary); color: #000; box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3); }
@@ -406,6 +407,11 @@
       
       resultText.innerText = decodedText;
       successScreen.style.display = 'flex';
+
+      // Haptic Feedback: สั่นเมื่อสแกนสำเร็จ
+      if (navigator.vibrate) {
+        navigator.vibrate([100, 50, 100]); // สั่น 2 ครั้งสั้นๆ
+      }
 
       // บันทึกข้อมูล
       const scanData = {

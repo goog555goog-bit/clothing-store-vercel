@@ -56,7 +56,7 @@
         <div id="adminName" class="hide-mobile" style="color:var(--text2); font-weight: 500; font-size: 0.9rem; background: var(--surface); padding: 0.4rem 1rem; border-radius: 99px; border: 1px solid var(--border);"></div>
         <button class="btn btn-ghost btn-sm" onclick="navigateTo(scriptUrl)"><i data-lucide="shopping-bag"></i> <span class="hide-mobile">หน้าร้าน</span></button>
         <button id="mgrPaneBtn" class="btn btn-warning btn-sm hidden hide-mobile" onclick="navigateTo('manager.html')"><i data-lucide="scale"></i> ผู้อนุมัติ</button>
-        <button class="btn btn-outline btn-sm" onclick="adminLogout()" style="color: var(--danger); border-color: rgba(239, 68, 68, 0.2);"><i data-lucide="log-out"></i></button>
+        <button class="btn btn-outline btn-sm" onclick="adminLogout()" style="color: var(--danger); border-color: rgba(239, 68, 68, 0.2);" aria-label="ออกจากระบบ" title="ออกจากระบบ"><i data-lucide="log-out"></i></button>
       </div>
     </div>
   </header>
@@ -1575,7 +1575,13 @@
         filterAdminProducts(); // Initial render
       }).catch(function(err) {
         showToast('โหลดสินค้าไม่สำเร็จ: ' + err, 'error');
-        if (body) body.innerHTML = '<tr><td colspan="8" class="text-center">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>';
+        if (body) body.innerHTML = '<tr><td colspan="8" class="text-center" style="padding:2rem">'
+          + '<div style="display:flex;flex-direction:column;align-items:center;gap:0.75rem">'
+          + '<i data-lucide="wifi-off" style="width:32px;height:32px;color:var(--danger)"></i>'
+          + '<p style="font-weight:600">โหลดข้อมูลไม่สำเร็จ</p>'
+          + '<button class="btn btn-primary btn-sm" onclick="loadProducts()"><i data-lucide="refresh-cw" style="width:14px;height:14px"></i> ลองใหม่</button>'
+          + '</div></td></tr>';
+        refreshIcons();
       });
     }
 
@@ -1713,7 +1719,13 @@
         refreshIcons();
       }).catch(function(err) {
         showToast('โหลดหมวดหมู่ไม่สำเร็จ: ' + err, 'error');
-        if (body) body.innerHTML = '<tr><td colspan="3" class="text-center">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>';
+        if (body) body.innerHTML = '<tr><td colspan="3" class="text-center" style="padding:2rem">'
+          + '<div style="display:flex;flex-direction:column;align-items:center;gap:0.75rem">'
+          + '<i data-lucide="wifi-off" style="width:32px;height:32px;color:var(--danger)"></i>'
+          + '<p style="font-weight:600">โหลดข้อมูลไม่สำเร็จ</p>'
+          + '<button class="btn btn-primary btn-sm" onclick="loadAdminCategories()"><i data-lucide="refresh-cw" style="width:14px;height:14px"></i> ลองใหม่</button>'
+          + '</div></td></tr>';
+        refreshIcons();
       });
     }
 
@@ -2237,7 +2249,13 @@
         refreshIcons();
       }).catch(function(err) {
         showToast('โหลดข้อมูลพนักงานไม่สำเร็จ: ' + err, 'error');
-        if (body) body.innerHTML = '<tr><td colspan="7" class="text-center">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>';
+        if (body) body.innerHTML = '<tr><td colspan="7" class="text-center" style="padding:2rem">'
+          + '<div style="display:flex;flex-direction:column;align-items:center;gap:0.75rem">'
+          + '<i data-lucide="wifi-off" style="width:32px;height:32px;color:var(--danger)"></i>'
+          + '<p style="font-weight:600">โหลดข้อมูลไม่สำเร็จ</p>'
+          + '<button class="btn btn-primary btn-sm" onclick="loadAdminEmployees()"><i data-lucide="refresh-cw" style="width:14px;height:14px"></i> ลองใหม่</button>'
+          + '</div></td></tr>';
+        refreshIcons();
       });
     }
 
@@ -2559,7 +2577,13 @@
         }).join('');
       }).catch(function(err) {
         showToast('โหลดคลังสินค้าไม่สำเร็จ: ' + err, 'error');
-        if (body) body.innerHTML = '<tr><td colspan="6" class="text-center">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>';
+        if (body) body.innerHTML = '<tr><td colspan="6" class="text-center" style="padding:2rem">'
+          + '<div style="display:flex;flex-direction:column;align-items:center;gap:0.75rem">'
+          + '<i data-lucide="wifi-off" style="width:32px;height:32px;color:var(--danger)"></i>'
+          + '<p style="font-weight:600">โหลดข้อมูลไม่สำเร็จ</p>'
+          + '<button class="btn btn-primary btn-sm" onclick="loadInventory()"><i data-lucide="refresh-cw" style="width:14px;height:14px"></i> ลองใหม่</button>'
+          + '</div></td></tr>';
+        refreshIcons();
       });
     }
 

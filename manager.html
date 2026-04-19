@@ -51,7 +51,7 @@
         </button>
         <button class="btn btn-ghost btn-sm" onclick="navigateTo(scriptUrl)"><i data-lucide="shopping-bag"></i> <span class="hide-mobile">หน้าร้าน</span></button>
         <button id="adminPaneBtn" class="btn btn-accent btn-sm hidden" onclick="navigateTo('admin.html')"><i data-lucide="shield-check"></i> แอดมิน</button>
-        <button class="btn btn-outline btn-sm" onclick="mgrLogout()" style="color: var(--danger); border-color: rgba(239, 68, 68, 0.2);"><i data-lucide="log-out"></i></button>
+        <button class="btn btn-outline btn-sm" onclick="mgrLogout()" style="color: var(--danger); border-color: rgba(239, 68, 68, 0.2);" aria-label="ออกจากระบบ" title="ออกจากระบบ"><i data-lucide="log-out"></i></button>
       </div>
     </div>
   </header>
@@ -221,7 +221,13 @@
         refreshIcons();
       }).catch(function(err) {
         showToast('ไม่สามารถโหลดข้อมูลใบเบิกได้: ' + err, 'error');
-        if (list) list.innerHTML = '<div class="card text-center" style="padding:2rem">เกิดข้อผิดพลาดในการโหลดข้อมูล</div>';
+        if (list) list.innerHTML = '<div class="card text-center" style="padding:3rem">'
+          + '<div style="width:56px;height:56px;border-radius:50%;background:rgba(248,113,113,0.1);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem"><i data-lucide="wifi-off" style="width:28px;height:28px;color:var(--danger)"></i></div>'
+          + '<p style="font-weight:700;font-size:1.1rem;margin-bottom:0.5rem">ไม่สามารถเชื่อมต่อได้</p>'
+          + '<p style="color:var(--text3);font-size:0.85rem;margin-bottom:1.5rem">เกิดข้อผิดพลาดในการโหลดข้อมูล กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองอีกครั้ง</p>'
+          + '<button class="btn btn-primary" onclick="loadPending()" style="margin:0 auto"><i data-lucide="refresh-cw" style="width:16px;height:16px"></i> ลองใหม่อีกครั้ง</button>'
+          + '</div>';
+        refreshIcons();
       });
     }
 

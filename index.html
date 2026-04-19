@@ -61,22 +61,22 @@
 
       <!-- User Actions (compact — nav tabs live in mobile nav) -->
       <div class="nav-actions">
-        <button id="adminPaneBtn" class="btn btn-accent btn-sm hidden" onclick="navigateTo('admin.html')">
+        <button id="adminPaneBtn" class="btn btn-accent btn-sm hidden" onclick="navigateTo('admin.html')" aria-label="เข้าสู่หน้าแอดมิน">
           <i data-lucide="settings"></i> <span class="hide-mobile">แอดมิน</span>
         </button>
-        <button id="mgrPaneBtn" class="btn btn-warning btn-sm hidden" onclick="navigateTo('manager.html')">
+        <button id="mgrPaneBtn" class="btn btn-warning btn-sm hidden" onclick="navigateTo('manager.html')" aria-label="เข้าสู่หน้าผู้อนุมัติ">
           <i data-lucide="scale"></i> <span class="hide-mobile">ผู้อนุมัติ</span>
         </button>
-        <button id="ordersBtn" class="btn btn-ghost btn-sm hidden" onclick="switchView('orders')">
+        <button id="ordersBtn" class="btn btn-ghost btn-sm hidden" onclick="switchView('orders')" aria-label="ดูรายการเบิกของฉัน">
           <i data-lucide="clipboard-list"></i> <span class="hide-mobile">รายการเบิก</span>
         </button>
-        <button id="substockBtn" class="btn btn-primary btn-sm hidden" onclick="switchView('substock')">
+        <button id="substockBtn" class="btn btn-primary btn-sm hidden" onclick="switchView('substock')" aria-label="จัดการคลังย่อย">
           <i data-lucide="package-search"></i> <span class="hide-mobile">คลังย่อย</span>
         </button>
         <button id="loginBtn" class="btn btn-outline btn-sm" onclick="navigateTo('login.html')">
           <i data-lucide="log-in" style="width:15px;height:15px;"></i> <span>เข้าสู่ระบบ</span>
         </button>
-        <button id="logoutBtn" class="btn btn-ghost btn-sm hidden" onclick="logout()">
+        <button id="logoutBtn" class="btn btn-ghost btn-sm hidden" onclick="logout()" aria-label="ออกจากระบบ">
           <span id="navUserName"></span> <i data-lucide="log-out"></i>
         </button>
         <button class="btn btn-ghost hide-mobile" style="position:relative" onclick="toggleDrawer('cartDrawer')"
