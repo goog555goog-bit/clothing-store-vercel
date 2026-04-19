@@ -3510,14 +3510,64 @@
         }, 200);
       };
     }
-    // Global Keyboard Accessibility
-    window.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') {
-        var openModal = document.querySelector('.modal-overlay.open');
-        if (openModal) {
-          openModal.classList.remove('open');
-        }
       }
+    });
+
+    // ─── DRAG TO SCROLL (FOR TABS) ────────────────
+    function initDragScroll(selector) {
+      const sliders = document.querySelectorAll(selector);
+      sliders.forEach(slider => {
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+        let hasMoved = false;
+
+        slider.addEventListener('mousedown', (e) => {
+          isDown = true;
+          hasMoved = false;
+          slider.classList.add('drag-scroll-active');
+          startX = e.pageX - slider.offsetLeft;
+          scrollLeft = slider.scrollLeft;
+        });
+
+        slider.addEventListener('mouseleave', () => {
+          isDown = false;
+          slider.classList.remove('drag-scroll-active');
+        });
+
+        slider.addEventListener('mouseup', () => {
+          isDown = false;
+          slider.classList.remove('drag-scroll-active');
+        });
+
+        slider.addEventListener('mousemove', (e) => {
+          if (!isDown) return;
+          e.preventDefault();
+          const x = e.pageX - slider.offsetLeft;
+          const walk = (x - startX) * 2;
+          
+          if (Math.abs(x - startX) > 5) {
+            hasMoved = true;
+          }
+          
+          if (hasMoved) {
+            slider.scrollLeft = scrollLeft - walk;
+          }
+        });
+
+        slider.addEventListener('click', (e) => {
+          if (hasMoved) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+        }, true);
+      });
+    }
+
+    // Initialize for admin tabs
+    document.addEventListener('DOMContentLoaded', function() {
+      initDragScroll('.tabs');
+      initDragScroll('.cat-filter'); // Also for any filters in admin if any
     });
   </script>
 

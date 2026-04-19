@@ -1483,3 +1483,62 @@ window.addEventListener('keydown', function (e) {
     }
   }
 });
+
+// ─── DRAG TO SCROLL (FOR TABS & CATEGORIES) ────────────────
+function initDragScroll(selector) {
+  const sliders = document.querySelectorAll(selector);
+  sliders.forEach(slider => {
+    let isDown = false;
+    let startX;
+    let scrollLeft;
+    let hasMoved = false;
+
+    slider.addEventListener('mousedown', (e) => {
+      isDown = true;
+      hasMoved = false;
+      slider.classList.add('drag-scroll-active');
+      startX = e.pageX - slider.offsetLeft;
+      scrollLeft = slider.scrollLeft;
+    });
+
+    slider.addEventListener('mouseleave', () => {
+      isDown = false;
+      slider.classList.remove('drag-scroll-active');
+    });
+
+    slider.addEventListener('mouseup', () => {
+      isDown = false;
+      slider.classList.remove('drag-scroll-active');
+    });
+
+    slider.addEventListener('mousemove', (e) => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.pageX - slider.offsetLeft;
+      const walk = (x - startX) * 2; // Scroll speed factor
+      
+      // Only consider it a drag if moved more than 5px
+      if (Math.abs(x - startX) > 5) {
+        hasMoved = true;
+      }
+      
+      if (hasMoved) {
+        slider.scrollLeft = scrollLeft - walk;
+      }
+    });
+
+    // Handle clicks during drag (don't trigger tab change if dragged)
+    slider.addEventListener('click', (e) => {
+      if (hasMoved) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    }, true);
+  });
+}
+
+// Initialize for category filters on DOM load
+document.addEventListener('DOMContentLoaded', function() {
+  initDragScroll('.cat-filter');
+});
+

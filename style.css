@@ -447,8 +447,22 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 .cat-filter {
   display: flex; gap: 0.6rem; overflow-x: auto; padding: 0.5rem 0;
   scrollbar-width: none;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  scroll-behavior: smooth;
 }
+.cat-filter:active { cursor: grabbing; }
 .cat-filter::-webkit-scrollbar { display: none; }
+
+/* Drag Scroll Utility Helpers */
+.drag-scroll-active {
+  cursor: grabbing !important;
+  scroll-behavior: auto !important; /* Disable smooth scroll during active drag for better tracking */
+}
+.drag-scroll-active * {
+  pointer-events: none; /* Prevent clicking children while dragging */
+}
 .cat-pill {
   padding: 0.55rem 1.2rem; border-radius: 999px; background: var(--surface);
   border: 1px solid var(--border); color: var(--text2); white-space: nowrap;
