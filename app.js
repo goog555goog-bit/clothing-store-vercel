@@ -923,7 +923,7 @@ function viewOrderDetails(requestId) {
   if (!modal || !body) return;
 
   currentSigningRequestId = requestId;
-  body.innerHTML = '<div class="text-center" style="padding:2rem"><div class="spinner"></div></div>';
+  body.innerHTML = '<div class="skeleton sk-line" style="height:30px"></div><div class="skeleton sk-line sk-line-short"></div>';
   sigSection.classList.add('hidden');
   modal.classList.add('open');
 
@@ -1519,3 +1519,49 @@ document.addEventListener('DOMContentLoaded', function() {
   initDragScroll('.cat-filter');
 });
 
+// ─── PREMIUM UX: MOBILE TABLE AUTO-LABELLER ──────────────────
+function initMobileTableLabeller() {
+  function applyLabels(table) {
+    if (table.dataset.labelled === "true") return;
+    var headers = Array.from(table.querySelectorAll('thead th')).map(th => th.innerText.trim());
+    if (headers.length === 0) return;
+    
+    // Check if it should be responsive
+    if (!table.closest('.table-responsive-premium') && !table.parentElement.classList.contains('table-wrap')) {
+        // Upgrade existing table-wraps to use our premium responsive rules
+        if(table.parentElement) table.parentElement.classList.add('table-responsive-premium');
+    }
+
+    table.querySelectorAll('tbody tr').forEach(tr => {
+      Array.from(tr.querySelectorAll('td')).forEach((td, i) => {
+        if (headers[i] && !td.getAttribute('data-label')) {
+          td.setAttribute('data-label', headers[i]);
+        }
+      });
+    });
+    // Mark as processed (re-evaluates if innerHTML is fully replaced)
+    table.dataset.labelled = "true";
+  }
+
+  // Initial pass
+  document.querySelectorAll('table').forEach(applyLabels);
+
+  // Watch for dynamically rendered tables
+  const observer = new MutationObserver(mutations => {
+    mutations.forEach(mutation => {
+      if (mutation.addedNodes.length) {
+        // Apply to any new tables
+        document.querySelectorAll('table').forEach(applyLabels);
+      }
+    });
+  });
+  
+  observer.observe(document.body, { childList: true, subtree: true });
+}
+
+// Start watching when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initMobileTableLabeller);
+} else {
+  initMobileTableLabeller();
+}

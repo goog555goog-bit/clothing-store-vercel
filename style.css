@@ -88,6 +88,7 @@ body {
 .text-right { text-align: right; }
 .flex-1 { flex: 1; }
 .flex-col { display: flex; flex-direction: column; }
+.flex-wrap { flex-wrap: wrap; }
 h1,h2,h3,h4 { letter-spacing: -0.025em; font-weight: 700; }
 
 .grid { display: grid; }
@@ -147,15 +148,18 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   padding: 0.75rem 1.5rem; border-radius: var(--radius-sm); font-weight: 700;
   cursor: pointer; transition: all 0.3s cubic-bezier(0.23,1,0.32,1);
   border: 1px solid transparent; font-size: 0.95rem; text-decoration: none;
-  background: rgba(255,255,255,0.05); color: var(--text); white-space: nowrap;
+  background: rgba(255,255,255,0.05); color: var(--text); 
+  /* FIXED: Allow button text wrapping to prevent overlapping items on small mobile screens */
+  white-space: normal; text-align: center; line-height: 1.2;
   letter-spacing: 0.02em; text-transform: uppercase; font-family: inherit;
-  position: relative; overflow: hidden;
+  overflow: hidden;
 }
 .btn::after {
   content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
   background: linear-gradient(45deg, transparent, rgba(255,255,255,0.08), transparent);
   transform: rotate(45deg); transition: 0.5s; pointer-events: none;
 }
+.btn:hover { z-index: 5; } /* FIXED: Prevents lifted buttons from being overlapped by adjacent buttons */
 .btn:hover::after { left: 100%; }
 .btn:active { transform: scale(0.95) translateY(1px); }
 .btn i, .btn svg { pointer-events: none !important; } /* Ensure icons don't block button clicks */
@@ -203,14 +207,16 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 0.5rem; width: 100%;
+  max-width: 1920px; /* Expand beyond 1440px container limit to prevent overlapping */
 }
 @media (min-width: 1601px) {
-  .search-wrapper { justify-self: center; width: 100%; }
+  .search-wrapper { justify-self: center; width: 100%; position: relative; }
 }
 /* ≤1600px: search bar drops to second row (to accommodate many buttons) */
 @media (max-width: 1600px) {
   .app-header { padding-bottom: 0.625rem; }
   .app-header .header-container { display: flex; flex-wrap: wrap; row-gap: 0.5rem; justify-content: space-between; }
+  .search-wrapper { position: relative; width: 100%; }
 }
 @media (max-width: 768px) {
   .app-header .header-container { padding: 0 0.75rem; gap: 0.25rem; }
@@ -229,11 +235,12 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 
 /* ─── Nav Actions ──────────────────────────────────── */
 .nav-actions {
-  display: flex; align-items: center; gap: 0.4rem;
+  display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;
   justify-self: end; overflow: visible;
   min-width: 0;
   position: relative;
   z-index: 100; /* Ensures buttons and tooltips stay above the search bar (z:10) */
+  justify-content: flex-end;
 }
 #navUserName {
   display: inline-block;
@@ -762,14 +769,13 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   top: calc(100% + 5px);
   left: 0;
   width: 100%;
-  z-index: 5000;
   max-height: 250px;
   background: var(--surface);
   border: 1px solid var(--primary);
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow-lg);
   display: none;
-  z-index: 5000;
+  z-index: 5000; /* FIXED: Elevated to properly overlap Modals (which are 3000) */
   overflow-y: auto;
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
@@ -966,7 +972,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 .modal {
   background: var(--surface); width: 95%; max-width: 600px; border-radius: var(--radius);
   border: 1px solid var(--glass-border); box-shadow: var(--shadow-lg); 
-  overflow: visible; /* Changed from hidden to allow pop-outs */
+  overflow: hidden; /* RESTORED: Prevent bleeding to maintain strict modal sizing */
   transform: translateY(20px); transition: transform 0.3s cubic-bezier(0.23,1,0.32,1);
   max-height: 90vh; display: flex; flex-direction: column;
   position: relative;
@@ -983,11 +989,16 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 
 .modal-body { 
   padding: 1.5rem; 
-  overflow: visible; /* Changed to visible to support absolute dropdowns */
+  overflow-y: auto; /* RESTORED: Allow internal scrolling so modal never exceeds 90vh */
   flex: 1; 
   min-height: 0;
 }
-.modal-footer { padding: 1.25rem 1.5rem; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 0.75rem; background: rgba(255,255,255,0.02); }
+/* FIXED: Add padding hack to modal bodies containing dropdowns so they don't clip */
+.modal-body:has(.search-select-dropdown.active) {
+  padding-bottom: 270px; /* Safely accommodates max-height 250px dropdowns */
+}
+
+.modal-footer { padding: 1.25rem 1.5rem; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 0.75rem; background: rgba(255,255,255,0.02); flex-wrap: wrap; }
 
 .product-detail-hero { width: 100%; aspect-ratio: 16/9; background: var(--surface); display: flex; align-items: center; justify-content: center; overflow: hidden; border-bottom: 1px solid var(--border); }
 .detail-img { width: 100%; height: 100%; object-fit: contain; background: #000; }
@@ -1051,13 +1062,13 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   margin-bottom: 1.5rem;
 }
 
-#scannerViewport {
+#modal-scanner-v2 {
   width: 100% !important;
   height: 100% !important;
   object-fit: cover !important;
 }
 
-#scannerViewport video {
+#modal-scanner-v2 video {
   width: 100% !important;
   height: 100% !important;
   object-fit: cover !important;
@@ -1462,4 +1473,139 @@ tr.row-stock-warning { background: rgba(245, 158, 11, 0.02) !important; }
 
 #forecastBody td {
   padding: 0.75rem 0.5rem;
+}
+
+/* ─── PREMIUM UX UPGRADES ──────────────────────────── */
+
+/* 1. Skeleton Loaders */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.05); /* Base shimmer color */
+  border-radius: var(--radius-sm);
+}
+
+.skeleton::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(251, 191, 36, 0.1) 50%, /* Gold-ish shimmer */
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: shimmer 1.5s infinite;
+}
+
+/* Skeleton Utilities */
+.sk-line { height: 16px; margin-bottom: 8px; width: 100%; border-radius: 4px; }
+.sk-line-short { width: 60%; }
+.sk-avatar { width: 40px; height: 40px; border-radius: 50%; }
+
+/* 2. Premium Empty States */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px dashed rgba(251, 191, 36, 0.2);
+  border-radius: var(--radius);
+  text-align: center;
+  animation: bodyFadeIn 0.5s ease;
+}
+
+.empty-state i, .empty-state svg {
+  width: 64px;
+  height: 64px;
+  color: rgba(251, 191, 36, 0.5); /* Primary Gold slightly faded */
+  margin-bottom: 1.5rem;
+  filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.3));
+}
+
+.empty-state h3 {
+  font-size: 1.25rem;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.empty-state p {
+  color: var(--text3);
+  font-size: 0.95rem;
+  max-width: 300px;
+}
+
+/* 3. Mobile Table Cards (Responsive) */
+@media (max-width: 768px) {
+  .table-responsive-premium table,
+  .table-responsive-premium thead,
+  .table-responsive-premium tbody,
+  .table-responsive-premium th,
+  .table-responsive-premium td,
+  .table-responsive-premium tr {
+    display: block;
+    width: 100%;
+  }
+  
+  .table-responsive-premium thead tr {
+    position: absolute;
+    top: -9999px;
+    left: -9999px; /* Hide headers */
+  }
+  
+  .table-responsive-premium tbody tr {
+    border: 1px solid var(--border);
+    margin-bottom: 1rem;
+    border-radius: var(--radius-sm);
+    padding: 0.5rem;
+    background: var(--surface-2);
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.2s ease;
+  }
+  
+  .table-responsive-premium td {
+    border: none;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    position: relative;
+    padding-left: 45%; 
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end; /* Align value to right */
+    text-align: right;
+  }
+  
+  .table-responsive-premium td:last-child {
+    border-bottom: 0;
+    justify-content: center; /* Center actions on mobile */
+    padding-left: 1rem; /* Reset padding for action row */
+    padding-top: 1rem;
+  }
+  
+  .table-responsive-premium td:last-child::before {
+    content: none !important; /* Hide label on action row */
+  }
+  
+  /* The auto-label logic */
+  .table-responsive-premium td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 1rem;
+    width: 40%;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text2);
+    font-size: 0.85rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }

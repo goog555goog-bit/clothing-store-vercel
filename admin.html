@@ -286,7 +286,7 @@
     <div id="p-orders" class="admin-page" style="display:none">
       <div class="flex items-center justify-between" style="margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem">
         <h3>📋 รายการใบเบิกทั้งหมด</h3>
-        <div class="flex gap-2">
+        <div class="flex flex-wrap gap-2">
           <select id="adminOrderFilter" class="input btn-sm" onchange="loadOrdersBasedOnFilter()" style="font-size:0.85rem; padding: 0.4rem 0.8rem; height: 38px;">
             <option value="all">ทุกสถานะ</option>
             <option value="Pending">รออนุมัติ</option>
@@ -329,7 +329,7 @@
       <div class="flex items-center justify-between" style="margin-bottom:1.5rem">
         <h2 style="margin:0;display:flex;align-items:center;gap:0.5rem"><i data-lucide="bar-chart-3"></i>
           รายงานและการส่งออก</h2>
-        <div class="flex gap-2">
+        <div class="flex flex-wrap gap-2">
           <button class="btn btn-accent" onclick="openExportModal()"><i data-lucide="file-spreadsheet"></i> ส่งออกข้อมูล
             (Excel)</button>
           <button class="btn btn-outline" onclick="downloadExcel('Orders')"><i data-lucide="file-text"></i> Export
@@ -466,7 +466,7 @@
     <section id="p-teams" class="admin-page" style="display:none">
       <div class="flex justify-between items-center" style="margin-bottom:1.5rem">
         <h2 style="margin:0"><i data-lucide="users"></i> จัดการทีมช่าง (Technician Teams)</h2>
-        <div class="flex gap-2">
+        <div class="flex flex-wrap gap-2">
           <button class="btn btn-outline" onclick="openSwapLeadModal()"><i data-lucide="repeat"></i> สลับตัวเอก</button>
           <button class="btn btn-accent" onclick="openTeamModal()"><i data-lucide="plus"></i> สร้างทีมใหม่</button>
         </div>
@@ -617,19 +617,19 @@
           <input type="file" id="imgUpload" style="display:none" accept="image/*" onchange="handleImageUpload(this)">
           <div id="uploadStatus" style="font-size:0.75rem; color:var(--text3); margin-top:0.25rem"></div>
         </div>
-        <div class="flex gap-2">
+        <div class="flex flex-wrap gap-2">
           <div class="form-group" style="flex:1"><label class="form-label">ราคา *</label><input id="pf-price"
               class="form-input" type="number" placeholder="0"></div>
           <div class="form-group" style="flex:1"><label class="form-label">สต๊อก</label><input id="pf-stock"
               class="form-input" type="number" placeholder="0"></div>
         </div>
-        <div class="flex gap-2">
+        <div class="flex flex-wrap gap-2">
           <div class="form-group" style="flex:1"><label class="form-label">สต๊อกขั้นต่ำ</label><input id="pf-min"
               class="form-input" type="number" placeholder="5"></div>
           <div class="form-group" style="flex:1">
             <div class="form-group">
               <label>รูปภาพสินค้า</label>
-              <div class="flex gap-2">
+              <div class="flex flex-wrap gap-2">
                 <input type="text" id="pf-img" class="form-input" placeholder="วางลิงก์รูปภาพ หรืออัปโหลด"
                   oninput="updateImagePreview(this.value)">
                 <label class="btn btn-outline" style="white-space:nowrap;cursor:pointer">
@@ -902,7 +902,7 @@
         <div class="signature-pad-wrap">
           <canvas id="signatureCanvas" class="signature-pad-canvas"></canvas>
         </div>
-        <div class="flex gap-2">
+        <div class="flex flex-wrap gap-2">
           <button class="btn btn-outline btn-sm" onclick="clearSignature()">ล้าง</button>
           <button class="btn btn-accent btn-sm flex-1" onclick="submitReceipt()">ยืนยันการรับของ</button>
         </div>
@@ -973,8 +973,8 @@
         </div>
 
         <!-- Scanner Viewport -->
-        <div class="scanner-viewport-container" id="scannerViewportParent">
-          <div id="scannerViewport"></div>
+        <div class="scanner-viewport-container" id="scannerViewportWrap">
+          <div id="modal-scanner-v2"></div>
           <div class="scanner-laser"></div>
           <div class="scanner-guide"></div>
           
@@ -985,7 +985,7 @@
           </div>
         </div>
 
-        <div class="flex gap-2">
+        <div class="flex flex-wrap gap-2">
           <button class="btn btn-outline flex-1" onclick="document.getElementById('qrFallbackInput').click()">
             <i data-lucide="image"></i> อัปโหลดรูปภาพ
           </button>
@@ -996,7 +996,7 @@
             <i data-lucide="keyboard"></i> ใส่รหัสเอง
           </button>
         </div>
-        <input type="file" id="qrFallbackInput" accept="image/*" style="display:none" onchange="handleQrFallback(this)">
+        <input type="file" id="qrFallbackInput" accept="image/*" style="display:none" onchange="handleModalFile(this)">
       </div>
       
       <div class="modal-footer" style="padding:1rem 1.5rem; background:rgba(0,0,0,0.2)">
@@ -2029,7 +2029,7 @@
         if (o.status === 'Pending') {
           actions = '<button class="btn btn-sm btn-accent" onclick="doApprove(\'' + o.orderId + '\', \'' + (o.employeeName || o.employeeId) + '\')"><i data-lucide="check" style="width:14px;height:14px"></i> อนุมัติ</button>';
         } else if (o.status === 'Approved') {
-          actions = '<div class="flex gap-1">' +
+          actions = '<div class="flex flex-wrap gap-1">' +
             '<button class="btn btn-sm btn-warning" onclick="doReady(\'' + o.orderId + '\')"><i data-lucide="package-check" style="width:14px;height:14px"></i> จัดเสร็จแล้ว</button>' +
             '<button class="btn btn-sm btn-primary" onclick="doDispatch(\'' + o.orderId + '\')"><i data-lucide="package" style="width:14px;height:14px"></i> จ่ายทันที</button>' +
             '</div>';
@@ -2298,7 +2298,7 @@
             + '<td>' + teamName + '</td>'
             + '<td>' + (isMe ? '<span class="badge badge-approved">คุณ (' + e.role + ')</span>' : roleSelect) + '</td>'
             + '<td class="hide-mobile"><span class="badge ' + (e.status === 'active' ? 'badge-approved' : 'badge-rejected') + '">' + (e.status === 'active' ? 'ปกติ' : 'ปิด') + '</span></td>'
-            + '<td class="flex gap-1">'
+            + '<td class="flex flex-wrap gap-1">'
             + '<button class="btn btn-xs btn-outline" onclick="showUserSubStock(\'' + e.employeeId + '\', \'' + e.name + '\')"><i data-lucide="eye" style="width:12px;height:12px"></i></button>'
             + (isMe ? '' : '<button class="btn btn-xs btn-ghost hide-mobile" style="color:var(--danger)" onclick="delEmployee(\'' + e.employeeId + '\')"><i data-lucide="trash-2" style="width:12px;height:12px"></i></button>')
             + '</td>'
@@ -2396,7 +2396,7 @@
                 '<h3 style="margin:0; font-size:1.1rem">' + t.teamName + '</h3>' +
                 '<span style="font-size:0.75rem; color:var(--text3)">ID: ' + t.teamId + '</span>' +
               '</div>' +
-              '<div class="flex gap-1">' +
+              '<div class="flex flex-wrap gap-1">' +
                 '<button class="btn btn-ghost btn-xs" onclick="editTeam(\'' + t.teamId + '\')"><i data-lucide="edit-2"></i></button>' +
                 '<button class="btn btn-ghost btn-xs" style="color:var(--danger)" onclick="delTeam(\'' + t.teamId + '\')"><i data-lucide="trash"></i></button>' +
               '</div>' +
@@ -2680,11 +2680,11 @@
     function loadAuditLogs() {
       var body = document.getElementById('auditBody');
       if (!body) return;
-      body.innerHTML = '<tr><td colspan="5" class="text-center" style="padding:2rem"><div class="spinner"></div></td></tr>';
+      body.innerHTML = '<tr><td colspan="10"><div class="skeleton sk-line"></div><div class="skeleton sk-line sk-line-short"></div></td></tr>';
 
       API.getReportData('auditActivities').then(function (res) {
         if (!res.success || !res.data || !res.data.logs) {
-          body.innerHTML = '<tr><td colspan="5" class="text-center" style="padding:2rem">ไม่พบประวัติกิจกรรม</td></tr>';
+          body.innerHTML = '<tr><td colspan="10"><div class="empty-state"><i data-lucide="history"></i><h3>ไม่มีข้อมูล</h3><p>ไม่พบประวัติกิจกรรม</p></div></td></tr>';
           return;
         }
         body.innerHTML = res.data.logs.map(function (l) {
@@ -2862,11 +2862,11 @@
     function loadForecast() {
       var body = document.getElementById('forecastBody');
       if (!body) return;
-      body.innerHTML = '<tr><td colspan="5" class="text-center" style="padding:2rem"><div class="spinner"></div></td></tr>';
+      body.innerHTML = '<tr><td colspan="10"><div class="skeleton sk-line"></div><div class="skeleton sk-line sk-line-short"></div></td></tr>';
 
       API.getInventoryForecast().then(function(res) {
         if (!res.success || !res.data || res.data.length === 0) {
-          body.innerHTML = '<tr><td colspan="5" class="text-center" style="padding:2rem;color:var(--text3)">ไม่มีข้อมูลพยากรณ์</td></tr>';
+          body.innerHTML = '<tr><td colspan="10"><div class="empty-state"><i data-lucide="trending-up"></i><h3>ไม่มีข้อมูล</h3><p>ไม่มีข้อมูลพยากรณ์</p></div></td></tr>';
           return;
         }
 
@@ -3370,7 +3370,7 @@
     var allBranches = [];
     function loadBranches() {
       var body = document.getElementById('branchesBody');
-      body.innerHTML = '<tr><td colspan="4" class="text-center" style="padding:2rem"><div class="spinner"></div></td></tr>';
+      body.innerHTML = '<tr><td colspan="10"><div class="skeleton sk-line"></div><div class="skeleton sk-line sk-line-short"></div></td></tr>';
       
       API.getBranches().then(function(res) {
         allBranches = res.data || [];
@@ -3383,7 +3383,7 @@
             '<td>' + escapeHTML(b.branchId) + '</td>' +
             '<td style="font-weight:500">' + escapeHTML(b.name) + '</td>' +
             '<td><span class="badge ' + (b.status === 'active' ? 'badge-approved' : 'badge-rejected') + '">' + (b.status === 'active' ? 'ปกติ' : 'ปิด') + '</span></td>' +
-            '<td class="flex gap-1">' +
+            '<td class="flex flex-wrap gap-1">' +
               '<button class="btn btn-xs btn-outline" onclick="editBranch(\'' + escapeHTML(b.branchId) + '\')"><i data-lucide="edit-2"></i></button>' +
               '<button class="btn btn-xs btn-ghost" style="color:var(--danger)" onclick="delBranch(\'' + escapeHTML(b.branchId) + '\', this)"><i data-lucide="trash"></i></button>' +
             '</td>' +
