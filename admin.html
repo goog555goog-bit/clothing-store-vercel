@@ -104,7 +104,7 @@
       </div>
     </div>
 
-    <div class="flex justify-between items-center" style="margin-bottom: 1.5rem;">
+    <div class="flex flex-wrap items-center justify-between gap-2" style="margin-bottom: 1.5rem;">
       <div id="pageTitleWrap">
         <h1 id="currentPageTitle" style="font-size: 1.5rem; font-weight: 800; letter-spacing: -1px; margin: 0;">
           ภาพรวมระบบ</h1>
@@ -205,7 +205,7 @@
 
     <!-- PRODUCTS -->
     <section id="p-products" class="admin-page" style="display:none">
-      <div class="flex justify-between items-center" style="margin-bottom:1.5rem">
+      <div class="flex flex-wrap items-center justify-between gap-2" style="margin-bottom:1.5rem">
         <h2 style="margin:0;display:flex;align-items:center;gap:0.5rem"><i data-lucide="package"></i> จัดการสินค้า</h2>
         <button class="btn btn-accent" onclick="openProductModal()"><i data-lucide="plus"></i> เพิ่มสินค้า</button>
       </div>
@@ -261,7 +261,7 @@
 
     <!-- Categories Section -->
     <section id="p-categories" class="admin-page" style="display:none">
-      <div class="flex justify-between items-center" style="margin-bottom:1.5rem">
+      <div class="flex flex-wrap items-center justify-between gap-2" style="margin-bottom:1.5rem">
         <h2 style="margin:0;display:flex;align-items:center;gap:0.5rem"><i data-lucide="folder-tree"></i>
           จัดการหมวดหมู่สินค้า</h2>
         <button class="btn btn-accent" onclick="openCategoryModal()"><i data-lucide="plus"></i> เพิ่มหมวดหมู่</button>
@@ -284,7 +284,7 @@
 
     <!-- ORDERS -->
     <div id="p-orders" class="admin-page" style="display:none">
-      <div class="flex items-center justify-between" style="margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem">
+      <div class="flex flex-wrap items-center justify-between gap-2" style="margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem">
         <h3>📋 รายการใบเบิกทั้งหมด</h3>
         <div class="flex flex-wrap gap-2">
           <select id="adminOrderFilter" class="input btn-sm" onchange="loadOrdersBasedOnFilter()" style="font-size:0.85rem; padding: 0.4rem 0.8rem; height: 38px;">
@@ -326,7 +326,7 @@
 
     <!-- REPORTS -->
     <section id="p-reports" class="admin-page" style="display:none">
-      <div class="flex items-center justify-between" style="margin-bottom:1.5rem">
+      <div class="flex flex-wrap items-center justify-between gap-2" style="margin-bottom:1.5rem">
         <h2 style="margin:0;display:flex;align-items:center;gap:0.5rem"><i data-lucide="bar-chart-3"></i>
           รายงานและการส่งออก</h2>
         <div class="flex flex-wrap gap-2">
@@ -438,7 +438,7 @@
 
     <!-- Employees Section -->
     <section id="p-employees" class="admin-page" style="display:none">
-      <div class="flex justify-between items-center" style="margin-bottom:1.5rem">
+      <div class="flex flex-wrap items-center justify-between gap-2" style="margin-bottom:1.5rem">
         <h2 style="margin:0"><i data-lucide="users-2"></i> จัดการพนักงาน</h2>
         <button class="btn btn-accent" onclick="openEmployeeModal()">+ เพิ่มพนักงาน</button>
       </div>
@@ -464,7 +464,7 @@
 
     <!-- Teams Section -->
     <section id="p-teams" class="admin-page" style="display:none">
-      <div class="flex justify-between items-center" style="margin-bottom:1.5rem">
+      <div class="flex flex-wrap items-center justify-between gap-2" style="margin-bottom:1.5rem">
         <h2 style="margin:0"><i data-lucide="users"></i> จัดการทีมช่าง (Technician Teams)</h2>
         <div class="flex flex-wrap gap-2">
           <button class="btn btn-outline" onclick="openSwapLeadModal()"><i data-lucide="repeat"></i> สลับตัวเอก</button>
@@ -478,7 +478,7 @@
 
     <!-- AUDIT LOGS -->
     <section id="p-audit" class="admin-page" style="display:none">
-      <div class="flex items-center justify-between" style="margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem">
+      <div class="flex flex-wrap items-center justify-between gap-2" style="margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem">
         <h3><i data-lucide="activity"></i> ประวัติกิจกรรมระบบ (Audit Logs)</h3>
         <button class="btn btn-outline btn-sm" onclick="downloadCSV('AuditLogs')">📥 Export CSV</button>
       </div>
@@ -506,7 +506,7 @@
 
     <!-- SYSTEM SETTINGS -->
     <section id="p-settings" class="admin-page" style="display:none">
-      <div class="flex items-center justify-between" style="margin-bottom:1.5rem">
+      <div class="flex flex-wrap items-center justify-between gap-2" style="margin-bottom:1.5rem">
         <h2 style="margin:0;display:flex;align-items:center;gap:0.5rem"><i data-lucide="settings"></i> ตั้งค่าระบบ</h2>
       </div>
       <div class="card">
@@ -549,7 +549,7 @@
 
     <!-- BRANCHES SECTION -->
     <section id="p-branches" class="admin-page" style="display:none">
-      <div class="flex justify-between items-center" style="margin-bottom:1.5rem">
+      <div class="flex flex-wrap items-center justify-between gap-2" style="margin-bottom:1.5rem">
         <h2 style="margin:0;display:flex;align-items:center;gap:0.5rem"><i data-lucide="building-2"></i> จัดการสาขา (Branches)</h2>
         <button class="btn btn-accent" onclick="openBranchModal()"><i data-lucide="plus"></i> เพิ่มสาขาใหม่</button>
       </div>
@@ -647,7 +647,7 @@
           <div id="pf-upload-status" style="font-size:0.8rem;color:var(--text3)"></div>
         </div>
       </div>
-      <div class="modal-footer">
+      <div class="modal-footer flex-wrap">
         <button class="btn btn-outline" onclick="closeProductModal()">ยกเลิก</button>
         <button id="saveProductBtn" class="btn btn-primary" onclick="saveProduct()">บันทึก</button>
       </div>
@@ -666,7 +666,7 @@
         <div id="barcodeLabel" style="margin-top:1rem; font-weight:700; font-size:1.1rem; color:var(--text1)"></div>
         <p style="font-size:0.8rem; color:var(--text3); margin-top:0.5rem">รหัสสินค้าสำหรับพิมพ์ติดพัสดุ</p>
       </div>
-      <div class="modal-footer">
+      <div class="modal-footer flex-wrap">
         <button class="btn btn-primary w-full" onclick="printBarcode()"><i data-lucide="printer"></i> พิมพ์บาร์โค้ด</button>
       </div>
     </div>
@@ -690,7 +690,7 @@
           </select>
         </div>
       </div>
-      <div class="modal-footer">
+      <div class="modal-footer flex-wrap">
         <button class="btn btn-outline" onclick="closeBranchModal()">ยกเลิก</button>
         <button id="saveBranchBtn" class="btn btn-primary" onclick="saveBranch()">บันทึก</button>
       </div>
@@ -730,7 +730,7 @@
           </select>
         </div>
       </div>
-      <div class="modal-footer">
+      <div class="modal-footer flex-wrap">
         <button class="btn btn-outline" onclick="closeEmployeeModal()">ยกเลิก</button>
         <button id="saveEmployeeBtn" class="btn btn-primary" onclick="saveEmployee()">บันทึก</button>
       </div>
@@ -767,7 +767,7 @@
           </select>
         </div>
       </div>
-      <div class="modal-footer">
+      <div class="modal-footer flex-wrap">
         <button class="btn btn-outline" onclick="closeExportModal()">ยกเลิก</button>
         <button id="doExportBtn" class="btn btn-primary" onclick="doDetailedExport()">ดาวน์โหลด Excel</button>
       </div>
@@ -792,7 +792,7 @@
           <input id="approvalComment" class="form-input" placeholder="ระบุเหตุผลการอนุมัติ/ปฏิเสธ...">
         </div>
       </div>
-      <div class="modal-footer" style="display:flex; gap:0.75rem">
+      <div class="modal-footer flex-wrap" style="display:flex; gap:0.75rem">
         <button class="btn btn-outline" style="flex:1" onclick="closeApprovalModal()">ยกเลิก</button>
         <button class="btn btn-danger" style="flex:1" onclick="submitOrderDecision('reject')">ปฏิเสธ</button>
         <button class="btn btn-accent" style="flex:2" onclick="submitOrderDecision('approve')">อนุมัติคำขอ</button>
@@ -815,7 +815,7 @@
           <input type="number" id="stockAdjust" class="form-input" placeholder="0" style="font-size:1.5rem; text-align:center; font-weight:700">
         </div>
       </div>
-      <div class="modal-footer">
+      <div class="modal-footer flex-wrap">
         <button class="btn btn-ghost" onclick="closeStockModal()">ยกเลิก</button>
         <button id="doStockAdjustBtn" class="btn btn-primary" onclick="doStockAdjust()" style="flex:1">บันทึกยอด</button>
       </div>
@@ -846,7 +846,7 @@
            <div id="tf-members" style="display:flex; flex-wrap:wrap; gap:0.5rem"></div>
         </div>
       </div>
-      <div class="modal-footer">
+      <div class="modal-footer flex-wrap">
         <button class="btn btn-outline" onclick="closeTeamModal()">ยกเลิก</button>
         <button id="saveTeamBtn" class="btn btn-primary" onclick="saveTeam()">บันทึกข้อมูลทีม</button>
       </div>
@@ -880,7 +880,7 @@
            </div>
         </div>
       </div>
-      <div class="modal-footer">
+      <div class="modal-footer flex-wrap">
         <button class="btn btn-outline" onclick="closeSwapLeadModal()">ยกเลิก</button>
         <button class="btn btn-primary" onclick="executeSwapLead()">ยืนยันการสลับตัว</button>
       </div>
@@ -907,7 +907,7 @@
           <button class="btn btn-accent btn-sm flex-1" onclick="submitReceipt()">ยืนยันการรับของ</button>
         </div>
       </div>
-      <div class="modal-footer">
+      <div class="modal-footer flex-wrap">
         <button class="btn btn-ghost btn-sm" onclick="closeModal('orderDetailModal')">ปิด</button>
       </div>
     </div>
@@ -940,7 +940,7 @@
           </table>
         </div>
       </div>
-      <div class="modal-footer">
+      <div class="modal-footer flex-wrap">
         <button class="btn btn-primary" onclick="adminNav('inventory'); closeModal('lowStockModal')">ไปที่คลังสินค้า</button>
         <button class="btn btn-outline" onclick="closeModal('lowStockModal')">ปิด</button>
       </div>
@@ -999,7 +999,7 @@
         <input type="file" id="qrFallbackInput" accept="image/*" style="display:none" onchange="handleModalFile(this)">
       </div>
       
-      <div class="modal-footer" style="padding:1rem 1.5rem; background:rgba(0,0,0,0.2)">
+      <div class="modal-footer flex-wrap" style="padding:1rem 1.5rem; background:rgba(0,0,0,0.2)">
         <button class="btn btn-ghost btn-sm w-full" onclick="closeScanner()">ยกเลิกการสแกน</button>
       </div>
     </div>
@@ -1027,7 +1027,7 @@
           </div>
         </div>
       </div>
-      <div class="modal-footer">
+      <div class="modal-footer flex-wrap">
         <button class="btn btn-ghost" onclick="closeModal('scanActionModal')">ยกเลิก</button>
         <button id="sa-confirm-btn" class="btn btn-primary flex-1" style="height:52px">ยืนยันรายการ</button>
       </div>
@@ -1338,7 +1338,7 @@
         if (data.topProducts && data.topProducts.length > 0) {
           dbTopInner.innerHTML = '<div class="flex flex-col gap-2" style="padding:0 1rem 1rem;">' + 
             data.topProducts.map(function(tp, idx) {
-              return '<div class="flex justify-between items-center" style="padding:0.75rem; background:rgba(255,255,255,0.02); border-radius:8px; border:1px solid var(--border)">' +
+              return '<div class="flex flex-wrap items-center justify-between gap-2" style="padding:0.75rem; background:rgba(255,255,255,0.02); border-radius:8px; border:1px solid var(--border)">' +
                 '<div style="flex:1"><strong style="color:var(--text1)">#'+(idx+1)+ ' ' + tp.productName + '</strong><div style="font-size:0.8rem;color:var(--text3)">รหัส: ' + tp.productId + '</div></div>' +
                 '<div class="text-right"><div style="font-weight:700; color:var(--accent)">' + tp.totalQty + ' ชิ้น</div><div style="font-size:0.8rem; color:var(--text3)">฿' + (Number(tp.totalValue) || 0).toLocaleString() + '</div></div>' +
                 '</div>';
@@ -1378,7 +1378,7 @@
               var spendAmt = Number(ds.totalSpending) || 0;
               var pct = maxSpend > 0 ? (spendAmt / maxSpend * 100) : 0;
               return '<div style="margin-bottom:0.75rem;">' +
-                '<div class="flex justify-between" style="font-size:0.85rem; margin-bottom:0.25rem"><span style="font-weight:600">' + ds.department + '</span><span style="color:var(--primary-light); font-weight:700">฿' + spendAmt.toLocaleString() + '</span></div>' +
+                '<div class="flex flex-wrap justify-between gap-2" style="font-size:0.85rem; margin-bottom:0.25rem"><span style="font-weight:600">' + ds.department + '</span><span style="color:var(--primary-light); font-weight:700">฿' + spendAmt.toLocaleString() + '</span></div>' +
                 '<div style="width:100%; height:8px; background:rgba(255,255,255,0.05); border-radius:4px; overflow:hidden;"><div style="width:' + pct + '%; height:100%; background:var(--primary); transition: width 0.5s ease;"></div></div>' +
                 '</div>';
             }).join('') + '</div>';
@@ -2208,7 +2208,7 @@
         document.getElementById('approvalItems').innerHTML = '<div style="font-size:0.85rem;font-weight:600;margin-bottom:0.5rem">รายการสินค้า:</div>'
           + '<div class="card glass" style="padding:0.5rem">'
           + res.data.map(function(item) {
-              return '<div class="flex justify-between items-center" style="padding:0.5rem;border-bottom:1px solid rgba(255,255,255,0.05)">'
+              return '<div class="flex flex-wrap items-center justify-between gap-2" style="padding:0.5rem;border-bottom:1px solid rgba(255,255,255,0.05)">'
                 + '<div style="font-size:0.9rem">' + item.productName + '</div>'
                 + '<div style="font-weight:700">x' + item.quantity + '</div>'
                 + '</div>';
@@ -2405,7 +2405,7 @@
               '<div style="font-size:0.7rem; color:var(--primary); text-transform:uppercase; font-weight:800; letter-spacing:0.05em; margin-bottom:0.25rem">ตัวเอก (Lead)</div>' +
               '<div style="font-weight:700; display:flex; align-items:center; gap:0.5rem"><i data-lucide="crown" style="width:14px; color:var(--primary)"></i> ' + (t.leadName || t.leadId) + '</div>' +
             '</div>' +
-            '<div class="flex justify-between items-center" style="font-size:0.85rem; color:var(--text2)">' +
+            '<div class="flex flex-wrap items-center justify-between gap-2" style="font-size:0.85rem; color:var(--text2)">' +
               '<span>สมาชิก: ' + (t.memberCount || 0) + ' คน</span>' +
               '<button class="btn btn-outline btn-xs" onclick="viewTeamInventory(\'' + t.teamId + '\')">ดูสต๊อกทีม</button>' +
             '</div>' +
@@ -2830,7 +2830,7 @@
         var el = document.getElementById('topItemsList');
         if (!res.success || res.data.length === 0) { el.innerHTML = '<p style="color:var(--text3)">ไม่มีข้อมูล</p>'; return; }
         el.innerHTML = res.data.slice(0, 10).map(function (i, idx) {
-          return '<div class="flex items-center justify-between" style="padding:0.4rem 0;border-bottom:1px solid var(--border)">'
+          return '<div class="flex flex-wrap items-center justify-between gap-2" style="padding:0.4rem 0;border-bottom:1px solid var(--border)">'
             + '<span>' + (idx + 1) + '. ' + i.productName + '</span>'
             + '<span style="font-weight:600">' + i.totalQty + ' ชิ้น</span>'
             + '</div>';
@@ -2844,7 +2844,7 @@
           var pct = d.budget > 0 ? d.percentUsed : 0;
           var barColor = pct > 80 ? 'var(--danger)' : pct > 50 ? 'var(--warning)' : 'var(--accent)';
           return '<div style="margin-bottom:0.75rem">'
-            + '<div class="flex justify-between" style="font-size:0.85rem;margin-bottom:0.25rem">'
+            + '<div class="flex flex-wrap justify-between gap-2" style="font-size:0.85rem;margin-bottom:0.25rem">'
             + '<span>' + d.department + '</span>'
             + '<span>฿' + d.totalSpending.toLocaleString() + ' / ฿' + d.budget.toLocaleString() + '</span>'
             + '</div>'

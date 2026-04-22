@@ -152,7 +152,7 @@
 
     <div class="container" style="padding-top:2rem;">
       <div
-        style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem;">
+        style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem;">
         <h2 style="font-size:1.25rem;font-weight:700;display:flex;align-items:center;gap:0.5rem;">
           <i data-lucide="clipboard-list" style="width:20px;height:20px;color:var(--primary);"></i> ประวัติการเบิก
         </h2>
@@ -219,7 +219,7 @@
       </div>
     </div>
     <div class="cart-footer">
-      <div class="flex justify-between items-center" style="margin-bottom:1rem;">
+      <div class="flex flex-wrap items-center justify-between gap-2" style="margin-bottom:1rem;">
         <span style="color:var(--text2);">ยอดรวมทั้งสิ้น</span>
         <span id="cartTotal" style="font-size:1.3rem;font-weight:700;color:var(--accent);">฿0</span>
       </div>
@@ -240,7 +240,7 @@
         <button class="btn btn-ghost btn-sm" onclick="closeModal('productDetailModal')" aria-label="ปิด">✕</button>
       </div>
       <div id="productDetailBody" class="modal-body" style="padding:0;"></div>
-      <div class="modal-footer">
+      <div class="modal-footer flex-wrap">
         <button class="btn btn-outline" onclick="closeModal('productDetailModal')">กลับ</button>
         <button id="detailAddToCartBtn" class="btn btn-accent flex-1">เพิ่มลงตะกร้า</button>
       </div>
@@ -270,7 +270,7 @@
           <button class="btn btn-accent btn-sm flex-1" onclick="submitReceipt()">ยืนยันการรับของ</button>
         </div>
       </div>
-      <div class="modal-footer">
+      <div class="modal-footer flex-wrap">
         <button class="btn btn-ghost btn-sm" onclick="closeModal('orderDetailModal')">ปิด</button>
       </div>
     </div>
@@ -315,7 +315,7 @@
         <button class="btn btn-ghost btn-sm" onclick="closeModal('checkoutModal')">✕</button>
       </div>
       <div class="modal-body" id="checkoutModalBody" style="padding:1.5rem;"></div>
-      <div class="modal-footer">
+      <div class="modal-footer flex-wrap">
         <button class="btn btn-ghost" onclick="closeModal('checkoutModal')">ยกเลิก</button>
         <button class="btn btn-primary flex-1" style="justify-content:center;" id="confirmCheckoutBtn"
           onclick="confirmCheckout()">
@@ -365,7 +365,7 @@
           </div>
         </div>
       </div>
-      <div class="modal-footer">
+      <div class="modal-footer flex-wrap">
         <button class="btn btn-ghost" onclick="closeModal('actionModal')">ยกเลิก</button>
         <button class="btn btn-primary flex-1" style="justify-content:center;" id="actionModalBtn">
           ยืนยัน

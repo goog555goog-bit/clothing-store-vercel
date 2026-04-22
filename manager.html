@@ -100,7 +100,7 @@
           <input id="decisionComment" class="form-input" placeholder="ระบุความคิดเห็น...">
         </div>
       </div>
-      <div class="modal-footer">
+      <div class="modal-footer flex-wrap">
         <button class="btn btn-outline" onclick="closeMgrModal()">ยกเลิก</button>
         <button id="decisionBtn" class="btn btn-primary" onclick="submitDecision()">ยืนยัน</button>
       </div>
@@ -224,7 +224,7 @@
 
         list.innerHTML = res.data.map(function(o) {
           return '<div class="card" style="margin-bottom:1rem">'
-            + '<div class="flex items-center justify-between" style="margin-bottom:0.75rem">'
+            + '<div class="flex flex-wrap items-center justify-between gap-2" style="margin-bottom:0.75rem">'
             +   '<div><span style="font-weight:600">' + escapeHTML(o.orderId) + '</span>'
             +   ' <span class="badge badge-pending">' + escapeHTML(o.statusLabel || o.status) + '</span></div>'
             +   '<div style="color:var(--text3);font-size:0.8rem">' + escapeHTML(String(o.createdAt || '').split(' ')[0]) + '</div>'

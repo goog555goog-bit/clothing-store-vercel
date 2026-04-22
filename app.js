@@ -258,7 +258,7 @@ var Onboarding = {
     tooltip.className = 'onboarding-tooltip';
     tooltip.innerHTML = '<div class="onboarding-header" style="display:flex;align-items:center;gap:0.5rem">' + step.title + '</div>'
       + '<div class="onboarding-body">' + step.body + '</div>'
-      + '<div class="flex justify-between">'
+      + '<div class="flex flex-wrap justify-between gap-2">'
       +   '<button class="btn btn-ghost btn-sm" onclick="Onboarding.skip()">ข้าม</button>'
       +   '<button class="btn btn-primary btn-sm" onclick="Onboarding.next()">' + (this.currentStep === this.steps.length - 1 ? 'เสร็จสิ้น' : 'ถัดไป') + '</button>'
       + '</div>';
@@ -687,7 +687,7 @@ function renderProductGrid(pageNum) {
       + '<div class="product-info">'
       +   '<div class="product-name" style="cursor:pointer" onclick="openProductDetail(\'' + escapeHTML(p.productId) + '\')">' + escapeHTML(p.name) + '</div>'
       +   '<div class="product-stock"><span class="product-stock-dot' + (outOfStock ? ' out' : '') + '"></span>' + (outOfStock ? '<span style="color:var(--danger)">หมดสต็อก</span>' : 'คงเหลือ: ' + Number(p.stock) + ' ชิ้น') + '</div>'
-      +   '<div class="flex items-center justify-between" style="margin-top:auto">'
+      +   '<div class="flex flex-wrap items-center justify-between gap-2" style="margin-top:auto">'
       +     '<div class="product-price">฿' + Number(p.price).toLocaleString() + '</div>'
       +     '<button class="btn btn-sm ' + (outOfStock ? 'btn-outline' : 'btn-primary') + '" '
       +       (outOfStock ? 'disabled' : 'onclick="addToCart(\'' + escapeHTML(p.productId) + '\', event)"')
@@ -844,8 +844,8 @@ function loadMyOrders() {
     renderOrderList(myOrdersCache);
   } else {
     list.innerHTML = Array(3).fill('<div class="order-card" style="display:flex; flex-direction:column; gap:0.75rem">'
-      + '<div class="flex items-center justify-between"><div class="skeleton skeleton-text" style="width:120px; margin:0"></div><div class="skeleton" style="width:80px; height:24px; border-radius:12px"></div></div>'
-      + '<div class="flex items-center justify-between" style="margin-top:0.5rem"><div class="skeleton skeleton-text" style="width:150px; margin:0"></div><div class="skeleton skeleton-text" style="width:80px; margin:0"></div></div>'
+      + '<div class="flex flex-wrap items-center justify-between gap-2"><div class="skeleton skeleton-text" style="width:120px; margin:0"></div><div class="skeleton" style="width:80px; height:24px; border-radius:12px"></div></div>'
+      + '<div class="flex flex-wrap items-center justify-between gap-2" style="margin-top:0.5rem"><div class="skeleton skeleton-text" style="width:150px; margin:0"></div><div class="skeleton skeleton-text" style="width:80px; margin:0"></div></div>'
       + '</div>').join('');
   }
 
@@ -894,13 +894,13 @@ function renderOrderList(data) {
     }
 
     return '<div class="order-card">'
-      + '<div class="flex items-center justify-between" style="margin-bottom:0.75rem">'
+      + '<div class="flex flex-wrap items-center justify-between gap-2" style="margin-bottom:0.75rem">'
       +   '<div style="font-weight:600">#' + o.orderId + '</div>'
       +   '<div class="badge ' + bc + '">' + (o.statusLabel || o.status) + '</div>'
       + '</div>'
-      + '<div class="flex items-center justify-between" style="font-size:0.9rem">'
+      + '<div class="flex flex-wrap items-center justify-between gap-2" style="font-size:0.9rem">'
       +   '<div style="font-size:0.85rem;color:var(--text3);margin-bottom:0.75rem"><i data-lucide="clock" style="width:14px;height:14px"></i> ' + (o.createdAt || '-') + '</div>'
-      +   '<div class="flex justify-between items-center">'
+      +   '<div class="flex flex-wrap items-center justify-between gap-2">'
       +     '<div style="font-weight:700;color:var(--accent)">฿' + Number(o.totalAmount).toLocaleString() + '</div>'
       +     '<button class="btn btn-outline btn-sm" onclick="viewOrderDetails(\'' + o.orderId + '\')">ดูรายละเอียด</button>'
       +   '</div>'
