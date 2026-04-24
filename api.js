@@ -261,7 +261,7 @@ var API = (function () {
     getInventoryForecast: function () { return this._call('getInventoryForecast', {}, true); },
 
     // Aliases for better DX
-    addToSubStock: function (data) { return this.receiveSubStock(data.productId, data.qty); }
+    addToSubStock: function (data) { return this.receiveSubStock(data); }
 
   };
 

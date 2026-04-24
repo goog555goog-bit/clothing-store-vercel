@@ -1680,7 +1680,7 @@
       btn.innerHTML = '<div class="spinner" style="width:16px;height:16px"></div> กำลังบันทึก...';
       btn.disabled = true;
 
-      var op = data.productId ? 'update' : 'add';
+      var op = data.oldProductId ? 'update' : 'add';
       API.manageProduct(op, data).then(function (res) {
         if (res.success) {
           showToast('บันทึกเรียบร้อย', 'success');
@@ -2914,7 +2914,7 @@
       }[currentScanMode];
 
       API.getStorefrontData().then(function (res) {
-        var products = res.data && res.data.products ? res.data.products : [];
+        var products = res.products || [];
         var prod = products.find(p => String(p.productId || p.id) === String(text));
 
         if (!prod) {
