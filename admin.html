@@ -1614,8 +1614,8 @@
     }
 
     function openProductModal(product) {
-      document.getElementById('pf-old-id').value = product ? product.productId : '';
-      document.getElementById('pf-id').value = product ? product.productId : '';
+      document.getElementById('pf-old-id').value = product ? (product.productId || product.id || '') : '';
+      document.getElementById('pf-id').value = product ? (product.productId || product.id || '') : '';
       document.getElementById('pf-name').value = product ? product.name : '';
 
       // Load categories and set selected
@@ -1650,13 +1650,13 @@
     function closeProductModal() { document.getElementById('productModal').classList.remove('open'); }
 
     function editProduct(id) {
-      var p = allAdminProducts.filter(function (x) { return String(x.productId) === String(id); })[0];
+      var p = allAdminProducts.filter(function (x) { return String(x.productId || x.id) === String(id); })[0];
       if (p) {
         openProductModal(p);
       } else {
         // Fallback if not in cache
         API.getProducts().then(function (res) {
-          var p2 = res.data.filter(function (x) { return String(x.productId) === String(id); })[0];
+          var p2 = (res.data || []).filter(function (x) { return String(x.productId || x.id) === String(id); })[0];
           if (p2) openProductModal(p2);
         });
       }
