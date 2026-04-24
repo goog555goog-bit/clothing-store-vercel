@@ -541,14 +541,16 @@ function renderCategories() {
   // Dedup by categoryId
   var seen = {};
   var unique = allCategories.filter(function(c) {
-    if (!c.categoryId || seen[c.categoryId]) return false;
-    seen[c.categoryId] = true;
+    var cid = c.categoryId || c.id;
+    if (!cid || seen[cid]) return false;
+    seen[cid] = true;
     return true;
   });
   
   var cats = [{ categoryId: 'all', name: 'ทุกหมวดหมู่' }].concat(unique);
   sel.innerHTML = cats.map(function(c) {
-    return '<option value="' + c.categoryId + '" ' + (currentCategory === c.categoryId ? 'selected' : '') + '>' + c.name + '</option>';
+    var cid = c.categoryId || c.id;
+    return '<option value="' + (cid || "") + '" ' + (currentCategory === cid ? 'selected' : '') + '>' + c.name + '</option>';
   }).join('');
 
   // Reinitalize searchable select if it exists

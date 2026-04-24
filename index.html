@@ -428,7 +428,7 @@
   <script>
     // --- SEARCHABLE SELECT HELPER (Optimized) ---
     var _ssDebounceTimer = null;
-    function initSearchSelect(selectId) {
+    function initSearchSelect(selectId, showAllOnEmpty) {
       var select = document.getElementById(selectId);
       if (!select) return;
 
@@ -474,7 +474,7 @@
         var filterLower = (filter || '').toLowerCase().trim();
         
         var filtered = options.filter(function(o, i) {
-          if (i === 0 && !o.value) return false; // skip placeholder
+          if (i === 0 && !o.value && !showAllOnEmpty) return false; // skip placeholder if not showing all
           if (!filterLower) return true;
           return o.text.toLowerCase().includes(filterLower);
         });

@@ -4,10 +4,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" href="data:;base64,iVBORw0KGgo= ">
-  <title>Admin Dashboard - EMETIX</title>
-  <link rel="icon" type="image/png" href="favicon.png">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <title>Admin Panel - Premium</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/bwip-js@3.0.4/dist/bwip-js-min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
@@ -27,7 +27,7 @@
     }
     // Admin Safety placeholders
     function refreshIcons() { if (typeof lucide !== 'undefined') lucide.createIcons(); }
-    
+
     function escapeHTML(str) {
       if (!str) return "";
       return String(str)
@@ -54,13 +54,15 @@
             style="font-weight:300;opacity:0.6;color:var(--primary);">ADMIN</span></span>
       </div>
       <div class="nav-actions">
-        <div id="adminName" class="hide-mobile" style="color:var(--text2); font-weight: 500; font-size: 0.9rem; background: var(--surface); padding: 0.4rem 1rem; border-radius: 99px; border: 1px solid var(--border);"></div>
-        <button class="btn btn-ghost btn-sm" onclick="navigateTo(scriptUrl)"><i data-lucide="shopping-bag"></i> <span class="hide-mobile">หน้าร้าน</span></button>
-        <button id="mgrPaneBtn" class="btn btn-warning btn-sm hidden" onclick="navigateTo('manager.html')"><i data-lucide="scale"></i> <span class="hide-mobile">ผู้อนุมัติ</span></button>
-        <button class="btn btn-ghost btn-sm" onclick="toggleDarkMode()" aria-label="สลับโหมดมืด/สว่าง">
-          <span id="darkModeIcon" class="force-show"><i data-lucide="moon"></i></span>
-        </button>
-        <button class="btn btn-outline btn-sm" onclick="adminLogout()" style="color: var(--danger); border-color: rgba(239, 68, 68, 0.2);" aria-label="ออกจากระบบ"><i data-lucide="log-out"></i></button>
+        <div id="adminName" class="hide-mobile"
+          style="color:var(--text2); font-weight: 500; font-size: 0.9rem; background: var(--surface); padding: 0.4rem 1rem; border-radius: 99px; border: 1px solid var(--border);">
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="navigateTo(scriptUrl)"><i data-lucide="shopping-bag"></i> <span
+            class="hide-mobile">หน้าร้าน</span></button>
+        <button id="mgrPaneBtn" class="btn btn-warning btn-sm hidden hide-mobile"
+          onclick="navigateTo('manager.html')"><i data-lucide="scale"></i> ผู้อนุมัติ</button>
+        <button class="btn btn-outline btn-sm" onclick="adminLogout()"
+          style="color: var(--danger); border-color: rgba(239, 68, 68, 0.2);"><i data-lucide="log-out"></i></button>
       </div>
     </div>
   </header>
@@ -68,17 +70,21 @@
 
   <div class="container" style="margin-bottom: 80px;">
     <!-- Iframe Warning / Fullscreen Unlock -->
-    <div id="iframe-warning" style="display:none; margin-bottom:1.5rem; padding:1.25rem; background:rgba(99,102,241,0.1); border:1px solid rgba(99,102,241,0.2); border-radius:12px; display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap">
-       <div style="display:flex; align-items:center; gap:1rem">
-         <div style="padding:0.75rem; background:var(--primary); color:#000; border-radius:10px; box-shadow:0 4px 12px rgba(251,191,36,0.3)">
-           <i data-lucide="maximize"></i>
-         </div>
-         <div>
-           <strong style="display:block; font-size:1rem; color:#fff">โหมดแสดงผลเต็มหน้าจอ (เพื่อเปิดกล้อง)</strong>
-           <p style="font-size:0.8rem; color:var(--text3); margin:0">พบว่าคุณกำลังใช้งานในกรอบจำกัดของ Google กรุณากดปลดล็อกเพื่อใช้กล้องสดได้ 100%</p>
-         </div>
-       </div>
-       <button onclick="window.open('admin.html', '_blank')" class="btn btn-primary" style="white-space:nowrap; padding:0.75rem 1.5rem; background:var(--gradient-gold); color:#000; border:none; box-shadow:0 10px 30px rgba(251,191,36,0.3)">🔓 ปลดล็อกเดี๋ยวนี้</button>
+    <div id="iframe-warning"
+      style="display:none; margin-bottom:1.5rem; padding:1.25rem; background:rgba(99,102,241,0.1); border:1px solid rgba(99,102,241,0.2); border-radius:12px; display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap">
+      <div style="display:flex; align-items:center; gap:1rem">
+        <div
+          style="padding:0.75rem; background:var(--primary); color:#000; border-radius:10px; box-shadow:0 4px 12px rgba(251,191,36,0.3)">
+          <i data-lucide="maximize"></i>
+        </div>
+        <div>
+          <strong style="display:block; font-size:1rem; color:#fff">โหมดแสดงผลเต็มหน้าจอ (เพื่อเปิดกล้อง)</strong>
+          <p style="font-size:0.8rem; color:var(--text3); margin:0">พบว่าคุณกำลังใช้งานในกรอบจำกัดของ Google
+            กรุณากดปลดล็อกเพื่อใช้กล้องสดได้ 100%</p>
+        </div>
+      </div>
+      <button onclick="window.open('admin.html', '_blank')" class="btn btn-accent"
+        style="white-space:nowrap; padding:0.75rem 1.5rem">🔓 ปลดล็อกเดี๋ยวนี้</button>
     </div>
     <!-- TABS (Desktop only) -->
     <div class="tabs-scroll-wrap hide-mobile"
@@ -89,7 +95,8 @@
         <button class="tab" onclick="adminNav('products', this)"><i data-lucide="package"></i> สินค้า</button>
         <button class="tab" id="tab-categories" onclick="adminNav('categories', this)"><i data-lucide="layers"></i>
           หมวดหมู่</button>
-        <button class="tab" onclick="adminNav('orders', this)"><i data-lucide="file-text"></i> ใบเบิกสินค้า <span id="ordersTabBadge" class="tab-badge" style="display:none">0</span></button>
+        <button class="tab" onclick="adminNav('orders', this)"><i data-lucide="file-text"></i> ใบเบิกสินค้า <span
+            id="ordersTabBadge" class="tab-badge" style="display:none">0</span></button>
         <button class="tab" onclick="adminNav('inventory', this)"><i data-lucide="archive"></i> คลังสินค้าหลัก</button>
         <button class="tab" onclick="adminNav('reports', this)"><i data-lucide="pie-chart"></i> รายงานสถิติ</button>
         <button class="tab" id="tab-employees" onclick="adminNav('employees', this)"><i data-lucide="users-2"></i>
@@ -117,12 +124,15 @@
 
     <!-- DASHBOARD -->
     <div id="p-dashboard" class="admin-page active-page">
-      
+
       <!-- Dashboard Filters -->
       <div class="card glass" style="margin-bottom: 1.5rem; padding: 1.25rem;">
         <div class="grid grid-2-tablet gap-2">
           <div>
-            <label class="form-label" style="font-size:0.85rem; margin-bottom:0.25rem; color:var(--text2); font-weight:600;"><i data-lucide="calendar" style="width:14px;height:14px;display:inline-block;vertical-align:middle;margin-right:4px;"></i>ช่วงเวลา</label>
+            <label class="form-label"
+              style="font-size:0.85rem; margin-bottom:0.25rem; color:var(--text2); font-weight:600;"><i
+                data-lucide="calendar"
+                style="width:14px;height:14px;display:inline-block;vertical-align:middle;margin-right:4px;"></i>ช่วงเวลา</label>
             <select id="dbFilterPeriod" class="input w-full" onchange="loadDashboard()">
               <option value="today">วันนี้</option>
               <option value="week">สัปดาห์นี้</option>
@@ -131,7 +141,11 @@
             </select>
           </div>
           <div>
-            <label class="form-label" style="font-size:0.85rem; margin-bottom:0.25rem; color:var(--text2); font-weight:600;"><i data-lucide="building-2" style="width:14px;height:14px;display:inline-block;vertical-align:middle;margin-right:4px;"></i>แผนก (Department)</label>
+            <label class="form-label"
+              style="font-size:0.85rem; margin-bottom:0.25rem; color:var(--text2); font-weight:600;"><i
+                data-lucide="building-2"
+                style="width:14px;height:14px;display:inline-block;vertical-align:middle;margin-right:4px;"></i>แผนก
+              (Department)</label>
             <select id="dbFilterDept" class="input w-full" onchange="loadDashboard()">
               <option value="all">ทุกแผนก (All Departments)</option>
             </select>
@@ -148,10 +162,9 @@
             <div class="card-title text-accent"><i data-lucide="award"></i> 5 อันดับสินค้ายอดนิยม</div>
           </div>
           <div id="dbTopProductsList" style="padding: 0.5rem 0;">
-             <div style="height:220px; position:relative; margin-bottom:1rem; padding:0 1rem;"><canvas id="topProductsDoughnut"></canvas></div>
-             <div id="dbTopProductsInner">
-               <div class="text-center" style="padding:2rem;"><div class="spinner"></div></div>
-             </div>
+            <div class="text-center" style="padding:2rem;">
+              <div class="spinner"></div>
+            </div>
           </div>
         </div>
         <div class="card">
@@ -159,10 +172,9 @@
             <div class="card-title text-primary"><i data-lucide="pie-chart"></i> สัดส่วนยอดเบิกตามแผนก</div>
           </div>
           <div id="dbDeptSpendingList" style="padding: 0.5rem 0;">
-             <div style="height:220px; position:relative; margin-bottom:1rem; padding:0 1rem;"><canvas id="deptSpendingDoughnut"></canvas></div>
-             <div id="dbDeptSpendingInner">
-               <div class="text-center" style="padding:2rem;"><div class="spinner"></div></div>
-             </div>
+            <div class="text-center" style="padding:2rem;">
+              <div class="spinner"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -216,7 +228,9 @@
           <div style="position:relative">
             <label class="form-label">ค้นหาชื่อสินค้า / รหัส</label>
             <div class="search-select-wrapper">
-              <input type="text" id="adminProductSearch" class="form-input" placeholder="พิมพ์ชื่อสินค้าเพื่อค้นหา..." oninput="onAdminProductSearch(this.value)" onfocus="onAdminProductSearch(this.value)" onclick="onAdminProductSearch(this.value)" autocomplete="off">
+              <input type="text" id="adminProductSearch" class="form-input" placeholder="พิมพ์ชื่อสินค้าเพื่อค้นหา..."
+                oninput="onAdminProductSearch(this.value)" onfocus="onAdminProductSearch(this.value)"
+                onclick="onAdminProductSearch(this.value)" autocomplete="off">
               <div id="adminProductSuggestions" class="search-select-dropdown"></div>
             </div>
           </div>
@@ -284,10 +298,12 @@
 
     <!-- ORDERS -->
     <div id="p-orders" class="admin-page" style="display:none">
-      <div class="flex flex-wrap items-center justify-between gap-2" style="margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem">
+      <div class="flex flex-wrap items-center justify-between gap-2"
+        style="margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem">
         <h3>📋 รายการใบเบิกทั้งหมด</h3>
         <div class="flex flex-wrap gap-2">
-          <select id="adminOrderFilter" class="input btn-sm" onchange="loadOrdersBasedOnFilter()" style="font-size:0.85rem; padding: 0.4rem 0.8rem; height: 38px;">
+          <select id="adminOrderFilter" class="input btn-sm" onchange="loadOrdersBasedOnFilter()"
+            style="font-size:0.85rem; padding: 0.4rem 0.8rem; height: 38px;">
             <option value="all">ทุกสถานะ</option>
             <option value="Pending">รออนุมัติ</option>
             <option value="Approved">อนุมัติแล้ว</option>
@@ -374,40 +390,6 @@
           </table>
         </div>
       </div>
-
-      <!-- FORECAST SECTION -->
-      <div class="card forecast-card" style="margin-top:1.5rem; border-color:rgba(251,191,36,0.15); position:relative; overflow:hidden">
-        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg, var(--primary), var(--accent), var(--primary));opacity:0.6"></div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem">
-          <div style="display:flex;align-items:center;gap:0.6rem">
-            <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg, rgba(251,191,36,0.2), rgba(16,185,129,0.15));display:flex;align-items:center;justify-content:center">
-              <i data-lucide="trending-up" style="width:18px;height:18px;color:var(--primary)"></i>
-            </div>
-            <div>
-              <h4 style="font-size:1rem;margin:0">พยากรณ์และแนะนำการสั่งซื้อ</h4>
-              <span style="font-size:0.7rem;color:var(--accent);font-weight:700;text-transform:uppercase;letter-spacing:0.08em">Restock AI</span>
-            </div>
-          </div>
-          <button class="btn btn-outline btn-xs" onclick="loadForecast()" style="gap:0.3rem"><i data-lucide="refresh-cw" style="width:12px;height:12px"></i> รีเฟรช</button>
-        </div>
-        <p style="font-size:0.82rem; color:var(--text3); margin-bottom:1rem; padding-left:0.25rem; line-height:1.5">วิเคราะห์จากอัตราการเบิกย้อนหลัง 30 วัน เพื่อพยากรณ์วันที่ของจะหมดและแจ้งจำนวนแนะนำที่ควรเติม</p>
-        <div class="table-wrap table-compact">
-          <table>
-            <thead>
-              <tr>
-                <th>สินค้า</th>
-                <th style="text-align:center">สต๊อก</th>
-                <th style="text-align:center">ใช้/วัน</th>
-                <th style="text-align:center">หมดใน (วัน)</th>
-                <th style="text-align:center">แนะนำเติม</th>
-              </tr>
-            </thead>
-            <tbody id="forecastBody">
-              <tr><td colspan="5" class="text-center" style="padding:2rem"><div class="spinner"></div></td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
     </section>
 
     <!-- INVENTORY -->
@@ -472,13 +454,16 @@
         </div>
       </div>
       <div id="teamsGrid" class="grid grid-3 gap-2">
-        <div class="card text-center" style="padding:3rem"><div class="spinner"></div></div>
+        <div class="card text-center" style="padding:3rem">
+          <div class="spinner"></div>
+        </div>
       </div>
     </section>
 
     <!-- AUDIT LOGS -->
     <section id="p-audit" class="admin-page" style="display:none">
-      <div class="flex flex-wrap items-center justify-between gap-2" style="margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem">
+      <div class="flex flex-wrap items-center justify-between gap-2"
+        style="margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem">
         <h3><i data-lucide="activity"></i> ประวัติกิจกรรมระบบ (Audit Logs)</h3>
         <button class="btn btn-outline btn-sm" onclick="downloadCSV('AuditLogs')">📥 Export CSV</button>
       </div>
@@ -513,44 +498,29 @@
         <div class="card-header">
           <div class="card-title">เวลารอบการแจ้งเตือน (Notification Times)</div>
         </div>
-        <p style="font-size:0.85rem; color:var(--text3); margin-bottom:1rem;">ตั้งค่าเวลาเบิก/ข้อกำหนดสำหรับบอทแจ้งเตือน LINE เพื่อสรุปยอดและส่งในเวลาที่กำหนด ระบบใช้เวลาในรูปแบบชั่วโมง 24 ชั่วโมง (0 - 23)</p>
+        <p style="font-size:0.85rem; color:var(--text3); margin-bottom:1rem;">ตั้งค่าเวลาเบิก/ข้อกำหนดสำหรับบอทแจ้งเตือน
+          LINE เพื่อสรุปยอดและส่งในเวลาที่กำหนด ระบบใช้เวลาในรูปแบบชั่วโมง 24 ชั่วโมง (0 - 23)</p>
         <form id="settingsForm" onsubmit="event.preventDefault(); saveSystemSettings();">
-            <div id="notifyTimesContainer" style="display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1rem;">
-                <div style="padding: 1rem; text-align: center;"><div class="spinner"></div></div>
+          <div id="notifyTimesContainer" style="display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1rem;">
+            <div style="padding: 1rem; text-align: center;">
+              <div class="spinner"></div>
             </div>
-            <button type="button" class="btn btn-outline btn-sm" onclick="addTimeSlot()" style="margin-bottom: 1.5rem;"><i data-lucide="plus"></i> เพิ่มรอบเวลา</button>
-            <div style="border-top: 1px solid var(--border); padding-top:1rem; text-align:right;">
-                <button type="submit" class="btn btn-primary" id="saveSetBtn"><i data-lucide="save"></i> บันทึกการตั้งค่า</button>
-            </div>
+          </div>
+          <button type="button" class="btn btn-outline btn-sm" onclick="addTimeSlot()" style="margin-bottom: 1.5rem;"><i
+              data-lucide="plus"></i> เพิ่มรอบเวลา</button>
+          <div style="border-top: 1px solid var(--border); padding-top:1rem; text-align:right;">
+            <button type="submit" class="btn btn-primary" id="saveSetBtn"><i data-lucide="save"></i>
+              บันทึกการตั้งค่า</button>
+          </div>
         </form>
-      </div>
-
-      <!-- Data Archiving -->
-      <div class="card" style="margin-top:1.5rem; border-color:rgba(239,68,68,0.12); position:relative; overflow:hidden">
-        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg, var(--warning), var(--danger), var(--warning));opacity:0.5"></div>
-        <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.75rem">
-          <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg, rgba(245,158,11,0.2), rgba(239,68,68,0.15));display:flex;align-items:center;justify-content:center">
-            <i data-lucide="archive" style="width:18px;height:18px;color:var(--warning)"></i>
-          </div>
-          <div>
-            <h4 style="font-size:1rem;margin:0">จัดเก็บและล้างข้อมูลเก่า</h4>
-            <span style="font-size:0.7rem;color:var(--warning);font-weight:700;text-transform:uppercase;letter-spacing:0.08em">Data Archiving</span>
-          </div>
-        </div>
-        <p style="font-size:0.82rem; color:var(--text3); margin-bottom:1rem; line-height:1.6; padding-left:0.25rem">
-          ย้ายข้อมูลใบเบิก, ประวัติคลัง, และรายการอนุมัติที่เก่ากว่า <strong style="color:var(--primary)">1 ปี</strong> ไปยังชีต Archive โดยอัตโนมัติ เพื่อให้ระบบทำงานเร็วขึ้น ข้อมูลจะไม่ถูกลบ แต่จะถูกย้ายไปเก็บที่ชีตสำรอง
-        </p>
-        <div id="archiveResult" style="display:none; padding:1rem; border-radius:12px; margin-bottom:1rem; font-size:0.9rem; border:1px solid var(--border); background:rgba(255,255,255,0.02)"></div>
-        <button id="archiveBtn" class="btn btn-outline" onclick="runArchive()" style="gap:0.5rem; border-color:var(--warning); color:var(--warning)">
-          <i data-lucide="hard-drive-download"></i> เริ่มล้างข้อมูลเก่า (ย้ายประวัติ > 1 ปี)
-        </button>
       </div>
     </section>
 
     <!-- BRANCHES SECTION -->
     <section id="p-branches" class="admin-page" style="display:none">
       <div class="flex flex-wrap items-center justify-between gap-2" style="margin-bottom:1.5rem">
-        <h2 style="margin:0;display:flex;align-items:center;gap:0.5rem"><i data-lucide="building-2"></i> จัดการสาขา (Branches)</h2>
+        <h2 style="margin:0;display:flex;align-items:center;gap:0.5rem"><i data-lucide="building-2"></i> จัดการสาขา
+          (Branches)</h2>
         <button class="btn btn-accent" onclick="openBranchModal()"><i data-lucide="plus"></i> เพิ่มสาขาใหม่</button>
       </div>
       <div class="card" style="padding:0;overflow:hidden">
@@ -600,7 +570,9 @@
       </div>
       <div class="modal-body">
         <input type="hidden" id="pf-old-id">
-        <div class="form-group"><label class="form-label">รหัสสินค้า / บาร์โค้ด (เว้นว่างเพื่อสร้างอัตโนมัติ)</label><input id="pf-id" class="form-input" placeholder="PRD-XXXX หรือยิงบาร์โค้ดมาใส่ตรงนี้"></div>
+        <div class="form-group"><label class="form-label">รหัสสินค้า / บาร์โค้ด
+            (เว้นว่างเพื่อสร้างอัตโนมัติ)</label><input id="pf-id" class="form-input"
+            placeholder="PRD-XXXX หรือยิงบาร์โค้ดมาใส่ตรงนี้"></div>
         <div class="form-group"><label class="form-label">ชื่อสินค้า *</label><input id="pf-name" class="form-input"
             placeholder="ชื่อสินค้า"></div>
         <div class="form-group">
@@ -608,15 +580,19 @@
           <select id="pf-cat" class="input w-full"></select>
         </div>
         <div class="form-group">
-          <label class="form-label">รูปภาพสินค้า (URL)</label>
+          <label class="form-label">รูปภาพสินค้า</label>
           <div style="display:flex; gap:0.5rem">
-            <input type="text" id="p-image" class="form-input" placeholder="https://...">
-            <button type="button" class="btn btn-outline" onclick="document.getElementById('imgUpload').click()"><i
-                data-lucide="camera"></i> อัปโหลด</button>
+            <input type="text" id="pf-img" class="form-input" placeholder="วางลิงก์รูปภาพ หรืออัปโหลด"
+              oninput="updateImagePreview(this.value)">
+            <button type="button" class="btn btn-outline" style="white-space:nowrap"
+              onclick="document.getElementById('pf-file').click()">
+              <i data-lucide="camera"></i> อัปโหลด
+            </button>
           </div>
-          <input type="file" id="imgUpload" style="display:none" accept="image/*" onchange="handleImageUpload(this)">
-          <div id="uploadStatus" style="font-size:0.75rem; color:var(--text3); margin-top:0.25rem"></div>
+          <input type="file" id="pf-file" style="display:none" accept="image/*" onchange="handleImageUpload(this)">
+          <div id="pf-upload-status" style="font-size:0.75rem; color:var(--text3); margin-top:0.25rem"></div>
         </div>
+
         <div class="flex flex-wrap gap-2">
           <div class="form-group" style="flex:1"><label class="form-label">ราคา *</label><input id="pf-price"
               class="form-input" type="number" placeholder="0"></div>
@@ -626,25 +602,18 @@
         <div class="flex flex-wrap gap-2">
           <div class="form-group" style="flex:1"><label class="form-label">สต๊อกขั้นต่ำ</label><input id="pf-min"
               class="form-input" type="number" placeholder="5"></div>
-          <div class="form-group" style="flex:1">
-            <div class="form-group">
-              <label>รูปภาพสินค้า</label>
-              <div class="flex flex-wrap gap-2">
-                <input type="text" id="pf-img" class="form-input" placeholder="วางลิงก์รูปภาพ หรืออัปโหลด"
-                  oninput="updateImagePreview(this.value)">
-                <label class="btn btn-outline" style="white-space:nowrap;cursor:pointer">
-                  📷 อัปโหลด
-                  <input type="file" id="pf-file" hidden accept="image/*" onchange="handleImageUpload(this)">
-                </label>
-              </div>
-            </div>
-          </div>
+          <div style="flex:1"></div>
         </div>
+
         <div id="pf-preview-wrap"
           style="display:none;margin-top:0.5rem;align-items:center;gap:1.5rem;padding:0.75rem;background:rgba(255,255,255,0.03);border-radius:8px">
           <img id="pf-preview"
             style="width:80px;height:80px;object-fit:cover;border-radius:6px;border:1px solid var(--border)">
-          <div id="pf-upload-status" style="font-size:0.8rem;color:var(--text3)"></div>
+          <div>
+            <div id="pf-preview-name" style="font-size:0.85rem; font-weight:600; color:#fff; margin-bottom:0.25rem">
+              ตัวอย่างรูปภาพ</div>
+            <div id="pf-upload-info" style="font-size:0.75rem; color:var(--text3)">พร้อมใช้งาน</div>
+          </div>
         </div>
       </div>
       <div class="modal-footer flex-wrap">
@@ -667,7 +636,8 @@
         <p style="font-size:0.8rem; color:var(--text3); margin-top:0.5rem">รหัสสินค้าสำหรับพิมพ์ติดพัสดุ</p>
       </div>
       <div class="modal-footer flex-wrap">
-        <button class="btn btn-primary w-full" onclick="printBarcode()"><i data-lucide="printer"></i> พิมพ์บาร์โค้ด</button>
+        <button class="btn btn-primary w-full" onclick="printBarcode()"><i data-lucide="printer"></i>
+          พิมพ์บาร์โค้ด</button>
       </div>
     </div>
   </div>
@@ -680,8 +650,10 @@
         <button class="btn btn-ghost btn-sm" onclick="closeBranchModal()">✕</button>
       </div>
       <div class="modal-body">
-        <div class="form-group"><label class="form-label">รหัสสาขา *</label><input id="bf-id" class="form-input" placeholder="BR-001"></div>
-        <div class="form-group"><label class="form-label">ชื่อสาขา *</label><input id="bf-name" class="form-input" placeholder="ชื่อสาขา"></div>
+        <div class="form-group"><label class="form-label">รหัสสาขา *</label><input id="bf-id" class="form-input"
+            placeholder="BR-001"></div>
+        <div class="form-group"><label class="form-label">ชื่อสาขา *</label><input id="bf-name" class="form-input"
+            placeholder="ชื่อสาขา"></div>
         <div class="form-group">
           <label class="form-label">สถานะ</label>
           <select id="bf-status" class="input w-full">
@@ -782,7 +754,8 @@
         <button class="btn btn-ghost btn-sm" onclick="closeApprovalModal()">✕</button>
       </div>
       <div class="modal-body">
-        <div id="approvalInfo" style="margin-bottom:1rem; padding:1rem; background:var(--bg2); border-radius:12px; border:1px solid var(--border)">
+        <div id="approvalInfo"
+          style="margin-bottom:1rem; padding:1rem; background:var(--bg2); border-radius:12px; border:1px solid var(--border)">
           <div id="ai-id" style="font-weight:700; color:var(--primary)"></div>
           <div id="ai-user" style="font-size:0.9rem; color:var(--text2)"></div>
         </div>
@@ -808,16 +781,19 @@
         <button class="btn btn-ghost btn-sm" onclick="closeStockModal()">✕</button>
       </div>
       <div class="modal-body">
-        <div id="stockProductName" style="font-weight:800; font-size:1.1rem; color:var(--primary); margin-bottom:1.5rem">--</div>
+        <div id="stockProductName"
+          style="font-weight:800; font-size:1.1rem; color:var(--primary); margin-bottom:1.5rem">--</div>
         <input type="hidden" id="stockProductId">
         <div class="form-group">
           <label class="form-label">ระบุจำนวน (บวกเพิ่มกดยอดบวก เช่น 10, ตัดออกใช้เครื่องหมายลบ เช่น -5) *</label>
-          <input type="number" id="stockAdjust" class="form-input" placeholder="0" style="font-size:1.5rem; text-align:center; font-weight:700">
+          <input type="number" id="stockAdjust" class="form-input" placeholder="0"
+            style="font-size:1.5rem; text-align:center; font-weight:700">
         </div>
       </div>
       <div class="modal-footer flex-wrap">
         <button class="btn btn-ghost" onclick="closeStockModal()">ยกเลิก</button>
-        <button id="doStockAdjustBtn" class="btn btn-primary" onclick="doStockAdjust()" style="flex:1">บันทึกยอด</button>
+        <button id="doStockAdjustBtn" class="btn btn-primary" onclick="doStockAdjust()"
+          style="flex:1">บันทึกยอด</button>
       </div>
     </div>
   </div>
@@ -842,8 +818,8 @@
           </select>
         </div>
         <div id="teamMemberList" style="margin-top:1rem; padding-top:1rem; border-top:1px solid var(--border)">
-           <p style="font-size:0.85rem; color:var(--text3); margin-bottom:0.5rem">สมาชิกทีมปัจจุบัน:</p>
-           <div id="tf-members" style="display:flex; flex-wrap:wrap; gap:0.5rem"></div>
+          <p style="font-size:0.85rem; color:var(--text3); margin-bottom:0.5rem">สมาชิกทีมปัจจุบัน:</p>
+          <div id="tf-members" style="display:flex; flex-wrap:wrap; gap:0.5rem"></div>
         </div>
       </div>
       <div class="modal-footer flex-wrap">
@@ -861,23 +837,24 @@
         <button class="btn btn-ghost btn-sm" onclick="closeSwapLeadModal()">✕</button>
       </div>
       <div class="modal-body">
-        <p style="font-size:0.85rem; color:var(--text3); margin-bottom:1.5rem">เลือกทีมที่ต้องการสลับหัวหน้า (ตัวเอก) เพื่อเปลี่ยนความรับผิดชอบและสต๊อกของทีม</p>
+        <p style="font-size:0.85rem; color:var(--text3); margin-bottom:1.5rem">เลือกทีมที่ต้องการสลับหัวหน้า (ตัวเอก)
+          เพื่อเปลี่ยนความรับผิดชอบและสต๊อกของทีม</p>
         <div class="grid grid-2 gap-2">
-           <div class="form-group">
-             <label class="form-label">ทีมที่ 1</label>
-             <select id="swap-t1" class="input w-full" onchange="updateSwapPreview()"></select>
-           </div>
-           <div class="form-group">
-             <label class="form-label">ทีมที่ 2</label>
-             <select id="swap-t2" class="input w-full" onchange="updateSwapPreview()"></select>
-           </div>
+          <div class="form-group">
+            <label class="form-label">ทีมที่ 1</label>
+            <select id="swap-t1" class="input w-full" onchange="updateSwapPreview()"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">ทีมที่ 2</label>
+            <select id="swap-t2" class="input w-full" onchange="updateSwapPreview()"></select>
+          </div>
         </div>
         <div id="swapPreview" class="card glass" style="margin-top:1rem; padding:1rem; display:none">
-           <div class="flex items-center justify-between text-center">
-              <div id="sp-t1-lead" style="flex:1"></div>
-              <div style="padding:0 1rem; color:var(--primary)"><i data-lucide="repeat"></i></div>
-              <div id="sp-t2-lead" style="flex:1"></div>
-           </div>
+          <div class="flex items-center justify-between text-center">
+            <div id="sp-t1-lead" style="flex:1"></div>
+            <div style="padding:0 1rem; color:var(--primary)"><i data-lucide="repeat"></i></div>
+            <div id="sp-t2-lead" style="flex:1"></div>
+          </div>
         </div>
       </div>
       <div class="modal-footer flex-wrap">
@@ -898,7 +875,8 @@
       <div class="modal-body" id="orderDetailBody"></div>
       <div id="signatureSection" class="modal-footer hidden" style="flex-direction:column;align-items:stretch">
         <p style="font-size:0.85rem;color:var(--text2);margin-bottom:0.5rem;display:flex;align-items:center;gap:0.5rem">
-          <i data-lucide="pen-tool"></i> กรุณาเซ็นชื่อรับพัสดุ:</p>
+          <i data-lucide="pen-tool"></i> กรุณาเซ็นชื่อรับพัสดุ:
+        </p>
         <div class="signature-pad-wrap">
           <canvas id="signatureCanvas" class="signature-pad-canvas"></canvas>
         </div>
@@ -913,73 +891,45 @@
     </div>
   </div>
 
-  <!-- LOW STOCK DETAILS MODAL -->
-  <div id="lowStockModal" class="modal-overlay" onclick="if(event.target===this) closeModal('lowStockModal')">
-    <div class="modal" style="max-width:650px">
-      <div class="modal-header">
-        <div style="font-weight:700; display:flex; align-items:center; gap:0.5rem">
-          <i data-lucide="alert-triangle" style="color:var(--danger)"></i> รายการสินค้าสต๊อกต่ำ
-        </div>
-        <button class="btn btn-ghost btn-sm" onclick="closeModal('lowStockModal')">✕</button>
-      </div>
-      <div class="modal-body">
-        <p style="font-size:0.85rem; color:var(--text3); margin-bottom:1.5rem">รายการสินค้าที่จำนวนคงเหลือเท่ากับหรือน้อยกว่าเกณฑ์ที่กำหนด (Minimum Stock)</p>
-        <div class="table-wrap">
-          <table class="table-compact">
-            <thead>
-              <tr>
-                <th>สินค้า</th>
-                <th style="text-align:center">คงเหลือ</th>
-                <th style="text-align:center">เกณฑ์ขั้นต่ำ</th>
-                <th style="text-align:center">สถานะ</th>
-              </tr>
-            </thead>
-            <tbody id="lowStockBody">
-              <!-- Dynamically rendered -->
-            </tbody>
-          </table>
-        </div>
-      </div>
-      <div class="modal-footer flex-wrap">
-        <button class="btn btn-primary" onclick="adminNav('inventory'); closeModal('lowStockModal')">ไปที่คลังสินค้า</button>
-        <button class="btn btn-outline" onclick="closeModal('lowStockModal')">ปิด</button>
-      </div>
-    </div>
-  </div>
-
   <!-- PREMIUM INTEGRATED SCANNER MODAL -->
   <div id="scannerModal" class="modal-overlay" onclick="if(event.target===this) closeScanner()">
     <div class="modal scanner-modal">
-      <div class="modal-header" style="background:rgba(255,255,255,0.03); border-bottom:1px solid rgba(255,255,255,0.05)">
+      <div class="modal-header"
+        style="background:rgba(255,255,255,0.03); border-bottom:1px solid rgba(255,255,255,0.05)">
         <div style="font-weight:700; display:flex; align-items:center; gap:0.5rem">
           <div class="scanner-status-dot active"></div>
           สแกนเนอร์อัจฉริยะ
         </div>
         <button class="btn btn-ghost btn-sm" onclick="closeScanner()">✕</button>
       </div>
-      
+
       <div class="modal-body" style="padding:1.5rem">
         <!-- Mode Selection -->
         <div class="flex justify-center mb-6">
           <div class="btn-group" style="max-width:320px">
-            <button id="scanModeDeduct" class="btn btn-sm scanner-mode-btn active" onclick="setScanMode('deduct')">📤 นำออก</button>
-            <button id="scanModeReceive" class="btn btn-sm scanner-mode-btn" onclick="setScanMode('receive')">📥 รับเข้า</button>
-            <button id="scanModeSub" class="btn btn-sm scanner-mode-btn" onclick="setScanMode('sub')">📦 คลังย่อย</button>
+            <button id="scanModeDeduct" class="btn btn-sm scanner-mode-btn active" onclick="setScanMode('deduct')">📤
+              นำออก</button>
+            <button id="scanModeReceive" class="btn btn-sm scanner-mode-btn" onclick="setScanMode('receive')">📥
+              รับเข้า</button>
+            <button id="scanModeSub" class="btn btn-sm scanner-mode-btn" onclick="setScanMode('sub')">📦
+              คลังย่อย</button>
           </div>
         </div>
 
-        <div id="scanModeLabel" style="text-align:center; font-size:0.85rem; color:var(--primary); margin-bottom:1.5rem; letter-spacing:0.05em">
+        <div id="scanModeLabel"
+          style="text-align:center; font-size:0.85rem; color:var(--primary); margin-bottom:1.5rem; letter-spacing:0.05em">
           โหมด: <strong>ตัดออกจาสต็อกหลัก</strong>
         </div>
 
         <!-- Scanner Viewport -->
-        <div class="scanner-viewport-container" id="scannerViewportWrap">
-          <div id="modal-scanner-v2"></div>
+        <div class="scanner-viewport-container" id="scannerViewportParent">
+          <div id="scannerViewport"></div>
           <div class="scanner-laser"></div>
           <div class="scanner-guide"></div>
-          
+
           <!-- Fallback/Permission Message -->
-          <div id="scannerPlaceholder" style="position:absolute; top:0; left:0; width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; background:rgba(0,0,0,0.8); z-index:2; text-align:center; padding:2rem">
+          <div id="scannerPlaceholder"
+            style="position:absolute; top:0; left:0; width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; background:rgba(0,0,0,0.8); z-index:2; text-align:center; padding:2rem">
             <i data-lucide="camera" style="width:48px; height:48px; margin-bottom:1rem; opacity:0.3"></i>
             <p style="font-size:0.9rem; color:var(--text3)">กำลังเตรียมกล้องของคุณ...</p>
           </div>
@@ -989,16 +939,17 @@
           <button class="btn btn-outline flex-1" onclick="document.getElementById('qrFallbackInput').click()">
             <i data-lucide="image"></i> อัปโหลดรูปภาพ
           </button>
-          <button id="modalTorchBtn" class="btn btn-outline" onclick="toggleModalTorch()" style="flex:0.3; padding:0.5rem">
+          <button id="modalTorchBtn" class="btn btn-outline" onclick="toggleModalTorch()"
+            style="flex:0.3; padding:0.5rem">
             <i data-lucide="flashlight"></i>
           </button>
           <button class="btn btn-primary flex-1" onclick="promptManualInput()">
             <i data-lucide="keyboard"></i> ใส่รหัสเอง
           </button>
         </div>
-        <input type="file" id="qrFallbackInput" accept="image/*" style="display:none" onchange="handleModalFile(this)">
+        <input type="file" id="qrFallbackInput" accept="image/*" style="display:none" onchange="handleQrFallback(this)">
       </div>
-      
+
       <div class="modal-footer flex-wrap" style="padding:1rem 1.5rem; background:rgba(0,0,0,0.2)">
         <button class="btn btn-ghost btn-sm w-full" onclick="closeScanner()">ยกเลิกการสแกน</button>
       </div>
@@ -1013,17 +964,22 @@
         <button class="btn btn-ghost btn-sm" onclick="closeModal('scanActionModal')">✕</button>
       </div>
       <div class="modal-body">
-        <div id="scanActionProduct" style="margin-bottom:1.5rem; padding:1.25rem; background:rgba(255,255,255,0.03); border-radius:12px; border:1px solid var(--border)">
+        <div id="scanActionProduct"
+          style="margin-bottom:1.5rem; padding:1.25rem; background:rgba(255,255,255,0.03); border-radius:12px; border:1px solid var(--border)">
           <div id="sa-name" style="font-weight:800; font-size:1.1rem; color:white; margin-bottom:0.25rem"></div>
           <div id="sa-id" style="font-size:0.8rem; color:var(--text3)"></div>
         </div>
-        
+
         <div class="form-group">
           <label class="form-label" id="sa-qty-label">จำนวนที่ต้องการดำเนินการ</label>
-          <div class="qty-control" style="background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:0.5rem">
-            <button class="btn btn-ghost" style="width:50px; height:50px; font-size:1.5rem" onclick="var i=document.getElementById('sa-qty-input'); i.value=Math.max(1, (parseInt(i.value)||1)-1)">-</button>
-            <input type="number" id="sa-qty-input" value="1" min="1" class="form-input" style="flex:1; text-align:center; border:none; background:transparent; font-size:1.5rem; font-weight:800; color:var(--primary)">
-            <button class="btn btn-ghost" style="width:50px; height:50px; font-size:1.5rem" onclick="var i=document.getElementById('sa-qty-input'); i.value=(parseInt(i.value)||1)+1">+</button>
+          <div class="qty-control"
+            style="background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:0.5rem">
+            <button class="btn btn-ghost" style="width:50px; height:50px; font-size:1.5rem"
+              onclick="var i=document.getElementById('sa-qty-input'); i.value=Math.max(1, (parseInt(i.value)||1)-1)">-</button>
+            <input type="number" id="sa-qty-input" value="1" min="1" class="form-input"
+              style="flex:1; text-align:center; border:none; background:transparent; font-size:1.5rem; font-weight:800; color:var(--primary)">
+            <button class="btn btn-ghost" style="width:50px; height:50px; font-size:1.5rem"
+              onclick="var i=document.getElementById('sa-qty-input'); i.value=(parseInt(i.value)||1)+1">+</button>
           </div>
         </div>
       </div>
@@ -1039,7 +995,7 @@
     <p style="margin-top:1rem;color:var(--text2);font-size:0.9rem">กำลังรวบรวมข้อมูลหลังบ้าน...</p>
   </div>
 
-  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+  <div class="toast-container" id="toastContainer"></div>
 
   <!-- แถบเมนูด้านล่างสำหรับมือถือ (Admin) -->
   <nav class="mobile-nav" style="border-top: 1px solid var(--glass-border); background: rgba(5, 5, 5, 0.9);">
@@ -1079,7 +1035,7 @@
         checkAuth();
       } else {
         var checkCount = 0;
-        var checkTimer = setInterval(function() {
+        var checkTimer = setInterval(function () {
           checkCount++;
           if (typeof API !== 'undefined') {
             clearInterval(checkTimer);
@@ -1154,11 +1110,6 @@
       }
 
       document.getElementById('adminName').textContent = '👤 ' + currentUser.name;
-      
-      // Initialize static searchable selects
-      initSearchableSelect('adminProductStockFilter');
-      initSearchableSelect('adminOrderFilter');
-      
       loadDashboard();
     };
 
@@ -1209,17 +1160,18 @@
     // ─── DASHBOARD ────────────────────────────────────────
     var chartInstance = null;
     var _dbDeptsLoaded = false;
-    
+
     function formatDateLocal(d) {
-      return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     }
 
     function loadDashboard() {
       if (typeof API === 'undefined' || !API.getAdvancedDashboardData) return;
-      
+
       // 0. Setup Filters
       var period = 'month';
       var dept = 'all';
+
       var pEl = document.getElementById('dbFilterPeriod');
       var dEl = document.getElementById('dbFilterDept');
       if (pEl) period = pEl.value;
@@ -1232,227 +1184,103 @@
         filters.endDate = formatDateLocal(now);
       } else if (period === 'week') {
         var startWeek = new Date(now);
-        startWeek.setDate(now.getDate() - now.getDay()); 
+        startWeek.setDate(now.getDate() - now.getDay());
         filters.startDate = formatDateLocal(startWeek);
         filters.endDate = formatDateLocal(now);
       } else if (period === 'month') {
-        filters.startDate = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-01';
+        filters.startDate = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-01';
         filters.endDate = formatDateLocal(now);
-      } 
+      }
 
-      // 1. Instant Render from Cache (SWR)
-      var cachedStats = API.getCached('getAdvancedDashboardData');
-      if (cachedStats && cachedStats.success) {
-        console.log('⚡ Dashboard SWR: Rendering from cache');
-        renderDashboardStats(cachedStats.data);
-      } else {
-        // Show Skeletons if no cache
-        var statsGrid = document.getElementById('statsGrid');
-        if (statsGrid) {
-          statsGrid.innerHTML = Array(4).fill('<div class="skeleton-stat"></div>').join('');
+      // 1. Initial State UI - Setup Spinners
+      var statsGrid = document.getElementById('statsGrid');
+      var dbTopList = document.getElementById('dbTopProductsList');
+      var dbDeptList = document.getElementById('dbDeptSpendingList');
+
+      if (statsGrid) statsGrid.innerHTML = '<div class="spinner" style="grid-column:1/-1;margin:2rem auto;"></div>';
+      if (dbTopList) dbTopList.innerHTML = '<div class="spinner" style="margin:2rem auto;"></div>';
+      if (dbDeptList) dbDeptList.innerHTML = '<div class="spinner" style="margin:2rem auto;"></div>';
+
+      // 2. Sequential Data Fetching (Prevent backend congestion)
+
+      // Step A: Load Depts Dropdown if needed
+      var deptPromise = (_dbDeptsLoaded || !dEl) ? Promise.resolve() : API.getReportData('Departments').then(function (res) {
+        if (res.success && res.data) {
+          var currentVal = dEl.value;
+          var opts = '<option value="all">ทุกแผนก (All Departments)</option>';
+          res.data.forEach(function (dep) { opts += '<option value="' + dep.name + '">' + dep.name + '</option>'; });
+          dEl.innerHTML = opts;
+          dEl.value = currentVal;
         }
-        var dbTopInner = document.getElementById('dbTopProductsInner');
-        var dbDeptInner = document.getElementById('dbDeptSpendingInner');
-        if (dbTopInner) dbTopInner.innerHTML = '<div class="skeleton" style="height:150px; margin:0 1rem 1rem;"></div>';
-        if (dbDeptInner) dbDeptInner.innerHTML = '<div class="skeleton" style="height:150px; margin:0 1rem 1rem;"></div>';
-      }
-
-      // 2. Parallel Fetching (Optimized to avoid redundant calls)
-      var dEl = document.getElementById('dbFilterDept');
-      var _dbDeptsLoaded = window._dbDeptsLoaded || false;
-
-      var dataPromises = [
-        API.getAdvancedDashboardData(filters).catch(function(e) { return { success: false, error: e }; }),
-        API.getReportData('auditActivities').catch(function(e) { return { success: false, error: e }; }),
-        API.getMonthlyTrends().catch(function(e) { return { success: false, error: e }; })
-      ];
-      
-      // Load departments once if not yet loaded
-      if (!_dbDeptsLoaded && dEl) {
-        API.getReportData('Departments').then(function(res) {
-          if (res.success && res.data && Array.isArray(res.data)) {
-            var currentVal = dEl.value;
-            var opts = '<option value="all">ทุกแผนก (All Departments)</option>';
-            res.data.forEach(function(dep) { opts += '<option value="'+dep.name+'">'+dep.name+'</option>'; });
-            dEl.innerHTML = opts;
-            dEl.value = currentVal;
-            window._dbDeptsLoaded = true;
-          }
-        }).catch(function(e) { console.warn('Failed to load departments', e); });
-      }
-
-      Promise.all(dataPromises).then(function(results) {
-        var resStats = results[0];
-        var resLogs = results[1];
-        var resTrends = results[2];
-
-        if (resStats && resStats.success) renderDashboardStats(resStats.data);
-        else if (resStats.error) console.warn('Dashboard stats load failed', resStats.error);
-        
-        if (resLogs && resLogs.success) renderDashboardLogsUI(resLogs.data);
-        else if (resLogs.error) console.warn('Dashboard logs load failed', resLogs.error);
-        
-        if (resTrends && resTrends.success) renderTrendsChartUI(resTrends);
-        else if (resTrends.error) console.warn('Dashboard trends load failed', resTrends.error);
-        
-        refreshIcons();
-      }).catch(function(err) {
-        console.error('Fatal Dashboard Error:', err);
-        showToast('เกิดข้อผิดพลาดในการโหลดข้อมูลหน้าแดชบอร์ด', 'error');
+        _dbDeptsLoaded = true;
       });
-    }
 
-    function renderDashboardStats(data) {
-      if (!data) return;
-      var dbTopInner = document.getElementById('dbTopProductsInner');
-      var dbDeptInner = document.getElementById('dbDeptSpendingInner');
-      var d = data.stats || {};
-      window._lowStockItems = d.lowStockItems || [];
+      deptPromise.then(function () {
+        // Step B: Load Main Dashboard Stats (Heavy)
+        return API.getAdvancedDashboardData(filters);
+      }).then(function (res) {
+        if (!res.success || !res.data) throw (res.message || res.error || 'โหลดข้อมูลแดชบอร์ดล้มเหลว');
 
-      if (statsGrid) {
-        statsGrid.innerHTML =
-          statCard('clipboard-list', 'ใบเบิกตามช่วงเวลา', d.totalOrders || 0) +
-          '<div onclick="adminNav(\'orders\', document.querySelector(\'[data-admin-page=orders]\'))" style="cursor:pointer">' + statCard('clock', 'รออนุมัติทั้งหมด', d.pendingCount || 0, 'warning') + '</div>' +
-          statCard('check-circle', 'อนุมัติแล้ว', d.approvedCount || 0, 'success') +
-          statCard('package-check', 'แจกจ่ายแล้ว', d.receivedCount || 0, 'primary') +
-          statCard('coins', 'ยอดการเบิก', '฿' + (Number(d.totalVolume) || 0).toLocaleString(), 'accent') +
-          statCard('package', 'สินค้าในระบบ', d.totalProducts || 0) +
-          '<div onclick="showLowStockDetails()" style="cursor:pointer">' + 
-            statCard('alert-octagon', 'สต๊อกต่ำ', d.lowStockCount || 0, (d.lowStockCount > 0 ? 'danger' : '')) + 
-          '</div>';
-      }
-      
-      var badge = document.getElementById('ordersTabBadge');
-      if (badge) {
-        if (d.pendingCount > 0) {
-          badge.textContent = d.pendingCount;
-          badge.style.display = 'inline-block';
-        } else { badge.style.display = 'none'; }
-      }
-
-      var isDark = document.body.classList.contains('dark-mode');
-      var chartTextColor = isDark ? '#cbd5e1' : '#475569';
-
-      // --- Chart: Top Products ---
-      if (dbTopInner) {
-        if (data.topProducts && data.topProducts.length > 0) {
-          dbTopInner.innerHTML = '<div class="flex flex-col gap-2" style="padding:0 1rem 1rem;">' + 
-            data.topProducts.map(function(tp, idx) {
-              return '<div class="flex flex-wrap items-center justify-between gap-2" style="padding:0.75rem; background:rgba(255,255,255,0.02); border-radius:8px; border:1px solid var(--border)">' +
-                '<div style="flex:1"><strong style="color:var(--text1)">#'+(idx+1)+ ' ' + tp.productName + '</strong><div style="font-size:0.8rem;color:var(--text3)">รหัส: ' + tp.productId + '</div></div>' +
-                '<div class="text-right"><div style="font-weight:700; color:var(--accent)">' + tp.totalQty + ' ชิ้น</div><div style="font-size:0.8rem; color:var(--text3)">฿' + (Number(tp.totalValue) || 0).toLocaleString() + '</div></div>' +
-                '</div>';
-            }).join('') + '</div>';
-          
-          // Draw Doughnut Chart
-          var ctx = document.getElementById('topProductsDoughnut').getContext('2d');
-          if (charts.topDoughnut) charts.topDoughnut.destroy();
-          charts.topDoughnut = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-              labels: data.topProducts.map(function(p){ return p.productName; }),
-              datasets: [{
-                data: data.topProducts.map(function(p){ return p.totalQty; }),
-                backgroundColor: ['#fbbf24', '#f59e0b', '#d97706', '#b45309', '#92400e'],
-                borderWidth: 2,
-                borderColor: isDark ? '#1a1a2e' : '#fff'
-              }]
-            },
-            options: {
-              responsive: true, maintainAspectRatio: false, cutout: '70%',
-              plugins: { legend: { display: false } }
-            }
-          });
-        } else {
-          dbTopInner.innerHTML = '<div class="empty-state" style="margin:0 1rem 1rem;"><i data-lucide="package-search"></i><p>ไม่พบรายการที่ต้องการ</p><small>ลองปรับเปลี่ยนช่วงเวลาหรือแผนกค้นหาดูนะครับ</small></div>';
-          if (charts.topDoughnut) charts.topDoughnut.destroy();
+        var d = res.data.stats || {};
+        if (statsGrid) {
+          statsGrid.innerHTML =
+            statCard('clipboard-list', 'ใบเบิกตามช่วงเวลา', d.totalOrders || 0) +
+            '<div onclick="adminNav(\'orders\', document.querySelector(\'[data-admin-page=orders]\'))" style="cursor:pointer">' + statCard('clock', 'รออนุมัติทั้งหมด', d.pendingCount || 0, 'warning') + '</div>' +
+            statCard('check-circle', 'อนุมัติแล้ว', d.approvedCount || 0, 'success') +
+            statCard('package-check', 'แจกจ่ายแล้ว', d.receivedCount || 0, 'primary') +
+            statCard('coins', 'ยอดการเบิก', '฿' + (Number(d.totalVolume) || 0).toLocaleString(), 'accent') +
+            statCard('package', 'สินค้าในระบบ', d.totalProducts || 0) +
+            statCard('alert-octagon', 'สต๊อกต่ำ', d.lowStockCount || 0, (d.lowStockCount > 0 ? 'danger' : ''));
         }
-      }
 
-      // --- Chart: Dept Spending ---
-      if (dbDeptInner) {
-        if (data.deptSpending && data.deptSpending.length > 0) {
-           var maxSpend = Math.max.apply(Math, data.deptSpending.map(function(ds){ return ds.totalSpending; }));
-           dbDeptInner.innerHTML = '<div class="flex flex-col gap-2" style="padding:0 1rem 1rem;">' + 
-            data.deptSpending.map(function(ds) {
-              var spendAmt = Number(ds.totalSpending) || 0;
-              var pct = maxSpend > 0 ? (spendAmt / maxSpend * 100) : 0;
-              return '<div style="margin-bottom:0.75rem;">' +
-                '<div class="flex flex-wrap justify-between gap-2" style="font-size:0.85rem; margin-bottom:0.25rem"><span style="font-weight:600">' + ds.department + '</span><span style="color:var(--primary-light); font-weight:700">฿' + spendAmt.toLocaleString() + '</span></div>' +
-                '<div style="width:100%; height:8px; background:rgba(255,255,255,0.05); border-radius:4px; overflow:hidden;"><div style="width:' + pct + '%; height:100%; background:var(--primary); transition: width 0.5s ease;"></div></div>' +
-                '</div>';
-            }).join('') + '</div>';
-
-          // Draw Doughnut Chart
-          var ctx = document.getElementById('deptSpendingDoughnut').getContext('2d');
-          if (charts.deptDoughnut) charts.deptDoughnut.destroy();
-          charts.deptDoughnut = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-              labels: data.deptSpending.map(function(d){ return d.department; }),
-              datasets: [{
-                data: data.deptSpending.map(function(d){ return d.totalSpending; }),
-                backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#6366f1'],
-                borderWidth: 2,
-                borderColor: isDark ? '#1a1a2e' : '#fff'
-              }]
-            },
-            options: {
-              responsive: true, maintainAspectRatio: false, cutout: '70%',
-              plugins: { legend: { display: false } }
-            }
-          });
-        } else {
-          dbDeptInner.innerHTML = '<div class="empty-state" style="margin:0 1rem 1rem;"><i data-lucide="bar-chart-3"></i><p>ไม่พบข้อมูลการใช้จ่าย</p><small>ลองปรับเปลี่ยนช่วงเวลาค้นหาใหม่ได้ครับ</small></div>';
-          if (charts.deptDoughnut) charts.deptDoughnut.destroy();
+        var badge = document.getElementById('ordersTabBadge');
+        if (badge) {
+          if (d.pendingCount > 0) {
+            badge.textContent = d.pendingCount;
+            badge.style.display = 'inline-block';
+          } else { badge.style.display = 'none'; }
         }
-      }
-    }
 
-    function renderDashboardLogsUI(data) {
-      var body = document.getElementById('dashboardActivitiesBody');
-      if (!body || !data || !data.logs) return;
-      body.innerHTML = data.logs.slice(0, 8).map(function (l) {
-        var time = l.timestamp ? String(l.timestamp).split(' ')[1].substring(0, 5) : '--:--';
-        var markerClass = 'status-dot';
-        if (l.action.indexOf('เบิก') !== -1) markerClass += ' info';
-        if (l.action.indexOf('อนุมัติ') !== -1) markerClass += ' success';
-        if (l.action.indexOf('ปฏิเสธ') !== -1) markerClass += ' danger';
-        if (l.action.indexOf('อัปเดต') !== -1) markerClass += ' warning';
-        return '<tr><td style="color:var(--text3);font-size:0.75rem">' + time + '</td><td style="font-weight:500;"><div class="flex items-center gap-2"><span class="' + markerClass + '"></span>' + l.action + '</div></td><td style="font-size:0.8rem">' + (l.user || 'SYSTEM') + '</td></tr>';
-      }).join('');
-    }
-
-    function renderTrendsChartUI(res) {
-      var ctxEl = document.getElementById('trendsChart');
-      if (!ctxEl) return;
-      var ctx = ctxEl.getContext('2d');
-      if (chartInstance) chartInstance.destroy();
-      chartInstance = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: res.labels,
-          datasets: [{
-            label: 'ยอดการเบิก (บาท)',
-            data: res.data,
-            borderColor: '#fbbf24',
-            backgroundColor: 'rgba(251, 191, 36, 0.1)',
-            borderWidth: 3,
-            tension: 0.4,
-            fill: true,
-            pointBackgroundColor: '#fbbf24',
-            pointRadius: 4
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } },
-            x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
-          },
-          plugins: { legend: { display: false } }
+        // Render Top Products
+        if (dbTopList) {
+          if (res.data.topProducts && res.data.topProducts.length > 0) {
+            dbTopList.innerHTML = '<div class="flex flex-col gap-2" style="padding:0 1rem 1rem;">' +
+              res.data.topProducts.map(function (tp, idx) {
+                return '<div class="flex flex-wrap items-center justify-between gap-2" style="padding:0.75rem; background:rgba(255,255,255,0.02); border-radius:8px; border:1px solid var(--border)">' +
+                  '<div style="flex:1"><strong style="color:var(--text1)">#' + (idx + 1) + ' ' + tp.productName + '</strong><div style="font-size:0.8rem;color:var(--text3)">รหัส: ' + tp.productId + '</div></div>' +
+                  '<div class="text-right"><div style="font-weight:700; color:var(--accent)">' + tp.totalQty + ' ชิ้น</div><div style="font-size:0.8rem; color:var(--text3)">฿' + (Number(tp.totalValue) || 0).toLocaleString() + '</div></div>' +
+                  '</div>';
+              }).join('') + '</div>';
+          } else {
+            dbTopList.innerHTML = '<div class="text-center" style="padding:2rem; color:var(--text3)">ไม่พบข้อมูลการเบิกในช่วงเวลานี้</div>';
+          }
         }
+
+        // Render Dept Spending
+        if (dbDeptList) {
+          if (res.data.deptSpending && res.data.deptSpending.length > 0) {
+            var maxSpend = Math.max.apply(Math, res.data.deptSpending.map(function (ds) { return ds.totalSpending; }));
+            dbDeptList.innerHTML = '<div class="flex flex-col gap-2" style="padding:0 1rem 1rem;">' +
+              res.data.deptSpending.map(function (ds) {
+                var spendAmt = Number(ds.totalSpending) || 0;
+                var pct = maxSpend > 0 ? (spendAmt / maxSpend * 100) : 0;
+                return '<div style="margin-bottom:0.75rem;">' +
+                  '<div class="flex flex-wrap justify-between gap-2" style="font-size:0.85rem; margin-bottom:0.25rem"><span style="font-weight:600">' + ds.department + '</span><span style="color:var(--primary-light); font-weight:700">฿' + spendAmt.toLocaleString() + '</span></div>' +
+                  '<div style="width:100%; height:8px; background:rgba(255,255,255,0.05); border-radius:4px; overflow:hidden;"><div style="width:' + pct + '%; height:100%; background:var(--primary); transition: width 0.5s ease;"></div></div>' +
+                  '</div>';
+              }).join('') + '</div>';
+          } else {
+            dbDeptList.innerHTML = '<div class="text-center" style="padding:2rem; color:var(--text3)">ไม่พบข้อมูลการเบิกในช่วงเวลานี้</div>';
+          }
+        }
+      }).catch(function (err) {
+        console.error('loadDashboard Stats Error:', err);
+        if (statsGrid) statsGrid.innerHTML = '<div class="card" style="grid-column: 1/-1; color: var(--danger); padding:2rem; text-align:center;">⚠️ ไม่สามารถโหลดข้อมูลสรุปได้ในขณะนี้<br><small style="opacity:0.6">' + err + '</small></div>';
+      }).finally(function () {
+        // Step C: Load Secondary Widgets independently but after main stats
+        loadDashboardLogs();
+        setTimeout(initTrendsChart, 500);
+        refreshIcons();
       });
     }
 
@@ -1462,7 +1290,7 @@
 
       API.getReportData('auditActivities').then(function (res) {
         if (!res.success || !res.data || !res.data.logs) {
-          body.innerHTML = '<tr><td colspan="3" class="text-center" style="padding:3rem 1rem;"><div class="flex flex-col items-center gap-2" style="opacity:0.4"><i data-lucide="activity" style="width:32px;height:32px"></i><div style="font-size:0.9rem">ไม่มีประวัติกิจกรรม</div></div></td></tr>';
+          body.innerHTML = '<tr><td colspan="3" class="text-center" style="padding:1rem;color:var(--text3)">ไม่มีกิจกรรม</td></tr>';
           return;
         }
         body.innerHTML = res.data.logs.slice(0, 8).map(function (l) {
@@ -1472,7 +1300,7 @@
           if (l.action.indexOf('อนุมัติ') !== -1) markerClass += ' success';
           if (l.action.indexOf('ปฏิเสธ') !== -1) markerClass += ' danger';
           if (l.action.indexOf('อัปเดต') !== -1) markerClass += ' warning';
-          
+
           return '<tr>'
             + '<td style="color:var(--text3);font-size:0.75rem">' + time + '</td>'
             + '<td style="font-weight:500;"><div class="flex items-center gap-2"><span class="' + markerClass + '"></span>' + l.action + '</div></td>'
@@ -1486,9 +1314,15 @@
     }
 
     function initTrendsChart() {
+      if (typeof Chart === 'undefined') {
+        console.warn('Chart.js library not loaded. Skipping trends chart.');
+        return;
+      }
       API.getMonthlyTrends().then(function (res) {
         if (!res.success) return;
-        var ctx = document.getElementById('trendsChart').getContext('2d');
+        var canvas = document.getElementById('trendsChart');
+        if (!canvas) return;
+        var ctx = canvas.getContext('2d');
         if (chartInstance) chartInstance.destroy();
 
         chartInstance = new Chart(ctx, {
@@ -1532,7 +1366,7 @@
       // Create virtual sparkline bars
       var bars = '';
       for (var i = 0; i < 15; i++) {
-        var h = Math.floor(Math.random() * 80) + 20; 
+        var h = Math.floor(Math.random() * 80) + 20;
         bars += '<div class="sparkline-bar" style="height:' + h + '%"></div>';
       }
 
@@ -1546,30 +1380,6 @@
         + '</div>';
     }
 
-    function showLowStockDetails() {
-      var items = window._lowStockItems || [];
-      var body = document.getElementById('lowStockBody');
-      if (!body) return;
-
-      if (items.length === 0) {
-        body.innerHTML = '<tr><td colspan="4" class="text-center" style="padding:2rem; color:var(--text3)">ยินดีด้วย! ไม่มีสินค้าที่สต๊อกต่ำกว่าเกณฑ์</td></tr>';
-      } else {
-        body.innerHTML = items.map(function(item) {
-          var urgency = Number(item.stock) <= 0 ? 'color:var(--danger); font-weight:700' : 'color:var(--warning)';
-          var statusText = Number(item.stock) <= 0 ? '<span class="badge badge-rejected">ของหมด</span>' : '<span class="badge badge-warning">ควรเติม</span>';
-          
-          return '<tr>' +
-            '<td><div style="font-weight:600">' + item.name + '</div><div style="font-size:0.75rem; color:var(--text3)">' + item.productId + '</div></td>' +
-            '<td style="text-align:center;' + urgency + '">' + item.stock + '</td>' +
-            '<td style="text-align:center; color:var(--text2)">' + item.minStock + '</td>' +
-            '<td style="text-align:center">' + statusText + '</td>' +
-          '</tr>';
-        }).join('');
-      }
-
-      document.getElementById('lowStockModal').classList.add('open');
-      refreshIcons();
-    }
 
     // ─── PRODUCTS ─────────────────────────────────────────
     // ─── PAGINATION HELPERS ───────────────────────────────
@@ -1577,32 +1387,32 @@
       var container = document.getElementById(containerId);
       if (!container) return;
       if (totalPages <= 1) { container.innerHTML = ''; return; }
-      
+
       var html = '<div class="flex justify-center flex-wrap gap-2" style="margin-top:1rem; margin-bottom:1rem">';
       var prevDisabled = currentPage === 1 ? 'disabled' : '';
       html += '<button class="btn btn-outline btn-sm" ' + prevDisabled + ' onclick="' + renderFunctionStr + '(' + (currentPage - 1) + ')">&laquo; ก่อนหน้า</button>';
-      
+
       var startPage = Math.max(1, currentPage - 2);
       var endPage = Math.min(totalPages, currentPage + 2);
-      
+
       if (startPage > 1) {
         html += '<button class="btn btn-outline btn-sm" onclick="' + renderFunctionStr + '(1)">1</button>';
         if (startPage > 2) html += '<span style="align-self:end; padding:0 0.25rem">...</span>';
       }
-      
+
       for (var i = startPage; i <= endPage; i++) {
         var activeClass = i === currentPage ? 'btn-primary' : 'btn-outline';
         html += '<button class="btn ' + activeClass + ' btn-sm" onclick="' + renderFunctionStr + '(' + i + ')">' + i + '</button>';
       }
-      
+
       if (endPage < totalPages) {
         if (endPage < totalPages - 1) html += '<span style="align-self:end; padding:0 0.25rem">...</span>';
         html += '<button class="btn btn-outline btn-sm" onclick="' + renderFunctionStr + '(' + totalPages + ')">' + totalPages + '</button>';
       }
-      
+
       var nextDisabled = currentPage === totalPages ? 'disabled' : '';
       html += '<button class="btn btn-outline btn-sm" ' + nextDisabled + ' onclick="' + renderFunctionStr + '(' + (currentPage + 1) + ')">ถัดไป &raquo;</button>';
-      
+
       html += '</div>';
       container.innerHTML = html;
     }
@@ -1614,32 +1424,23 @@
     var currentAdminProductsPage = 1;
 
     function loadProducts() {
-      var body = document.getElementById('productsBody');
       API.getProducts().then(function (res) {
         if (!res.data) res.data = [];
         allAdminProducts = res.data;
-        
+
         // Load categories for filter
-        API.getCategories().then(function(cRes) {
+        API.getCategories().then(function (cRes) {
           var sel = document.getElementById('adminProductCatFilter');
           if (sel) {
-            sel.innerHTML = '<option value="all">ทั้งหมด</option>' + (cRes.data || []).map(function(c) {
+            sel.innerHTML = '<option value="all">ทั้งหมด</option>' + (cRes.data || []).map(function (c) {
               return '<option value="' + c.categoryId + '">' + c.name + '</option>';
             }).join('');
-            initSearchableSelect('adminProductCatFilter');
+            initSearchableSelect('adminProductCatFilter', true);
+            initSearchableSelect('adminProductStockFilter', true);
           }
-        }).catch(function(err) { console.warn('Categories load failed', err); });
+        });
 
         filterAdminProducts(); // Initial render
-      }).catch(function(err) {
-        showToast('โหลดสินค้าไม่สำเร็จ: ' + err, 'error');
-        if (body) body.innerHTML = '<tr><td colspan="8" class="text-center" style="padding:2rem">'
-          + '<div style="display:flex;flex-direction:column;align-items:center;gap:0.75rem">'
-          + '<i data-lucide="wifi-off" style="width:32px;height:32px;color:var(--danger)"></i>'
-          + '<p style="font-weight:600">โหลดข้อมูลไม่สำเร็จ</p>'
-          + '<button class="btn btn-primary btn-sm" onclick="loadProducts()"><i data-lucide="refresh-cw" style="width:14px;height:14px"></i> ลองใหม่</button>'
-          + '</div></td></tr>';
-        refreshIcons();
       });
     }
 
@@ -1650,16 +1451,17 @@
 
     function showAdminProductSuggestions(query) {
       var dropdown = document.getElementById('adminProductSuggestions');
-      
+
       // If query is empty, show all active products as a dropdown
       var suggestions = allAdminProducts;
       if (query && query.trim().length > 0) {
-        suggestions = allAdminProducts.filter(function(p) {
-          return p.name.toLowerCase().includes(query.toLowerCase()) || 
-                 String(p.productId).toLowerCase().includes(query.toLowerCase());
+        suggestions = allAdminProducts.filter(function (p) {
+          var name = String(p.name || "");
+          return name.toLowerCase().includes(query.toLowerCase()) ||
+            String(p.productId).toLowerCase().includes(query.toLowerCase());
         });
       }
-      
+
       // Limit to 20 products for performance when empty, or 8 when searching
       suggestions = query ? suggestions.slice(0, 8) : suggestions.slice(0, 20);
 
@@ -1669,16 +1471,18 @@
         return;
       }
 
-      dropdown.innerHTML = suggestions.map(function(p) {
-        return '<div class="search-select-item" onclick="selectAdminProductSuggestion(\'' + p.productId + '\', \'' + p.name.replace(/'/g, "\\'") + '\')">' +
-               '<div style="font-weight:600">' + p.name + '</div>' +
-               '<div style="font-size:0.75rem; color:var(--text3)">ID: ' + p.productId + ' | ' + (p.categoryId || '-') + '</div>' +
-               '</div>';
+      dropdown.innerHTML = suggestions.map(function (p) {
+        var pName = String(p.name || "ไม่มีชื่อ");
+        var safeName = pName.replace(/'/g, "\\'");
+        return '<div class="search-select-item" onclick="selectAdminProductSuggestion(\'' + p.productId + '\', \'' + safeName + '\')">' +
+          '<div style="font-weight:600">' + pName + '</div>' +
+          '<div style="font-size:0.75rem; color:var(--text3)">ID: ' + p.productId + ' | ' + (p.categoryId || '-') + '</div>' +
+          '</div>';
       }).join('');
       dropdown.classList.add('active');
     }
 
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', function (e) {
       var dropdown = document.getElementById('adminProductSuggestions');
       var searchInput = document.getElementById('adminProductSearch');
       if (dropdown && dropdown.classList.contains('active') && searchInput) {
@@ -1699,17 +1503,21 @@
       var cat = document.getElementById('adminProductCatFilter').value;
       var stock = document.getElementById('adminProductStockFilter').value;
 
-      filteredAdminProducts = allAdminProducts.filter(function(p) {
-        var matchText = !query || p.name.toLowerCase().includes(query) || String(p.productId).toLowerCase().includes(query);
-        var matchCat = (cat === 'all') || (p.categoryId === cat);
-        
+      filteredAdminProducts = allAdminProducts.filter(function (p) {
+        var pName = String(p.name || "").toLowerCase();
+        var pId = String(p.productId || "").toLowerCase();
+
+        var matchText = !query || pName.includes(query) || pId.includes(query);
+        // Use == to allow numeric ID matching with string value
+        var matchCat = (cat === 'all') || (p.categoryId == cat);
+
         var s = Number(p.stock) || 0;
         var min = Number(p.minStock) || 5;
         var matchStock = true;
         if (stock === 'low') matchStock = (s > 0 && s <= min);
         else if (stock === 'out') matchStock = (s <= 0);
-        else if (stock === 'active') matchStock = (p.status === 'active');
-        else if (stock === 'inactive') matchStock = (p.status === 'inactive');
+        else if (stock === 'active') matchStock = (String(p.status).toLowerCase() === 'active');
+        else if (stock === 'inactive') matchStock = (String(p.status).toLowerCase() === 'inactive');
 
         return matchText && matchCat && matchStock;
       });
@@ -1719,23 +1527,23 @@
 
     function renderAdminProducts(pageNum) {
       if (pageNum) currentAdminProductsPage = pageNum;
-      
+
       var body = document.getElementById('productsBody');
       var container = document.getElementById('productsPagination');
-      
-      if (filteredAdminProducts.length === 0) { 
-        body.innerHTML = '<tr><td colspan="8" class="text-center" style="padding:2rem;color:var(--text3)">ไม่พบสินค้าที่ตรงตามเงื่อนไข</td></tr>'; 
-        if(container) container.innerHTML = '';
-        return; 
+
+      if (filteredAdminProducts.length === 0) {
+        body.innerHTML = '<tr><td colspan="8" class="text-center" style="padding:2rem;color:var(--text3)">ไม่พบสินค้าที่ตรงตามเงื่อนไข</td></tr>';
+        if (container) container.innerHTML = '';
+        return;
       }
-      
+
       var totalPages = Math.ceil(filteredAdminProducts.length / adminProductsPageSize);
       if (currentAdminProductsPage > totalPages) currentAdminProductsPage = totalPages;
       if (currentAdminProductsPage < 1) currentAdminProductsPage = 1;
-      
+
       var startIdx = (currentAdminProductsPage - 1) * adminProductsPageSize;
       var paginated = filteredAdminProducts.slice(startIdx, startIdx + adminProductsPageSize);
-      
+
       body.innerHTML = paginated.map(function (p) {
         var stock = Number(p.stock) || 0;
         var min = Number(p.minStock) || 5;
@@ -1751,38 +1559,29 @@
           + '<td>฿' + Number(p.price).toLocaleString() + '</td>'
           + '<td class="hide-mobile ' + stockClass + '">' + stock + '</td>'
           + '<td><span class="badge ' + (p.status === 'active' ? 'badge-approved' : 'badge-rejected') + '" style="cursor:pointer" onclick="toggleProductStatus(\'' + p.productId + '\', \'' + p.status + '\')">' + (p.status === 'active' ? 'เปิด' : 'ปิด') + '</span></td>'
-          + '<td><button class="btn btn-sm btn-ghost" onclick="generateBarcode(\'' + escapeHTML(p.productId) + '\', \'' + escapeHTML(p.name).replace(/'/g, "\\'") + '\')" title="ดูบาร์โค้ด"><i data-lucide="barcode" style="width:14px;height:14px"></i></button>'
+          + '<td><button class="btn btn-sm btn-ghost" onclick="generateBarcode(\'' + escapeHTML(p.productId) + '\', \'' + String(p.name || "").replace(/'/g, "\\'") + '\')" title="ดูบาร์โค้ด"><i data-lucide="barcode" style="width:14px;height:14px"></i></button>'
           + '<button class="btn btn-sm btn-ghost" onclick="editProduct(\'' + escapeHTML(p.productId) + '\')"><i data-lucide="edit" style="width:14px;height:14px"></i></button>'
           + '<button class="btn btn-sm btn-ghost hide-mobile" style="color:var(--danger)" onclick="delProduct(\'' + escapeHTML(p.productId) + '\')"><i data-lucide="trash-2" style="width:14px;height:14px"></i></button></td>'
           + '</tr>';
       }).join('');
-      
+
       renderPaginationControls(totalPages, currentAdminProductsPage, 'productsPagination', 'renderAdminProducts');
       refreshIcons();
     }
 
     // ─── CATEGORIES ───────────────────────────────────────
     function loadAdminCategories() {
-      var body = document.getElementById('categoriesBody');
       API.getCategories().then(function (res) {
+        var body = document.getElementById('categoriesBody');
         if (!res.data || res.data.length === 0) { body.innerHTML = '<tr><td colspan="3" class="text-center" style="padding:2rem;color:var(--text3)">ยังไม่มีหมวดหมู่</td></tr>'; return; }
         body.innerHTML = res.data.map(function (c) {
           return '<tr>'
             + '<td>' + escapeHTML(c.categoryId) + '</td>'
             + '<td style="font-weight:600">' + escapeHTML(c.name) + '</td>'
-            + '<td><button class="btn btn-sm btn-ghost" onclick="editCategory(\'' + escapeHTML(c.categoryId) + '\', \'' + escapeHTML(c.name).replace(/'/g, "\\'") + '\')"><i data-lucide="edit" style="width:14px;height:14px"></i> แก้ไข</button>'
+            + '<td><button class="btn btn-sm btn-ghost" onclick="editCategory(\'' + escapeHTML(c.categoryId) + '\', \'' + String(c.name || "").replace(/'/g, "\\'") + '\')"><i data-lucide="edit" style="width:14px;height:14px"></i> แก้ไข</button>'
             + '<button class="btn btn-sm btn-ghost" style="color:var(--danger)" onclick="delCategory(\'' + escapeHTML(c.categoryId) + '\')"><i data-lucide="trash-2" style="width:14px;height:14px"></i> ลบ</button></td>'
             + '</tr>';
         }).join('');
-        refreshIcons();
-      }).catch(function(err) {
-        showToast('โหลดหมวดหมู่ไม่สำเร็จ: ' + err, 'error');
-        if (body) body.innerHTML = '<tr><td colspan="3" class="text-center" style="padding:2rem">'
-          + '<div style="display:flex;flex-direction:column;align-items:center;gap:0.75rem">'
-          + '<i data-lucide="wifi-off" style="width:32px;height:32px;color:var(--danger)"></i>'
-          + '<p style="font-weight:600">โหลดข้อมูลไม่สำเร็จ</p>'
-          + '<button class="btn btn-primary btn-sm" onclick="loadAdminCategories()"><i data-lucide="refresh-cw" style="width:14px;height:14px"></i> ลองใหม่</button>'
-          + '</div></td></tr>';
         refreshIcons();
       });
     }
@@ -1806,9 +1605,9 @@
     function delCategory(id) {
       if (!confirm('ยืนยันการลบหมวดหมู่ ' + id + '? (เฉพาะหมวดที่ไม่มีสินค้าเท่านั้น)')) return;
       API.manageCategory('delete', { categoryId: id }).then(function (res) {
-        if (res && res.success) { 
-          showToast('ลบหมวดหมู่เรียบร้อย', 'success'); 
-          loadAdminCategories(); 
+        if (res && res.success) {
+          showToast('ลบหมวดหมู่เรียบร้อย', 'success');
+          loadAdminCategories();
         }
         else { showToast(res.message || 'ไม่สามารถลบหมวดหมู่ได้', 'error'); }
       });
@@ -1865,7 +1664,7 @@
 
     function saveProduct() {
       var data = {
-        oldProductId: document.getElementById('pf-old-id').value || '',
+        oldProductId: document.getElementById('pf-old-id').value,
         productId: document.getElementById('pf-id').value.trim(),
         name: document.getElementById('pf-name').value.trim(),
         categoryId: document.getElementById('pf-cat').value,
@@ -1876,37 +1675,22 @@
       };
       if (!data.name || isNaN(data.price)) { showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warning'); return; }
 
-      // Detect barcode change → show confirm
-      var isUpdate = !!data.oldProductId;
-      var isBarcodeChanged = isUpdate && data.productId && data.oldProductId !== data.productId;
-
-      if (isBarcodeChanged) {
-        if (!confirm('⚠️ คุณกำลังเปลี่ยนรหัสบาร์โค้ดจาก\n\n"' + data.oldProductId + '" → "' + data.productId + '"\n\nระบบจะอัปเดตรหัสนี้ในทุกใบเบิก, ประวัติคลัง, และคลังย่อยของช่างโดยอัตโนมัติ (Cascade Update)\n\nยืนยันการเปลี่ยนรหัส?')) {
-          return;
-        }
-      }
-
-      // BUG-04 fix: Don't send oldProductId for new products
-      if (!isUpdate) {
-        delete data.oldProductId;
-      }
-
       var btn = document.getElementById('saveProductBtn');
       var oldHtml = btn.innerHTML;
       btn.innerHTML = '<div class="spinner" style="width:16px;height:16px"></div> กำลังบันทึก...';
       btn.disabled = true;
 
-      var op = isUpdate ? 'update' : 'add';
+      var op = data.productId ? 'update' : 'add';
       API.manageProduct(op, data).then(function (res) {
         if (res.success) {
-          showToast(isBarcodeChanged ? 'เปลี่ยนรหัสบาร์โค้ดและอัปเดตข้อมูลทั้งระบบสำเร็จ!' : 'บันทึกเรียบร้อย', 'success');
+          showToast('บันทึกเรียบร้อย', 'success');
           closeProductModal(); loadProducts();
         } else {
           showToast(res.message, 'error');
         }
-      }).catch(function (err) { 
-        showToast(err, 'error'); 
-      }).finally(function() {
+      }).catch(function (err) {
+        showToast(err, 'error');
+      }).finally(function () {
         btn.innerHTML = oldHtml;
         btn.disabled = false;
       });
@@ -1914,10 +1698,10 @@
 
     function toggleProductStatus(id, current) {
       var newStatus = current === 'active' ? 'inactive' : 'active';
-      var p = allAdminProducts.find(function(x){ return String(x.productId) === String(id); });
+      var p = allAdminProducts.find(function (x) { return String(x.productId) === String(id); });
       if (!p) return;
       var data = Object.assign({}, p, { status: newStatus });
-      API.manageProduct('update', data).then(function(res) {
+      API.manageProduct('update', data).then(function (res) {
         if (res.success) { showToast('อัปเดตสถานะแล้ว', 'success'); loadProducts(); }
       });
     }
@@ -1986,44 +1770,44 @@
     function loadAdminOrders() {
       API.getAllOrders().then(function (res) {
         masterAdminOrders = res.data || [];
-        
+
         // Apply current filter if any
         var filter = document.getElementById('adminOrderFilter') ? document.getElementById('adminOrderFilter').value : 'all';
         if (filter === 'all') {
           allAdminOrders = masterAdminOrders;
         } else {
-          allAdminOrders = masterAdminOrders.filter(function(o) { return o.status === filter; });
+          allAdminOrders = masterAdminOrders.filter(function (o) { return o.status === filter; });
         }
-        
+
         renderAdminOrders(1);
       }).catch(function (err) { showToast(err, 'error'); });
     }
 
     function renderAdminOrders(pageNum) {
       if (pageNum) currentAdminOrdersPage = pageNum;
-      
+
       var body = document.getElementById('ordersBody');
       var container = document.getElementById('ordersPagination');
-      
-      if (allAdminOrders.length === 0) { 
-        body.innerHTML = '<tr><td colspan="7" class="text-center" style="padding:2rem;color:var(--text3)">ยังไม่มีใบเบิก</td></tr>'; 
-        if(container) container.innerHTML = '';
-        return; 
+
+      if (allAdminOrders.length === 0) {
+        body.innerHTML = '<tr><td colspan="7" class="text-center" style="padding:2rem;color:var(--text3)">ยังไม่มีใบเบิก</td></tr>';
+        if (container) container.innerHTML = '';
+        return;
       }
-      
+
       var totalPages = Math.ceil(allAdminOrders.length / adminOrdersPageSize);
       if (currentAdminOrdersPage > totalPages) currentAdminOrdersPage = totalPages;
       if (currentAdminOrdersPage < 1) currentAdminOrdersPage = 1;
-      
+
       var startIdx = (currentAdminOrdersPage - 1) * adminOrdersPageSize;
       var paginated = allAdminOrders.slice(startIdx, startIdx + adminOrdersPageSize);
-      
+
       body.innerHTML = paginated.map(function (o) {
-         var bc = 'badge-pending';
-         if (o.status === 'Approved' || o.status === 'Dispatched') bc = 'badge-approved';
-         if (o.status === 'READY' || o.status === 'Ready') bc = 'badge-ready';
-         if (o.status === 'Received') bc = 'badge-complete';
-         if (o.status === 'Rejected') bc = 'badge-rejected';
+        var bc = 'badge-pending';
+        if (o.status === 'Approved' || o.status === 'Dispatched') bc = 'badge-approved';
+        if (o.status === 'READY' || o.status === 'Ready') bc = 'badge-ready';
+        if (o.status === 'Received') bc = 'badge-complete';
+        if (o.status === 'Rejected') bc = 'badge-rejected';
 
         var actions = '';
         if (o.status === 'Pending') {
@@ -2049,7 +1833,7 @@
           + '<td>' + actions + '</td>'
           + '</tr>';
       }).join('');
-      
+
       renderPaginationControls(totalPages, currentAdminOrdersPage, 'ordersPagination', 'renderAdminOrders');
       refreshIcons();
     }
@@ -2078,12 +1862,12 @@
       sigSection.classList.add('hidden');
       modal.classList.add('open');
 
-      var order = allAdminOrders.filter(function(o) { return o.orderId === requestId; })[0];
+      var order = allAdminOrders.filter(function (o) { return o.orderId === requestId; })[0];
 
-      API.getOrderItems(requestId).then(function(res) {
+      API.getOrderItems(requestId).then(function (res) {
         var items = res.data || [];
         var html = '<div class="table-wrap"><table><thead><tr><th>สินค้า</th><th class="text-center">จำนวน</th><th class="text-right">รวม</th></tr></thead><tbody>'
-          + items.map(function(i) {
+          + items.map(function (i) {
             return '<tr><td>' + i.productName + '</td><td class="text-center">' + i.quantity + '</td>'
               + '<td class="text-right" style="font-weight:600">฿' + (Number(i.price) * Number(i.quantity)).toLocaleString() + '</td></tr>';
           }).join('')
@@ -2100,15 +1884,15 @@
         // Add history section for this employee
         if (order && (order.employeeId || order.employeeName)) {
           var eIdMatch = order.employeeId || order.employeeName;
-          var pastOrders = allAdminOrders.filter(function(o) { 
-            return (o.employeeId === eIdMatch || o.employeeName === eIdMatch) && o.orderId !== requestId && 
-            (o.status === 'Received' || o.status === 'Approved' || o.status === 'Dispatched'); 
+          var pastOrders = allAdminOrders.filter(function (o) {
+            return (o.employeeId === eIdMatch || o.employeeName === eIdMatch) && o.orderId !== requestId &&
+              (o.status === 'Received' || o.status === 'Approved' || o.status === 'Dispatched');
           });
           if (pastOrders.length > 0) {
             html += '<div style="margin-top:1.5rem;border-top:1px dashed var(--border);padding-top:1rem;">'
               + '<h4 style="font-size:0.9rem;font-weight:700;margin-bottom:0.5rem"><i data-lucide="history" style="width:14px;height:14px"></i> ประวัติการเบิกของ ' + (order.employeeName || order.employeeId) + '</h4>'
               + '<ul style="font-size:0.8rem;color:var(--text2);list-style:none;padding:0;display:flex;flex-direction:column;gap:0.5rem">';
-            pastOrders.slice(0, 5).forEach(function(po) {
+            pastOrders.slice(0, 5).forEach(function (po) {
               html += '<li style="display:flex;justify-content:space-between;background:rgba(255,255,255,0.02);padding:0.5rem;border-radius:4px;">'
                 + '<span>#' + po.orderId + ' (' + (po.createdAt ? po.createdAt.split(' ')[0] : '') + ')</span>'
                 + '<span style="font-weight:600;color:var(--accent)">฿' + Number(po.totalAmount).toLocaleString() + '</span>'
@@ -2123,20 +1907,20 @@
         var labels = ['รออนุมัติ', 'อนุมัติแล้ว', 'จัดเสร็จ', 'จ่ายของ', 'รับของแล้ว'];
         var currentIdx = statuses.indexOf(order.status);
         if (order.status === 'Rejected') {
-           html = '<div class="badge badge-rejected" style="width:100%;padding:1rem;margin-bottom:1rem;justify-content:center">🚫 รายการนี้ถูกปฏิเสธ: ' + (order.reason || 'ไม่ระบุเหตุผล') + '</div>' + html;
+          html = '<div class="badge badge-rejected" style="width:100%;padding:1rem;margin-bottom:1rem;justify-content:center">🚫 รายการนี้ถูกปฏิเสธ: ' + (order.reason || 'ไม่ระบุเหตุผล') + '</div>' + html;
         } else {
-           var timelineHtml = '<div class="status-timeline">';
-           statuses.forEach(function(st, idx) {
-             var active = idx <= currentIdx ? 'active' : '';
-             var icon = 'circle';
-             if (idx < currentIdx) icon = 'check-circle';
-             else if (idx === currentIdx) {
-               icon = (st === 'Ready') ? 'package-check' : 'clock';
-             }
-             timelineHtml += '<div class="status-step ' + active + '"><div class="status-dot"><i data-lucide="' + icon + '" style="width:16px;height:16px"></i></div><div class="status-label">' + labels[idx] + '</div></div>';
-           });
-           timelineHtml += '</div>';
-           html = timelineHtml + html;
+          var timelineHtml = '<div class="status-timeline">';
+          statuses.forEach(function (st, idx) {
+            var active = idx <= currentIdx ? 'active' : '';
+            var icon = 'circle';
+            if (idx < currentIdx) icon = 'check-circle';
+            else if (idx === currentIdx) {
+              icon = (st === 'Ready') ? 'package-check' : 'clock';
+            }
+            timelineHtml += '<div class="status-step ' + active + '"><div class="status-dot"><i data-lucide="' + icon + '" style="width:16px;height:16px"></i></div><div class="status-label">' + labels[idx] + '</div></div>';
+          });
+          timelineHtml += '</div>';
+          html = timelineHtml + html;
         }
 
         body.innerHTML = html;
@@ -2159,16 +1943,16 @@
       signatureCtx.lineWidth = 2;
       signatureCtx.lineJoin = 'round';
       signatureCtx.lineCap = 'round';
-      signatureCanvas.onmousedown = function(e) { isDrawing = true; signatureCtx.beginPath(); var pos = getMousePos(e); signatureCtx.moveTo(pos.x, pos.y); };
-      signatureCanvas.onmousemove = function(e) { if (!isDrawing) return; var pos = getMousePos(e); signatureCtx.lineTo(pos.x, pos.y); signatureCtx.stroke(); };
-      signatureCanvas.onmouseup = function() { isDrawing = false; };
-      signatureCanvas.onmouseleave = function() { isDrawing = false; };
-      signatureCanvas.ontouchstart = function(e) { e.preventDefault(); isDrawing = true; signatureCtx.beginPath(); var p = getMousePos(e.touches[0]); signatureCtx.moveTo(p.x, p.y); };
-      signatureCanvas.ontouchmove = function(e) { e.preventDefault(); if (!isDrawing) return; var p = getMousePos(e.touches[0]); signatureCtx.lineTo(p.x, p.y); signatureCtx.stroke(); };
-      signatureCanvas.ontouchend = function() { isDrawing = false; };
+      signatureCanvas.onmousedown = function (e) { isDrawing = true; signatureCtx.beginPath(); var pos = getMousePos(e); signatureCtx.moveTo(pos.x, pos.y); };
+      signatureCanvas.onmousemove = function (e) { if (!isDrawing) return; var pos = getMousePos(e); signatureCtx.lineTo(pos.x, pos.y); signatureCtx.stroke(); };
+      signatureCanvas.onmouseup = function () { isDrawing = false; };
+      signatureCanvas.onmouseleave = function () { isDrawing = false; };
+      signatureCanvas.ontouchstart = function (e) { e.preventDefault(); isDrawing = true; signatureCtx.beginPath(); var p = getMousePos(e.touches[0]); signatureCtx.moveTo(p.x, p.y); };
+      signatureCanvas.ontouchmove = function (e) { e.preventDefault(); if (!isDrawing) return; var p = getMousePos(e.touches[0]); signatureCtx.lineTo(p.x, p.y); signatureCtx.stroke(); };
+      signatureCanvas.ontouchend = function () { isDrawing = false; };
     }
     function getMousePos(e) {
-      if (!signatureCanvas) return {x:0,y:0};
+      if (!signatureCanvas) return { x: 0, y: 0 };
       var rect = signatureCanvas.getBoundingClientRect();
       return { x: (e.clientX || e.pageX) - rect.left, y: (e.clientY || e.pageY) - rect.top };
     }
@@ -2181,12 +1965,12 @@
       if (signatureCanvas.toDataURL() === blank.toDataURL()) { showToast('กรุณาเซ็นชื่อก่อนยืนยัน', 'warning'); return; }
 
       showToast('กำลังบันทึก...', 'info');
-      API.signForReceipt(currentSigningRequestId, signatureCanvas.toDataURL('image/png')).then(function(res) {
+      API.signForReceipt(currentSigningRequestId, signatureCanvas.toDataURL('image/png')).then(function (res) {
         showToast('✅ บันทึกการรับของเรียบร้อย', 'success');
         if (typeof triggerConfetti === 'function') triggerConfetti();
         closeModal('orderDetailModal');
         loadAdminOrders();
-      }).catch(function(err) { showToast('ข้อผิดพลาด: ' + err, 'error'); });
+      }).catch(function (err) { showToast('ข้อผิดพลาด: ' + err, 'error'); });
     }
 
 
@@ -2200,19 +1984,19 @@
       document.getElementById('approvalItems').innerHTML = '<div class="text-center p-4"><div class="spinner"></div></div>';
       document.getElementById('orderApprovalModal').classList.add('open');
 
-      API.getOrderItems(id).then(function(res) {
+      API.getOrderItems(id).then(function (res) {
         if (!res.data || res.data.length === 0) {
           document.getElementById('approvalItems').innerHTML = '<div class="text-center color-danger">ไม่พบรายการสินค้า</div>';
           return;
         }
         document.getElementById('approvalItems').innerHTML = '<div style="font-size:0.85rem;font-weight:600;margin-bottom:0.5rem">รายการสินค้า:</div>'
           + '<div class="card glass" style="padding:0.5rem">'
-          + res.data.map(function(item) {
-              return '<div class="flex flex-wrap items-center justify-between gap-2" style="padding:0.5rem;border-bottom:1px solid rgba(255,255,255,0.05)">'
-                + '<div style="font-size:0.9rem">' + item.productName + '</div>'
-                + '<div style="font-weight:700">x' + item.quantity + '</div>'
-                + '</div>';
-            }).join('')
+          + res.data.map(function (item) {
+            return '<div class="flex flex-wrap items-center justify-between gap-2" style="padding:0.5rem;border-bottom:1px solid rgba(255,255,255,0.05)">'
+              + '<div style="font-size:0.9rem">' + item.productName + '</div>'
+              + '<div style="font-weight:700">x' + item.quantity + '</div>'
+              + '</div>';
+          }).join('')
           + '</div>';
         refreshIcons();
       });
@@ -2226,52 +2010,52 @@
     function submitOrderDecision(action) {
       if (!currentProcessingOrderId) return;
       var comment = document.getElementById('approvalComment').value.trim() || (action === 'approve' ? 'ผ่านการตรวจสอบ' : 'ไม่อนุมัติ');
-      
+
       showToast('⏳ กำลังดำเนินการ...', 'info');
-      
-      var requestPromise = action === 'approve' ? 
-        API.approveRequest(currentProcessingOrderId, comment) : 
+
+      var requestPromise = action === 'approve' ?
+        API.approveRequest(currentProcessingOrderId, comment) :
         API.rejectRequest(currentProcessingOrderId, comment);
-      
-      requestPromise.then(function(res) {
+
+      requestPromise.then(function (res) {
         if (res.success) {
           showToast('✅ ดำเนินการ ' + (action === 'approve' ? 'อนุมัติ' : 'ปฏิเสธ') + ' เรียบร้อย', 'success');
           if (action === 'approve' && typeof triggerConfetti === 'function') triggerConfetti();
           closeApprovalModal();
           loadAdminOrders();
-          loadDashboard(); 
+          loadDashboard();
 
         } else {
           showToast('❌ ' + res.message, 'error');
         }
-      }).catch(function(err) {
+      }).catch(function (err) {
         showToast('❌ ผิดพลาด: ' + err, 'error');
       });
     }
 
     function doDispatch(id) {
       if (!confirm('ยืนยันการจ่ายพัสดุและตัดสต๊อกใบเบิก ' + id + ' ?')) return;
-      API.dispatchRequest(id).then(function () { showToast('ส่งพัสดุเรียบร้อย', 'success'); loadAdminOrders(); }).catch(function(err) { showToast('ข้อผิดพลาด: ' + err, 'error'); });
+      API.dispatchRequest(id).then(function () { showToast('ส่งพัสดุเรียบร้อย', 'success'); loadAdminOrders(); }).catch(function (err) { showToast('ข้อผิดพลาด: ' + err, 'error'); });
     }
 
     function doReady(id) {
       showToast('กำลังส่งแจ้งเตือน...', 'info');
-      API.setReady(id).then(function() { 
-        showToast('จัดสำนักเสร็จแล้วและแจ้งเตือนผู้เบิกเรียบร้อย', 'success'); 
-        loadAdminOrders(); 
-      }).catch(function(err) { showToast('ข้อผิดพลาด: ' + err, 'error'); });
+      API.setReady(id).then(function () {
+        showToast('จัดสำนักเสร็จแล้วและแจ้งเตือนผู้เบิกเรียบร้อย', 'success');
+        loadAdminOrders();
+      }).catch(function (err) { showToast('ข้อผิดพลาด: ' + err, 'error'); });
     }
 
     // ─── EMPLOYEES ────────────────────────────────────────
     var allAdminTeams = [];
 
     function loadAdminEmployees() {
-      var body = document.getElementById('employeesBody');
       Promise.all([API.getEmployees(), API.getTeams()]).then(function (results) {
         var resEmp = results[0];
         var resTeams = results[1];
         allAdminTeams = resTeams.data || [];
 
+        var body = document.getElementById('employeesBody');
         if (!resEmp.data) return;
         body.innerHTML = resEmp.data.map(function (e) {
           var isMe = currentUser && e.employeeId === currentUser.employeeId;
@@ -2288,7 +2072,7 @@
           var teamName = '-';
           if (e.teamId) {
             var team = allAdminTeams.find(t => t.teamId === e.teamId);
-            if (team) teamName = team.teamName;
+            if (team) teamName = team.name;
           }
 
           return '<tr>'
@@ -2305,22 +2089,13 @@
             + '</tr>';
         }).join('');
         refreshIcons();
-      }).catch(function(err) {
-        showToast('โหลดข้อมูลพนักงานไม่สำเร็จ: ' + err, 'error');
-        if (body) body.innerHTML = '<tr><td colspan="7" class="text-center" style="padding:2rem">'
-          + '<div style="display:flex;flex-direction:column;align-items:center;gap:0.75rem">'
-          + '<i data-lucide="wifi-off" style="width:32px;height:32px;color:var(--danger)"></i>'
-          + '<p style="font-weight:600">โหลดข้อมูลไม่สำเร็จ</p>'
-          + '<button class="btn btn-primary btn-sm" onclick="loadAdminEmployees()"><i data-lucide="refresh-cw" style="width:14px;height:14px"></i> ลองใหม่</button>'
-          + '</div></td></tr>';
-        refreshIcons();
       });
     }
 
     function changeEmpRole(id, sel) {
       var newRole = sel.value;
       if (!confirm('ยืนยันการเปลี่ยนบทบาทของ ' + id + ' เป็น ' + newRole + ' ?')) {
-        loadAdminEmployees(); 
+        loadAdminEmployees();
         return;
       }
       API.updateEmployeeRole(id, newRole).then(function (res) {
@@ -2335,12 +2110,12 @@
       document.getElementById('ef-name').value = '';
       document.getElementById('ef-dept').value = '';
       document.getElementById('ef-role').value = 'employee';
-      
+
       // Load teams into dropdown
       var teamSel = document.getElementById('ef-team');
       if (teamSel) {
-        teamSel.innerHTML = '<option value="">-- ไม่สังกัดทีม --</option>' + allAdminTeams.map(function(t) {
-          return '<option value="' + t.teamId + '">' + t.teamName + '</option>';
+        teamSel.innerHTML = '<option value="">-- ไม่สังกัดทีม --</option>' + allAdminTeams.map(function (t) {
+          return '<option value="' + t.teamId + '">' + t.name + '</option>';
         }).join('');
         initSearchableSelect('ef-team');
       }
@@ -2372,9 +2147,9 @@
         } else {
           showToast(res.message, 'error');
         }
-      }).catch(function(err) {
+      }).catch(function (err) {
         showToast(err, 'error');
-      }).finally(function() {
+      }).finally(function () {
         btn.innerHTML = oldHtml;
         btn.disabled = false;
       });
@@ -2391,40 +2166,38 @@
         allAdminTeams = res.data;
         grid.innerHTML = res.data.map(function (t) {
           return '<div class="card glass hover-lift">' +
-            '<div class="flex justify-between items-start mb-4">' +
-              '<div>' +
-                '<h3 style="margin:0; font-size:1.1rem">' + t.teamName + '</h3>' +
-                '<span style="font-size:0.75rem; color:var(--text3)">ID: ' + t.teamId + '</span>' +
-              '</div>' +
-              '<div class="flex flex-wrap gap-1">' +
-                '<button class="btn btn-ghost btn-xs" onclick="editTeam(\'' + t.teamId + '\')"><i data-lucide="edit-2"></i></button>' +
-                '<button class="btn btn-ghost btn-xs" style="color:var(--danger)" onclick="delTeam(\'' + t.teamId + '\')"><i data-lucide="trash"></i></button>' +
-              '</div>' +
+            '<div class="flex flex-wrap items-center justify-between gap-2 mb-4">' +
+            '<div>' +
+            '<h3 style="margin:0; font-size:1.1rem">' + t.name + '</h3>' +
+            '<span style="font-size:0.75rem; color:var(--text3)">ID: ' + t.teamId + '</span>' +
+            '</div>' +
+            '<div class="flex flex-wrap gap-1">' +
+            '<button class="btn btn-ghost btn-xs" onclick="editTeam(\'' + t.teamId + '\')"><i data-lucide="edit-2"></i></button>' +
+            '<button class="btn btn-ghost btn-xs" style="color:var(--danger)" onclick="delTeam(\'' + t.teamId + '\')"><i data-lucide="trash"></i></button>' +
+            '</div>' +
             '</div>' +
             '<div style="background:rgba(251,191,36,0.05); padding:0.75rem; border-radius:12px; border:1px solid var(--glass-border); margin-bottom:1rem">' +
-              '<div style="font-size:0.7rem; color:var(--primary); text-transform:uppercase; font-weight:800; letter-spacing:0.05em; margin-bottom:0.25rem">ตัวเอก (Lead)</div>' +
-              '<div style="font-weight:700; display:flex; align-items:center; gap:0.5rem"><i data-lucide="crown" style="width:14px; color:var(--primary)"></i> ' + (t.leadName || t.leadId) + '</div>' +
+            '<div style="font-size:0.7rem; color:var(--primary); text-transform:uppercase; font-weight:800; letter-spacing:0.05em; margin-bottom:0.25rem">ตัวเอก (Lead)</div>' +
+            '<div style="font-weight:700; display:flex; align-items:center; gap:0.5rem"><i data-lucide="crown" style="width:14px; color:var(--primary)"></i> ' + (t.leadName || t.leadId) + '</div>' +
             '</div>' +
             '<div class="flex flex-wrap items-center justify-between gap-2" style="font-size:0.85rem; color:var(--text2)">' +
-              '<span>สมาชิก: ' + (t.memberCount || 0) + ' คน</span>' +
-              '<button class="btn btn-outline btn-xs" onclick="viewTeamInventory(\'' + t.teamId + '\')">ดูสต๊อกทีม</button>' +
+            '<span>สมาชิก: ' + (t.memberCount || 0) + ' คน</span>' +
+            '<button class="btn btn-outline btn-xs" onclick="viewTeamInventory(\'' + t.teamId + '\')">ดูสต๊อกทีม</button>' +
             '</div>' +
-          '</div>';
+            '</div>';
         }).join('');
         refreshIcons();
-      }).catch(function(err) {
-        showToast('โหลดข้อมูลทีมไม่สำเร็จ: ' + err, 'error');
       });
     }
 
     function openTeamModal(team) {
       document.getElementById('tf-id').value = team ? team.teamId : '';
-      document.getElementById('tf-name').value = team ? team.teamName : '';
-      
-      API.getEmployees().then(function(res) {
+      document.getElementById('tf-name').value = team ? team.name : '';
+
+      API.getEmployees().then(function (res) {
         var technicians = (res.data || []).filter(e => e.role === 'technician' || e.role === 'fc');
         var leadSel = document.getElementById('tf-lead');
-        leadSel.innerHTML = '<option value="">-- เลือกหัวหน้าทีม --</option>' + technicians.map(function(e) {
+        leadSel.innerHTML = '<option value="">-- เลือกหัวหน้าทีม --</option>' + technicians.map(function (e) {
           return '<option value="' + e.employeeId + '" ' + (team && team.leadId === e.employeeId ? 'selected' : '') + '>' + e.name + ' (' + e.employeeId + ')</option>';
         }).join('');
         initSearchableSelect('tf-lead');
@@ -2432,7 +2205,7 @@
 
       document.getElementById('tf-members').innerHTML = '';
       if (team && team.members) {
-        document.getElementById('tf-members').innerHTML = team.members.map(m => 
+        document.getElementById('tf-members').innerHTML = team.members.map(m =>
           '<span class="badge badge-pending" style="font-size:0.7rem">' + m.name + '</span>'
         ).join('');
       }
@@ -2444,17 +2217,17 @@
     function closeTeamModal() { document.getElementById('teamModal').classList.remove('open'); }
 
     function editTeam(id) {
-      var team = allAdminTeams.find(t => t.teamId == id);
+      var team = allAdminTeams.find(t => t.teamId === id);
       if (team) openTeamModal(team);
     }
 
     function saveTeam() {
       var data = {
         teamId: document.getElementById('tf-id').value,
-        teamName: document.getElementById('tf-name').value.trim(),
+        name: document.getElementById('tf-name').value.trim(),
         leadId: document.getElementById('tf-lead').value
       };
-      if (!data.teamName || !data.leadId) { showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warning'); return; }
+      if (!data.name || !data.leadId) { showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warning'); return; }
 
       var btn = document.getElementById('saveTeamBtn');
       var oldHtml = btn.innerHTML;
@@ -2462,7 +2235,7 @@
       btn.disabled = true;
 
       var op = data.teamId ? 'update' : 'add';
-      API.manageTeam(op, data).then(function(res) {
+      API.manageTeam(op, data).then(function (res) {
         if (res.success) {
           showToast('บันทึกข้อมูลทีมเรียบร้อย', 'success');
           closeTeamModal();
@@ -2470,9 +2243,9 @@
         } else {
           showToast(res.message, 'error');
         }
-      }).catch(function(err) { 
-        showToast(err, 'error'); 
-      }).finally(function() {
+      }).catch(function (err) {
+        showToast(err, 'error');
+      }).finally(function () {
         btn.innerHTML = oldHtml;
         btn.disabled = false;
       });
@@ -2480,7 +2253,7 @@
 
     function delTeam(id) {
       if (!confirm('ยืนยันการลบทีม ' + id + ' ? (สมาชิกในทีมจะกลายเป็นผู้ไม่สังกัดทีม)')) return;
-      API.manageTeam('delete', { teamId: id }).then(function(res) {
+      API.manageTeam('delete', { teamId: id }).then(function (res) {
         showToast('ลบทีมเรียบร้อย', 'success');
         loadTeams();
       });
@@ -2489,7 +2262,7 @@
     function openSwapLeadModal() {
       var s1 = document.getElementById('swap-t1');
       var s2 = document.getElementById('swap-t2');
-      var opStr = '<option value="">-- เลือกทีม --</option>' + allAdminTeams.map(t => '<option value="' + t.teamId + '">' + t.teamName + '</option>').join('');
+      var opStr = '<option value="">-- เลือกทีม --</option>' + allAdminTeams.map(t => '<option value="' + t.teamId + '">' + t.name + '</option>').join('');
       s1.innerHTML = opStr;
       s2.innerHTML = opStr;
       initSearchableSelect('swap-t1');
@@ -2504,12 +2277,12 @@
       var t1id = document.getElementById('swap-t1').value;
       var t2id = document.getElementById('swap-t2').value;
       var preview = document.getElementById('swapPreview');
-      
+
       if (t1id && t2id && t1id !== t2id) {
         var t1 = allAdminTeams.find(t => t.teamId === t1id);
         var t2 = allAdminTeams.find(t => t.teamId === t2id);
-        document.getElementById('sp-t1-lead').innerHTML = '<div style="font-size:0.75rem; color:var(--text3)">' + t1.teamName + '</div><div style="font-weight:700">' + t1.leadName + '</div>';
-        document.getElementById('sp-t2-lead').innerHTML = '<div style="font-size:0.75rem; color:var(--text3)">' + t2.teamName + '</div><div style="font-weight:700">' + t2.leadName + '</div>';
+        document.getElementById('sp-t1-lead').innerHTML = '<div style="font-size:0.75rem; color:var(--text3)">' + t1.name + '</div><div style="font-weight:700">' + t1.leadName + '</div>';
+        document.getElementById('sp-t2-lead').innerHTML = '<div style="font-size:0.75rem; color:var(--text3)">' + t2.name + '</div><div style="font-weight:700">' + t2.leadName + '</div>';
         preview.style.display = 'block';
       } else {
         preview.style.display = 'none';
@@ -2523,13 +2296,13 @@
       if (!t1id || !t2id || t1id === t2id) { showToast('กรุณาเลือก 2 ทีมที่แตกต่างกัน', 'warning'); return; }
 
       if (!confirm('ยืนยันการสลับ "ตัวเอก" ระหว่างทีม? (รวมถึงการย้ายสิทธิ์การจัดการและสต๊อกของทีม)')) return;
-      
-      API.swapTeamLead({ team1Id: t1id, team2Id: t2id }).then(function(res) {
+
+      API.swapTeamLead({ team1Id: t1id, team2Id: t2id }).then(function (res) {
         showToast('สลับตัวเอกเรียบร้อย', 'success');
         closeSwapLeadModal();
         loadTeams();
         if (typeof triggerConfetti === 'function') triggerConfetti();
-      }).catch(function(err) { showToast(err, 'error'); });
+      }).catch(function (err) { showToast(err, 'error'); });
     }
 
     function viewTeamInventory(teamId) {
@@ -2549,7 +2322,7 @@
       sig.classList.add('hidden');
       modal.classList.add('open');
 
-      API.getSubStock({ employeeId: isTeam ? null : targetId, teamId: isTeam ? targetId : null }).then(function(res) {
+      API.getSubStock({ employeeId: isTeam ? null : targetId, teamId: isTeam ? targetId : null }).then(function (res) {
         var items = res.data || [];
         if (items.length === 0) {
           body.innerHTML = '<div class="empty-state"><i>📦</i><p>ไม่พบพัสดุในคลังย่อยของ ' + title + '</p></div>';
@@ -2557,7 +2330,7 @@
         }
         body.innerHTML = '<h4>📦 คลังย่อย: ' + title + '</h4>' +
           '<div class="table-wrap"><table><thead><tr><th>สินค้า</th><th>จำนวน</th></tr></thead><tbody>' +
-          items.map(function(i) {
+          items.map(function (i) {
             return '<tr><td>' + (i.productName || i.productId) + '</td><td style="font-weight:700">' + i.quantity + '</td></tr>';
           }).join('') + '</tbody></table></div>';
       });
@@ -2608,9 +2381,9 @@
         XLSX.writeFile(wb, 'Detailed_Requisition_' + new Date().getTime() + '.xlsx');
         showToast('✅ ดาวน์โหลดเรียบร้อย', 'success');
         closeExportModal();
-      }).catch(function (err) { 
-        showToast('เกิดข้อผิดพลาด: ' + err, 'error'); 
-      }).finally(function() {
+      }).catch(function (err) {
+        showToast('เกิดข้อผิดพลาด: ' + err, 'error');
+      }).finally(function () {
         btn.innerHTML = oldHtml;
         btn.disabled = false;
       });
@@ -2618,9 +2391,9 @@
 
     // ─── INVENTORY ────────────────────────────────────────
     function loadInventory() {
-      var body = document.getElementById('inventoryBody');
       API.getProducts().then(function (res) {
         if (!res.success) return;
+        var body = document.getElementById('inventoryBody');
         if (!body) return;
         body.innerHTML = res.data.map(function (p) {
           var isLow = Number(p.stock) <= Number(p.minStock);
@@ -2633,15 +2406,6 @@
             + '<td><button class="btn btn-sm btn-outline" onclick="openStockModal(\'' + p.productId + '\',\'' + p.name + '\')">ปรับ</button></td>'
             + '</tr>';
         }).join('');
-      }).catch(function(err) {
-        showToast('โหลดคลังสินค้าไม่สำเร็จ: ' + err, 'error');
-        if (body) body.innerHTML = '<tr><td colspan="6" class="text-center" style="padding:2rem">'
-          + '<div style="display:flex;flex-direction:column;align-items:center;gap:0.75rem">'
-          + '<i data-lucide="wifi-off" style="width:32px;height:32px;color:var(--danger)"></i>'
-          + '<p style="font-weight:600">โหลดข้อมูลไม่สำเร็จ</p>'
-          + '<button class="btn btn-primary btn-sm" onclick="loadInventory()"><i data-lucide="refresh-cw" style="width:14px;height:14px"></i> ลองใหม่</button>'
-          + '</div></td></tr>';
-        refreshIcons();
       });
     }
 
@@ -2665,13 +2429,13 @@
 
       API.updateStock(id, adj, currentUser ? currentUser.employeeId : 'SYSTEM').then(function (res) {
         showToast(res.message || res.error, res.success ? 'success' : 'error');
-        if (res.success) { 
-          closeStockModal(); 
-          loadInventory(); 
+        if (res.success) {
+          closeStockModal();
+          loadInventory();
         }
-      }).catch(function(err) {
+      }).catch(function (err) {
         showToast(err, 'error');
-      }).finally(function() {
+      }).finally(function () {
         btn.innerHTML = oldHtml;
         btn.disabled = false;
       });
@@ -2680,11 +2444,11 @@
     function loadAuditLogs() {
       var body = document.getElementById('auditBody');
       if (!body) return;
-      body.innerHTML = '<tr><td colspan="10"><div class="skeleton sk-line"></div><div class="skeleton sk-line sk-line-short"></div></td></tr>';
+      body.innerHTML = '<tr><td colspan="5" class="text-center" style="padding:2rem"><div class="spinner"></div></td></tr>';
 
       API.getReportData('auditActivities').then(function (res) {
         if (!res.success || !res.data || !res.data.logs) {
-          body.innerHTML = '<tr><td colspan="10"><div class="empty-state"><i data-lucide="history"></i><h3>ไม่มีข้อมูล</h3><p>ไม่พบประวัติกิจกรรม</p></div></td></tr>';
+          body.innerHTML = '<tr><td colspan="5" class="text-center" style="padding:2rem">ไม่พบประวัติกิจกรรม</td></tr>';
           return;
         }
         body.innerHTML = res.data.logs.map(function (l) {
@@ -2694,7 +2458,7 @@
               var parsed = JSON.parse(l.detail);
               detailDisplay = '<pre style="font-size:0.7rem; margin:0; opacity:0.7; overflow:auto; max-width:200px">' + JSON.stringify(parsed, null, 2) + '</pre>';
             }
-          } catch(e) {}
+          } catch (e) { }
 
           return '<tr>'
             + '<td>' + l.logId + '</td>'
@@ -2714,6 +2478,10 @@
     var charts = {};
 
     function renderDashboardCharts() {
+      if (typeof Chart === 'undefined') {
+        console.warn('Chart.js not loaded. Skipping charts.');
+        return;
+      }
       var now = new Date();
       var month = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
 
@@ -2726,7 +2494,7 @@
         var data = res.data.slice(0, 5);
         var ctxId = 'topProductsChart';
         var canvas = document.getElementById(ctxId);
-        if(!canvas) return;
+        if (!canvas) return;
         var ctx = canvas.getContext('2d');
 
         var goldGradient = ctx.createLinearGradient(0, 0, 0, 400);
@@ -2752,17 +2520,17 @@
             responsive: true,
             maintainAspectRatio: false,
             scales: {
-              y: { 
-                beginAtZero: true, 
-                grid: { color: gridColor, drawBorder: false }, 
-                ticks: { color: textColor, font: { family: "'Inter', sans-serif", size: 11 } } 
+              y: {
+                beginAtZero: true,
+                grid: { color: gridColor, drawBorder: false },
+                ticks: { color: textColor, font: { family: "'Inter', sans-serif", size: 11 } }
               },
-              x: { 
-                grid: { display: false }, 
-                ticks: { color: textColor, font: { family: "'Inter', sans-serif", size: 11 } } 
+              x: {
+                grid: { display: false },
+                ticks: { color: textColor, font: { family: "'Inter', sans-serif", size: 11 } }
               }
             },
-            plugins: { 
+            plugins: {
               legend: { display: false },
               tooltip: {
                 backgroundColor: 'rgba(0,0,0,0.85)',
@@ -2776,7 +2544,7 @@
           }
         });
         refreshIcons();
-      }).catch(function(err) { console.warn('Top requested items load failed', err); });
+      });
 
       API.getDepartmentSpending(month).then(function (res) {
         if (!res.success || !res.data) return;
@@ -2801,13 +2569,13 @@
             maintainAspectRatio: false,
             cutout: '70%',
             plugins: {
-              legend: { 
-                position: 'right', 
-                labels: { 
-                  color: textColor, 
+              legend: {
+                position: 'right',
+                labels: {
+                  color: textColor,
                   boxWidth: 12,
                   font: { family: "'Inter', sans-serif", size: 12 }
-                } 
+                }
               },
               tooltip: {
                 backgroundColor: 'rgba(0,0,0,0.85)',
@@ -2853,78 +2621,6 @@
             + '</div>'
             + '</div>';
         }).join('');
-      });
-
-      // Trigger Forecast AI
-      loadForecast();
-    }
-
-    function loadForecast() {
-      var body = document.getElementById('forecastBody');
-      if (!body) return;
-      body.innerHTML = '<tr><td colspan="10"><div class="skeleton sk-line"></div><div class="skeleton sk-line sk-line-short"></div></td></tr>';
-
-      API.getInventoryForecast().then(function(res) {
-        if (!res.success || !res.data || res.data.length === 0) {
-          body.innerHTML = '<tr><td colspan="10"><div class="empty-state"><i data-lucide="trending-up"></i><h3>ไม่มีข้อมูล</h3><p>ไม่มีข้อมูลพยากรณ์</p></div></td></tr>';
-          return;
-        }
-
-        body.innerHTML = res.data.map(function(item) {
-          var dtz = item.daysToZero !== null ? Math.round(item.daysToZero) : '-';
-          var burn = item.dailyBurnRate !== null ? item.dailyBurnRate.toFixed(2) : '0';
-          var urgency = dtz !== '-' && dtz <= 7 ? 'color:var(--danger);font-weight:700' : (dtz <= 14 ? 'color:var(--warning)' : '');
-          
-          var rowBg = dtz !== '-' && dtz <= 7 ? 'background:rgba(239,68,68,0.05);' : '';
-          
-          return '<tr style="' + rowBg + '">'
-            + '<td><div style="font-weight:600">' + item.name + '</div><div style="font-size:0.72rem;color:var(--text3);font-family:monospace">' + item.productId + '</div></td>'
-            + '<td style="text-align:center;font-weight:600">' + item.stock + '</td>'
-            + '<td style="text-align:center">' + burn + '</td>'
-            + '<td style="text-align:center;' + urgency + '">' + (dtz !== '-' && dtz <= 7 ? '⚠️ ' : '') + dtz + '</td>'
-            + '<td style="text-align:center">' + (item.suggestedRestock > 0 ? '<span class="badge badge-approved" style="font-size:0.78rem">+' + item.suggestedRestock + '</span>' : '<span style="color:var(--text3)">—</span>') + '</td>'
-            + '</tr>';
-        }).join('');
-      }).catch(function(err) {
-        body.innerHTML = '<tr><td colspan="5" class="text-center" style="padding:2rem;color:var(--danger)">เกิดข้อผิดพลาด: ' + err + '</td></tr>';
-      });
-    }
-
-    function runArchive() {
-      if (!confirm('ยืนยันการจัดเก็บข้อมูลเก่า (Archive)?\n\nระบบจะย้ายข้อมูลที่มีอายุมากกว่า 1 ปีไปยังชีตสำรอง\nขั้นตอนนี้อาจใช้เวลาสักครู่และไม่สามารถย้อนกลับได้ง่ายๆ')) return;
-      
-      var btn = document.getElementById('archiveBtn');
-      var result = document.getElementById('archiveResult');
-      var oldHtml = btn.innerHTML;
-      
-      btn.disabled = true;
-      btn.innerHTML = '<div class="spinner" style="width:16px;height:16px"></div> กำลังจัดเก็บและล้างข้อมูลเก่า...';
-      result.style.display = 'block';
-      result.style.borderColor = 'var(--border)';
-      result.innerHTML = '<p style="color:var(--text2)"><i data-lucide="loader" class="spinner"></i> เริ่มกระบวนการจัดเก็บข้อมูล... กรุณาอย่าปิดหน้านี้</p>';
-      refreshIcons();
-
-      API.archiveOldData(12).then(function(res) {
-        if (res.success) {
-          result.style.borderColor = 'var(--success)';
-          result.innerHTML = '<p style="color:var(--success);font-weight:600"><i data-lucide="check-circle"></i> ' + res.message + '</p>'
-            + '<ul style="margin-top:0.5rem;padding-left:1.5rem;color:var(--text2);font-size:0.85rem">'
-            + (res.details ? res.details.map(function(d) { return '<li>' + d + '</li>'; }).join('') : '')
-            + '</ul>';
-          showToast('จัดเก็บข้อมูลเก่าเรียบร้อยแล้ว', 'success');
-        } else {
-          result.style.borderColor = 'var(--danger)';
-          result.innerHTML = '<p style="color:var(--danger)"><i data-lucide="alert-circle"></i> เกิดข้อผิดพลาด: ' + (res.message || res.error) + '</p>';
-          showToast('เกิดข้อผิดพลาดในการจัดเก็บข้อมูล', 'error');
-        }
-      }).catch(function(err) {
-        result.style.borderColor = 'var(--danger)';
-        result.innerHTML = '<p style="color:var(--danger)"><i data-lucide="alert-circle"></i> เกิดข้อผิดพลาดทางเทคนิค: ' + err + '</p>';
-        showToast('เกิดข้อผิดพลาดในการจัดเก็บข้อมูล', 'error');
-      }).finally(function() {
-        btn.disabled = false;
-        btn.innerHTML = oldHtml;
-        refreshIcons();
       });
     }
 
@@ -2977,6 +2673,10 @@
 
     // ─── EXCEL EXPORT (SheetJS) ─────────────────────────────
     function downloadExcel(sheetName) {
+      if (typeof XLSX === 'undefined') {
+        showToast('❌ ไม่พบไลบรารี XLSX (กรุณาเช็คอินเทอร์เน็ต)', 'error');
+        return;
+      }
       showToast('⏳ กำลังเตรียมไฟล์ Excel...', 'info');
 
       // ดึงข้อมูลในรูปแบบอ็อบเจกต์มาทำเป็นแผ่นงาน
@@ -3004,21 +2704,21 @@
 
     function setScanMode(mode) {
       currentScanMode = mode;
-      
+
       // Update UI Buttons (Lucide Icons)
-      document.querySelectorAll('.scanner-mode-btn').forEach(function(btn) {
+      document.querySelectorAll('.scanner-mode-btn').forEach(function (btn) {
         btn.classList.toggle('active', btn.id === 'sm-' + mode);
       });
-      
+
       showToast('สลับโหมดเป็น: ' + mode, 'info');
     }
 
     function openScanner(mode) {
       if (mode) setScanMode(mode);
-      
+
       var modal = document.getElementById('scannerModal');
       if (!modal) return;
-      
+
       modal.classList.add('open');
       document.body.style.overflow = 'hidden';
       refreshIcons();
@@ -3033,7 +2733,7 @@
       document.getElementById('scannerModal').classList.remove('open');
       document.body.style.overflow = 'auto';
     }
- 
+
     function startLiveScan() {
       const startBtn = document.getElementById('modalStartBtn');
       const placeholder = document.getElementById('scannerPlaceholder');
@@ -3045,26 +2745,26 @@
 
       startBtn.disabled = true;
       startBtn.innerHTML = '<div class="spinner" style="width:16px;height:16px;border-width:2px"></div> กำลังเชื่อมต่อ...';
-      
-      const config = { 
-        fps: 15, 
+
+      const config = {
+        fps: 15,
         qrbox: { width: 250, height: 250 },
-        aspectRatio: 1.0 
+        aspectRatio: 1.0
       };
 
       modalScanner.start(
         { facingMode: "environment" },
         config,
-        function(decodedText) {
+        function (decodedText) {
           if (isScannerBusy) return;
           isScannerBusy = true;
           if (window.navigator && window.navigator.vibrate) window.navigator.vibrate(100);
-          
+
           processScanResult(decodedText);
           closeScanner();
         },
-        function(err) {}
-      ).then(function() {
+        function (err) { }
+      ).then(function () {
         if (placeholder) placeholder.style.display = 'none';
         if (viewport) viewport.classList.add('scanner-active');
         if (dot) dot.classList.add('active');
@@ -3073,7 +2773,7 @@
           statusText.style.color = 'var(--accent)';
         }
         startBtn.style.display = 'none';
-      }).catch(function(err) {
+      }).catch(function (err) {
         startBtn.disabled = false;
         startBtn.innerHTML = '<i data-lucide="camera"></i> เริ่มเปิดกล้องวิดีโอสด';
         showToast('ไม่สามารถเปิดใช้งานกล้องได้: ' + err, 'error');
@@ -3086,15 +2786,15 @@
       if (modalScanner && modalScanner.getState() === 2 /* SCANNING */) {
         isModalTorchOn = !isModalTorchOn;
         var btn = document.getElementById('modalTorchBtn');
-        modalScanner.applyVideoConstraints({ advanced: [{ torch: isModalTorchOn }] }).then(function() {
-          if(isModalTorchOn) {
+        modalScanner.applyVideoConstraints({ advanced: [{ torch: isModalTorchOn }] }).then(function () {
+          if (isModalTorchOn) {
             btn.style.background = 'var(--primary)';
             btn.style.color = '#000';
           } else {
             btn.style.background = 'transparent';
             btn.style.color = 'var(--text)';
           }
-        }).catch(function(err) {
+        }).catch(function (err) {
           showToast('อุปกรณ์นี้/เบราว์เซอร์นี้ ไม่รองรับการเปิดไฟแฟลช', 'error');
           isModalTorchOn = false;
         });
@@ -3103,9 +2803,9 @@
 
     function stopLiveScan() {
       if (modalScanner && modalScanner.isScanning) {
-        modalScanner.stop().then(function() {
+        modalScanner.stop().then(function () {
           resetScannerUI();
-        }).catch(function(err) {
+        }).catch(function (err) {
           console.warn("Stop error:", err);
           resetScannerUI();
         });
@@ -3138,20 +2838,20 @@
     }
 
     function handleModalFile(input) {
-        if (!input.files || input.files.length === 0) return;
-        showToast('กำลังอ่านรูปภาพ...', 'info');
-        
-        if (!modalScanner) modalScanner = new Html5Qrcode("modal-scanner-v2");
-        
-        modalScanner.scanFile(input.files[0], true)
-          .then(function(decodedText) {
-            processScanResult(decodedText);
-            closeScanner();
-          })
-          .catch(function(err) {
-            showToast('ไม่พบรหัสในรูปภาพนี้', 'error');
-          });
-        input.value = '';
+      if (!input.files || input.files.length === 0) return;
+      showToast('กำลังอ่านรูปภาพ...', 'info');
+
+      if (!modalScanner) modalScanner = new Html5Qrcode("modal-scanner-v2");
+
+      modalScanner.scanFile(input.files[0], true)
+        .then(function (decodedText) {
+          processScanResult(decodedText);
+          closeScanner();
+        })
+        .catch(function (err) {
+          showToast('ไม่พบรหัสในรูปภาพนี้', 'error');
+        });
+      input.value = '';
     }
 
     function openScanActionModal(prod, title, desc) {
@@ -3159,15 +2859,15 @@
       document.getElementById('sa-name').textContent = prod.name;
       document.getElementById('sa-id').textContent = 'SKU: ' + (prod.productId || prod.id);
       document.getElementById('sa-qty-input').value = '1';
-      
+
       var btn = document.getElementById('sa-confirm-btn');
-      btn.onclick = function() {
+      btn.onclick = function () {
         var qty = parseInt(document.getElementById('sa-qty-input').value);
         if (qty > 0) {
           performScanAction(prod.productId || prod.id, qty);
         }
       };
-      
+
       document.getElementById('scanActionModal').classList.add('open');
       refreshIcons();
     }
@@ -3175,7 +2875,7 @@
     function performScanAction(id, qty) {
       var mode = currentScanMode; // 'deduct' | 'receive' | 'sub'
       showToast('กำลังดำเนินการ...', 'info');
-      
+
       var promise;
       if (mode === 'deduct') {
         promise = API.updateStock(id, -qty, currentUser.employeeId);
@@ -3187,7 +2887,7 @@
       }
 
       if (promise) {
-        promise.then(function(res) {
+        promise.then(function (res) {
           if (res.success) {
             showToast('✅ ดำเนินการสำเร็จ: ' + (res.message || ''), 'success');
             closeModal('scanActionModal');
@@ -3196,9 +2896,9 @@
           } else {
             showToast('❌ ' + res.message, 'error');
           }
-        }).catch(function(err) {
+        }).catch(function (err) {
           showToast('❌ ข้อผิดพลาด: ' + err, 'error');
-        }).finally(function() {
+        }).finally(function () {
           isScannerBusy = false;
         });
       }
@@ -3213,10 +2913,10 @@
         'sub': { title: 'รับเข้าคลังย่อย (FC)', desc: 'ระบุจำนวนที่รับเข้าคลังย่อยของคุณ' }
       }[currentScanMode];
 
-      API.getStorefrontData().then(function(res) {
+      API.getStorefrontData().then(function (res) {
         var products = res.data && res.data.products ? res.data.products : [];
         var prod = products.find(p => String(p.productId || p.id) === String(text));
-        
+
         if (!prod) {
           showToast('ไม่พบรหัสสินค้า: ' + text, 'error');
           isScannerBusy = false;
@@ -3226,7 +2926,7 @@
         // Use the existing action modal to confirm quantity
         openScanActionModal(prod, config.title, config.desc);
 
-      }).catch(function(err) {
+      }).catch(function (err) {
         showToast('เกิดข้อผิดพลาดในการโหลดข้อมูล', 'error');
         isScannerBusy = false;
       });
@@ -3245,82 +2945,83 @@
 
     // ─── SYSTEM SETTINGS LOGIC ───
     function loadSystemSettings() {
-        var container = document.getElementById('notifyTimesContainer');
-        container.innerHTML = '<div style="padding: 1rem; text-align: center;"><div class="spinner"></div></div>';
-        
-        API._call('getSystemSettings', {}).then(function(res) {
-            container.innerHTML = ''; // clear
-            var times = res.notifyTimes || [8, 12, 15, 18];
-            if (times.length === 0) times = [8]; // fallback
-            
-            times.forEach(function(t) { addTimeSlot(t); });
-        }).catch(function(err) {
-            container.innerHTML = '<div class="text-center text-danger">เกิดข้อผิดพลาดในการโหลดตั้งค่า</div>';
-        });
+      var container = document.getElementById('notifyTimesContainer');
+      container.innerHTML = '<div style="padding: 1rem; text-align: center;"><div class="spinner"></div></div>';
+
+      API._call('getSystemSettings', {}).then(function (res) {
+        container.innerHTML = ''; // clear
+        var times = res.notifyTimes || [8, 12, 15, 18];
+        if (times.length === 0) times = [8]; // fallback
+
+        times.forEach(function (t) { addTimeSlot(t); });
+      }).catch(function (err) {
+        container.innerHTML = '<div class="text-center text-danger">เกิดข้อผิดพลาดในการโหลดตั้งค่า</div>';
+      });
     }
 
     function addTimeSlot(value) {
-        var val = value !== undefined ? value : 12;
-        var wrapper = document.createElement('div');
-        wrapper.className = 'flex gap-2 items-center time-slot';
-        
-        var select = document.createElement('select');
-        select.className = 'input flex-1 notify-time-input';
-        
-        for (var i = 0; i <= 23; i++) {
-            var option = document.createElement('option');
-            option.value = i;
-            var displayHour = i.toString().padStart(2, '0') + ':00';
-            option.textContent = displayHour;
-            if (i == val) option.selected = true;
-            select.appendChild(option);
-        }
-        
-        var removeBtn = document.createElement('button');
-        removeBtn.type = 'button';
-        removeBtn.className = 'btn btn-outline btn-sm';
-        removeBtn.style.color = 'var(--danger)';
-        removeBtn.innerHTML = '<i data-lucide="trash-2"></i>';
-        removeBtn.onclick = function() { wrapper.remove(); };
-        
-        wrapper.appendChild(select);
-        wrapper.appendChild(removeBtn);
-        document.getElementById('notifyTimesContainer').appendChild(wrapper);
-        refreshIcons();
+      var val = value !== undefined ? value : 12;
+      var wrapper = document.createElement('div');
+      wrapper.className = 'flex gap-2 items-center time-slot';
+
+      var select = document.createElement('select');
+      select.className = 'input flex-1 notify-time-input';
+
+      for (var i = 0; i <= 23; i++) {
+        var option = document.createElement('option');
+        option.value = i;
+        var displayHour = i.toString().padStart(2, '0') + ':00';
+        option.textContent = displayHour;
+        if (i == val) option.selected = true;
+        select.appendChild(option);
+      }
+
+      var removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.className = 'btn btn-outline btn-sm';
+      removeBtn.style.color = 'var(--danger)';
+      removeBtn.innerHTML = '<i data-lucide="trash-2"></i>';
+      removeBtn.onclick = function () { wrapper.remove(); };
+
+      wrapper.appendChild(select);
+      wrapper.appendChild(removeBtn);
+      document.getElementById('notifyTimesContainer').appendChild(wrapper);
+      refreshIcons();
     }
 
     function saveSystemSettings() {
-        var inputs = document.querySelectorAll('.notify-time-input');
-        var times = [];
-        inputs.forEach(function(input) {
-            times.push(parseInt(input.value, 10));
-        });
-        
-        // Remove duplicates and sort
-        times = times.filter(function(item, pos) { return times.indexOf(item) == pos; }).sort(function(a, b){return a - b});
-        
-        var btn = document.getElementById('saveSetBtn');
-        btn.innerHTML = '<div class="spinner" style="width:16px;height:16px"></div> กำลังบันทึก...';
-        btn.disabled = true;
-        
-        API._call('saveSystemSettings', { settings: { notifyTimes: times } }).then(function(res) {
-            btn.innerHTML = '<i data-lucide="save"></i> บันทึกการตั้งค่า';
-            btn.disabled = false;
-            refreshIcons();
-            if (res.success) {
-                showToast('บันทึกเวลาแจ้งเตือนเรียบร้อยแล้ว: ' + times.map(t => String(t).padStart(2, '0')+':00').join(', '), 'success');
-                loadSystemSettings();
-            } else {
-                showToast(res.message || 'บันทึกไม่สำเร็จ', 'error');
-            }
-        }).catch(function(err) {
-            btn.innerHTML = '<i data-lucide="save"></i> บันทึกการตั้งค่า';
-            btn.disabled = false;
-            showToast('เกิดข้อผิดพลาด: ' + err, 'error');
-        });
+      var inputs = document.querySelectorAll('.notify-time-input');
+      var times = [];
+      inputs.forEach(function (input) {
+        times.push(parseInt(input.value, 10));
+      });
+
+      // Remove duplicates and sort
+      times = times.filter(function (item, pos) { return times.indexOf(item) == pos; }).sort(function (a, b) { return a - b });
+
+      var btn = document.getElementById('saveSetBtn');
+      btn.innerHTML = '<div class="spinner" style="width:16px;height:16px"></div> กำลังบันทึก...';
+      btn.disabled = true;
+
+      API._call('saveSystemSettings', { settings: { notifyTimes: times } }).then(function (res) {
+        btn.innerHTML = '<i data-lucide="save"></i> บันทึกการตั้งค่า';
+        btn.disabled = false;
+        refreshIcons();
+        if (res.success) {
+          showToast('บันทึกเวลาแจ้งเตือนเรียบร้อยแล้ว: ' + times.map(t => String(t).padStart(2, '0') + ':00').join(', '), 'success');
+          loadSystemSettings();
+        } else {
+          showToast(res.message || 'บันทึกไม่สำเร็จ', 'error');
+        }
+      }).catch(function (err) {
+        btn.innerHTML = '<i data-lucide="save"></i> บันทึกการตั้งค่า';
+        btn.disabled = false;
+        showToast('เกิดข้อผิดพลาด: ' + err, 'error');
+      });
     }
 
-    window.addEventListener('scroll', function() {
+    // --- BACK TO TOP ---
+    window.addEventListener('scroll', function () {
       var btn = document.getElementById('backToTopBtn');
       if (btn) {
         if (window.scrollY > 300) {
@@ -3336,33 +3037,78 @@
     function loadOrdersBasedOnFilter() {
       var filter = document.getElementById('adminOrderFilter').value;
       if (filter === 'all') {
-        allAdminOrders = masterAdminOrders; // Use a master list to filter from
+        allAdminOrders = masterAdminOrders;
       } else {
-        allAdminOrders = masterAdminOrders.filter(function(o) { return o.status === filter; });
+        allAdminOrders = masterAdminOrders.filter(function (o) { return o.status === filter; });
       }
       renderAdminOrders(1);
     }
 
     // --- SYSTEM SETTINGS LOGIC ---
+    function loadSystemSettings() {
+      var container = document.getElementById('notifyTimesContainer');
+      if (!container) return;
+      container.innerHTML = '<div style="padding: 1rem; text-align: center;"><div class="spinner"></div></div>';
+
+      API._call('getSystemSettings', {}).then(function (res) {
+        container.innerHTML = '';
+        var times = res.notifyTimes || [8, 12, 15, 18];
+        if (times.length === 0) times = [8];
+        times.forEach(function (t) { addTimeSlot(t); });
+      }).catch(function (err) {
+        container.innerHTML = '<div class="text-center text-danger">เกิดข้อผิดพลาดในการโหลดตั้งค่า</div>';
+      });
+    }
+
+    function addTimeSlot(value) {
+      var val = value !== undefined ? value : 12;
+      var wrapper = document.createElement('div');
+      wrapper.className = 'flex gap-2 items-center time-slot';
+      var select = document.createElement('select');
+      select.className = 'input flex-1 notify-time-input';
+      for (var i = 0; i <= 23; i++) {
+        var option = document.createElement('option');
+        option.value = i;
+        option.textContent = i.toString().padStart(2, '0') + ':00';
+        if (i == val) option.selected = true;
+        select.appendChild(option);
+      }
+      var removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.className = 'btn btn-outline btn-sm';
+      removeBtn.style.color = 'var(--danger)';
+      removeBtn.innerHTML = '<i data-lucide="trash-2"></i>';
+      removeBtn.onclick = function () { wrapper.remove(); };
+      wrapper.appendChild(select);
+      wrapper.appendChild(removeBtn);
+      document.getElementById('notifyTimesContainer').appendChild(wrapper);
+      refreshIcons();
+    }
+
     function saveSystemSettings() {
       var inputs = document.querySelectorAll('.notify-time-input');
       var times = [];
-      inputs.forEach(function(i) { if(i.value) times.push(i.value); });
-      
+      inputs.forEach(function (input) { times.push(parseInt(input.value, 10)); });
+      times = times.filter(function (item, pos) { return times.indexOf(item) == pos; }).sort(function (a, b) { return a - b });
+
       var btn = document.getElementById('saveSetBtn');
-      var oldHtml = btn.innerHTML;
       btn.innerHTML = '<div class="spinner" style="width:16px;height:16px"></div> กำลังบันทึก...';
       btn.disabled = true;
 
-      API.saveSystemSettings(times).then(function(res) {
-        if(res.success) showToast('บันทึกการตั้งค่าระบบเรียบร้อยแล้ว', 'success');
-        else showToast(res.message, 'error');
-      }).catch(function(err) {
-        showToast(err, 'error');
-      }).finally(function() {
-        btn.innerHTML = oldHtml;
+      API._call('saveSystemSettings', { settings: { notifyTimes: times } }).then(function (res) {
+        btn.innerHTML = '<i data-lucide="save"></i> บันทึกการตั้งค่า';
         btn.disabled = false;
         refreshIcons();
+        if (res.success) {
+          showToast('บันทึกเวลาแจ้งเตือนเรียบร้อยแล้ว: ' + times.map(t => String(t).padStart(2, '0') + ':00').join(', '), 'success');
+          loadSystemSettings();
+        } else {
+          showToast(res.message || 'บันทึกไม่สำเร็จ', 'error');
+        }
+      }).catch(function (err) {
+        btn.innerHTML = '<i data-lucide="save"></i> บันทึกการตั้งค่า';
+        btn.disabled = false;
+        showToast('เกิดข้อผิดพลาด: ' + err, 'error');
       });
     }
 
@@ -3370,24 +3116,24 @@
     var allBranches = [];
     function loadBranches() {
       var body = document.getElementById('branchesBody');
-      body.innerHTML = '<tr><td colspan="10"><div class="skeleton sk-line"></div><div class="skeleton sk-line sk-line-short"></div></td></tr>';
-      
-      API.getBranches().then(function(res) {
+      if (!body) return;
+      body.innerHTML = '<tr><td colspan="4" class="text-center" style="padding:2rem"><div class="spinner"></div></td></tr>';
+      API.getBranches().then(function (res) {
         allBranches = res.data || [];
-        if(allBranches.length === 0) {
+        if (allBranches.length === 0) {
           body.innerHTML = '<tr><td colspan="4" class="text-center" style="padding:2rem; color:var(--text3)">ไม่พบข้อมูลสาขา</td></tr>';
           return;
         }
-        body.innerHTML = allBranches.map(function(b) {
+        body.innerHTML = allBranches.map(function (b) {
           return '<tr>' +
             '<td>' + escapeHTML(b.branchId) + '</td>' +
             '<td style="font-weight:500">' + escapeHTML(b.name) + '</td>' +
             '<td><span class="badge ' + (b.status === 'active' ? 'badge-approved' : 'badge-rejected') + '">' + (b.status === 'active' ? 'ปกติ' : 'ปิด') + '</span></td>' +
             '<td class="flex flex-wrap gap-1">' +
-              '<button class="btn btn-xs btn-outline" onclick="editBranch(\'' + escapeHTML(b.branchId) + '\')"><i data-lucide="edit-2"></i></button>' +
-              '<button class="btn btn-xs btn-ghost" style="color:var(--danger)" onclick="delBranch(\'' + escapeHTML(b.branchId) + '\', this)"><i data-lucide="trash"></i></button>' +
+            '<button class="btn btn-xs btn-outline" onclick="editBranch(\'' + escapeHTML(b.branchId) + '\')"><i data-lucide="edit-2"></i></button>' +
+            '<button class="btn btn-xs btn-ghost" style="color:var(--danger)" onclick="delBranch(\'' + escapeHTML(b.branchId) + '\')"><i data-lucide="trash"></i></button>' +
             '</td>' +
-          '</tr>';
+            '</tr>';
         }).join('');
         refreshIcons();
       });
@@ -3402,256 +3148,144 @@
       document.getElementById('branchModal').classList.add('open');
     }
     function closeBranchModal() { document.getElementById('branchModal').classList.remove('open'); }
-    function editBranch(id) { 
-      var b = allBranches.find(x => x.branchId == id); 
-      if(b) openBranchModal(b); 
+    function editBranch(id) { var b = allBranches.find(x => x.branchId === id); if (b) openBranchModal(b); }
+    function saveBranch() {
+      var data = {
+        branchId: document.getElementById('bf-id').value.trim(),
+        name: document.getElementById('bf-name').value.trim(),
+        status: document.getElementById('bf-status').value
+      };
+      if (!data.branchId || !data.name) { showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warning'); return; }
+      var op = allBranches.some(x => x.branchId === data.branchId) ? 'update' : 'add';
+      API.manageBranch(op, data).then(function (res) {
+        showToast(res.message, res.success ? 'success' : 'error');
+        if (res.success) { closeBranchModal(); loadBranches(); }
+      });
     }
-
-     function saveBranch() {
-       var data = {
-         branchId: document.getElementById('bf-id').value.trim(),
-         name: document.getElementById('bf-name').value.trim(),
-         status: document.getElementById('bf-status').value
-       };
-       if(!data.branchId || !data.name) { showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warning'); return; }
-       
-       var btn = document.getElementById('saveBranchBtn');
-       var oldHtml = btn.innerHTML;
-       btn.disabled = true;
-       btn.innerHTML = '<div class="spinner" style="width:14px; height:14px"></div>';
- 
-       var op = allBranches.some(x => x.branchId == data.branchId) ? 'update' : 'add';
-       API.manageBranch(op, data).then(function(res) {
-         showToast(res.message, res.success ? 'success' : 'error');
-         if(res.success) { 
-           closeBranchModal(); 
-           loadBranches(); 
-           // Invalidate dashboard if needed
-           API.invalidateCache('getBranches');
-         }
-       }).finally(function() {
-         btn.disabled = false;
-         btn.innerHTML = oldHtml;
-       });
-     }
- 
-     function delBranch(id, btnEl) {
-       if(!confirm('ยืนยันการลบสาขา ' + id + ' ?')) return;
-       
-       var oldHtml = btnEl ? btnEl.innerHTML : '';
-       if(btnEl) {
-         btnEl.disabled = true;
-         btnEl.innerHTML = '<div class="spinner" style="width:12px; height:12px"></div>';
-       }
- 
-       API.manageBranch('delete', { branchId: id }).then(function(res) {
-         showToast('ลบสาขาเรียบร้อย', 'success');
-         loadBranches();
-         API.invalidateCache('getBranches');
-       }).finally(function() {
-         if(btnEl) {
-           btnEl.disabled = false;
-           btnEl.innerHTML = oldHtml;
-         }
-       });
-     }
+    function delBranch(id) {
+      if (!confirm('ยืนยันการลบสาขา ' + id + ' ?')) return;
+      API.manageBranch('delete', { branchId: id }).then(function (res) {
+        showToast('ลบสาขาเรียบร้อย', 'success');
+        loadBranches();
+      });
+    }
 
     // --- BARCODE LOGIC ---
     function generateBarcode(id, name) {
       document.getElementById('barcodeLabel').textContent = name;
       document.getElementById('barcodeModal').classList.add('open');
-      
-      setTimeout(function() {
+      setTimeout(function () {
         try {
           bwipjs.toCanvas('barcodeCanvas', {
-            bcid: 'code128',
-            text: id,
-            scale: 3,
-            height: 10,
-            includetext: true,
-            textxalign: 'center',
-            textcolor: '000000',
-            barcolor: '000000'
+            bcid: 'code128', text: id, scale: 3, height: 10, includetext: true,
+            textxalign: 'center', textcolor: '000000', barcolor: '000000'
           });
-        } catch (e) {
-          console.error(e);
-          showToast('ไม่สามารถสร้างบาร์โค้ดได้', 'error');
-        }
+        } catch (e) { showToast('ไม่สามารถสร้างบาร์โค้ดได้', 'error'); }
       }, 100);
       refreshIcons();
     }
     function closeBarcodeModal() { document.getElementById('barcodeModal').classList.remove('open'); }
     function printBarcode() {
       var canvas = document.getElementById('barcodeCanvas');
+      var labelText = document.getElementById('barcodeLabel').textContent;
+      var dataUrl = canvas.toDataURL();
+      
       var win = window.open('', '_blank');
-      win.document.write('\x3chtml\x3e\x3chead\x3e\x3ctitle\x3ePrint Barcode\x3c/title\x3e\x3cstyle\x3ebody{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;font-family:sans-serif}\x3c/style\x3e\x3c/head\x3e\x3cbody\x3e');
-      win.document.write('\x3ch2\x3e' + document.getElementById('barcodeLabel').textContent + '\x3c/h2\x3e');
-      win.document.write('\x3cimg src="' + canvas.toDataURL() + '" style="width:300px"\x3e');
-      win.document.write('\x3cscript\x3esetTimeout(function(){window.print();window.close();},500);\x3c/script\x3e\x3c/body\x3e\x3c/html\x3e');
+      win.document.write('<html><head><title>Print Barcode</title><style>body{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;font-family:sans-serif}img{width:300px;margin-top:1rem}</style></head><body></body></html>');
       win.document.close();
+
+      var doc = win.document;
+      var h2 = doc.createElement('h2');
+      h2.textContent = labelText;
+      doc.body.appendChild(h2);
+
+      var img = doc.createElement('img');
+      img.src = dataUrl;
+      doc.body.appendChild(img);
+
+      var script = doc.createElement('script');
+      script.textContent = 'window.onload = function() { window.print(); window.close(); };';
+      doc.body.appendChild(script);
     }
 
     // --- SEARCHABLE SELECT UTILITY ---
-    function initSearchableSelect(selectId) {
+    function initSearchableSelect(selectId, forceReadOnly) {
       var select = document.getElementById(selectId);
       if (!select) return;
-
-      // Clean up old wrapper if exists
-      var oldWrapper = select.parentElement.querySelector('.search-select-wrapper');
-      if (oldWrapper) oldWrapper.remove();
-
+      var prev = select.previousElementSibling;
+      if (prev && prev.classList.contains('search-select-wrapper')) prev.remove();
       var wrapper = document.createElement('div');
       wrapper.className = 'search-select-wrapper';
       select.style.display = 'none';
       select.parentElement.insertBefore(wrapper, select);
-
       var input = document.createElement('input');
       input.type = 'text';
       input.className = 'form-input search-select-input';
       input.placeholder = select.options[0] ? select.options[0].text : 'พิมพ์เพื่อค้นหา...';
       input.autocomplete = 'off';
-      
-      var chevron = document.createElement('div');
-      chevron.className = 'search-select-chevron';
-      chevron.innerHTML = '<i data-lucide="chevron-down" style="width:16px;height:16px;color:var(--text3)"></i>';
-      
-      // If a value is already selected, show it
-      if (select.selectedIndex > 0) {
-        input.value = select.options[select.selectedIndex].text;
+      var isReadOnly = select.hasAttribute('readonly') || select.readOnly || forceReadOnly;
+      var isDisabled = select.disabled;
+      if (isReadOnly || isDisabled) {
+        input.readOnly = true;
+        input.style.cursor = isDisabled ? 'not-allowed' : 'default';
+        if (isDisabled) input.style.opacity = '0.6';
       }
-
+      if (select.selectedIndex > 0) input.value = select.options[select.selectedIndex].text;
       var dropdown = document.createElement('div');
       dropdown.className = 'search-select-dropdown';
-
       wrapper.appendChild(input);
-      wrapper.appendChild(chevron);
       wrapper.appendChild(dropdown);
-      refreshIcons();
 
       function updateDropdown(filter) {
         var options = Array.from(select.options);
-        var filtered = options.filter(function(o, i) {
-          if (i === 0) return false; // skip placeholder
+        var filtered = options.filter(function (o, i) {
+          if (i === 0 && o.value === "") return false;
           if (!filter) return true;
-          return o.text.toLowerCase().includes(filter.toLowerCase());
+          return o.text.toLowerCase().indexOf(filter.toLowerCase()) !== -1;
         });
-
         if (filtered.length === 0) {
-          dropdown.innerHTML = '<div class="search-select-empty">ไม่พบตัวเลือกที่ตรงกัน</div>';
+          dropdown.innerHTML = '<div class="search-select-empty">ไม่พบตัวเลือก</div>';
         } else {
-          dropdown.innerHTML = filtered.map(function(o) {
+          dropdown.innerHTML = filtered.map(function (o) {
             return '<div class="search-select-item ' + (o.value === select.value ? 'selected' : '') + '" data-value="' + o.value + '">' + o.text + '</div>';
           }).join('');
         }
-
-        dropdown.querySelectorAll('.search-select-item').forEach(function(item) {
-          item.onclick = function() {
+        dropdown.querySelectorAll('.search-select-item').forEach(function (item) {
+          item.onclick = function () {
             select.value = this.dataset.value;
             input.value = this.textContent;
             dropdown.classList.remove('active');
-            // Dispatch change event so existing onchange handlers work
-            select.dispatchEvent(new Event('change'));
+            if (selectId === 'swap-t1' || selectId === 'swap-t2') updateSwapPreview();
+            var event = document.createEvent('HTMLEvents');
+            event.initEvent('change', true, false);
+            select.dispatchEvent(event);
           };
         });
       }
-
-      input.onfocus = function() {
-        if (!dropdown.classList.contains('active')) {
-          this.value = ''; // clear on focus to allow fresh search
-          updateDropdown('');
-          dropdown.classList.add('active');
-        }
-      };
-
-      // Toggle on click
-      input.onclick = function(e) {
-        e.stopPropagation();
-        if (dropdown.classList.contains('active')) {
-          dropdown.classList.remove('active');
-          if (select.selectedIndex >= 0) input.value = select.options[select.selectedIndex].text;
-        } else {
-          this.value = '';
-          updateDropdown('');
-          dropdown.classList.add('active');
-        }
-      };
-
-      input.oninput = function() {
-        updateDropdown(this.value);
+      input.onfocus = function () {
+        if (isDisabled) return;
+        if (!isReadOnly) this.value = '';
+        updateDropdown('');
         dropdown.classList.add('active');
       };
-
-      input.onblur = function() {
-        setTimeout(function() {
+      input.oninput = function () { updateDropdown(this.value); dropdown.classList.add('active'); };
+      var outsideClick = function (e) {
+        if (!wrapper.contains(e.target)) {
           dropdown.classList.remove('active');
-          if (!input.value && select.selectedIndex >= 0) {
-            input.value = select.options[select.selectedIndex].text;
-          }
-        }, 200);
+          if (!input.value && select.selectedIndex >= 0) input.value = select.options[select.selectedIndex].text;
+          document.removeEventListener('click', outsideClick);
+        }
       };
+      input.onclick = function (e) { if (isDisabled) return; dropdown.classList.add('active'); e.stopPropagation(); document.addEventListener('click', outsideClick); };
     }
-
-    // ─── DRAG TO SCROLL (FOR TABS) ────────────────
-    function initDragScroll(selector) {
-      const sliders = document.querySelectorAll(selector);
-      sliders.forEach(slider => {
-        let isDown = false;
-        let startX;
-        let scrollLeft;
-        let hasMoved = false;
-
-        slider.addEventListener('mousedown', (e) => {
-          isDown = true;
-          hasMoved = false;
-          startX = e.pageX - slider.offsetLeft;
-          scrollLeft = slider.scrollLeft;
-        });
-
-        slider.addEventListener('mouseleave', () => {
-          isDown = false;
-          slider.classList.remove('drag-scroll-active');
-        });
-
-        slider.addEventListener('mouseup', () => {
-          isDown = false;
-          slider.classList.remove('drag-scroll-active');
-        });
-
-        slider.addEventListener('mousemove', (e) => {
-          if (!isDown) return;
-          e.preventDefault();
-          const x = e.pageX - slider.offsetLeft;
-          const walk = (x - startX) * 2;
-          
-          if (Math.abs(x - startX) > 10) {
-            hasMoved = true;
-            slider.classList.add('drag-scroll-active');
-          }
-          
-          if (hasMoved) {
-            slider.scrollLeft = scrollLeft - walk;
-          }
-        });
-
-        slider.addEventListener('click', (e) => {
-          if (hasMoved) {
-            e.preventDefault();
-            e.stopPropagation();
-          }
-        }, true);
-      });
-    }
-
-    // Initialize for admin tabs
-    document.addEventListener('DOMContentLoaded', function() {
-      initDragScroll('.tabs');
-      initDragScroll('.cat-filter'); // Also for any filters in admin if any
-    });
   </script>
 
   <!-- Back to Top Button -->
-  <button id="backToTopBtn" class="btn btn-primary" style="position:fixed; bottom:2rem; right:2rem; border-radius:50%; width:50px; height:50px; display:none; align-items:center; justify-content:center; box-shadow:var(--shadow-lg); z-index:1200; padding:0; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1)" onclick="window.scrollTo({top:0, behavior:'smooth'})" title="กลับขึ้นด้านบน">
+  <button id="backToTopBtn" class="btn btn-primary"
+    style="position:fixed; bottom:2rem; right:2rem; border-radius:50%; width:50px; height:50px; display:none; align-items:center; justify-content:center; box-shadow:var(--shadow-lg); z-index:1200; padding:0; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1)"
+    onclick="window.scrollTo({top:0, behavior:'smooth'})" title="กลับขึ้นด้านบน">
     <i data-lucide="arrow-up" style="width:24px;height:24px"></i>
   </button>
 </body>
+
 </html>

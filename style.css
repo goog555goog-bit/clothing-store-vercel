@@ -104,12 +104,17 @@ h1,h2,h3,h4 { letter-spacing: -0.025em; font-weight: 700; }
 /* ─── Forms ────────────────────────────────────────── */
 .form-group { margin-bottom: 1.25rem; }
 .form-label { display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--text2); }
-.form-input {
+.form-input, .input {
   width: 100%; padding: 0.75rem 1rem; border-radius: var(--radius-sm);
   border: 1px solid var(--border); background: var(--surface);
   color: var(--text); font-size: 0.95rem; transition: all 0.2s; font-family: inherit;
+  appearance: none; /* Premium custom arrow styling */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23fbbf24' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1.25rem;
 }
-.form-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(251,191,36,0.25); }
+.form-input:focus, .input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(251,191,36,0.25); }
 
 /* Unified Visible Focus Ring for Accessibility */
 :focus-visible {
