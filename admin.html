@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Panel - Premium</title>
   <link
-    href="https://script.google.com/macros/s/AKfycbyQIuT1ZR2J-LtqJ5EqO3rGZDQZb3i_aYf1Mp31LG48WI3Y4dZDPDM67ZSQcmg2zkES4g/exec"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap"
     rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/bwip-js@3.0.4/dist/bwip-js-min.js"></script>
@@ -1664,7 +1664,7 @@
 
     function saveProduct() {
       var data = {
-        oldProductId: document.getElementById('pf-old-id').value,
+        oldProductId: document.getElementById('pf-old-id').value.trim(),
         productId: document.getElementById('pf-id').value.trim(),
         name: document.getElementById('pf-name').value.trim(),
         categoryId: document.getElementById('pf-cat').value,
@@ -2914,7 +2914,7 @@
       }[currentScanMode];
 
       API.getStorefrontData().then(function (res) {
-        var products = res.products || [];
+        var products = res.data && res.data.products ? res.data.products : [];
         var prod = products.find(p => String(p.productId || p.id) === String(text));
 
         if (!prod) {
@@ -3019,8 +3019,15 @@
         showToast('เกิดข้อผิดพลาด: ' + err, 'error');
       });
     }
+  </script>
 
-    // --- BACK TO TOP ---
+  <!-- Back to Top Button -->
+  <button id="backToTopBtn" class="btn btn-primary"
+    style="position:fixed; bottom:2rem; right:2rem; border-radius:50%; width:50px; height:50px; display:none; align-items:center; justify-content:center; box-shadow:var(--shadow-lg); z-index:1200; padding:0; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1)"
+    onclick="window.scrollTo({top:0, behavior:'smooth'})" title="กลับขึ้นด้านบน">
+    <i data-lucide="arrow-up" style="width:24px;height:24px"></i>
+  </button>
+  <script>
     window.addEventListener('scroll', function () {
       var btn = document.getElementById('backToTopBtn');
       if (btn) {
@@ -3033,11 +3040,31 @@
         }
       }
     });
+  </script>
+  <!-- Back to Top Button -->
+  <button id="backToTopBtn" class="btn btn-primary"
+    style="position:fixed; bottom:2rem; right:2rem; border-radius:50%; width:50px; height:50px; display:none; align-items:center; justify-content:center; box-shadow:var(--shadow-lg); z-index:1200; padding:0; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1)"
+    onclick="window.scrollTo({top:0, behavior:'smooth'})" title="กลับขึ้นด้านบน">
+    <i data-lucide="arrow-up" style="width:24px;height:24px"></i>
+  </button>
+  <script>
+    window.addEventListener('scroll', function () {
+      var btn = document.getElementById('backToTopBtn');
+      if (btn) {
+        if (window.scrollY > 400) {
+          btn.style.display = 'flex';
+          btn.style.opacity = '1';
+        } else {
+          btn.style.display = 'none';
+          btn.style.opacity = '0';
+        }
+      }
+    });
 
     function loadOrdersBasedOnFilter() {
       var filter = document.getElementById('adminOrderFilter').value;
       if (filter === 'all') {
-        allAdminOrders = masterAdminOrders;
+        allAdminOrders = masterAdminOrders; // Use a master list to filter from
       } else {
         allAdminOrders = masterAdminOrders.filter(function (o) { return o.status === filter; });
       }
@@ -3045,70 +3072,25 @@
     }
 
     // --- SYSTEM SETTINGS LOGIC ---
-    function loadSystemSettings() {
-      var container = document.getElementById('notifyTimesContainer');
-      if (!container) return;
-      container.innerHTML = '<div style="padding: 1rem; text-align: center;"><div class="spinner"></div></div>';
-
-      API._call('getSystemSettings', {}).then(function (res) {
-        container.innerHTML = '';
-        var times = res.notifyTimes || [8, 12, 15, 18];
-        if (times.length === 0) times = [8];
-        times.forEach(function (t) { addTimeSlot(t); });
-      }).catch(function (err) {
-        container.innerHTML = '<div class="text-center text-danger">เกิดข้อผิดพลาดในการโหลดตั้งค่า</div>';
-      });
-    }
-
-    function addTimeSlot(value) {
-      var val = value !== undefined ? value : 12;
-      var wrapper = document.createElement('div');
-      wrapper.className = 'flex gap-2 items-center time-slot';
-      var select = document.createElement('select');
-      select.className = 'input flex-1 notify-time-input';
-      for (var i = 0; i <= 23; i++) {
-        var option = document.createElement('option');
-        option.value = i;
-        option.textContent = i.toString().padStart(2, '0') + ':00';
-        if (i == val) option.selected = true;
-        select.appendChild(option);
-      }
-      var removeBtn = document.createElement('button');
-      removeBtn.type = 'button';
-      removeBtn.className = 'btn btn-outline btn-sm';
-      removeBtn.style.color = 'var(--danger)';
-      removeBtn.innerHTML = '<i data-lucide="trash-2"></i>';
-      removeBtn.onclick = function () { wrapper.remove(); };
-      wrapper.appendChild(select);
-      wrapper.appendChild(removeBtn);
-      document.getElementById('notifyTimesContainer').appendChild(wrapper);
-      refreshIcons();
-    }
-
     function saveSystemSettings() {
       var inputs = document.querySelectorAll('.notify-time-input');
       var times = [];
-      inputs.forEach(function (input) { times.push(parseInt(input.value, 10)); });
-      times = times.filter(function (item, pos) { return times.indexOf(item) == pos; }).sort(function (a, b) { return a - b });
+      inputs.forEach(function (i) { if (i.value) times.push(i.value); });
 
       var btn = document.getElementById('saveSetBtn');
+      var oldHtml = btn.innerHTML;
       btn.innerHTML = '<div class="spinner" style="width:16px;height:16px"></div> กำลังบันทึก...';
       btn.disabled = true;
 
-      API._call('saveSystemSettings', { settings: { notifyTimes: times } }).then(function (res) {
-        btn.innerHTML = '<i data-lucide="save"></i> บันทึกการตั้งค่า';
+      API.saveSystemSettings(times).then(function (res) {
+        if (res.success) showToast('บันทึกการตั้งค่าระบบเรียบร้อยแล้ว', 'success');
+        else showToast(res.message, 'error');
+      }).catch(function (err) {
+        showToast(err, 'error');
+      }).finally(function () {
+        btn.innerHTML = oldHtml;
         btn.disabled = false;
         refreshIcons();
-        if (res.success) {
-          showToast('บันทึกเวลาแจ้งเตือนเรียบร้อยแล้ว: ' + times.map(t => String(t).padStart(2, '0') + ':00').join(', '), 'success');
-          loadSystemSettings();
-        } else {
-          showToast(res.message || 'บันทึกไม่สำเร็จ', 'error');
-        }
-      }).catch(function (err) {
-        btn.innerHTML = '<i data-lucide="save"></i> บันทึกการตั้งค่า';
-        btn.disabled = false;
-        showToast('เกิดข้อผิดพลาด: ' + err, 'error');
       });
     }
 
@@ -3116,8 +3098,8 @@
     var allBranches = [];
     function loadBranches() {
       var body = document.getElementById('branchesBody');
-      if (!body) return;
       body.innerHTML = '<tr><td colspan="4" class="text-center" style="padding:2rem"><div class="spinner"></div></td></tr>';
+
       API.getBranches().then(function (res) {
         allBranches = res.data || [];
         if (allBranches.length === 0) {
@@ -3149,6 +3131,7 @@
     }
     function closeBranchModal() { document.getElementById('branchModal').classList.remove('open'); }
     function editBranch(id) { var b = allBranches.find(x => x.branchId === id); if (b) openBranchModal(b); }
+
     function saveBranch() {
       var data = {
         branchId: document.getElementById('bf-id').value.trim(),
@@ -3156,12 +3139,14 @@
         status: document.getElementById('bf-status').value
       };
       if (!data.branchId || !data.name) { showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warning'); return; }
+
       var op = allBranches.some(x => x.branchId === data.branchId) ? 'update' : 'add';
       API.manageBranch(op, data).then(function (res) {
         showToast(res.message, res.success ? 'success' : 'error');
         if (res.success) { closeBranchModal(); loadBranches(); }
       });
     }
+
     function delBranch(id) {
       if (!confirm('ยืนยันการลบสาขา ' + id + ' ?')) return;
       API.manageBranch('delete', { branchId: id }).then(function (res) {
@@ -3174,13 +3159,23 @@
     function generateBarcode(id, name) {
       document.getElementById('barcodeLabel').textContent = name;
       document.getElementById('barcodeModal').classList.add('open');
+
       setTimeout(function () {
         try {
           bwipjs.toCanvas('barcodeCanvas', {
-            bcid: 'code128', text: id, scale: 3, height: 10, includetext: true,
-            textxalign: 'center', textcolor: '000000', barcolor: '000000'
+            bcid: 'code128',
+            text: id,
+            scale: 3,
+            height: 10,
+            includetext: true,
+            textxalign: 'center',
+            textcolor: '000000',
+            barcolor: '000000'
           });
-        } catch (e) { showToast('ไม่สามารถสร้างบาร์โค้ดได้', 'error'); }
+        } catch (e) {
+          console.error(e);
+          showToast('ไม่สามารถสร้างบาร์โค้ดได้', 'error');
+        }
       }, 100);
       refreshIcons();
     }
@@ -3212,27 +3207,39 @@
     function initSearchableSelect(selectId, forceReadOnly) {
       var select = document.getElementById(selectId);
       if (!select) return;
+
       var prev = select.previousElementSibling;
-      if (prev && prev.classList.contains('search-select-wrapper')) prev.remove();
+      if (prev && prev.classList.contains('search-select-wrapper')) {
+        prev.remove();
+      }
+
       var wrapper = document.createElement('div');
       wrapper.className = 'search-select-wrapper';
       select.style.display = 'none';
       select.parentElement.insertBefore(wrapper, select);
+
       var input = document.createElement('input');
       input.type = 'text';
       input.className = 'form-input search-select-input';
       input.placeholder = select.options[0] ? select.options[0].text : 'พิมพ์เพื่อค้นหา...';
       input.autocomplete = 'off';
+
       var isReadOnly = select.hasAttribute('readonly') || select.readOnly || forceReadOnly;
       var isDisabled = select.disabled;
+
       if (isReadOnly || isDisabled) {
         input.readOnly = true;
         input.style.cursor = isDisabled ? 'not-allowed' : 'default';
         if (isDisabled) input.style.opacity = '0.6';
       }
-      if (select.selectedIndex > 0) input.value = select.options[select.selectedIndex].text;
+
+      if (select.selectedIndex > 0) {
+        input.value = select.options[select.selectedIndex].text;
+      }
+
       var dropdown = document.createElement('div');
       dropdown.className = 'search-select-dropdown';
+
       wrapper.appendChild(input);
       wrapper.appendChild(dropdown);
 
@@ -3243,6 +3250,7 @@
           if (!filter) return true;
           return o.text.toLowerCase().indexOf(filter.toLowerCase()) !== -1;
         });
+
         if (filtered.length === 0) {
           dropdown.innerHTML = '<div class="search-select-empty">ไม่พบตัวเลือก</div>';
         } else {
@@ -3250,42 +3258,52 @@
             return '<div class="search-select-item ' + (o.value === select.value ? 'selected' : '') + '" data-value="' + o.value + '">' + o.text + '</div>';
           }).join('');
         }
+
         dropdown.querySelectorAll('.search-select-item').forEach(function (item) {
           item.onclick = function () {
             select.value = this.dataset.value;
             input.value = this.textContent;
             dropdown.classList.remove('active');
+
             if (selectId === 'swap-t1' || selectId === 'swap-t2') updateSwapPreview();
+
             var event = document.createEvent('HTMLEvents');
             event.initEvent('change', true, false);
             select.dispatchEvent(event);
           };
         });
       }
+
       input.onfocus = function () {
         if (isDisabled) return;
         if (!isReadOnly) this.value = '';
         updateDropdown('');
         dropdown.classList.add('active');
       };
-      input.oninput = function () { updateDropdown(this.value); dropdown.classList.add('active'); };
+
+      input.oninput = function () {
+        updateDropdown(this.value);
+        dropdown.classList.add('active');
+      };
+
       var outsideClick = function (e) {
         if (!wrapper.contains(e.target)) {
           dropdown.classList.remove('active');
-          if (!input.value && select.selectedIndex >= 0) input.value = select.options[select.selectedIndex].text;
+          if (!input.value && select.selectedIndex >= 0) {
+            input.value = select.options[select.selectedIndex].text;
+          }
           document.removeEventListener('click', outsideClick);
         }
       };
-      input.onclick = function (e) { if (isDisabled) return; dropdown.classList.add('active'); e.stopPropagation(); document.addEventListener('click', outsideClick); };
+
+      input.onclick = function (e) {
+        if (isDisabled) return;
+        dropdown.classList.add('active');
+        e.stopPropagation();
+        document.addEventListener('click', outsideClick);
+      };
     }
   </script>
-
-  <!-- Back to Top Button -->
-  <button id="backToTopBtn" class="btn btn-primary"
-    style="position:fixed; bottom:2rem; right:2rem; border-radius:50%; width:50px; height:50px; display:none; align-items:center; justify-content:center; box-shadow:var(--shadow-lg); z-index:1200; padding:0; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1)"
-    onclick="window.scrollTo({top:0, behavior:'smooth'})" title="กลับขึ้นด้านบน">
-    <i data-lucide="arrow-up" style="width:24px;height:24px"></i>
-  </button>
 </body>
 
 </html>
