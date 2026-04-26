@@ -2,7 +2,7 @@
 //  api.js — Frontend REST Adapter (Refactored & Optimized)
 // ============================================================
 
-const GAS_URL = "https://script.google.com/macros/s/AKfycbwMedwlttQ8et2Xq-Xk4dxHdvFv5otMxoqElmwkc-73yX2hSr9mjjDhHFj7ijKHWeg_nA/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbzzqz0K_FzdL2flMcKoY4frRnM2f7Ya8n9ATvAI4geuAYBG2GGuVmC2nYPEJQsyQHJfRA/exec";
 
 var API = (function () {
   var CACHE_KEY = '_api_cache_v1';
