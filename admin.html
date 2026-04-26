@@ -1239,7 +1239,7 @@
               }).join('') + '</div>';
 
             // Render Top Products Horizontal Bar Chart
-            renderTopProductsChart(res.data.topProducts);
+            renderTopProductsChart(res.data.topProducts, 'topProductsChart');
           } else {
             dbTopList.innerHTML = '<div class="text-center" style="padding:2rem; color:var(--text3)">ไม่พบข้อมูล</div>';
           }
@@ -1256,7 +1256,7 @@
           }
           
           if (res.data.categorySpending) {
-            renderCategorySpendingChart(res.data.categorySpending);
+            renderCategorySpendingChart(res.data.categorySpending, 'categorySpendingChart');
           }
         }
       }).catch(function (err) {
@@ -1359,54 +1359,68 @@
     }
 
     function initTrendsChart() {
-      if (typeof Chart === 'undefined') {
-        console.warn('Chart.js library not loaded. Skipping trends chart.');
-        return;
-      }
-      API.getMonthlyTrends().then(function (res) {
-        if (!res.success) return;
-        var canvas = document.getElementById('trendsChart');
-        if (!canvas) return;
-        var ctx = canvas.getContext('2d');
-        if (chartInstance) chartInstance.destroy();
+      var canvas = document.getElementById('trendsChart');
+      if (!canvas || typeof Chart === 'undefined') return;
 
-        chartInstance = new Chart(ctx, {
-          type: 'line',
-          data: {
-            labels: res.labels,
-            datasets: [{
-              label: 'ยอดการเบิก (บาท)',
-              data: res.data,
-              borderColor: '#7c3aed',
-              backgroundColor: 'rgba(124, 58, 237, 0.1)',
-              borderWidth: 3,
-              tension: 0.4,
-              fill: true,
-              pointBackgroundColor: '#06d6a0',
-              pointRadius: 5
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-              y: {
-                beginAtZero: true,
-                grid: { color: 'rgba(255,255,255,0.05)' },
-                ticks: { color: '#94a3b8' }
-              },
-              x: {
-                grid: { display: false },
-                ticks: { color: '#94a3b8' }
-              }
-            },
-            plugins: {
-              legend: { display: false }
-            }
-          }
-        });
+      API.getMonthlyTrends().then(function (res) {
+        if (!res.success || !res.labels || !res.data) return;
+        renderTrendsChart(res.labels, res.data, 'trendsChart');
+      }).catch(function(err) {
+        console.error('Trends Chart Error:', err);
       });
     }
+
+    var trendsInstances = {};
+    function renderTrendsChart(labels, data, canvasId) {
+      var canvas = document.getElementById(canvasId);
+      if (!canvas || typeof Chart === 'undefined') return;
+      if (trendsInstances[canvasId]) trendsInstances[canvasId].destroy();
+
+      trendsInstances[canvasId] = new Chart(canvas.getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'ยอดการเบิก (บาท)',
+            data: data,
+            borderColor: '#8b5cf6',
+            backgroundColor: 'rgba(139, 92, 246, 0.1)',
+            fill: true,
+            tension: 0.4,
+            borderWidth: 3,
+            pointRadius: 4,
+            pointBackgroundColor: '#8b5cf6',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10 } } },
+            y: { 
+              beginAtZero: true,
+              grid: { color: 'rgba(255, 255, 255, 0.05)', drawBorder: false }, 
+              ticks: { color: '#94a3b8', font: { size: 10 }, callback: function(v) { return '฿' + v.toLocaleString(); } } 
+            }
+          },
+          plugins: { 
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#1e293b',
+              titleColor: '#fff',
+              bodyColor: '#fff',
+              borderColor: 'rgba(255,255,255,0.1)',
+              borderWidth: 1,
+              padding: 10,
+              displayColors: false
+            }
+          }
+        }
+      });
+    }
+
     function statCard(iconName, label, value, color) {
       // Create virtual sparkline bars
       var bars = '';
