@@ -1990,10 +1990,10 @@
         } else if (o.status === 'Approved') {
           actions = '<div class="flex flex-wrap gap-1">' +
             '<button class="btn btn-sm btn-warning" onclick="doReady(\'' + o.orderId + '\')"><i data-lucide="package-check" style="width:14px;height:14px"></i> จัดเสร็จแล้ว</button>' +
-            '<button class="btn btn-sm btn-primary" onclick="doDispatch(\'' + o.orderId + '\')"><i data-lucide="package" style="width:14px;height:14px"></i> จ่ายทันที</button>' +
+            '<button class="btn btn-sm btn-primary" onclick="doDispatch(\'' + o.orderId + '\', this)"><i data-lucide="package" style="width:14px;height:14px"></i> จ่ายทันที</button>' +
             '</div>';
         } else if (o.status === 'Ready') {
-          actions = '<button class="btn btn-sm btn-primary" onclick="doDispatch(\'' + o.orderId + '\')"><i data-lucide="package" style="width:14px;height:14px"></i> จ่ายของ</button>';
+          actions = '<button class="btn btn-sm btn-primary" onclick="doDispatch(\'' + o.orderId + '\', this)"><i data-lucide="package" style="width:14px;height:14px"></i> จ่ายของ</button>';
         } else if (o.status === 'Dispatched') {
           actions = '<button class="btn btn-primary btn-sm" onclick="openSignatureModal(\'' + o.orderId + '\')"><i data-lucide="edit-3" style="width:14px;height:14px"></i> เซ็นรับของ</button>';
         }
@@ -2208,9 +2208,29 @@
       });
     }
 
-    function doDispatch(id) {
+    function doDispatch(id, btnEl) {
       if (!confirm('ยืนยันการจ่ายพัสดุและตัดสต๊อกใบเบิก ' + id + ' ?')) return;
-      API.dispatchRequest(id).then(function () { showToast('ส่งพัสดุเรียบร้อย', 'success'); loadAdminOrders(); }).catch(function (err) { showToast('ข้อผิดพลาด: ' + err, 'error'); });
+      
+      var btn = btnEl || event.currentTarget;
+      var oldHtml = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<div class="spinner" style="width:14px;height:14px"></div>';
+
+      API.dispatchRequest(id).then(function (res) { 
+        if (res.success) {
+          showToast(res.message || 'ส่งพัสดุเรียบร้อย', 'success'); 
+        } else {
+          showToast(res.message, 'error');
+        }
+        loadAdminOrders(); 
+      }).catch(function (err) { 
+        showToast('ข้อผิดพลาด: ' + err, 'error'); 
+      }).finally(function() {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = oldHtml;
+        }
+      });
     }
 
     function doReady(id) {
