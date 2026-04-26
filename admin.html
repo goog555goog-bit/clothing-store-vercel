@@ -1016,8 +1016,8 @@
   </nav>
   
   <!-- Change Password Modal -->
-  <div id="passwordModal" class="modal">
-    <div class="modal-content" style="max-width:400px">
+  <div id="passwordModal" class="modal-overlay" onclick="if(event.target===this) closePasswordModal()">
+    <div class="modal" style="max-width:400px" onclick="event.stopPropagation()">
       <div class="modal-header">
         <h3 id="passwordModalTitle">เปลี่ยนรหัสผ่าน</h3>
         <button class="btn-close" onclick="closePasswordModal()">&times;</button>
