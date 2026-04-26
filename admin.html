@@ -339,17 +339,21 @@
       <div class="grid grid-2 gap-2">
         <div class="card">
           <div class="card-header">
-            <div class="card-title">ยอดเบิกตามหมวดหมู่</div>
+            <div class="card-title text-primary">ยอดเบิกตามหมวดหมู่</div>
           </div>
-          <div style="height:250px;position:relative"><canvas id="categoryOrdersChart"></canvas></div>
-          <div id="deptSpendList" style="margin-top:1rem; padding: 0 1rem 1rem"></div>
+          <div style="height:250px;position:relative;padding:1rem">
+            <canvas id="reportCategoryChart"></canvas>
+          </div>
+          <div id="reportDeptList" style="margin-top:1rem; padding: 0 1rem 1rem"></div>
         </div>
         <div class="card">
           <div class="card-header">
-            <div class="card-title">สินค้าขายดี</div>
+            <div class="card-title text-accent">สินค้าขายดี</div>
           </div>
-          <div style="height:250px;position:relative"><canvas id="topProductsChart"></canvas></div>
-          <div id="topItemsList" style="margin-top:1rem; padding: 0 1rem 1rem"></div>
+          <div style="height:250px;position:relative;padding:1rem">
+            <canvas id="reportProductsChart"></canvas>
+          </div>
+          <div id="reportTopList" style="margin-top:1rem; padding: 0 1rem 1rem"></div>
         </div>
       </div>
       <div class="card" style="margin-top:1.5rem">
@@ -1295,13 +1299,13 @@
       });
     }
 
-    var categoryChartInstance = null;
-    function renderCategorySpendingChart(data) {
-      var canvas = document.getElementById('categorySpendingChart');
+    var categoryChartInstances = {};
+    function renderCategorySpendingChart(data, canvasId) {
+      var canvas = document.getElementById(canvasId);
       if (!canvas || typeof Chart === 'undefined') return;
-      if (categoryChartInstance) categoryChartInstance.destroy();
+      if (categoryChartInstances[canvasId]) categoryChartInstances[canvasId].destroy();
       
-      categoryChartInstance = new Chart(canvas.getContext('2d'), {
+      categoryChartInstances[canvasId] = new Chart(canvas.getContext('2d'), {
         type: 'doughnut',
         data: {
           labels: data.map(function(d){ return d.category; }),
@@ -1323,13 +1327,13 @@
       });
     }
 
-    var topChartInstance = null;
-    function renderTopProductsChart(data) {
-      var canvas = document.getElementById('topProductsChart');
+    var topChartInstances = {};
+    function renderTopProductsChart(data, canvasId) {
+      var canvas = document.getElementById(canvasId);
       if (!canvas || typeof Chart === 'undefined') return;
-      if (topChartInstance) topChartInstance.destroy();
+      if (topChartInstances[canvasId]) topChartInstances[canvasId].destroy();
 
-      topChartInstance = new Chart(canvas.getContext('2d'), {
+      topChartInstances[canvasId] = new Chart(canvas.getContext('2d'), {
         type: 'bar',
         data: {
           labels: data.map(function(d){ return d.productName; }),
@@ -1748,9 +1752,17 @@
 
     function toggleProductStatus(id, current) {
       var newStatus = current === 'active' ? 'inactive' : 'active';
-      var p = allAdminProducts.find(function (x) { return String(x.productId) === String(id); });
+      var p = null;
+      for (var i = 0; i < allAdminProducts.length; i++) {
+        if (String(allAdminProducts[i].productId) === String(id)) {
+          p = allAdminProducts[i];
+          break;
+        }
+      }
       if (!p) return;
-      var data = Object.assign({}, p, { status: newStatus });
+      var data = {};
+      for (var key in p) { if (p.hasOwnProperty(key)) data[key] = p[key]; }
+      data.status = newStatus;
       API.manageProduct('update', data).then(function (res) {
         if (res.success) { showToast('อัปเดตสถานะแล้ว', 'success'); loadProducts(); }
       });
@@ -2121,7 +2133,7 @@
 
           var teamName = '-';
           if (e.teamId) {
-            var team = allAdminTeams.find(t => t.teamId === e.teamId);
+            var team = allAdminTeams.find(function(t) { return t.teamId === e.teamId; });
             if (team) teamName = team.name;
           }
 
@@ -2245,7 +2257,7 @@
       document.getElementById('tf-name').value = team ? team.name : '';
 
       API.getEmployees().then(function (res) {
-        var technicians = (res.data || []).filter(e => e.role === 'technician' || e.role === 'fc');
+        var technicians = (res.data || []).filter(function(e) { return e.role === 'technician' || e.role === 'fc'; });
         var leadSel = document.getElementById('tf-lead');
         leadSel.innerHTML = '<option value="">-- เลือกหัวหน้าทีม --</option>' + technicians.map(function (e) {
           return '<option value="' + e.employeeId + '" ' + (team && team.leadId === e.employeeId ? 'selected' : '') + '>' + e.name + ' (' + e.employeeId + ')</option>';
@@ -2255,9 +2267,9 @@
 
       document.getElementById('tf-members').innerHTML = '';
       if (team && team.members) {
-        document.getElementById('tf-members').innerHTML = team.members.map(m =>
-          '<span class="badge badge-pending" style="font-size:0.7rem">' + m.name + '</span>'
-        ).join('');
+        document.getElementById('tf-members').innerHTML = team.members.map(function(m) {
+          return '<span class="badge badge-pending" style="font-size:0.7rem">' + m.name + '</span>';
+        }).join('');
       }
 
       document.getElementById('teamModalTitle').textContent = team ? 'แก้ไขข้อมูลทีม' : 'สร้างทีมใหม่';
@@ -2267,7 +2279,13 @@
     function closeTeamModal() { document.getElementById('teamModal').classList.remove('open'); }
 
     function editTeam(id) {
-      var team = allAdminTeams.find(t => t.teamId === id);
+      var team = null;
+      for (var i = 0; i < allAdminTeams.length; i++) {
+        if (allAdminTeams[i].teamId === id) {
+          team = allAdminTeams[i];
+          break;
+        }
+      }
       if (team) openTeamModal(team);
     }
 
@@ -2312,7 +2330,7 @@
     function openSwapLeadModal() {
       var s1 = document.getElementById('swap-t1');
       var s2 = document.getElementById('swap-t2');
-      var opStr = '<option value="">-- เลือกทีม --</option>' + allAdminTeams.map(t => '<option value="' + t.teamId + '">' + t.name + '</option>').join('');
+      var opStr = '<option value="">-- เลือกทีม --</option>' + allAdminTeams.map(function(t) { return '<option value="' + t.teamId + '">' + t.name + '</option>'; }).join('');
       s1.innerHTML = opStr;
       s2.innerHTML = opStr;
       initSearchableSelect('swap-t1');
@@ -2329,8 +2347,8 @@
       var preview = document.getElementById('swapPreview');
 
       if (t1id && t2id && t1id !== t2id) {
-        var t1 = allAdminTeams.find(t => t.teamId === t1id);
-        var t2 = allAdminTeams.find(t => t.teamId === t2id);
+        var t1 = allAdminTeams.find(function(t) { return t.teamId === t1id; });
+        var t2 = allAdminTeams.find(function(t) { return t.teamId === t2id; });
         document.getElementById('sp-t1-lead').innerHTML = '<div style="font-size:0.75rem; color:var(--text3)">' + t1.name + '</div><div style="font-weight:700">' + t1.leadName + '</div>';
         document.getElementById('sp-t2-lead').innerHTML = '<div style="font-size:0.75rem; color:var(--text3)">' + t2.name + '</div><div style="font-weight:700">' + t2.leadName + '</div>';
         preview.style.display = 'block';
@@ -2525,152 +2543,66 @@
     }
 
     // ─── REPORTS ──────────────────────────────────────────
-    var charts = {};
 
-    function renderDashboardCharts() {
-      if (typeof Chart === 'undefined') {
-        console.warn('Chart.js not loaded. Skipping charts.');
-        return;
-      }
-      var now = new Date();
-      var month = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
-
-      var isDark = document.body.classList.contains('dark-mode');
-      var textColor = isDark ? '#cbd5e1' : '#475569';
-      var gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
-
-      API.getTopRequestedItems(month).then(function (res) {
-        if (!res.success || !res.data) return;
-        var data = res.data.slice(0, 5);
-        var ctxId = 'topProductsChart';
-        var canvas = document.getElementById(ctxId);
-        if (!canvas) return;
-        var ctx = canvas.getContext('2d');
-
-        var goldGradient = ctx.createLinearGradient(0, 0, 0, 400);
-        goldGradient.addColorStop(0, 'rgba(251, 191, 36, 0.8)');
-        goldGradient.addColorStop(1, 'rgba(217, 119, 6, 0.2)');
-
-        if (charts.top) charts.top.destroy();
-        charts.top = new Chart(ctx, {
-          type: 'bar',
-          data: {
-            labels: data.map(function (i) { return i.productName; }),
-            datasets: [{
-              label: 'จำนวนที่เบิก (ชิ้น)',
-              data: data.map(function (i) { return i.totalQty; }),
-              backgroundColor: goldGradient,
-              borderColor: '#fbbf24',
-              borderWidth: 1,
-              borderRadius: 6,
-              hoverBackgroundColor: '#fbbf24'
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-              y: {
-                beginAtZero: true,
-                grid: { color: gridColor, drawBorder: false },
-                ticks: { color: textColor, font: { family: "'Inter', sans-serif", size: 11 } }
-              },
-              x: {
-                grid: { display: false },
-                ticks: { color: textColor, font: { family: "'Inter', sans-serif", size: 11 } }
-              }
-            },
-            plugins: {
-              legend: { display: false },
-              tooltip: {
-                backgroundColor: 'rgba(0,0,0,0.85)',
-                titleFont: { size: 13, weight: 'bold' },
-                padding: 12,
-                cornerRadius: 10,
-                borderColor: 'rgba(251, 191, 36, 0.3)',
-                borderWidth: 1
-              }
-            }
-          }
-        });
-        refreshIcons();
-      });
-
-      API.getDepartmentSpending(month).then(function (res) {
-        if (!res.success || !res.data) return;
-        var ctx = document.getElementById('categoryOrdersChart').getContext('2d');
-        if (charts.dept) charts.dept.destroy();
-        charts.dept = new Chart(ctx, {
-          type: 'doughnut',
-          data: {
-            labels: res.data.map(function (d) { return d.department; }),
-            datasets: [{
-              data: res.data.map(function (d) { return d.totalSpending; }),
-              backgroundColor: [
-                '#fbbf24', '#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#ef4444'
-              ],
-              borderColor: isDark ? '#12121e' : '#fff',
-              borderWidth: 2,
-              hoverOffset: 15
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            cutout: '70%',
-            plugins: {
-              legend: {
-                position: 'right',
-                labels: {
-                  color: textColor,
-                  boxWidth: 12,
-                  font: { family: "'Inter', sans-serif", size: 12 }
-                }
-              },
-              tooltip: {
-                backgroundColor: 'rgba(0,0,0,0.85)',
-                padding: 12,
-                cornerRadius: 10,
-                borderColor: 'rgba(255,255,255,0.1)',
-                borderWidth: 1
-              }
-            }
-          }
-        });
-      });
-    }
 
     function loadReports() {
-      var now = new Date();
-      var month = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+      var topList = document.getElementById('reportTopList');
+      var deptList = document.getElementById('reportDeptList');
+      if (topList) topList.innerHTML = '<div class="text-center" style="padding:2rem"><div class="spinner"></div></div>';
+      if (deptList) deptList.innerHTML = '<div class="text-center" style="padding:2rem"><div class="spinner"></div></div>';
 
-      API.getTopRequestedItems(month).then(function (res) {
-        var el = document.getElementById('topItemsList');
-        if (!res.success || res.data.length === 0) { el.innerHTML = '<p style="color:var(--text3)">ไม่มีข้อมูล</p>'; return; }
-        el.innerHTML = res.data.slice(0, 10).map(function (i, idx) {
-          return '<div class="flex flex-wrap items-center justify-between gap-2" style="padding:0.4rem 0;border-bottom:1px solid var(--border)">'
-            + '<span>' + (idx + 1) + '. ' + i.productName + '</span>'
-            + '<span style="font-weight:600">' + i.totalQty + ' ชิ้น</span>'
-            + '</div>';
-        }).join('');
-      });
+      API.getAdvancedDashboardData().then(function (res) {
+        if (!res.success || !res.data) return;
 
-      API.getDepartmentSpending(month).then(function (res) {
-        var el = document.getElementById('deptSpendList');
-        if (!res.success || res.data.length === 0) { el.innerHTML = '<p style="color:var(--text3)">ไม่มีข้อมูล</p>'; return; }
-        el.innerHTML = res.data.map(function (d) {
-          var pct = d.budget > 0 ? d.percentUsed : 0;
-          var barColor = pct > 80 ? 'var(--danger)' : pct > 50 ? 'var(--warning)' : 'var(--accent)';
-          return '<div style="margin-bottom:0.75rem">'
-            + '<div class="flex flex-wrap justify-between gap-2" style="font-size:0.85rem;margin-bottom:0.25rem">'
-            + '<span>' + d.department + '</span>'
-            + '<span>฿' + d.totalSpending.toLocaleString() + ' / ฿' + d.budget.toLocaleString() + '</span>'
-            + '</div>'
-            + '<div style="height:8px;background:var(--bg);border-radius:4px;overflow:hidden">'
-            + '<div style="height:100%;width:' + Math.min(pct, 100) + '%;background:' + barColor + ';border-radius:4px;transition:width 0.5s"></div>'
-            + '</div>'
-            + '</div>';
-        }).join('');
+        // 1. Render Charts
+        if (res.data.topProducts) {
+          renderTopProductsChart(res.data.topProducts, 'reportProductsChart');
+        }
+        if (res.data.categorySpending) {
+          renderCategorySpendingChart(res.data.categorySpending, 'reportCategoryChart');
+        }
+
+        // 2. Render List Data
+        if (topList) {
+          topList.innerHTML = res.data.topProducts.map(function (tp, idx) {
+            return '<div class="flex items-center justify-between" style="padding:0.5rem; border-bottom:1px solid var(--border); font-size:0.85rem">' +
+              '<span>' + (idx + 1) + '. ' + tp.productName + '</span>' +
+              '<span style="font-weight:700; color:var(--accent)">' + tp.totalQty + ' ชิ้น</span>' +
+              '</div>';
+          }).join('');
+        }
+
+        if (deptList) {
+          deptList.innerHTML = '<div style="font-size:0.75rem; color:var(--text3); margin-bottom:0.5rem; margin-top:1rem">สัดส่วนตามแผนก:</div>' +
+            res.data.deptSpending.map(function (ds) {
+              return '<div class="flex justify-between" style="font-size:0.85rem; margin-bottom:0.25rem">' +
+                '<span>' + ds.department + '</span>' +
+                '<span style="color:var(--primary-light)">฿' + (ds.totalSpending || 0).toLocaleString() + '</span>' +
+                '</div>';
+            }).join('');
+        }
+
+        // 3. Render Inventory Table
+        API.getInventoryForecast().then(function (resInv) {
+          var body = document.getElementById('reportInventoryBody');
+          if (!body) return;
+          if (!resInv.success || !resInv.data) {
+            body.innerHTML = '<tr><td colspan="6" class="text-center">ไม่มีข้อมูล</td></tr>';
+            return;
+          }
+          body.innerHTML = resInv.data.slice(0, 20).map(function (p) {
+            var statusClass = p.currentStock <= 0 ? 'badge-rejected' : p.currentStock <= 5 ? 'badge-pending' : 'badge-approved';
+            var statusText = p.currentStock <= 0 ? 'หมด' : p.currentStock <= 5 ? 'ใกล้หมด' : 'ปกติ';
+            return '<tr>' +
+              '<td>' + p.productId + '</td>' +
+              '<td>' + p.productName + '</td>' +
+              '<td>' + (p.category || '-') + '</td>' +
+              '<td>' + p.currentStock + '</td>' +
+              '<td>' + (p.minStock || 5) + '</td>' +
+              '<td><span class="badge ' + statusClass + '">' + statusText + '</span></td>' +
+              '</tr>';
+          }).join('');
+        });
       });
     }
 
@@ -2965,7 +2897,7 @@
 
       API.getStorefrontData().then(function (res) {
         var products = res.data && res.data.products ? res.data.products : [];
-        var prod = products.find(p => String(p.productId || p.id) === String(text));
+        var prod = products.find(function(p) { return String(p.productId || p.id) === String(text); });
 
         if (!prod) {
           showToast('ไม่พบรหัสสินค้า: ' + text, 'error');
@@ -3058,7 +2990,8 @@
         btn.disabled = false;
         refreshIcons();
         if (res.success) {
-          showToast('บันทึกเวลาแจ้งเตือนเรียบร้อยแล้ว: ' + times.map(t => String(t).padStart(2, '0') + ':00').join(', '), 'success');
+          var timeLabels = times.map(function(t) { return String(t).padStart(2, '0') + ':00'; }).join(', ');
+          showToast('บันทึกเวลาแจ้งเตือนเรียบร้อยแล้ว: ' + timeLabels, 'success');
           loadSystemSettings();
         } else {
           showToast(res.message || 'บันทึกไม่สำเร็จ', 'error');
@@ -3069,47 +3002,27 @@
         showToast('เกิดข้อผิดพลาด: ' + err, 'error');
       });
     }
-  </script>
 
-  <!-- Back to Top Button -->
-  <button id="backToTopBtn" class="btn btn-primary"
-    style="position:fixed; bottom:2rem; right:2rem; border-radius:50%; width:50px; height:50px; display:none; align-items:center; justify-content:center; box-shadow:var(--shadow-lg); z-index:1200; padding:0; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1)"
-    onclick="window.scrollTo({top:0, behavior:'smooth'})" title="กลับขึ้นด้านบน">
-    <i data-lucide="arrow-up" style="width:24px;height:24px"></i>
-  </button>
-  <script>
-    window.addEventListener('scroll', function () {
-      var btn = document.getElementById('backToTopBtn');
-      if (btn) {
-        if (window.scrollY > 300) {
-          btn.style.display = 'flex';
-          btn.style.opacity = '1';
-        } else {
-          btn.style.display = 'none';
-          btn.style.opacity = '0';
-        }
-      }
+    // --- Back to Top Button ---
+    var backBtn = document.createElement('button');
+    backBtn.id = 'backToTopBtn';
+    backBtn.className = 'btn btn-primary';
+    backBtn.innerHTML = '<i data-lucide="arrow-up"></i>';
+    backBtn.style.cssText = 'position:fixed; bottom:2rem; right:2rem; border-radius:50%; width:50px; height:50px; display:none; align-items:center; justify-content:center; box-shadow:var(--shadow-lg); z-index:1200; padding:0;';
+    backBtn.onclick = function() { window.scrollTo({top:0, behavior:'smooth'}); };
+    document.body.appendChild(backBtn);
+
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 400) backBtn.style.display = 'flex';
+      else backBtn.style.display = 'none';
     });
-  </script>
-  <!-- Back to Top Button -->
-  <button id="backToTopBtn" class="btn btn-primary"
-    style="position:fixed; bottom:2rem; right:2rem; border-radius:50%; width:50px; height:50px; display:none; align-items:center; justify-content:center; box-shadow:var(--shadow-lg); z-index:1200; padding:0; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1)"
-    onclick="window.scrollTo({top:0, behavior:'smooth'})" title="กลับขึ้นด้านบน">
-    <i data-lucide="arrow-up" style="width:24px;height:24px"></i>
-  </button>
-  <script>
-    window.addEventListener('scroll', function () {
-      var btn = document.getElementById('backToTopBtn');
-      if (btn) {
-        if (window.scrollY > 400) {
-          btn.style.display = 'flex';
-          btn.style.opacity = '1';
-        } else {
-          btn.style.display = 'none';
-          btn.style.opacity = '0';
-        }
-      }
-    });
+
+    function escapeHTML(str) {
+      if (!str) return "";
+      var p = document.createElement("p");
+      p.textContent = str;
+      return p.innerHTML;
+    }
 
     function loadOrdersBasedOnFilter() {
       var filter = document.getElementById('adminOrderFilter').value;
@@ -3121,28 +3034,7 @@
       renderAdminOrders(1);
     }
 
-    // --- SYSTEM SETTINGS LOGIC ---
-    function saveSystemSettings() {
-      var inputs = document.querySelectorAll('.notify-time-input');
-      var times = [];
-      inputs.forEach(function (i) { if (i.value) times.push(i.value); });
 
-      var btn = document.getElementById('saveSetBtn');
-      var oldHtml = btn.innerHTML;
-      btn.innerHTML = '<div class="spinner" style="width:16px;height:16px"></div> กำลังบันทึก...';
-      btn.disabled = true;
-
-      API.saveSystemSettings(times).then(function (res) {
-        if (res.success) showToast('บันทึกการตั้งค่าระบบเรียบร้อยแล้ว', 'success');
-        else showToast(res.message, 'error');
-      }).catch(function (err) {
-        showToast(err, 'error');
-      }).finally(function () {
-        btn.innerHTML = oldHtml;
-        btn.disabled = false;
-        refreshIcons();
-      });
-    }
 
     // --- BRANCH MANAGEMENT LOGIC ---
     var allBranches = [];
@@ -3180,7 +3072,16 @@
       document.getElementById('branchModal').classList.add('open');
     }
     function closeBranchModal() { document.getElementById('branchModal').classList.remove('open'); }
-    function editBranch(id) { var b = allBranches.find(x => x.branchId === id); if (b) openBranchModal(b); }
+    function editBranch(id) {
+      var b = null;
+      for (var i = 0; i < allBranches.length; i++) {
+        if (allBranches[i].branchId === id) {
+          b = allBranches[i];
+          break;
+        }
+      }
+      if (b) openBranchModal(b);
+    }
 
     function saveBranch() {
       var data = {
@@ -3190,7 +3091,7 @@
       };
       if (!data.branchId || !data.name) { showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warning'); return; }
 
-      var op = allBranches.some(x => x.branchId === data.branchId) ? 'update' : 'add';
+      var op = allBranches.some(function(x) { return x.branchId === data.branchId; }) ? 'update' : 'add';
       API.manageBranch(op, data).then(function (res) {
         showToast(res.message, res.success ? 'success' : 'error');
         if (res.success) { closeBranchModal(); loadBranches(); }
