@@ -1681,14 +1681,23 @@
       btn.disabled = true;
 
       var op = data.oldProductId ? 'update' : 'add';
+      console.log('=== saveProduct DEBUG ===');
+      console.log('op:', op);
+      console.log('oldProductId:', JSON.stringify(data.oldProductId));
+      console.log('productId:', JSON.stringify(data.productId));
+      console.log('Full data:', JSON.stringify(data));
       API.manageProduct(op, data).then(function (res) {
         if (res.success) {
           showToast('บันทึกเรียบร้อย', 'success');
           closeProductModal(); loadProducts();
         } else {
+          console.error('Save FAILED (then):', res.message);
+          alert('DEBUG: Save failed!\nop=' + op + '\noldProductId=' + data.oldProductId + '\nproductId=' + data.productId + '\nError: ' + res.message);
           showToast(res.message, 'error');
         }
       }).catch(function (err) {
+        console.error('Save FAILED (catch):', err);
+        alert('DEBUG: Save error!\nop=' + op + '\noldProductId=' + data.oldProductId + '\nproductId=' + data.productId + '\nError: ' + (typeof err === 'string' ? err : JSON.stringify(err)));
         showToast(err, 'error');
       }).finally(function () {
         btn.innerHTML = oldHtml;
