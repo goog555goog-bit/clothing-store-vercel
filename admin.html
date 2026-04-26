@@ -1131,8 +1131,8 @@
     };
 
 
-    function adminNav(page, el) {
-      if (currentAdminPage === page && !el) return;
+    function adminNav(page, el, options) {
+      if (currentAdminPage === page && !el && !options) return;
       currentAdminPage = page;
 
       // 1. UI Sync
@@ -1156,7 +1156,7 @@
       // 2. Data Loading
       var loaders = {
         'dashboard': loadDashboard,
-        'products': loadProducts,
+        'products': function() { loadProducts(options); },
         'categories': loadAdminCategories,
         'orders': loadAdminOrders,
         'inventory': loadInventory,
@@ -1247,7 +1247,9 @@
             statCard('package-check', 'แจกจ่ายแล้ว', d.receivedCount || 0, 'primary') +
             statCard('coins', 'ยอดการเบิก', '฿' + (Number(d.totalVolume) || 0).toLocaleString(), 'accent') +
             statCard('package', 'สินค้าในระบบ', d.totalProducts || 0) +
-            statCard('alert-octagon', 'สต๊อกต่ำ', d.lowStockCount || 0, (d.lowStockCount > 0 ? 'danger' : ''));
+            '<div onclick="adminNav(\'products\', document.querySelector(\'[data-admin-page=products]\'), {filter:\'lowstock\'})" style="cursor:pointer">' + 
+              statCard('alert-octagon', 'สต๊อกต่ำ', d.lowStockCount || 0, (d.lowStockCount > 0 ? 'danger' : '')) + 
+            '</div>';
         }
 
         var badge = document.getElementById('ordersTabBadge');
@@ -1513,7 +1515,7 @@
     var adminProductsPageSize = 25;
     var currentAdminProductsPage = 1;
 
-    function loadProducts() {
+    function loadProducts(options) {
       API.getProducts().then(function (res) {
         if (!res.data) res.data = [];
         allAdminProducts = res.data;
@@ -1525,6 +1527,13 @@
             sel.innerHTML = '<option value="all">ทั้งหมด</option>' + (cRes.data || []).map(function (c) {
               return '<option value="' + c.categoryId + '">' + c.name + '</option>';
             }).join('');
+            
+            // Apply low-stock filter if requested from dashboard
+            if (options && options.filter === 'lowstock') {
+              var stockSel = document.getElementById('adminProductStockFilter');
+              if (stockSel) stockSel.value = 'low';
+            }
+
             initSearchableSelect('adminProductCatFilter', true);
             initSearchableSelect('adminProductStockFilter', true);
           }
