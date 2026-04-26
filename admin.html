@@ -1244,15 +1244,17 @@
 
       // Step A: Load Depts Dropdown if needed
       var deptPromise = (_dbDeptsLoaded || !dEl) ? Promise.resolve() : API.getReportData('Departments').then(function (res) {
-        if (res.success && res.data) {
+        if (res.success && res.data && Array.isArray(res.data)) {
           var currentVal = dEl.value;
           var opts = '<option value="all">ทุกแผนก (All Departments)</option>';
-          res.data.forEach(function (dep) { opts += '<option value="' + dep.name + '">' + dep.name + '</option>'; });
+          res.data.forEach(function (dep) { 
+            if (dep && dep.name) opts += '<option value="' + dep.name + '">' + dep.name + '</option>'; 
+          });
           dEl.innerHTML = opts;
           dEl.value = currentVal;
         }
         _dbDeptsLoaded = true;
-      });
+      }).catch(function(err) { console.warn('Dept Load Error:', err); });
 
       deptPromise.then(function () {
         // Step B: Load Main Dashboard Stats (Heavy)
