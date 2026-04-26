@@ -2223,6 +2223,7 @@
           showToast(res.message, 'error');
         }
         loadAdminOrders(); 
+        loadDashboard(); 
       }).catch(function (err) { 
         showToast('ข้อผิดพลาด: ' + err, 'error'); 
       }).finally(function() {
@@ -2236,8 +2237,9 @@
     function doReady(id) {
       showToast('กำลังส่งแจ้งเตือน...', 'info');
       API.setReady(id).then(function () {
-        showToast('จัดสำนักเสร็จแล้วและแจ้งเตือนผู้เบิกเรียบร้อย', 'success');
+        showToast('จัดสินค้าเสร็จแล้วและแจ้งเตือนผู้เบิกเรียบร้อย', 'success');
         loadAdminOrders();
+        loadDashboard();
       }).catch(function (err) { showToast('ข้อผิดพลาด: ' + err, 'error'); });
     }
 
@@ -2633,6 +2635,7 @@
         if (res.success) {
           closeStockModal();
           loadInventory();
+          loadDashboard();
         }
       }).catch(function (err) {
         showToast(err, 'error');
