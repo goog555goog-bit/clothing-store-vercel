@@ -174,8 +174,22 @@ var API = (function () {
     },
 
     // ─── AUTH & CORE ──────────────────────────────────────────
-    login: function (employeeId) { return this._call('login', { employeeId: employeeId }); },
+    login: function (employeeId, password) { return this._call('login', { employeeId: employeeId, password: password }); },
     checkEmployee: function (employeeId) { return this._call('checkEmployee', { employeeId: employeeId }); },
+    changePassword: function (oldPassword, newPassword) {
+      var user = null;
+      try {
+        var stored = localStorage.getItem('_user');
+        if (stored) user = JSON.parse(stored);
+      } catch (e) { }
+      if (!user) return Promise.reject('กรุณาเข้าสู่ระบบก่อนดำเนินการ');
+      
+      return this._call('changePassword', {
+        employeeId: user.employeeId,
+        oldPassword: oldPassword,
+        newPassword: newPassword
+      });
+    },
 
     // ─── READ (Cached) ────────────────────────────────────────
     getProducts: function (filter) { return this._call('getProducts', { filter: filter }, true); },

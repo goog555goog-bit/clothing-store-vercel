@@ -86,12 +86,14 @@ function updateUserUI() {
   var loginBtn = document.getElementById('loginBtn');
   var logoutBtn = document.getElementById('logoutBtn');
   var ordersBtn = document.getElementById('ordersBtn');
+  var changePwdBtn = document.getElementById('changePwdBtn');
 
   if (currentUser) {
     if (nameEl) nameEl.textContent = currentUser.name;
     if (loginBtn) loginBtn.classList.add('hidden');
     if (logoutBtn) logoutBtn.classList.remove('hidden');
     if (ordersBtn) ordersBtn.classList.remove('hidden');
+    if (changePwdBtn) changePwdBtn.classList.remove('hidden');
     
     // แสดงปุ่มคลังย่อยสำหรับ FC/Technician/Admin
     var substockBtn = document.getElementById('substockBtn');
@@ -134,6 +136,7 @@ function updateUserUI() {
     if (loginBtn) loginBtn.classList.remove('hidden');
     if (logoutBtn) logoutBtn.classList.add('hidden');
     if (ordersBtn) ordersBtn.classList.add('hidden');
+    if (changePwdBtn) changePwdBtn.classList.add('hidden');
     var substockBtn = document.getElementById('substockBtn');
     if (substockBtn) substockBtn.classList.add('hidden');
   }
