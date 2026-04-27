@@ -258,6 +258,11 @@ var API = (function () {
       return this._call('saveSystemSettings', { settings: settings }, false, ['getSystemSettings']);
     },
 
+    // ─── AUTH & USER ──────────────────────────────────────────
+    checkEmployee: function (employeeId) { return this._call('checkEmployee', { employeeId: employeeId }, true); },
+    login: function (employeeId, password) { return this._call('login', { employeeId: employeeId, password: password }, false); },
+    changePassword: function (oldPassword, newPassword) { return this._call('changePassword', { oldPassword: oldPassword, newPassword: newPassword }, false); },
+
     // ─── OTHERS ───────────────────────────────────────────────
     uploadToDrive: function (base64, fileName) { return this._call('uploadToDrive', { base64: base64, fileName: fileName }); },
     exportToCSV: function (sheetName) { return this._call('exportToCSV', { sheetName: sheetName }); },
