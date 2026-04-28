@@ -2440,8 +2440,8 @@
             '<span style="font-size:0.75rem; color:var(--text3)">ID: ' + t.teamId + '</span>' +
             '</div>' +
             '<div class="flex flex-wrap gap-1">' +
-            '<button class="btn btn-ghost btn-xs" onclick="editTeam(\'' + escapeHTML(t.teamId) + '\')"><i data-lucide="edit-2"></i></button>' +
-            '<button class="btn btn-ghost btn-xs" style="color:var(--danger)" onclick="delTeam(\'' + escapeHTML(t.teamId) + '\')"><i data-lucide="trash"></i></button>' +
+            '<button class="btn btn-ghost btn-xs" onclick="editTeam(\'' + String(t.teamId).replace(/'/g, "\\'") + '\')"><i data-lucide="edit-2" style="pointer-events:none"></i></button>' +
+            '<button class="btn btn-ghost btn-xs" style="color:var(--danger)" onclick="delTeam(\'' + String(t.teamId).replace(/'/g, "\\'") + '\')"><i data-lucide="trash" style="pointer-events:none"></i></button>' +
             '</div>' +
             '</div>' +
             '<div style="background:rgba(251,191,36,0.05); padding:0.75rem; border-radius:12px; border:1px solid var(--glass-border); margin-bottom:1rem">' +
@@ -2451,8 +2451,8 @@
             '<div class="flex flex-wrap items-center justify-between gap-2" style="font-size:0.85rem; color:var(--text2)">' +
             '<span>สมาชิก: ' + (t.memberCount || 0) + ' คน</span>' +
             '<div class="flex gap-1">' +
-            '<button class="btn btn-outline btn-xs" onclick="viewTeamInventory(\'' + t.teamId + '\')">ดูสต๊อกทีม</button>' +
-            '<button class="btn btn-primary btn-xs" onclick="openManageMembersModal(\'' + t.teamId + '\')">จัดการสมาชิก</button>' +
+            '<button class="btn btn-outline btn-xs" onclick="viewTeamInventory(\'' + String(t.teamId).replace(/'/g, "\\'") + '\')">ดูสต๊อกทีม</button>' +
+            '<button class="btn btn-primary btn-xs" onclick="openManageMembersModal(\'' + String(t.teamId).replace(/'/g, "\\'") + '\')">จัดการสมาชิก</button>' +
             '</div>' +
             '</div>' +
             '</div>';
