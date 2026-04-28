@@ -473,9 +473,6 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   cursor: grabbing !important;
   scroll-behavior: auto !important; /* Disable smooth scroll during active drag for better tracking */
 }
-.drag-scroll-active * {
-  pointer-events: none; /* Prevent clicking children while dragging */
-}
 .cat-pill {
   padding: 0.55rem 1.2rem; border-radius: 999px; background: var(--surface);
   border: 1px solid var(--border); color: var(--text2); white-space: nowrap;
