@@ -2425,14 +2425,20 @@
 
     // ─── TEAMS ──────────────────────────────────────────
     function loadTeams() {
-      API.getTeams().then(function (res) {
-        var grid = document.getElementById('teamsGrid');
-        if (!res.data || res.data.length === 0) {
+      var grid = document.getElementById('teamsGrid');
+      grid.innerHTML = '<div class="text-center" style="grid-column:1/-1; padding:3rem; color:var(--text3)"><div class="spinner" style="margin:0 auto 1rem"></div>กำลังโหลดข้อมูล...</div>';
+      
+      Promise.all([API.getTeams(), API.getEmployees()]).then(function (results) {
+        var resTeams = results[0];
+        var resEmp = results[1];
+        allAdminTeams = resTeams.data || [];
+        allAdminEmployees = resEmp.data || [];
+        
+        if (allAdminTeams.length === 0) {
           grid.innerHTML = '<div class="card text-center" style="grid-column:1/-1; padding:3rem; color:var(--text3)">ยังไม่มีทีมช่างในระบบ</div>';
           return;
         }
-        allAdminTeams = res.data;
-        grid.innerHTML = res.data.map(function (t) {
+        grid.innerHTML = allAdminTeams.map(function (t) {
           return '<div class="card glass hover-lift">' +
             '<div class="flex flex-wrap items-center justify-between gap-2 mb-4">' +
             '<div>' +
@@ -2516,7 +2522,7 @@
       var empId = document.getElementById('mm-add-emp').value;
       if (!empId) { showToast('กรุณาเลือกพนักงาน', 'warning'); return; }
 
-      var emp = allAdminEmployees.find(function (e) { return e.employeeId === empId; });
+      var emp = allAdminEmployees.find(function (e) { return String(e.employeeId) === String(empId); });
       if (!emp) return;
 
       API.updateEmployeeRole(empId, emp.role, teamId).then(function (res) {
@@ -2536,7 +2542,7 @@
     function removeMemberFromTeam(empId, teamId) {
       if (!confirm('ยืนยันการนำสมาชิกออกจากทีม?')) return;
 
-      var emp = allAdminEmployees.find(function (e) { return e.employeeId === empId; });
+      var emp = allAdminEmployees.find(function (e) { return String(e.employeeId) === String(empId); });
       if (!emp) return;
 
       API.updateEmployeeRole(empId, emp.role, '').then(function (res) {
@@ -2576,7 +2582,7 @@
         membersDiv.innerHTML = members.map(function (m) {
           return '<div class="badge badge-pending" style="font-size:0.75rem; padding:0.4rem 0.8rem; display:flex; align-items:center; gap:0.5rem">' + 
                  m.name + 
-                 '<span style="cursor:pointer; opacity:0.6" onclick="removeMemberFromTeam(\'' + m.employeeId + '\', \'' + teamId + '\'); this.parentElement.remove()">✕</span>' +
+                 '<span style="cursor:pointer; opacity:0.6" onclick="removeMemberFromTeam(\'' + String(m.employeeId).replace(/'/g, "\\'") + '\', \'' + String(teamId).replace(/'/g, "\\'") + '\'); this.parentElement.remove()">✕</span>' +
                  '</div>';
         }).join('');
       } else {
