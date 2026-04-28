@@ -1610,6 +1610,7 @@
 
     // ─── PRODUCTS ─────────────────────────────────────────
     var allAdminProducts = [];
+    var allAdminCategories = [];
     var filteredAdminProducts = [];
     var adminProductsPageSize = 25;
     var currentAdminProductsPage = 1;
@@ -1621,6 +1622,7 @@
 
         // Load categories for filter
         API.getCategories().then(function (cRes) {
+          allAdminCategories = cRes.data || [];
           var sel = document.getElementById('adminProductCatFilter');
           if (sel) {
             sel.innerHTML = '<option value="all">ทั้งหมด</option>' + (cRes.data || []).map(function (c) {
@@ -1636,9 +1638,8 @@
             initSearchableSelect('adminProductCatFilter', true);
             initSearchableSelect('adminProductStockFilter', true);
           }
+          filterAdminProducts(); // Initial render after categories loaded
         });
-
-        filterAdminProducts(); // Initial render
       });
     }
 
@@ -1753,7 +1754,7 @@
         return '<tr class="' + rowClass + '">'
           + '<td class="hide-mobile" style="font-size:0.8rem;color:var(--text3)">' + escapeHTML(p.productId) + '</td>'
           + '<td style="font-weight:500">' + escapeHTML(p.name) + '</td>'
-          + '<td class="hide-mobile">' + escapeHTML(p.categoryId || '-') + '</td>'
+          + '<td class="hide-mobile">' + escapeHTML(getCategoryName(p.categoryId)) + '</td>'
           + '<td>฿' + Number(p.price).toLocaleString() + '</td>'
           + '<td class="hide-mobile ' + stockClass + '">' + stock + '</td>'
           + '<td><span class="badge ' + (p.status === 'active' ? 'badge-approved' : 'badge-rejected') + '" style="cursor:pointer" onclick="toggleProductStatus(\'' + p.productId + '\', \'' + p.status + '\')">' + (p.status === 'active' ? 'เปิด' : 'ปิด') + '</span></td>'
@@ -1767,13 +1768,23 @@
       refreshIcons();
     }
 
+    function getCategoryName(id) {
+      if (!id) return '-';
+      var searchId = String(id).trim();
+      var cat = allAdminCategories.find(function (c) {
+        var catId = c.id || c.categoryId || c.ID || c.CategoryID || c.CategoryCode || c.name;
+        return String(catId).trim() === searchId;
+      });
+      return cat ? cat.name : id;
+    }
+
     // ─── CATEGORIES ───────────────────────────────────────
     function loadAdminCategories() {
       API.getCategories().then(function (res) {
         var body = document.getElementById('categoriesBody');
         if (!res.data || res.data.length === 0) { body.innerHTML = '<tr><td colspan="3" class="text-center" style="padding:2rem;color:var(--text3)">ยังไม่มีหมวดหมู่</td></tr>'; return; }
         body.innerHTML = res.data.map(function (c) {
-          var catId = c.id || c.categoryId;
+          var catId = c.id || c.categoryId || c.ID || c.CategoryID || c.CategoryCode || c.name;
           return '<tr>'
             + '<td>' + escapeHTML(catId) + '</td>'
             + '<td style="font-weight:600">' + escapeHTML(c.name) + '</td>'
@@ -1821,7 +1832,8 @@
       API.getCategories().then(function (res) {
         var sel = document.getElementById('pf-cat');
         sel.innerHTML = (res.data || []).map(function (c) {
-          var catId = c.id || c.categoryId;
+          var catId = c.id || c.categoryId || c.ID || c.CategoryID || c.CategoryCode || c.name;
+          console.log('Category Mapping:', { id: catId, name: c.name });
           return '<option value="' + catId + '" ' + (product && (product.categoryId === catId || product.categoryId === c.name) ? 'selected' : '') + '>' + c.name + '</option>';
         }).join('');
         initSearchableSelect('pf-cat');
@@ -1885,6 +1897,7 @@
       console.log('op:', op);
       console.log('oldProductId:', JSON.stringify(data.oldProductId));
       console.log('productId:', JSON.stringify(data.productId));
+      console.log('categoryId to save:', data.categoryId);
       console.log('Full data:', JSON.stringify(data));
       API.manageProduct(op, data).then(function (res) {
         if (res.success) {
@@ -2324,9 +2337,9 @@
             + '<td>' + (isMe ? '<span class="badge badge-approved">คุณ (' + e.role + ')</span>' : roleSelect) + '</td>'
             + '<td class="hide-mobile"><span class="badge ' + (e.status === 'active' ? 'badge-approved' : 'badge-rejected') + '">' + (e.status === 'active' ? 'ปกติ' : 'ปิด') + '</span></td>'
             + '<td class="flex flex-wrap gap-1">'
-            + '<button class="btn btn-xs btn-outline" onclick="showUserSubStock(\'' + e.employeeId + '\', \'' + e.name + '\')" title="ดูคลังสินค้าส่วนตัว"><i data-lucide="eye" style="width:12px;height:12px"></i></button>'
-            + '<button class="btn btn-xs btn-outline" onclick="editEmployee(\'' + e.employeeId + '\')" title="แก้ไขข้อมูล"><i data-lucide="edit-2" style="width:12px;height:12px"></i></button>'
-            + (isMe ? '' : '<button class="btn btn-xs btn-ghost hide-mobile" style="color:var(--danger)" onclick="delEmployee(\'' + e.employeeId + '\')" title="ลบพนักงาน"><i data-lucide="trash-2" style="width:12px;height:12px"></i></button>')
+            + '<button class="btn btn-xs btn-outline" onclick="showUserSubStock(\'' + e.employeeId + '\', \'' + e.name + '\')" title="ดูคลังสินค้าส่วนตัว"><i data-lucide="eye" style="width:12px;height:12px;pointer-events:none"></i></button>'
+            + '<button class="btn btn-xs btn-outline" onclick="editEmployee(\'' + e.employeeId + '\')" title="แก้ไขข้อมูล"><i data-lucide="edit-2" style="width:12px;height:12px;pointer-events:none"></i></button>'
+            + (isMe ? '' : '<button class="btn btn-xs btn-ghost hide-mobile" style="color:var(--danger)" onclick="delEmployee(\'' + e.employeeId + '\')" title="ลบพนักงาน"><i data-lucide="trash-2" style="width:12px;height:12px;pointer-events:none"></i></button>')
             + '</td>'
             + '</tr>';
         }).join('');
@@ -2460,7 +2473,9 @@
 
     function renderMemberList(teamId) {
       var list = document.getElementById('mm-list');
-      var members = allAdminEmployees.filter(function (e) { return e.teamId === teamId; });
+      var members = allAdminEmployees.filter(function (e) { 
+        return e.teamId && String(e.teamId) === String(teamId); 
+      });
 
       if (members.length === 0) {
         list.innerHTML = '<p class="text-center" style="padding:1rem; color:var(--text3); font-size:0.85rem">ยังไม่มีสมาชิกในทีมนี้</p>';
@@ -2549,11 +2564,21 @@
         initSearchableSelect('tf-lead');
       });
 
-      document.getElementById('tf-members').innerHTML = '';
-      if (team && team.members) {
-        document.getElementById('tf-members').innerHTML = team.members.map(function (m) {
-          return '<span class="badge badge-pending" style="font-size:0.7rem">' + m.name + '</span>';
+      var membersDiv = document.getElementById('tf-members');
+      membersDiv.innerHTML = '';
+      var members = allAdminEmployees.filter(function (e) { 
+        return e.teamId && String(e.teamId) === String(teamId); 
+      });
+
+      if (members.length > 0) {
+        membersDiv.innerHTML = members.map(function (m) {
+          return '<div class="badge badge-pending" style="font-size:0.75rem; padding:0.4rem 0.8rem; display:flex; align-items:center; gap:0.5rem">' + 
+                 m.name + 
+                 '<span style="cursor:pointer; opacity:0.6" onclick="removeMemberFromTeam(\'' + m.employeeId + '\', \'' + teamId + '\'); this.parentElement.remove()">✕</span>' +
+                 '</div>';
         }).join('');
+      } else {
+        membersDiv.innerHTML = '<span style="font-size:0.8rem; color:var(--text3)">ยังไม่มีสมาชิก</span>';
       }
 
       document.getElementById('teamModalTitle').textContent = team ? 'แก้ไขข้อมูลทีม' : 'สร้างทีมใหม่';

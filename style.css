@@ -154,6 +154,9 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   cursor: pointer; transition: all 0.3s cubic-bezier(0.23,1,0.32,1);
   border: 1px solid transparent; font-size: 0.95rem; text-decoration: none;
   background: rgba(255,255,255,0.05); color: var(--text); 
+  flex-shrink: 0;
+  z-index: 2;
+  pointer-events: auto !important;
   /* FIXED: Allow button text wrapping to prevent overlapping items on small mobile screens */
   white-space: normal; text-align: center; line-height: 1.2;
   letter-spacing: 0.02em; text-transform: uppercase; font-family: inherit;
