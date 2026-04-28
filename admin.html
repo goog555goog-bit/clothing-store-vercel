@@ -2325,7 +2325,7 @@
 
           var teamName = '-';
           if (e.teamId) {
-            var team = allAdminTeams.find(function (t) { return t.teamId === e.teamId; });
+            var team = allAdminTeams.find(function (t) { return String(t.teamId) === String(e.teamId); });
             if (team) teamName = team.name;
           }
 
@@ -2337,9 +2337,9 @@
             + '<td>' + (isMe ? '<span class="badge badge-approved">คุณ (' + e.role + ')</span>' : roleSelect) + '</td>'
             + '<td class="hide-mobile"><span class="badge ' + (e.status === 'active' ? 'badge-approved' : 'badge-rejected') + '">' + (e.status === 'active' ? 'ปกติ' : 'ปิด') + '</span></td>'
             + '<td class="flex flex-wrap gap-1">'
-            + '<button class="btn btn-xs btn-outline" onclick="showUserSubStock(\'' + e.employeeId + '\', \'' + e.name + '\')" title="ดูคลังสินค้าส่วนตัว"><i data-lucide="eye" style="width:12px;height:12px;pointer-events:none"></i></button>'
-            + '<button class="btn btn-xs btn-outline" onclick="editEmployee(\'' + e.employeeId + '\')" title="แก้ไขข้อมูล"><i data-lucide="edit-2" style="width:12px;height:12px;pointer-events:none"></i></button>'
-            + (isMe ? '' : '<button class="btn btn-xs btn-ghost hide-mobile" style="color:var(--danger)" onclick="delEmployee(\'' + e.employeeId + '\')" title="ลบพนักงาน"><i data-lucide="trash-2" style="width:12px;height:12px;pointer-events:none"></i></button>')
+            + '<button class="btn btn-xs btn-outline" onclick="showUserSubStock(\'' + String(e.employeeId).replace(/'/g, "\\'") + '\', \'' + String(e.name || "").replace(/'/g, "\\'") + '\')" title="ดูคลังสินค้าส่วนตัว"><i data-lucide="eye" style="width:12px;height:12px;pointer-events:none"></i></button>'
+            + '<button class="btn btn-xs btn-outline" onclick="editEmployee(\'' + String(e.employeeId).replace(/'/g, "\\'") + '\')" title="แก้ไขข้อมูล"><i data-lucide="edit-2" style="width:12px;height:12px;pointer-events:none"></i></button>'
+            + (isMe ? '' : '<button class="btn btn-xs btn-ghost hide-mobile" style="color:var(--danger)" onclick="delEmployee(\'' + String(e.employeeId).replace(/'/g, "\\'") + '\')" title="ลบพนักงาน"><i data-lucide="trash-2" style="width:12px;height:12px;pointer-events:none"></i></button>')
             + '</td>'
             + '</tr>';
         }).join('');
@@ -2361,7 +2361,9 @@
     }
 
     function editEmployee(id) {
-      var emp = allAdminEmployees.find(function (e) { return e.employeeId === id; });
+      var emp = allAdminEmployees.find(function (e) { 
+        return String(e.employeeId) === String(id); 
+      });
       if (emp) openEmployeeModal(emp);
     }
 
@@ -2438,8 +2440,8 @@
             '<span style="font-size:0.75rem; color:var(--text3)">ID: ' + t.teamId + '</span>' +
             '</div>' +
             '<div class="flex flex-wrap gap-1">' +
-            '<button class="btn btn-ghost btn-xs" onclick="editTeam(\'' + t.teamId + '\')"><i data-lucide="edit-2"></i></button>' +
-            '<button class="btn btn-ghost btn-xs" style="color:var(--danger)" onclick="delTeam(\'' + t.teamId + '\')"><i data-lucide="trash"></i></button>' +
+            '<button class="btn btn-ghost btn-xs" onclick="editTeam(\'' + escapeHTML(t.teamId) + '\')"><i data-lucide="edit-2"></i></button>' +
+            '<button class="btn btn-ghost btn-xs" style="color:var(--danger)" onclick="delTeam(\'' + escapeHTML(t.teamId) + '\')"><i data-lucide="trash"></i></button>' +
             '</div>' +
             '</div>' +
             '<div style="background:rgba(251,191,36,0.05); padding:0.75rem; border-radius:12px; border:1px solid var(--glass-border); margin-bottom:1rem">' +
@@ -2555,14 +2557,14 @@
       document.getElementById('tf-id').value = team ? team.teamId : '';
       document.getElementById('tf-name').value = team ? team.name : '';
 
-      API.getEmployees().then(function (res) {
-        var technicians = (res.data || []).filter(function (e) { return e.role === 'technician' || e.role === 'fc'; });
-        var leadSel = document.getElementById('tf-lead');
-        leadSel.innerHTML = '<option value="">-- เลือกหัวหน้าทีม --</option>' + technicians.map(function (e) {
-          return '<option value="' + e.employeeId + '" ' + (team && team.leadId === e.employeeId ? 'selected' : '') + '>' + e.name + ' (' + e.employeeId + ')</option>';
-        }).join('');
-        initSearchableSelect('tf-lead');
+      var technicians = allAdminEmployees.filter(function (e) { 
+        return e.role === 'technician' || e.role === 'fc' || (team && String(team.leadId) === String(e.employeeId)); 
       });
+      var leadSel = document.getElementById('tf-lead');
+      leadSel.innerHTML = '<option value="">-- เลือกหัวหน้าทีม --</option>' + technicians.map(function (e) {
+        return '<option value="' + e.employeeId + '" ' + (team && String(team.leadId) === String(e.employeeId) ? 'selected' : '') + '>' + e.name + ' (' + e.employeeId + ')</option>';
+      }).join('');
+      initSearchableSelect('tf-lead');
 
       var membersDiv = document.getElementById('tf-members');
       membersDiv.innerHTML = '';
@@ -2588,13 +2590,9 @@
     function closeTeamModal() { document.getElementById('teamModal').classList.remove('open'); }
 
     function editTeam(id) {
-      var team = null;
-      for (var i = 0; i < allAdminTeams.length; i++) {
-        if (allAdminTeams[i].teamId === id) {
-          team = allAdminTeams[i];
-          break;
-        }
-      }
+      var team = allAdminTeams.find(function (t) { 
+        return String(t.teamId) === String(id); 
+      });
       if (team) openTeamModal(team);
     }
 
