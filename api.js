@@ -225,10 +225,10 @@ var API = (function () {
       return this._call('setReady', { requestId: requestId }, false, ['getAllOrders', 'getAdvancedDashboardData']); 
     },
     dispatchRequest: function (requestId) { 
-      return this._call('dispatchRequest', { requestId: requestId }, false, ['getAllOrders', 'getAdvancedDashboardData', 'getProducts', 'getInventoryForecast']); 
+      return this._call('dispatchRequest', { requestId: requestId }, false, ['getAllOrders', 'getAdvancedDashboardData', 'getProducts', 'getInventoryForecast', 'getSubStock']); 
     },
     signForReceipt: function (requestId, signature) { 
-      return this._call('signForReceipt', { requestId: requestId, signature: signature }, false, ['getAllOrders', 'getAdvancedDashboardData', 'getMyRequests', 'getProducts']); 
+      return this._call('signForReceipt', { requestId: requestId, signature: signature }, false, ['getAllOrders', 'getAdvancedDashboardData', 'getMyRequests', 'getProducts', 'getSubStock']); 
     },
 
     manageEmployee: function (op, data, oldEmployeeId) {

@@ -2043,10 +2043,7 @@
         if (o.status === 'Pending') {
           actions = '<button class="btn btn-sm btn-accent" onclick="doApprove(\'' + o.orderId + '\', \'' + (o.employeeName || o.employeeId) + '\')"><i data-lucide="check" style="width:14px;height:14px"></i> อนุมัติ</button>';
         } else if (o.status === 'Approved') {
-          actions = '<div class="flex flex-wrap gap-1">' +
-            '<button class="btn btn-sm btn-warning" onclick="doReady(\'' + o.orderId + '\')"><i data-lucide="package-check" style="width:14px;height:14px"></i> จัดเสร็จแล้ว</button>' +
-            '<button class="btn btn-sm btn-primary" onclick="doDispatch(\'' + o.orderId + '\', this)"><i data-lucide="package" style="width:14px;height:14px"></i> จ่ายทันที</button>' +
-            '</div>';
+          actions = '<button class="btn btn-sm btn-warning" onclick="doReady(\'' + o.orderId + '\')"><i data-lucide="package-check" style="width:14px;height:14px"></i> จัดเสร็จแล้ว</button>';
         } else if (o.status === 'Ready') {
           actions = '<button class="btn btn-sm btn-primary" onclick="doDispatch(\'' + o.orderId + '\', this)"><i data-lucide="package" style="width:14px;height:14px"></i> จ่ายของ</button>';
         } else if (o.status === 'Dispatched') {
