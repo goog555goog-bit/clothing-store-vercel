@@ -598,6 +598,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   color: var(--text2); font-weight: 600; cursor: pointer;
   border-bottom: 3px solid transparent; transition: all 0.2s;
   display: flex; align-items: center; gap: 0.5rem; white-space: nowrap; font-family: inherit;
+  flex-shrink: 0;
 }
 .tab:hover { color: var(--primary); background: rgba(251,191,36,0.04); border-radius: 8px 8px 0 0; }
 .tab.active { color: var(--primary); border-bottom-color: var(--primary); }

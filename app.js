@@ -544,7 +544,7 @@ function renderCategories() {
   // Dedup by categoryId
   var seen = {};
   var unique = allCategories.filter(function(c) {
-    var cid = c.categoryId || c.id;
+    var cid = c.id || c.categoryId;
     if (!cid || seen[cid]) return false;
     seen[cid] = true;
     return true;
@@ -552,7 +552,7 @@ function renderCategories() {
   
   var cats = [{ categoryId: 'all', name: 'ทุกหมวดหมู่' }].concat(unique);
   sel.innerHTML = cats.map(function(c) {
-    var cid = c.categoryId || c.id;
+    var cid = c.id || c.categoryId;
     return '<option value="' + (cid || "") + '" ' + (currentCategory === cid ? 'selected' : '') + '>' + c.name + '</option>';
   }).join('');
 

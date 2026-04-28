@@ -231,8 +231,8 @@ var API = (function () {
       return this._call('signForReceipt', { requestId: requestId, signature: signature }, false, ['getAllOrders', 'getAdvancedDashboardData', 'getMyRequests', 'getProducts']); 
     },
 
-    manageEmployee: function (op, data) {
-      return this._call('manageEmployee', { op: op, data: data }, false, ['getEmployees']);
+    manageEmployee: function (op, data, oldEmployeeId) {
+      return this._call('manageEmployee', { op: op, data: data, oldEmployeeId: oldEmployeeId }, false, ['getEmployees']);
     },
     addEmployee: function (employee) {
       return this._call('addEmployee', { employee: employee }, false, ['getEmployees']);

@@ -50,8 +50,8 @@
     <div class="container header-container">
       <div class="logo" onclick="navigateTo(scriptUrl)">
         <div class="logo-icon"><i data-lucide="shield-check"></i></div>
-        <span style="font-size:1.35rem;font-weight:800;letter-spacing:-1px;color:#fff;">EMETIX <span
-            style="font-weight:300;opacity:0.6;color:var(--primary);">ADMIN</span></span>
+        <span style="font-size:1.35rem;font-weight:800;letter-spacing:-1px;color:#fff;"> YY <span
+            style="font-weight:300;opacity:0.6;color:var(--primary);">STOCK-SYSTEM</span></span>
       </div>
       <div class="nav-actions">
         <div id="adminName" class="hide-mobile"
@@ -666,6 +666,7 @@
         <button class="btn btn-ghost btn-sm" onclick="closeEmployeeModal()">✕</button>
       </div>
       <div class="modal-body">
+        <input type="hidden" id="ef-old-id">
         <div class="form-group"><label class="form-label">รหัสพนักงาน *</label><input id="ef-id" class="form-input"
             placeholder="EMP001"></div>
         <div class="form-group"><label class="form-label">ชื่อ-นามสกุล *</label><input id="ef-name" class="form-input"
@@ -814,6 +815,42 @@
       <div class="modal-footer flex-wrap">
         <button class="btn btn-outline" onclick="closeTeamModal()">ยกเลิก</button>
         <button id="saveTeamBtn" class="btn btn-primary" onclick="saveTeam()">บันทึกข้อมูลทีม</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MANAGE TEAM MEMBERS MODAL -->
+  <div id="manageMembersModal" class="modal-overlay" onclick="if(event.target===this) closeManageMembersModal()">
+    <div class="modal" style="max-width:500px">
+      <div class="modal-header">
+        <div id="manageMembersTitle" style="font-weight:600">จัดการสมาชิกในทีม</div>
+        <button class="btn btn-ghost btn-sm" onclick="closeManageMembersModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="mm-team-id">
+        
+        <div class="form-group">
+          <label class="form-label">เพิ่มสมาชิกใหม่</label>
+          <div class="flex gap-2">
+            <div style="flex:1">
+              <select id="mm-add-emp" class="input w-full">
+                <option value="">-- เลือกพนักงานเพื่อเข้าทีม --</option>
+              </select>
+            </div>
+            <button class="btn btn-accent" onclick="addMemberToTeam()">เพิ่มเข้าทีม</button>
+          </div>
+          <p style="font-size:0.75rem; color:var(--text3); margin-top:0.25rem">หมายเหตุ: พนักงานที่แสดงคือกลุ่ม Technician/FC ที่ยังไม่มีสังกัดทีม</p>
+        </div>
+
+        <div style="margin-top:1.5rem">
+          <h4 style="margin-bottom:0.75rem; font-size:0.9rem">รายชื่อสมาชิกปัจจุบัน</h4>
+          <div id="mm-list" class="flex flex-col gap-2">
+            <!-- Members will be listed here -->
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline w-full" onclick="closeManageMembersModal()">ปิดหน้าต่าง</button>
       </div>
     </div>
   </div>
@@ -1014,7 +1051,7 @@
       <span>หน้าร้าน</span>
     </button>
   </nav>
-  
+
   <!-- Change Password Modal -->
   <div id="passwordModal" class="modal-overlay" onclick="if(event.target===this) closePasswordModal()">
     <div class="modal" style="max-width:400px" onclick="event.stopPropagation()">
@@ -1059,7 +1096,8 @@
       </div>
       <div class="modal-footer">
         <button class="btn btn-outline" onclick="closeLowStockModal()">ปิด</button>
-        <button class="btn btn-primary" onclick="closeLowStockModal(); adminNav('products', null, {filter:'lowstock'})">ไปหน้าจัดการสินค้า</button>
+        <button class="btn btn-primary"
+          onclick="closeLowStockModal(); adminNav('products', null, {filter:'lowstock'})">ไปหน้าจัดการสินค้า</button>
       </div>
     </div>
   </div>
@@ -1069,6 +1107,8 @@
 
     window.onload = function () {
       initDarkMode();
+      initDragScroll('.tabs');
+      initDragScroll('.cat-filter');
       if (typeof API !== 'undefined') {
         checkAuth();
       } else {
@@ -1177,7 +1217,7 @@
       // 2. Data Loading
       var loaders = {
         'dashboard': loadDashboard,
-        'products': function() { loadProducts(options); },
+        'products': function () { loadProducts(options); },
         'categories': loadAdminCategories,
         'orders': loadAdminOrders,
         'inventory': loadInventory,
@@ -1247,14 +1287,14 @@
         if (res.success && res.data && Array.isArray(res.data)) {
           var currentVal = dEl.value;
           var opts = '<option value="all">ทุกแผนก (All Departments)</option>';
-          res.data.forEach(function (dep) { 
-            if (dep && dep.name) opts += '<option value="' + dep.name + '">' + dep.name + '</option>'; 
+          res.data.forEach(function (dep) {
+            if (dep && dep.name) opts += '<option value="' + dep.name + '">' + dep.name + '</option>';
           });
           dEl.innerHTML = opts;
           dEl.value = currentVal;
         }
         _dbDeptsLoaded = true;
-      }).catch(function(err) { console.warn('Dept Load Error:', err); });
+      }).catch(function (err) { console.warn('Dept Load Error:', err); });
 
       deptPromise.then(function () {
         // Step B: Load Main Dashboard Stats (Heavy)
@@ -1273,8 +1313,8 @@
             statCard('package-check', 'แจกจ่ายแล้ว', d.receivedCount || 0, 'primary') +
             statCard('coins', 'ยอดการเบิก', '฿' + (Number(d.totalVolume) || 0).toLocaleString(), 'accent') +
             statCard('package', 'สินค้าในระบบ', d.totalProducts || 0) +
-            '<div onclick="showLowStockModal()" style="cursor:pointer">' + 
-              statCard('alert-octagon', 'สต๊อกต่ำ', d.lowStockCount || 0, (d.lowStockCount > 0 ? 'danger' : '')) + 
+            '<div onclick="showLowStockModal()" style="cursor:pointer">' +
+            statCard('alert-octagon', 'สต๊อกต่ำ', d.lowStockCount || 0, (d.lowStockCount > 0 ? 'danger' : '')) +
             '</div>';
         }
 
@@ -1313,7 +1353,7 @@
                 return '<div class="flex justify-between" style="font-size:0.8rem"><span>' + ds.department + '</span><span style="color:var(--primary-light)">฿' + (ds.totalSpending || 0).toLocaleString() + '</span></div>';
               }).join('') + '</div>';
           }
-          
+
           if (res.data.categorySpending) {
             renderCategorySpendingChart(res.data.categorySpending, 'categorySpendingChart');
           }
@@ -1363,13 +1403,13 @@
       var canvas = document.getElementById(canvasId);
       if (!canvas || typeof Chart === 'undefined') return;
       if (categoryChartInstances[canvasId]) categoryChartInstances[canvasId].destroy();
-      
+
       categoryChartInstances[canvasId] = new Chart(canvas.getContext('2d'), {
         type: 'doughnut',
         data: {
-          labels: data.map(function(d){ return d.category; }),
+          labels: data.map(function (d) { return d.category; }),
           datasets: [{
-            data: data.map(function(d){ return d.totalValue; }),
+            data: data.map(function (d) { return d.totalValue; }),
             backgroundColor: ['#6366f1', '#a855f7', '#ec4899', '#f43f5e', '#f59e0b', '#10b981', '#06b6d4'],
             borderWidth: 0,
             hoverOffset: 10
@@ -1395,10 +1435,10 @@
       topChartInstances[canvasId] = new Chart(canvas.getContext('2d'), {
         type: 'bar',
         data: {
-          labels: data.map(function(d){ return d.productName; }),
+          labels: data.map(function (d) { return d.productName; }),
           datasets: [{
             label: 'จำนวนที่เบิก',
-            data: data.map(function(d){ return d.totalQty; }),
+            data: data.map(function (d) { return d.totalQty; }),
             backgroundColor: 'rgba(251, 191, 36, 0.8)',
             borderRadius: 6,
             barThickness: 20
@@ -1424,7 +1464,7 @@
       API.getMonthlyTrends().then(function (res) {
         if (!res.success || !res.labels || !res.data) return;
         renderTrendsChart(res.labels, res.data, 'trendsChart');
-      }).catch(function(err) {
+      }).catch(function (err) {
         console.error('Trends Chart Error:', err);
       });
     }
@@ -1458,13 +1498,13 @@
           maintainAspectRatio: false,
           scales: {
             x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10 } } },
-            y: { 
+            y: {
               beginAtZero: true,
-              grid: { color: 'rgba(255, 255, 255, 0.05)', drawBorder: false }, 
-              ticks: { color: '#94a3b8', font: { size: 10 }, callback: function(v) { return '฿' + v.toLocaleString(); } } 
+              grid: { color: 'rgba(255, 255, 255, 0.05)', drawBorder: false },
+              ticks: { color: '#94a3b8', font: { size: 10 }, callback: function (v) { return '฿' + v.toLocaleString(); } }
             }
           },
-          plugins: { 
+          plugins: {
             legend: { display: false },
             tooltip: {
               backgroundColor: '#1e293b',
@@ -1511,8 +1551,8 @@
           '<th style="text-align:center">คงเหลือ</th>' +
           '<th style="text-align:center">ขั้นต่ำ</th>' +
           '</tr></thead><tbody>';
-        
-        items.forEach(function(itm) {
+
+        items.forEach(function (itm) {
           html += '<tr>' +
             '<td><div style="font-weight:600">' + itm.name + '</div><div style="font-size:0.7rem; color:var(--text3)">ID: ' + itm.productId + '</div></td>' +
             '<td style="text-align:center; color:var(--danger); font-weight:700">' + itm.stock + '</td>' +
@@ -1584,9 +1624,9 @@
           var sel = document.getElementById('adminProductCatFilter');
           if (sel) {
             sel.innerHTML = '<option value="all">ทั้งหมด</option>' + (cRes.data || []).map(function (c) {
-              return '<option value="' + c.categoryId + '">' + c.name + '</option>';
+              return '<option value="' + (c.id || c.categoryId) + '">' + c.name + '</option>';
             }).join('');
-            
+
             // Apply low-stock filter if requested from dashboard
             if (options && options.filter === 'lowstock') {
               var stockSel = document.getElementById('adminProductStockFilter');
@@ -1733,11 +1773,12 @@
         var body = document.getElementById('categoriesBody');
         if (!res.data || res.data.length === 0) { body.innerHTML = '<tr><td colspan="3" class="text-center" style="padding:2rem;color:var(--text3)">ยังไม่มีหมวดหมู่</td></tr>'; return; }
         body.innerHTML = res.data.map(function (c) {
+          var catId = c.id || c.categoryId;
           return '<tr>'
-            + '<td>' + escapeHTML(c.categoryId) + '</td>'
+            + '<td>' + escapeHTML(catId) + '</td>'
             + '<td style="font-weight:600">' + escapeHTML(c.name) + '</td>'
-            + '<td><button class="btn btn-sm btn-ghost" onclick="editCategory(\'' + escapeHTML(c.categoryId) + '\', \'' + String(c.name || "").replace(/'/g, "\\'") + '\')"><i data-lucide="edit" style="width:14px;height:14px"></i> แก้ไข</button>'
-            + '<button class="btn btn-sm btn-ghost" style="color:var(--danger)" onclick="delCategory(\'' + escapeHTML(c.categoryId) + '\')"><i data-lucide="trash-2" style="width:14px;height:14px"></i> ลบ</button></td>'
+            + '<td><button class="btn btn-sm btn-ghost" onclick="editCategory(\'' + escapeHTML(catId) + '\', \'' + String(c.name || "").replace(/'/g, "\\'") + '\')"><i data-lucide="edit" style="width:14px;height:14px"></i> แก้ไข</button>'
+            + '<button class="btn btn-sm btn-ghost" style="color:var(--danger)" onclick="delCategory(\'' + escapeHTML(catId) + '\')"><i data-lucide="trash-2" style="width:14px;height:14px"></i> ลบ</button></td>'
             + '</tr>';
         }).join('');
         refreshIcons();
@@ -1780,7 +1821,8 @@
       API.getCategories().then(function (res) {
         var sel = document.getElementById('pf-cat');
         sel.innerHTML = (res.data || []).map(function (c) {
-          return '<option value="' + c.categoryId + '" ' + (product && product.categoryId === c.categoryId ? 'selected' : '') + '>' + c.name + '</option>';
+          var catId = c.id || c.categoryId;
+          return '<option value="' + catId + '" ' + (product && (product.categoryId === catId || product.categoryId === c.name) ? 'selected' : '') + '>' + c.name + '</option>';
         }).join('');
         initSearchableSelect('pf-cat');
       });
@@ -2210,23 +2252,23 @@
 
     function doDispatch(id, btnEl) {
       if (!confirm('ยืนยันการจ่ายพัสดุและตัดสต๊อกใบเบิก ' + id + ' ?')) return;
-      
+
       var btn = btnEl || event.currentTarget;
       var oldHtml = btn.innerHTML;
       btn.disabled = true;
       btn.innerHTML = '<div class="spinner" style="width:14px;height:14px"></div>';
 
-      API.dispatchRequest(id).then(function (res) { 
+      API.dispatchRequest(id).then(function (res) {
         if (res.success) {
-          showToast(res.message || 'ส่งพัสดุเรียบร้อย', 'success'); 
+          showToast(res.message || 'ส่งพัสดุเรียบร้อย', 'success');
         } else {
           showToast(res.message, 'error');
         }
-        loadAdminOrders(); 
-        loadDashboard(); 
-      }).catch(function (err) { 
-        showToast('ข้อผิดพลาด: ' + err, 'error'); 
-      }).finally(function() {
+        loadAdminOrders();
+        loadDashboard();
+      }).catch(function (err) {
+        showToast('ข้อผิดพลาด: ' + err, 'error');
+      }).finally(function () {
         if (btn) {
           btn.disabled = false;
           btn.innerHTML = oldHtml;
@@ -2245,12 +2287,14 @@
 
     // ─── EMPLOYEES ────────────────────────────────────────
     var allAdminTeams = [];
+    var allAdminEmployees = [];
 
     function loadAdminEmployees() {
       Promise.all([API.getEmployees(), API.getTeams()]).then(function (results) {
         var resEmp = results[0];
         var resTeams = results[1];
         allAdminTeams = resTeams.data || [];
+        allAdminEmployees = resEmp.data || [];
 
         var body = document.getElementById('employeesBody');
         if (!resEmp.data) return;
@@ -2268,7 +2312,7 @@
 
           var teamName = '-';
           if (e.teamId) {
-            var team = allAdminTeams.find(function(t) { return t.teamId === e.teamId; });
+            var team = allAdminTeams.find(function (t) { return t.teamId === e.teamId; });
             if (team) teamName = team.name;
           }
 
@@ -2280,8 +2324,9 @@
             + '<td>' + (isMe ? '<span class="badge badge-approved">คุณ (' + e.role + ')</span>' : roleSelect) + '</td>'
             + '<td class="hide-mobile"><span class="badge ' + (e.status === 'active' ? 'badge-approved' : 'badge-rejected') + '">' + (e.status === 'active' ? 'ปกติ' : 'ปิด') + '</span></td>'
             + '<td class="flex flex-wrap gap-1">'
-            + '<button class="btn btn-xs btn-outline" onclick="showUserSubStock(\'' + e.employeeId + '\', \'' + e.name + '\')"><i data-lucide="eye" style="width:12px;height:12px"></i></button>'
-            + (isMe ? '' : '<button class="btn btn-xs btn-ghost hide-mobile" style="color:var(--danger)" onclick="delEmployee(\'' + e.employeeId + '\')"><i data-lucide="trash-2" style="width:12px;height:12px"></i></button>')
+            + '<button class="btn btn-xs btn-outline" onclick="showUserSubStock(\'' + e.employeeId + '\', \'' + e.name + '\')" title="ดูคลังสินค้าส่วนตัว"><i data-lucide="eye" style="width:12px;height:12px"></i></button>'
+            + '<button class="btn btn-xs btn-outline" onclick="editEmployee(\'' + e.employeeId + '\')" title="แก้ไขข้อมูล"><i data-lucide="edit-2" style="width:12px;height:12px"></i></button>'
+            + (isMe ? '' : '<button class="btn btn-xs btn-ghost hide-mobile" style="color:var(--danger)" onclick="delEmployee(\'' + e.employeeId + '\')" title="ลบพนักงาน"><i data-lucide="trash-2" style="width:12px;height:12px"></i></button>')
             + '</td>'
             + '</tr>';
         }).join('');
@@ -2302,26 +2347,34 @@
       });
     }
 
-    function openEmployeeModal() {
-      document.getElementById('ef-id').value = '';
-      document.getElementById('ef-name').value = '';
-      document.getElementById('ef-dept').value = '';
-      document.getElementById('ef-role').value = 'employee';
+    function editEmployee(id) {
+      var emp = allAdminEmployees.find(function (e) { return e.employeeId === id; });
+      if (emp) openEmployeeModal(emp);
+    }
+
+    function openEmployeeModal(emp) {
+      document.getElementById('ef-old-id').value = emp ? emp.employeeId : '';
+      document.getElementById('ef-id').value = emp ? emp.employeeId : '';
+      document.getElementById('ef-name').value = emp ? emp.name : '';
+      document.getElementById('ef-dept').value = emp ? (emp.department || '') : '';
+      document.getElementById('ef-role').value = emp ? emp.role : 'employee';
 
       // Load teams into dropdown
       var teamSel = document.getElementById('ef-team');
       if (teamSel) {
         teamSel.innerHTML = '<option value="">-- ไม่สังกัดทีม --</option>' + allAdminTeams.map(function (t) {
-          return '<option value="' + t.teamId + '">' + t.name + '</option>';
+          return '<option value="' + t.teamId + '" ' + (emp && emp.teamId === t.teamId ? 'selected' : '') + '>' + t.name + '</option>';
         }).join('');
         initSearchableSelect('ef-team');
       }
 
+      document.getElementById('employeeModalTitle').textContent = emp ? 'แก้ไขข้อมูลพนักงาน' : 'เพิ่มพนักงาน';
       document.getElementById('employeeModal').classList.add('open');
     }
     function closeEmployeeModal() { document.getElementById('employeeModal').classList.remove('open'); }
 
     function saveEmployee() {
+      var oldId = document.getElementById('ef-old-id').value.trim();
       var data = {
         employeeId: document.getElementById('ef-id').value.trim(),
         name: document.getElementById('ef-name').value.trim(),
@@ -2336,9 +2389,12 @@
       btn.innerHTML = '<div class="spinner" style="width:16px;height:16px"></div> กำลังบันทึก...';
       btn.disabled = true;
 
-      API.addEmployee(data).then(function (res) {
+      var op = oldId ? 'update' : 'add';
+      var apiCall = oldId ? API.manageEmployee(op, data, oldId) : API.addEmployee(data);
+
+      apiCall.then(function (res) {
         if (res.success) {
-          showToast('เพิ่มพนักงานเรียบร้อย', 'success');
+          showToast(oldId ? 'อัปเดตข้อมูลเรียบร้อย' : 'เพิ่มพนักงานเรียบร้อย', 'success');
           closeEmployeeModal();
           loadAdminEmployees();
         } else {
@@ -2379,11 +2435,104 @@
             '</div>' +
             '<div class="flex flex-wrap items-center justify-between gap-2" style="font-size:0.85rem; color:var(--text2)">' +
             '<span>สมาชิก: ' + (t.memberCount || 0) + ' คน</span>' +
+            '<div class="flex gap-1">' +
             '<button class="btn btn-outline btn-xs" onclick="viewTeamInventory(\'' + t.teamId + '\')">ดูสต๊อกทีม</button>' +
+            '<button class="btn btn-primary btn-xs" onclick="openManageMembersModal(\'' + t.teamId + '\')">จัดการสมาชิก</button>' +
+            '</div>' +
             '</div>' +
             '</div>';
         }).join('');
         refreshIcons();
+      });
+    }
+
+    function openManageMembersModal(teamId) {
+      document.getElementById('mm-team-id').value = teamId;
+      var team = allAdminTeams.find(function (t) { return t.teamId === teamId; });
+      document.getElementById('manageMembersTitle').textContent = 'จัดการสมาชิก: ' + (team ? team.name : teamId);
+
+      renderMemberList(teamId);
+      loadUnassignedEmployees();
+
+      document.getElementById('manageMembersModal').classList.add('open');
+    }
+    function closeManageMembersModal() { document.getElementById('manageMembersModal').classList.remove('open'); }
+
+    function renderMemberList(teamId) {
+      var list = document.getElementById('mm-list');
+      var members = allAdminEmployees.filter(function (e) { return e.teamId === teamId; });
+
+      if (members.length === 0) {
+        list.innerHTML = '<p class="text-center" style="padding:1rem; color:var(--text3); font-size:0.85rem">ยังไม่มีสมาชิกในทีมนี้</p>';
+        return;
+      }
+
+      list.innerHTML = members.map(function (m) {
+        return '<div class="flex items-center justify-between p-2 glass" style="border-radius:8px">' +
+          '<div>' +
+          '<div style="font-weight:600; font-size:0.9rem">' + m.name + '</div>' +
+          '<div style="font-size:0.75rem; color:var(--text3)">' + m.employeeId + ' (' + m.role + ')</div>' +
+          '</div>' +
+          '<button class="btn btn-ghost btn-xs" style="color:var(--danger)" onclick="removeMemberFromTeam(\'' + m.employeeId + '\', \'' + teamId + '\')">' +
+          '<i data-lucide="user-minus" style="width:14px;height:14px"></i> ลบออก' +
+          '</button>' +
+          '</div>';
+      }).join('');
+      refreshIcons();
+    }
+
+    function loadUnassignedEmployees() {
+      var sel = document.getElementById('mm-add-emp');
+      // Filter for Technicians/FCs who don't have a team yet
+      var available = allAdminEmployees.filter(function (e) {
+        return (e.role === 'technician' || e.role === 'fc') && !e.teamId;
+      });
+
+      sel.innerHTML = '<option value="">-- เลือกพนักงานเพื่อเข้าทีม --</option>' + available.map(function (e) {
+        return '<option value="' + e.employeeId + '">' + e.name + ' (' + e.employeeId + ')</option>';
+      }).join('');
+      initSearchableSelect('mm-add-emp');
+    }
+
+    function addMemberToTeam() {
+      var teamId = document.getElementById('mm-team-id').value;
+      var empId = document.getElementById('mm-add-emp').value;
+      if (!empId) { showToast('กรุณาเลือกพนักงาน', 'warning'); return; }
+
+      var emp = allAdminEmployees.find(function (e) { return e.employeeId === empId; });
+      if (!emp) return;
+
+      API.updateEmployeeRole(empId, emp.role, teamId).then(function (res) {
+        if (res.success) {
+          showToast('เพิ่มเข้าทีมเรียบร้อย', 'success');
+          // Update local cache
+          emp.teamId = teamId;
+          renderMemberList(teamId);
+          loadUnassignedEmployees();
+          loadTeams(); // Refresh team cards count
+        } else {
+          showToast(res.message, 'error');
+        }
+      });
+    }
+
+    function removeMemberFromTeam(empId, teamId) {
+      if (!confirm('ยืนยันการนำสมาชิกออกจากทีม?')) return;
+
+      var emp = allAdminEmployees.find(function (e) { return e.employeeId === empId; });
+      if (!emp) return;
+
+      API.updateEmployeeRole(empId, emp.role, '').then(function (res) {
+        if (res.success) {
+          showToast('นำออกจากทีมเรียบร้อย', 'success');
+          // Update local cache
+          emp.teamId = '';
+          renderMemberList(teamId);
+          loadUnassignedEmployees();
+          loadTeams(); // Refresh team cards count
+        } else {
+          showToast(res.message, 'error');
+        }
       });
     }
 
@@ -2392,7 +2541,7 @@
       document.getElementById('tf-name').value = team ? team.name : '';
 
       API.getEmployees().then(function (res) {
-        var technicians = (res.data || []).filter(function(e) { return e.role === 'technician' || e.role === 'fc'; });
+        var technicians = (res.data || []).filter(function (e) { return e.role === 'technician' || e.role === 'fc'; });
         var leadSel = document.getElementById('tf-lead');
         leadSel.innerHTML = '<option value="">-- เลือกหัวหน้าทีม --</option>' + technicians.map(function (e) {
           return '<option value="' + e.employeeId + '" ' + (team && team.leadId === e.employeeId ? 'selected' : '') + '>' + e.name + ' (' + e.employeeId + ')</option>';
@@ -2402,7 +2551,7 @@
 
       document.getElementById('tf-members').innerHTML = '';
       if (team && team.members) {
-        document.getElementById('tf-members').innerHTML = team.members.map(function(m) {
+        document.getElementById('tf-members').innerHTML = team.members.map(function (m) {
           return '<span class="badge badge-pending" style="font-size:0.7rem">' + m.name + '</span>';
         }).join('');
       }
@@ -2465,7 +2614,7 @@
     function openSwapLeadModal() {
       var s1 = document.getElementById('swap-t1');
       var s2 = document.getElementById('swap-t2');
-      var opStr = '<option value="">-- เลือกทีม --</option>' + allAdminTeams.map(function(t) { return '<option value="' + t.teamId + '">' + t.name + '</option>'; }).join('');
+      var opStr = '<option value="">-- เลือกทีม --</option>' + allAdminTeams.map(function (t) { return '<option value="' + t.teamId + '">' + t.name + '</option>'; }).join('');
       s1.innerHTML = opStr;
       s2.innerHTML = opStr;
       initSearchableSelect('swap-t1');
@@ -2482,8 +2631,8 @@
       var preview = document.getElementById('swapPreview');
 
       if (t1id && t2id && t1id !== t2id) {
-        var t1 = allAdminTeams.find(function(t) { return t.teamId === t1id; });
-        var t2 = allAdminTeams.find(function(t) { return t.teamId === t2id; });
+        var t1 = allAdminTeams.find(function (t) { return t.teamId === t1id; });
+        var t2 = allAdminTeams.find(function (t) { return t.teamId === t2id; });
         document.getElementById('sp-t1-lead').innerHTML = '<div style="font-size:0.75rem; color:var(--text3)">' + t1.name + '</div><div style="font-weight:700">' + t1.leadName + '</div>';
         document.getElementById('sp-t2-lead').innerHTML = '<div style="font-size:0.75rem; color:var(--text3)">' + t2.name + '</div><div style="font-weight:700">' + t2.leadName + '</div>';
         preview.style.display = 'block';
@@ -3033,7 +3182,7 @@
 
       API.getStorefrontData().then(function (res) {
         var products = res.data && res.data.products ? res.data.products : [];
-        var prod = products.find(function(p) { return String(p.productId || p.id) === String(text); });
+        var prod = products.find(function (p) { return String(p.productId || p.id) === String(text); });
 
         if (!prod) {
           showToast('ไม่พบรหัสสินค้า: ' + text, 'error');
@@ -3126,7 +3275,7 @@
         btn.disabled = false;
         refreshIcons();
         if (res.success) {
-          var timeLabels = times.map(function(t) { return String(t).padStart(2, '0') + ':00'; }).join(', ');
+          var timeLabels = times.map(function (t) { return String(t).padStart(2, '0') + ':00'; }).join(', ');
           showToast('บันทึกเวลาแจ้งเตือนเรียบร้อยแล้ว: ' + timeLabels, 'success');
           loadSystemSettings();
         } else {
@@ -3145,10 +3294,10 @@
     backBtn.className = 'btn btn-primary';
     backBtn.innerHTML = '<i data-lucide="arrow-up"></i>';
     backBtn.style.cssText = 'position:fixed; bottom:2rem; right:2rem; border-radius:50%; width:50px; height:50px; display:none; align-items:center; justify-content:center; box-shadow:var(--shadow-lg); z-index:1200; padding:0;';
-    backBtn.onclick = function() { window.scrollTo({top:0, behavior:'smooth'}); };
+    backBtn.onclick = function () { window.scrollTo({ top: 0, behavior: 'smooth' }); };
     document.body.appendChild(backBtn);
 
-    window.addEventListener('scroll', function() {
+    window.addEventListener('scroll', function () {
       if (window.scrollY > 400) backBtn.style.display = 'flex';
       else backBtn.style.display = 'none';
     });
@@ -3227,7 +3376,7 @@
       };
       if (!data.branchId || !data.name) { showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warning'); return; }
 
-      var op = allBranches.some(function(x) { return x.branchId === data.branchId; }) ? 'update' : 'add';
+      var op = allBranches.some(function (x) { return x.branchId === data.branchId; }) ? 'update' : 'add';
       API.manageBranch(op, data).then(function (res) {
         showToast(res.message, res.success ? 'success' : 'error');
         if (res.success) { closeBranchModal(); loadBranches(); }
@@ -3435,6 +3584,37 @@
       }).finally(function () {
         btn.disabled = false;
         btn.innerHTML = oldHtml;
+      });
+    }
+
+    // --- DRAG SCROLL UTILITY ---
+    function initDragScroll(selector) {
+      const el = document.querySelector(selector);
+      if (!el) return;
+      let isDown = false;
+      let startX;
+      let scrollLeft;
+
+      el.addEventListener('mousedown', (e) => {
+        isDown = true;
+        el.classList.add('drag-scroll-active');
+        startX = e.pageX - el.offsetLeft;
+        scrollLeft = el.scrollLeft;
+      });
+      el.addEventListener('mouseleave', () => {
+        isDown = false;
+        el.classList.remove('drag-scroll-active');
+      });
+      el.addEventListener('mouseup', () => {
+        isDown = false;
+        el.classList.remove('drag-scroll-active');
+      });
+      el.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - el.offsetLeft;
+        const walk = (x - startX) * 2; // scroll-fast
+        el.scrollLeft = scrollLeft - walk;
       });
     }
   </script>
