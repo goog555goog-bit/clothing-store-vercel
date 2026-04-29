@@ -1232,7 +1232,17 @@
       }
 
       document.getElementById('adminName').textContent = '👤 ' + currentUser.name;
-      loadDashboard();
+      
+      // Load categories globally at startup to ensure charts and lists show names instead of IDs
+      API.getCategories().then(function(res) {
+        if (res.success && res.data) {
+          allAdminCategories = res.data;
+        }
+        loadDashboard();
+      }).catch(function(err) {
+        console.warn('Initial Category Load Failed:', err);
+        loadDashboard();
+      });
     };
 
 
@@ -1451,7 +1461,7 @@
       categoryChartInstances[canvasId] = new Chart(canvas.getContext('2d'), {
         type: 'doughnut',
         data: {
-          labels: data.map(function (d) { return d.category; }),
+          labels: data.map(function (d) { return getCategoryName(d.category); }),
           datasets: [{
             data: data.map(function (d) { return d.totalValue; }),
             backgroundColor: ['#6366f1', '#a855f7', '#ec4899', '#f43f5e', '#f59e0b', '#10b981', '#06b6d4'],
