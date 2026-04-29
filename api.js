@@ -211,6 +211,9 @@ var API = (function () {
     quickDeductStock: function (productId, qty) { 
       return this._call('quickDeductStock', { productId: productId, qty: qty }, false, ['getProducts', 'getAdvancedDashboardData', 'getInventoryForecast']); 
     },
+    addToSubStock: function (data) {
+      return this._call('addToSubStock', { data: data }, false, ['getSubStock', 'getProducts', 'getInventoryForecast']);
+    },
     
     createRequest: function (items) { 
       return this._call('createRequest', { items: items }, false, ['getMyRequests', 'getAllOrders', 'getDashboardStats', 'getAdvancedDashboardData']); 
@@ -252,6 +255,9 @@ var API = (function () {
     },
     manageBranch: function (op, data) {
       return this._call('manageBranch', { op: op, data: data }, false, ['getBranches']);
+    },
+    manageDepartment: function (op, data) {
+      return this._call('manageDepartment', { op: op, data: data }, false, ['getReportData', 'getEmployees']);
     },
 
     saveSystemSettings: function (settings) {

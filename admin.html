@@ -94,6 +94,8 @@
           ตั้งค่าระบบ</button>
         <button class="tab" id="tab-branches" onclick="adminNav('branches', this)"><i data-lucide="building-2"></i>
           จัดการสาขา</button>
+        <button class="tab" id="tab-departments" onclick="adminNav('departments', this)"><i data-lucide="building"></i>
+          จัดการแผนก</button>
         <button class="tab" onclick="adminNav('audit', this)"><i data-lucide="activity"></i> ประวัติกิจกรรม</button>
       </div>
     </div>
@@ -146,7 +148,7 @@
       <div class="grid grid-2 gap-2" style="margin-top:1.5rem">
         <div class="card">
           <div class="card-header">
-            <div class="card-title text-accent"><i data-lucide="award"></i> 5 อันดับสินค้าขายดี</div>
+            <div class="card-title text-accent"><i data-lucide="award"></i> TOP 5 รายการที่เบิกเยอะที่สุด</div>
           </div>
           <div style="height: 250px; padding: 1rem; position: relative;">
             <canvas id="topProductsChart"></canvas>
@@ -242,6 +244,7 @@
           <table class="table-responsive-premium">
             <thead>
               <tr>
+                <th></th>
                 <th>รหัส</th>
                 <th>ชื่อสินค้า</th>
                 <th>หมวดหมู่</th>
@@ -276,6 +279,28 @@
               </tr>
             </thead>
             <tbody id="categoriesBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Departments Section -->
+    <section id="p-departments" class="admin-page" style="display:none">
+      <div class="flex flex-wrap items-center justify-between gap-2" style="margin-bottom:1.5rem">
+        <h2 style="margin:0;display:flex;align-items:center;gap:0.5rem"><i data-lucide="building"></i> จัดการแผนก</h2>
+        <button class="btn btn-accent" onclick="openDeptModal()"><i data-lucide="plus"></i> เพิ่มแผนก</button>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>รหัสแผนก</th>
+                <th>ชื่อแผนก</th>
+                <th>จัดการ</th>
+              </tr>
+            </thead>
+            <tbody id="departmentsBody"></tbody>
           </table>
         </div>
       </div>
@@ -654,6 +679,25 @@
       <div class="modal-footer flex-wrap">
         <button class="btn btn-outline" onclick="closeBranchModal()">ยกเลิก</button>
         <button id="saveBranchBtn" class="btn btn-primary" onclick="saveBranch()">บันทึก</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD/EDIT DEPARTMENT MODAL -->
+  <div id="deptModal" class="modal-overlay" onclick="if(event.target===this) closeDeptModal()">
+    <div class="modal" style="max-width:350px">
+      <div class="modal-header">
+        <div id="deptModalTitle" style="font-weight:600">จัดการแผนก</div>
+        <button class="btn btn-ghost btn-sm" onclick="closeDeptModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="df-id">
+        <div class="form-group"><label class="form-label">ชื่อแผนก *</label><input id="df-name" class="form-input"
+            placeholder="ชื่อแผนก"></div>
+      </div>
+      <div class="modal-footer flex-wrap">
+        <button class="btn btn-outline" onclick="closeDeptModal()">ยกเลิก</button>
+        <button id="saveDeptBtn" class="btn btn-primary" onclick="saveDept()">บันทึก</button>
       </div>
     </div>
   </div>
@@ -1224,9 +1268,9 @@
         'reports': loadReports,
         'employees': loadAdminEmployees,
         'teams': loadTeams,
-        'branches': loadBranches,
-        'audit': loadAuditLogs,
-        'settings': loadSystemSettings
+        'settings': loadSystemSettings,
+        'departments': loadAdminDepartments,
+        'branches': loadBranches
       };
 
       if (loaders[page]) {
@@ -1751,14 +1795,16 @@
         if (stock <= 0) { stockClass = 'stock-danger'; rowClass = 'row-stock-danger'; }
         else if (stock <= min) { stockClass = 'stock-warning'; rowClass = 'row-stock-warning'; }
 
-        return '<tr class="' + rowClass + '">'
+        return '<tr class="hover-row ' + rowClass + '" onclick="editProduct(\'' + escapeHTML(p.productId) + '\')">'
+          + '<td><img src="' + (p.imageUrl || 'https://placehold.co/100x100/12121e/fbbf24?text=📦') + '" style="width:32px;height:32px;object-fit:cover;border-radius:4px;background:rgba(255,255,255,0.05)" onerror="this.src=\'https://placehold.co/100x100/12121e/fbbf24?text=📦\'"></td>'
           + '<td data-label="รหัสสินค้า" class="hide-mobile" style="font-size:0.8rem;color:var(--text3)">' + escapeHTML(p.productId) + '</td>'
           + '<td data-label="ชื่อสินค้า" style="font-weight:500">' + escapeHTML(p.name) + '</td>'
           + '<td data-label="หมวดหมู่">' + escapeHTML(getCategoryName(p.categoryId)) + '</td>'
           + '<td data-label="ราคา">฿' + Number(p.price).toLocaleString() + '</td>'
           + '<td data-label="สต๊อก" class="' + stockClass + '">' + stock + '</td>'
-          + '<td data-label="สถานะ"><span class="badge ' + (p.status === 'active' ? 'badge-approved' : 'badge-rejected') + '" style="cursor:pointer" onclick="toggleProductStatus(\'' + p.productId + '\', \'' + p.status + '\')">' + (p.status === 'active' ? 'เปิด' : 'ปิด') + '</span></td>'
-          + '<td data-label="จัดการ"><button class="btn btn-sm btn-ghost" onclick="generateBarcode(\'' + escapeHTML(p.productId) + '\', \'' + String(p.name || "").replace(/'/g, "\\'") + '\')" title="ดูบาร์โค้ด"><i data-lucide="barcode" style="width:14px;height:14px"></i></button>'
+          + '<td data-label="สถานะ"><span class="badge ' + (p.status === 'active' ? 'badge-approved' : 'badge-rejected') + '" style="cursor:pointer" onclick="event.stopPropagation(); toggleProductStatus(\'' + p.productId + '\', \'' + p.status + '\')">' + (p.status === 'active' ? 'เปิด' : 'ปิด') + '</span></td>'
+          + '<td data-label="จัดการ" onclick="event.stopPropagation()">'
+          + '<button class="btn btn-sm btn-ghost" onclick="generateBarcode(\'' + escapeHTML(p.productId) + '\', \'' + String(p.name || "").replace(/'/g, "\\'") + '\')" title="ดูบาร์โค้ด"><i data-lucide="barcode" style="width:14px;height:14px"></i></button>'
           + '<button class="btn btn-sm btn-ghost" onclick="editProduct(\'' + escapeHTML(p.productId) + '\')"><i data-lucide="edit" style="width:14px;height:14px"></i></button>'
           + '<button class="btn btn-sm btn-ghost" style="color:var(--danger)" onclick="delProduct(\'' + escapeHTML(p.productId) + '\')"><i data-lucide="trash-2" style="width:14px;height:14px"></i></button></td>'
           + '</tr>';
@@ -2443,13 +2489,16 @@
             '<span style="font-size:0.75rem; color:var(--text3)">ID: ' + t.teamId + '</span>' +
             '</div>' +
             '<div class="flex flex-wrap gap-1">' +
-            '<button class="btn btn-ghost btn-xs" onclick="editTeam(\'' + String(t.teamId).replace(/'/g, "\\'") + '\')"><i data-lucide="edit-2" style="pointer-events:none"></i></button>' +
             '<button class="btn btn-ghost btn-xs" style="color:var(--danger)" onclick="delTeam(\'' + String(t.teamId).replace(/'/g, "\\'") + '\')"><i data-lucide="trash" style="pointer-events:none"></i></button>' +
             '</div>' +
             '</div>' +
             '<div style="background:rgba(251,191,36,0.05); padding:0.75rem; border-radius:12px; border:1px solid var(--glass-border); margin-bottom:1rem">' +
             '<div style="font-size:0.7rem; color:var(--primary); text-transform:uppercase; font-weight:800; letter-spacing:0.05em; margin-bottom:0.25rem">ตัวเอก (Lead)</div>' +
-            '<div style="font-weight:700; display:flex; align-items:center; gap:0.5rem"><i data-lucide="crown" style="width:14px; color:var(--primary)"></i> ' + (t.leadName || t.leadId) + '</div>' +
+            '<div style="font-weight:700; display:flex; align-items:center; gap:0.5rem; margin-bottom:0.5rem"><i data-lucide="crown" style="width:14px; color:var(--primary)"></i> ' + (t.leadName || t.leadId) + '</div>' +
+            '<div style="font-size:0.7rem; color:var(--text3); text-transform:uppercase; margin-bottom:0.25rem">สมาชิกในทีม:</div>' +
+            '<div style="font-size:0.85rem; color:var(--text2); line-height:1.4">' + 
+              (t.members && t.members.length > 0 ? t.members.map(function(m){ return m.name; }).join(', ') : 'ไม่มีสมาชิก') + 
+            '</div>' +
             '</div>' +
             '<div class="flex flex-wrap items-center justify-between gap-2" style="font-size:0.85rem; color:var(--text2)">' +
             '<span>สมาชิก: ' + (t.memberCount || 0) + ' คน</span>' +
@@ -2706,7 +2755,8 @@
           body.innerHTML = '<div class="empty-state"><i>📦</i><p>ไม่พบพัสดุในคลังย่อยของ ' + title + '</p></div>';
           return;
         }
-        body.innerHTML = '<h4>📦 คลังย่อย: ' + title + '</h4>' +
+        body.innerHTML = '<div class="flex justify-between items-center mb-4"><h4>📦 คลังย่อย: ' + title + '</h4>' +
+          '<button class="btn btn-accent btn-sm" onclick="openScannerForSubStock(\'' + targetId + '\', \'' + (isTeam ? 'team' : 'personal') + '\')"><i data-lucide="scan"></i> สแกนใช้งาน</button></div>' +
           '<div class="table-wrap"><table><thead><tr><th>สินค้า</th><th>จำนวน</th></tr></thead><tbody>' +
           items.map(function (i) {
             return '<tr><td>' + (i.productName || i.productId) + '</td><td style="font-weight:700">' + i.quantity + '</td></tr>';
@@ -2723,6 +2773,61 @@
       });
     }
 
+    function loadAdminDepartments() {
+      API.getReportData('Departments').then(function (res) {
+        var body = document.getElementById('departmentsBody');
+        if (!body) return;
+        body.innerHTML = (res.data || []).map(function (d) {
+          return '<tr>'
+            + '<td>' + (d.departmentId || '-') + '</td>'
+            + '<td style="font-weight:600">' + d.name + '</td>'
+            + '<td class="flex gap-1">'
+            + '<button class="btn btn-sm btn-ghost" onclick="openDeptModal({departmentId:\'' + d.departmentId + '\', name:\'' + d.name + '\'})"><i data-lucide="edit-2" style="width:14px;height:14px"></i></button>'
+            + '<button class="btn btn-sm btn-ghost" style="color:var(--danger)" onclick="delDept(\'' + d.departmentId + '\')"><i data-lucide="trash-2" style="width:14px;height:14px"></i></button></td>'
+            + '</tr>';
+        }).join('');
+        refreshIcons();
+      });
+    }
+
+    function openDeptModal(dept) {
+      document.getElementById('df-id').value = dept ? dept.departmentId : '';
+      document.getElementById('df-name').value = dept ? dept.name : '';
+      document.getElementById('deptModalTitle').textContent = dept ? 'แก้ไขแผนก' : 'เพิ่มแผนก';
+      document.getElementById('deptModal').classList.add('open');
+    }
+    function closeDeptModal() { document.getElementById('deptModal').classList.remove('open'); }
+
+    function saveDept() {
+      var id = document.getElementById('df-id').value;
+      var name = document.getElementById('df-name').value.trim();
+      if (!name) { showToast('กรุณากรอกชื่อแผนก', 'warning'); return; }
+
+      var op = id ? 'update' : 'add';
+      showToast('กำลังบันทึก...', 'info');
+      API.manageDepartment(op, { departmentId: id, name: name }).then(function (res) {
+        if (res.success) {
+          showToast('บันทึกแผนกเรียบร้อย', 'success');
+          closeDeptModal();
+          loadAdminDepartments();
+        } else {
+          showToast(res.message, 'error');
+        }
+      });
+    }
+
+    function delDept(id) {
+      if (!confirm('ยืนยันการลบแผนก?')) return;
+      API.manageDepartment('delete', { departmentId: id }).then(function (res) {
+        if (res.success) {
+          showToast('ลบแผนกเรียบร้อย', 'success');
+          loadAdminDepartments();
+        } else {
+          showToast(res.message, 'error');
+        }
+      });
+    }
+
     function openExportModal() {
       // โหลดรายชื่อแผนกมาใส่ใน select (ถ้ามี)
       API.getReportData('Departments').then(function (res) {
@@ -2735,6 +2840,15 @@
       document.getElementById('exportModal').classList.add('open');
     }
     function closeExportModal() { document.getElementById('exportModal').classList.remove('open'); }
+
+    var _subStockTarget = null;
+    var _subStockType = null;
+    function openScannerForSubStock(targetId, type) {
+      _subStockTarget = targetId;
+      _subStockType = type;
+      setScanMode('sub');
+      openScanner();
+    }
 
     function doDetailedExport() {
       var filters = {
@@ -3175,8 +3289,18 @@
       } else if (mode === 'receive') {
         promise = API.updateStock(id, qty, currentUser.employeeId);
       } else if (mode === 'sub') {
-        // รับเข้าคลังย่อย (FC)
-        promise = API.addToSubStock({ productId: id, qty: qty });
+        if (_subStockTarget) {
+          // สแกนใช้งานจากคลังย่อย (ตัดออก)
+          promise = API.addToSubStock({ 
+            productId: id, 
+            qty: -qty, 
+            employeeId: _subStockType === 'personal' ? _subStockTarget : null,
+            teamId: _subStockType === 'team' ? _subStockTarget : null
+          });
+        } else {
+          // รับเข้าคลังย่อย (กรณีปกติ)
+          promise = API.addToSubStock({ productId: id, qty: qty });
+        }
       }
 
       if (promise) {
@@ -3203,7 +3327,10 @@
       var config = {
         'deduct': { title: 'ตัดจ่ายพัสดุ', desc: 'ระบุจำนวนที่ต้องการตัดออกจากสต็อกหลัก' },
         'receive': { title: 'รับพัสดุเข้าคลัง', desc: 'ระบุจำนวนพัสดุที่รับเข้าคลังหลัก' },
-        'sub': { title: 'รับเข้าคลังย่อย (FC)', desc: 'ระบุจำนวนที่รับเข้าคลังย่อยของคุณ' }
+        'sub': { 
+          title: _subStockTarget ? 'บันทึกการใช้งานพัสดุ' : 'รับเข้าคลังย่อย', 
+          desc: _subStockTarget ? 'ระบุจำนวนที่นำไปใช้งานจริง' : 'ระบุจำนวนที่รับเข้าคลังย่อยของคุณ' 
+        }
       }[currentScanMode];
 
       API.getStorefrontData().then(function (res) {
