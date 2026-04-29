@@ -3031,7 +3031,7 @@
             return '<tr>' +
               '<td>' + p.productId + '</td>' +
               '<td>' + p.productName + '</td>' +
-              '<td>' + (p.category || '-') + '</td>' +
+              '<td>' + getCategoryName(p.category) + '</td>' +
               '<td>' + p.currentStock + '</td>' +
               '<td>' + (p.minStock || 5) + '</td>' +
               '<td><span class="badge ' + statusClass + '">' + statusText + '</span></td>' +
