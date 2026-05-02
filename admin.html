@@ -683,6 +683,31 @@
     </div>
   </div>
 
+  <!-- ADD/EDIT CATEGORY MODAL -->
+  <div id="categoryModal" class="modal-overlay" onclick="if(event.target===this) closeCategoryModal()">
+    <div class="modal" style="max-width:350px">
+      <div class="modal-header">
+        <div id="categoryModalTitle" style="font-weight:600">จัดการหมวดหมู่</div>
+        <button class="btn btn-ghost btn-sm" onclick="closeCategoryModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="cf-old-id">
+        <div class="form-group">
+          <label class="form-label">รหัสหมวดหมู่ *</label>
+          <input id="cf-id" class="form-input" placeholder="เช่น CAT001">
+        </div>
+        <div class="form-group">
+          <label class="form-label">ชื่อหมวดหมู่ *</label>
+          <input id="cf-name" class="form-input" placeholder="เช่น เสื้อยืด">
+        </div>
+      </div>
+      <div class="modal-footer flex-wrap">
+        <button class="btn btn-outline" onclick="closeCategoryModal()">ยกเลิก</button>
+        <button id="saveCategoryBtn" class="btn btn-primary" onclick="saveCategory()">บันทึก</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ADD/EDIT DEPARTMENT MODAL -->
   <div id="deptModal" class="modal-overlay" onclick="if(event.target===this) closeDeptModal()">
     <div class="modal" style="max-width:350px">
@@ -1853,16 +1878,33 @@
     }
 
     function openCategoryModal(cat) {
-      var name = prompt(cat ? 'แก้ไขชื่อหมวดหมู่' : 'เพิ่มหมวดหมู่ใหม่', cat ? cat.name : '');
-      if (name === null) return;
-      if (!name.trim()) { showToast('กรุณากรอกชื่อหมวดหมู่', 'warning'); return; }
+      document.getElementById('cf-old-id').value = cat ? cat.id : '';
+      document.getElementById('cf-id').value = cat ? cat.id : '';
+      document.getElementById('cf-name').value = cat ? cat.name : '';
+      document.getElementById('categoryModalTitle').textContent = cat ? 'แก้ไขหมวดหมู่' : 'เพิ่มหมวดหมู่ใหม่';
+      document.getElementById('categoryModal').classList.add('open');
+    }
+    function closeCategoryModal() { document.getElementById('categoryModal').classList.remove('open'); }
 
-      var op = cat ? 'update' : 'add';
-      var data = { categoryId: cat ? cat.id : null, name: name.trim() };
+    function saveCategory() {
+      var oldId = document.getElementById('cf-old-id').value.trim();
+      var newId = document.getElementById('cf-id').value.trim();
+      var name = document.getElementById('cf-name').value.trim();
 
+      if (!newId || !name) { showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warning'); return; }
+
+      var op = oldId ? 'update' : 'add';
+      var data = { oldCategoryId: oldId, categoryId: newId, name: name };
+
+      showToast('กำลังบันทึก...', 'info');
       API.manageCategory(op, data).then(function (res) {
-        showToast('บันทึกหมวดหมู่เรียบร้อย', 'success');
-        loadAdminCategories();
+        if (res.success) {
+          showToast('บันทึกหมวดหมู่เรียบร้อย', 'success');
+          closeCategoryModal();
+          loadAdminCategories();
+        } else {
+          showToast(res.message, 'error');
+        }
       }).catch(function (err) { showToast(err, 'error'); });
     }
 
