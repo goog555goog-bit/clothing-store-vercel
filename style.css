@@ -1167,25 +1167,6 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   opacity: 1;
 }
 
-/* Sparkline Micro-charts */
-.sparkline-container {
-  height: 40px;
-  width: 100%;
-  margin-top: 5px;
-  display: flex;
-  align-items: flex-end;
-  gap: 3px;
-}
-.sparkline-bar {
-  flex: 1;
-  background: var(--primary);
-  opacity: 0.2;
-  border-radius: 2px 2px 0 0;
-  transition: height 1s ease-out, opacity 0.3s;
-}
-.stat-card:hover .sparkline-bar {
-  opacity: 0.5;
-}
 
 /* Confetti Particles */
 .confetti {

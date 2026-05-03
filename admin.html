@@ -633,13 +633,13 @@
 
         <div class="flex flex-wrap gap-2">
           <div class="form-group" style="flex:1"><label class="form-label">ราคา *</label><input id="pf-price"
-              class="form-input" type="number" placeholder="0"></div>
+              class="form-input" type="number" placeholder="0" min="0" step="0.01"></div>
           <div class="form-group" style="flex:1"><label class="form-label">สต๊อก</label><input id="pf-stock"
-              class="form-input" type="number" placeholder="0"></div>
+              class="form-input" type="number" placeholder="0" min="0"></div>
         </div>
         <div class="flex flex-wrap gap-2">
           <div class="form-group" style="flex:1"><label class="form-label">สต๊อกขั้นต่ำ</label><input id="pf-min"
-              class="form-input" type="number" placeholder="5"></div>
+              class="form-input" type="number" placeholder="5" min="0"></div>
           <div style="flex:1"></div>
         </div>
 
@@ -764,8 +764,12 @@
             placeholder="EMP001"></div>
         <div class="form-group"><label class="form-label">ชื่อ-นามสกุล *</label><input id="ef-name" class="form-input"
             placeholder="ชื่อ นามสกุล"></div>
-        <div class="form-group"><label class="form-label">แผนก</label><input id="ef-dept" class="form-input"
-            placeholder="แผนก"></div>
+        <div class="form-group">
+          <label class="form-label">แผนก *</label>
+          <select id="ef-dept" class="input w-full">
+            <option value="">-- เลือกแผนก --</option>
+          </select>
+        </div>
         <div class="form-group">
           <label class="form-label">ทีมช่าง (ถ้ามี)</label>
           <select id="ef-team" class="input w-full">
@@ -850,10 +854,12 @@
           <input id="approvalComment" class="form-input" placeholder="ระบุเหตุผลการอนุมัติ/ปฏิเสธ...">
         </div>
       </div>
-      <div class="modal-footer flex-wrap" style="display:flex; gap:0.75rem">
-        <button class="btn btn-outline" style="flex:1" onclick="closeApprovalModal()">ยกเลิก</button>
-        <button class="btn btn-danger" style="flex:1" onclick="submitOrderDecision('reject')">ปฏิเสธ</button>
-        <button class="btn btn-accent" style="flex:2" onclick="submitOrderDecision('approve')">อนุมัติคำขอ</button>
+      <div class="modal-footer flex-wrap" style="display:flex; justify-content:space-between; align-items:center; gap:1rem">
+        <button class="btn btn-outline" onclick="closeApprovalModal()">ยกเลิก</button>
+        <div class="flex gap-2" style="flex:1; justify-content:flex-end">
+          <button class="btn btn-danger" onclick="submitOrderDecision('reject')">ปฏิเสธ</button>
+          <button class="btn btn-accent" style="flex:1; min-width:150px" onclick="submitOrderDecision('approve')">อนุมัติคำขอ</button>
+        </div>
       </div>
     </div>
   </div>
@@ -1367,7 +1373,8 @@
         'tab-reports': 'view_reports',
         'tab-audit': 'view_reports',
         'tab-settings': 'superadmin_only',
-        'tab-branches': 'superadmin_only'
+        'tab-branches': 'superadmin_only',
+        'tab-permissions': 'superadmin_only'
       };
 
       for (var id in tabPermissions) {
@@ -1400,9 +1407,14 @@
         if (res.success && res.data) {
           allAdminCategories = res.data;
         }
+        return API.getReportData('Departments');
+      }).then(function(res) {
+        if (res.success && res.data) {
+          allAdminDepartments = res.data;
+        }
         loadDashboard();
       }).catch(function(err) {
-        console.warn('Initial Category Load Failed:', err);
+        console.warn('Initial Data Load Failed:', err);
         loadDashboard();
       });
     };
@@ -1483,6 +1495,7 @@
     var chartInstance = null;
     var _dbDeptsLoaded = false;
     var _lastDashboardStats = null; // Store for low-stock modal
+    var allAdminDepartments = [];
 
     function formatDateLocal(d) {
       return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
@@ -1769,20 +1782,10 @@
     }
 
     function statCard(iconName, label, value, color) {
-      // Create virtual sparkline bars
-      var bars = '';
-      for (var i = 0; i < 15; i++) {
-        var h = Math.floor(Math.random() * 80) + 20;
-        bars += '<div class="sparkline-bar" style="height:' + h + '%"></div>';
-      }
-
       var colorStyle = color ? 'style="color:var(--' + color + ')"' : '';
-      var activeClass = (color === 'danger' || color === 'warning') ? 'active' : '';
-
       return '<div class="stat-card mouse-glow-card">'
         + '<div class="stat-label"><i data-lucide="' + iconName + '"></i> ' + label + '</div>'
         + '<div class="stat-value" ' + colorStyle + '>' + value + '</div>'
-        + '<div class="sparkline-container">' + bars + '</div>'
         + '</div>';
     }
 
@@ -2509,6 +2512,7 @@
 
     function submitOrderDecision(action) {
       if (!currentProcessingOrderId) return;
+      if (!confirm('ยืนยันการ' + (action === 'approve' ? 'อนุมัติ' : 'ปฏิเสธ') + 'ใบเบิก ' + currentProcessingOrderId + ' ?')) return;
       var comment = document.getElementById('approvalComment').value.trim() || (action === 'approve' ? 'ผ่านการตรวจสอบ' : 'ไม่อนุมัติ');
 
       showToast('⏳ กำลังดำเนินการ...', 'info');
@@ -2646,7 +2650,16 @@
       document.getElementById('ef-old-id').value = emp ? emp.employeeId : '';
       document.getElementById('ef-id').value = emp ? emp.employeeId : '';
       document.getElementById('ef-name').value = emp ? emp.name : '';
-      document.getElementById('ef-dept').value = emp ? (emp.department || '') : '';
+      
+      // Load departments into dropdown
+      var deptSel = document.getElementById('ef-dept');
+      if (deptSel) {
+        deptSel.innerHTML = '<option value="">-- เลือกแผนก --</option>' + allAdminDepartments.map(function (d) {
+          return '<option value="' + d.name + '" ' + (emp && emp.department === d.name ? 'selected' : '') + '>' + d.name + '</option>';
+        }).join('');
+        initSearchableSelect('ef-dept');
+      }
+
       document.getElementById('ef-role').value = emp ? emp.role : 'employee';
 
       // Load teams into dropdown
@@ -3219,6 +3232,7 @@
 
       API.getReportData('Departments').then(function (res) {
         if (!body) return;
+        allAdminDepartments = res.data || [];
         if (!res.data || res.data.length === 0) {
           body.innerHTML = '<tr><td colspan="3" class="text-center" style="padding:2rem;color:var(--text3)">ไม่พบข้อมูลแผนก</td></tr>';
           return;
