@@ -3807,7 +3807,7 @@
       refreshIcons();
 
       if (!modalScanner) {
-        modalScanner = new Html5Qrcode("modal-scanner-v2");
+        modalScanner = new Html5Qrcode("scannerViewport");
       }
     }
 
@@ -3822,7 +3822,7 @@
       const placeholder = document.getElementById('scannerPlaceholder');
       const dot = document.querySelector('.scanner-status-dot');
       const statusText = document.getElementById('ssText');
-      const viewport = document.getElementById('scannerViewportWrap');
+      const viewport = document.getElementById('scannerViewportParent');
 
       if (!startBtn) return;
 
