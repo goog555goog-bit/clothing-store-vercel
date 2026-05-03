@@ -1082,7 +1082,7 @@
 
         <!-- Scanner Viewport -->
         <div class="scanner-viewport-container" id="scannerViewportParent">
-          <div id="scannerViewport"></div>
+          <div id="modal-scanner-v2"></div>
           <div class="scanner-laser"></div>
           <div class="scanner-guide"></div>
 
@@ -1090,7 +1090,10 @@
           <div id="scannerPlaceholder"
             style="position:absolute; top:0; left:0; width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; background:rgba(0,0,0,0.8); z-index:2; text-align:center; padding:2rem">
             <i data-lucide="camera" style="width:48px; height:48px; margin-bottom:1rem; opacity:0.3"></i>
-            <p style="font-size:0.9rem; color:var(--text3)">กำลังเตรียมกล้องของคุณ...</p>
+            <p id="ssText" style="font-size:0.9rem; color:var(--text3); margin-bottom:1rem">ระบบสแกนเนอร์พร้อมทำงาน</p>
+            <button id="modalStartBtn" class="btn btn-primary" onclick="startLiveScan()">
+              <i data-lucide="play"></i> เริ่มเปิดกล้อง
+            </button>
           </div>
         </div>
 
@@ -3807,7 +3810,7 @@
       refreshIcons();
 
       if (!modalScanner) {
-        modalScanner = new Html5Qrcode("scannerViewport");
+        modalScanner = new Html5Qrcode("modal-scanner-v2");
       }
     }
 
