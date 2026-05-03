@@ -272,6 +272,7 @@ var API = (function () {
     // ─── OTHERS ───────────────────────────────────────────────
     uploadToDrive: function (base64, fileName) { return this._call('uploadToDrive', { base64: base64, fileName: fileName }); },
     exportToCSV: function (sheetName) { return this._call('exportToCSV', { sheetName: sheetName }); },
+    setupSpreadsheet: function() { return this._call('setupSpreadsheet'); },
 
     // Compatibility wrappers
     approveOrder: function (id, _, comment) { return this.approveRequest(id, comment); },

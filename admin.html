@@ -561,6 +561,30 @@
       </div>
     </section>
 
+    <!-- SETTINGS SECTION -->
+    <section id="p-settings" class="admin-page" style="display:none">
+      <div class="flex flex-wrap items-center justify-between gap-2" style="margin-bottom:1.5rem">
+        <h2 style="margin:0;display:flex;align-items:center;gap:0.5rem"><i data-lucide="settings"></i> ตั้งค่าระบบ</h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="card glass">
+          <div class="card-header">
+            <div class="card-title"><i data-lucide="database"></i> การจัดการฐานข้อมูล</div>
+          </div>
+          <div class="card-body" style="padding:1.5rem">
+            <p style="font-size:0.9rem; color:var(--text3); margin-bottom:1.5rem">
+              หากคุณเพิ่งอัปเดตเวอร์ชันของระบบ หรือพบว่าบางฟีเจอร์ (เช่น การเลือกไซส์สินค้า) ใช้งานไม่ได้ 
+              กรุณากดปุ่มด้านล่างเพื่อตรวจสอบและอัปเดตหัวตารางใน Google Sheets ให้เป็นเวอร์ชันล่าสุด
+            </p>
+            <button class="btn btn-primary w-full" id="btnUpdateDB" onclick="runDBMaintenance()">
+              <i data-lucide="refresh-cw"></i> อัปเดตโครงสร้างฐานข้อมูล (Migration)
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- BRANCHES SECTION -->
     <section id="p-branches" class="admin-page" style="display:none">
       <div class="flex flex-wrap items-center justify-between gap-2" style="margin-bottom:1.5rem">
@@ -4312,6 +4336,30 @@
           e.stopPropagation();
         }
       }, true);
+    }
+
+    function runDBMaintenance() {
+      var btn = document.getElementById('btnUpdateDB');
+      if (!btn) return;
+      
+      if (!confirm('ยืนยันการตรวจสอบและอัปเดตโครงสร้างฐานข้อมูล (Google Sheets)?')) return;
+      
+      var oldHtml = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<div class="spinner"></div> กำลังดำเนินการ...';
+      
+      API.setupSpreadsheet().then(function(res) {
+        if (res.success) {
+          showToast(res.message || 'อัปเดตโครงสร้างฐานข้อมูลเรียบร้อย', 'success');
+        } else {
+          showToast(res.message || 'เกิดข้อผิดพลาดในการอัปเดต', 'error');
+        }
+      }).catch(function(err) {
+        showToast('เซิร์ฟเวอร์ขัดข้อง: ' + err, 'error');
+      }).finally(function() {
+        btn.disabled = false;
+        btn.innerHTML = oldHtml;
+      });
     }
   </script>
 </body>
