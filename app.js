@@ -739,8 +739,8 @@ function renderProductGrid(pageNum) {
       +     '<div class="product-price">' + (hasPermission('view_prices') ? '฿' + Number(p.price).toLocaleString() : '***') + '</div>'
       +     (hasPermission('can_request') 
               ? '<button class="btn btn-sm ' + (outOfStock ? 'btn-outline' : 'btn-primary') + '" '
-                + (outOfStock ? 'disabled' : 'onclick="addToCart(\'' + escapeHTML(p.productId) + '\', event)"')
-                + ' style="border-radius:99px; padding: 0.4rem 1rem;' + (outOfStock ? '' : 'background:var(--gradient-gold);color:#000;border:none;') + '">' + (outOfStock ? 'หมด' : '+ เบิกสินค้า') + '</button>'
+                + (outOfStock ? 'disabled' : 'onclick="' + (p.sizes ? 'openProductDetail(\'' + escapeHTML(p.productId) + '\')' : 'addToCart(\'' + escapeHTML(p.productId) + '\', event)') + '"')
+                + ' style="border-radius:99px; padding: 0.4rem 1rem;' + (outOfStock ? '' : 'background:var(--gradient-gold);color:#000;border:none;') + '">' + (outOfStock ? 'หมด' : (p.sizes ? 'เลือกไซส์' : '+ เบิกสินค้า')) + '</button>'
               : '<div style="font-size:0.75rem; color:var(--danger)">🔒 ไม่มีสิทธิ์เบิก</div>'
             )
       +   '</div>'
@@ -790,8 +790,24 @@ function openProductDetail(id) {
     +   '<div style="margin-bottom:1.5rem">'
     +     '<h3 style="font-size:1rem;font-weight:700;margin-bottom:0.75rem">รายละเอียดสินค้า</h3>'
     +     '<p style="color:var(--text2);line-height:1.6;font-size:0.95rem">' + (p.description || 'ไม่มีรายละเอียดเพิ่มเติมสำหรับสินค้านี้') + '</p>'
-    +   '</div>'
-    + '</div>';
+    +   '</div>';
+
+  // --- Size Selection Logic ---
+  if (p.sizes) {
+    var sizeList = p.sizes.split(',').map(function(s) { return s.trim(); }).filter(function(s) { return s !== ''; });
+    if (sizeList.length > 0) {
+      var sizeHtml = '<div style="margin-bottom:1.5rem">'
+        + '<h3 style="font-size:0.9rem;font-weight:700;margin-bottom:0.75rem">เลือกไซส์:</h3>'
+        + '<div class="flex flex-wrap gap-2" id="size-selector-container">'
+        + sizeList.map(function(s) {
+            return '<button class="btn btn-outline btn-sm size-btn" onclick="selectProductSize(this, \'' + escapeHTML(s) + '\')" style="min-width:44px; height:44px; border-radius:12px; font-weight:700">' + s + '</button>';
+          }).join('')
+        + '</div><input type="hidden" id="selected-product-size"></div>';
+      body.innerHTML += sizeHtml;
+    }
+  }
+
+  body.innerHTML += '</div>';
   
   var btn = document.getElementById('detailAddToCartBtn');
   var outOfStock = Number(p.stock) <= 0;
@@ -804,7 +820,17 @@ function openProductDetail(id) {
   } else {
     btn.disabled = outOfStock;
     btn.style.opacity = outOfStock ? '0.5' : '1';
-    btn.onclick = function() { addToCart(p.productId); closeModal('productDetailModal'); toggleDrawer('cartDrawer'); };
+    btn.onclick = function() { 
+      var size = document.getElementById('selected-product-size') ? document.getElementById('selected-product-size').value : null;
+      var hasSizes = !!document.getElementById('size-selector-container');
+      if (hasSizes && !size) {
+        showToast('กรุณาเลือกไซส์ก่อนเพิ่มลงตะกร้า', 'warning');
+        return;
+      }
+      addToCart(p.productId, null, size); 
+      closeModal('productDetailModal'); 
+      toggleDrawer('cartDrawer'); 
+    };
     btn.innerHTML = outOfStock ? 'สินค้าหมด' : '<i data-lucide="shopping-cart" style="width:18px;height:18px"></i> เพิ่มลงตะกร้า';
   }
   
@@ -833,18 +859,40 @@ function getImageUrl(url) {
   return url;
 }
 
-function addToCart(productId, event) {
+function addToCart(productId, event, size) {
   if (!currentUser) {
-    // Show premium login-gate modal instead of redirecting abruptly
     var modal = document.getElementById('loginGateModal');
     if (modal) { modal.classList.add('open'); refreshIcons(); }
     return;
   }
   var product = allProducts.filter(function(p) { return String(p.productId) === String(productId); })[0];
   if (product) {
-    Cart.add(product);
+    // If it has sizes but no size provided, force detail modal
+    if (product.sizes && !size) {
+      openProductDetail(productId);
+      return;
+    }
+    Cart.add(product, size);
     if (event) animateFlyToCart(event, getImageUrl(product.imageUrl));
   }
+}
+
+// Global helper for size selection
+function selectProductSize(btn, size) {
+  var container = document.getElementById('size-selector-container');
+  if (!container) return;
+  container.querySelectorAll('.size-btn').forEach(function(b) {
+    b.classList.remove('btn-primary');
+    b.classList.add('btn-outline');
+    b.style.background = '';
+    b.style.color = '';
+  });
+  btn.classList.remove('btn-outline');
+  btn.classList.add('btn-primary');
+  btn.style.background = 'var(--gradient-gold)';
+  btn.style.color = '#000';
+  btn.style.border = 'none';
+  document.getElementById('selected-product-size').value = size;
 }
 
 /**
@@ -1003,7 +1051,8 @@ function viewOrderDetails(requestId) {
 
     var html = '<div class="table-wrap"><table><thead><tr><th>สินค้า</th><th class="text-center">จำนวน</th><th class="text-right">รวม</th></tr></thead><tbody>'
       + items.map(function(i) {
-        return '<tr><td>' + i.productName + '</td><td class="text-center">' + i.quantity + '</td>'
+        var sizeInfo = i.size ? ' <span class="badge badge-pending" style="font-size:0.7rem; padding:0.1rem 0.4rem; vertical-align:middle; margin-left:0.4rem">' + i.size + '</span>' : '';
+        return '<tr><td>' + i.productName + sizeInfo + '</td><td class="text-center">' + i.quantity + '</td>'
           + '<td class="text-right" style="font-weight:600">฿' + (Number(i.price) * Number(i.quantity)).toLocaleString() + '</td></tr>';
       }).join('')
       + '</tbody></table></div>';
@@ -1369,7 +1418,8 @@ function showCheckoutModal() {
   body.innerHTML = '<div class="table-wrap" style="margin-bottom:1rem;"><table><thead><tr>'
     + '<th>สินค้า</th><th class="text-center">จำนวน</th><th class="text-right">รวม</th></tr></thead><tbody>'
     + items.map(function(i) {
-        return '<tr><td>' + i.name + '</td><td class="text-center">' + i.qty + '</td><td class="text-right" style="font-weight:600;color:var(--accent)">฿' + (i.price * i.qty).toLocaleString() + '</td></tr>';
+        var sizeInfo = i.size ? ' <span class="badge badge-pending" style="font-size:0.7rem; padding:0.1rem 0.4rem; vertical-align:middle; margin-left:0.4rem">' + i.size + '</span>' : '';
+        return '<tr><td>' + i.name + sizeInfo + '</td><td class="text-center">' + i.qty + '</td><td class="text-right" style="font-weight:600;color:var(--accent)">฿' + (i.price * i.qty).toLocaleString() + '</td></tr>';
       }).join('')
     + '</tbody></table></div>'
     + '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem;background:var(--glass-gold);border-radius:10px;border:1px solid rgba(251,191,36,0.2);">'
@@ -1389,7 +1439,7 @@ function confirmCheckout() {
   var btn = document.getElementById('confirmCheckoutBtn');
   if (btn) { btn.disabled = true; btn.innerHTML = '<div class="spinner"></div> กำลังดำเนินการ...'; }
 
-  var payload = items.map(function(i) { return { productId: i.productId, qty: i.qty }; });
+  var payload = items.map(function(i) { return { productId: i.productId, qty: i.qty, size: i.size || '' }; });
 
   API.createRequest(payload)
     .then(function(res) {

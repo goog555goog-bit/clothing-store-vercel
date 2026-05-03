@@ -16,11 +16,16 @@ var Cart = {
     this.renderBadge();
   },
 
-  add: function(product) {
+  add: function(product, productSize) {
     var items = this.getItems();
     var existing = null;
+    var size = (productSize || '').trim();
+
     for (var i = 0; i < items.length; i++) {
-      if (items[i].productId === product.productId) { existing = items[i]; break; }
+      if (items[i].productId === product.productId && (items[i].size || '') === size) { 
+        existing = items[i]; 
+        break; 
+      }
     }
 
     // Re-verify stock with global products cache if available
@@ -48,6 +53,7 @@ var Cart = {
         price: Number(product.price),
         img: product.imageUrl || '',
         maxStock: currentStoreStock,
+        size: size,
         qty: 1
       });
     }
@@ -57,17 +63,18 @@ var Cart = {
     showToast('เพิ่ม "' + product.name + '" ลงตะกร้าแล้ว', 'success');
   },
 
-  updateQty: function(productId, delta) {
+  updateQty: function(productId, delta, size) {
     var items = this.getItems();
     var currentItem = null;
     var currentStock = null;
+    var targetSize = size || '';
     if (typeof allProducts !== 'undefined' && allProducts) {
       var p = allProducts.find(function(x) { return String(x.productId) === String(productId); });
       if (p) currentStock = Number(p.stock);
     }
 
     for (var i = 0; i < items.length; i++) {
-      if (items[i].productId === productId) {
+      if (items[i].productId === productId && (items[i].size || '') === targetSize) {
         if (currentStock !== null) items[i].maxStock = currentStock;
 
         var nextQty = items[i].qty + delta;
@@ -104,8 +111,11 @@ var Cart = {
     }
   },
 
-  remove: function(productId) {
-    var items = this.getItems().filter(function(i) { return i.productId !== productId; });
+  remove: function(productId, size) {
+    var targetSize = size || '';
+    var items = this.getItems().filter(function(i) { 
+      return !(i.productId === productId && (i.size || '') === targetSize); 
+    });
     this.save(items);
     this.render();
   },
@@ -161,21 +171,22 @@ var Cart = {
     }
 
     container.innerHTML = items.map(function(item) {
+      var sizeInfo = item.size ? ' <span class="badge badge-pending" style="font-size:0.7rem; padding:0.1rem 0.4rem; vertical-align:middle; margin-left:0.25rem">' + item.size + '</span>' : '';
       return '<div class="cart-item">'
         + '<img src="' + (item.img || '') + '" class="cart-item-img" onerror="this.style.display=\'none\'">'
         + '<div style="flex:1">'
         +   '<div class="flex flex-wrap justify-between gap-2"><div>'
-        +     '<div style="font-weight:600;font-size:0.9rem">' + item.name + '</div>'
+        +     '<div style="font-weight:600;font-size:0.9rem">' + item.name + sizeInfo + '</div>'
         +     '<div style="color:var(--accent);font-size:0.85rem">' + (typeof hasPermission === 'function' && !hasPermission('view_prices') ? '***' : '฿' + item.price.toLocaleString()) + '</div>'
         +   '</div>'
-        +   '<button class="btn btn-ghost btn-xs" style="color:var(--danger);padding:0.25rem" onclick="Cart.remove(\'' + item.productId + '\')"><i data-lucide="trash-2" style="width:14px;height:14px"></i></button></div>'
+        +   '<button class="btn btn-ghost btn-xs" style="color:var(--danger);padding:0.25rem" onclick="Cart.remove(\'' + item.productId + '\', \'' + (item.size || '') + '\')"><i data-lucide="trash-2" style="width:14px;height:14px"></i></button></div>'
         +   '<div class="flex flex-wrap items-center justify-between gap-2" style="margin-top:0.5rem">'
         +     '<div class="qty-ctrl">'
-        +       '<button class="qty-btn" onclick="Cart.updateQty(\'' + item.productId + '\', -1)" aria-label="ลดจำนวน"><i data-lucide="minus" style="width:12px;height:12px"></i></button>'
-        +       '<div class="qty-val" id="qty-val-' + item.productId + '">' + item.qty + '</div>'
-        +       '<button class="qty-btn" onclick="Cart.updateQty(\'' + item.productId + '\', 1)" aria-label="เพิ่มจำนวน"><i data-lucide="plus" style="width:12px;height:12px"></i></button>'
+        +       '<button class="qty-btn" onclick="Cart.updateQty(\'' + item.productId + '\', -1, \'' + (item.size || '') + '\')" aria-label="ลดจำนวน"><i data-lucide="minus" style="width:12px;height:12px"></i></button>'
+        +       '<div class="qty-val" id="qty-val-' + item.productId + '-' + (item.size || '') + '">' + item.qty + '</div>'
+        +       '<button class="qty-btn" onclick="Cart.updateQty(\'' + item.productId + '\', 1, \'' + (item.size || '') + '\')" aria-label="เพิ่มจำนวน"><i data-lucide="plus" style="width:12px;height:12px"></i></button>'
         +     '</div>'
-        +     '<div style="font-weight:700" id="item-total-' + item.productId + '">' + (typeof hasPermission === 'function' && !hasPermission('view_prices') ? '***' : '฿' + (item.price * item.qty).toLocaleString()) + '</div>'
+        +     '<div style="font-weight:700" id="item-total-' + item.productId + '-' + (item.size || '') + '">' + (typeof hasPermission === 'function' && !hasPermission('view_prices') ? '***' : '฿' + (item.price * item.qty).toLocaleString()) + '</div>'
         +   '</div>'
         + '</div>'
         + '</div>';
