@@ -2738,6 +2738,13 @@
             '<td style="text-align:center"><button class="btn btn-xs btn-outline" onclick="openRoleCategoryModal(\'' + role.id + '\')">' + catLabel + '</button></td>' +
             '</tr>';
         }).join('');
+      }).catch(function(err) {
+        console.error('Failed to load role permissions:', err);
+        body.innerHTML = '<tr><td colspan="8" class="text-center" style="padding:2rem">' +
+          '<div style="color:var(--danger);margin-bottom:1rem">⚠️ ไม่สามารถโหลดข้อมูลสิทธิ์จากเซิร์ฟเวอร์ได้</div>' +
+          '<button class="btn btn-sm btn-outline" onclick="loadPermissionsPage()">ลองใหม่อีกครั้ง</button>' +
+          '</td></tr>';
+        showToast('เกิดข้อผิดพลาด: ' + err, 'error');
       });
     }
 
