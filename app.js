@@ -1284,12 +1284,12 @@ function renderSubStock(data, teamName) {
     return '<div class="product-card">'
       + imgHtml
       + '<div class="product-info">'
-      +   '<div class="product-name">' + item.productName + '</div>'
-      +   '<div class="product-stock">คงเหลือ: <span id="ss-qty-' + item.productId + '">' + item.quantity + '</span></div>'
+      +   '<div class="product-name">' + item.productName + (item.size ? ' <span class="badge" style="font-size:0.7rem; padding:2px 6px">' + item.size + '</span>' : '') + '</div>'
+      +   '<div class="product-stock">คงเหลือ: <span id="ss-qty-' + item.productId + '-' + (item.size || 'default') + '">' + item.quantity + '</span></div>'
       +   '<div style="margin-top:1rem; display:flex; gap:0.5rem; flex-wrap:wrap">'
-      +     '<button class="btn btn-primary btn-sm flex-1" onclick="openActionModal(\'use\', \'' + item.productId + '\', \'' + item.productName.replace(/'/g, "\\'") + '\', ' + item.quantity + ')"><i data-lucide="sparkles" style="width:14px;height:14px"></i> เบิกใช้งาน</button>'
-      +     '<button class="btn btn-outline btn-sm" title="โอนให้เพื่อน" onclick="openActionModal(\'transfer\', \'' + item.productId + '\', \'' + item.productName.replace(/'/g, "\\'") + '\', ' + item.quantity + ')"><i data-lucide="repeat" style="width:14px;height:14px"></i> โอน</button>'
-      +     '<button class="btn btn-ghost btn-sm" title="คืนคลังหลัก" onclick="openActionModal(\'return\', \'' + item.productId + '\', \'' + item.productName.replace(/'/g, "\\'") + '\', ' + item.quantity + ')"><i data-lucide="archive" style="width:14px;height:14px"></i> คืน</button>'
+      +     '<button class="btn btn-primary btn-sm flex-1" onclick="openActionModal(\'use\', \'' + item.productId + '\', \'' + item.productName.replace(/'/g, "\\'") + '\', ' + item.quantity + ', \'' + (item.size || '') + '\')"><i data-lucide="sparkles" style="width:14px;height:14px"></i> เบิกใช้งาน</button>'
+      +     '<button class="btn btn-outline btn-sm" title="โอนให้เพื่อน" onclick="openActionModal(\'transfer\', \'' + item.productId + '\', \'' + item.productName.replace(/'/g, "\\'") + '\', ' + item.quantity + ', \'' + (item.size || '') + '\')"><i data-lucide="repeat" style="width:14px;height:14px"></i> โอน</button>'
+      +     '<button class="btn btn-ghost btn-sm" title="คืนคลังหลัก" onclick="openActionModal(\'return\', \'' + item.productId + '\', \'' + item.productName.replace(/'/g, "\\'") + '\', ' + item.quantity + ', \'' + (item.size || '') + '\')"><i data-lucide="archive" style="width:14px;height:14px"></i> คืน</button>'
       +   '</div>'
       + '</div>'
       + '</div>';
@@ -1299,8 +1299,8 @@ function renderSubStock(data, teamName) {
 
 var _activeAction = null;
 
-function openActionModal(action, productId, productName, maxQty) {
-  _activeAction = { type: action, productId: productId, max: maxQty };
+function openActionModal(action, productId, productName, maxQty, size) {
+  _activeAction = { type: action, productId: productId, max: maxQty, size: size };
   var mTitle = document.getElementById('actionModalTitle');
   var mDesc = document.getElementById('actionModalDesc');
   var inputWrap = document.getElementById('actionModalInputWrap');
@@ -1372,14 +1372,14 @@ function executeSubStockAction() {
   if (_activeAction.type === 'use') {
     var branch = document.getElementById('actionModalBranch').value.trim();
     if (!branch) { btn.disabled=false; btn.innerHTML='ยืนยัน'; showToast('กรุณาระบุสาขาหรือหน่วยงาน', 'warning'); return; }
-    promise = API.deductSubStock(_activeAction.productId, qty, branch);
+    promise = API.deductSubStock(_activeAction.productId, qty, branch, _activeAction.size);
   } else if (_activeAction.type === 'transfer') {
 
     var toId = document.getElementById('actionModalInput').value.trim();
     if (!toId) { btn.disabled=false; btn.innerHTML='ยืนยัน'; showToast('กรุณาระบุรหัสพนักงานเป้าหมาย', 'warning'); return; }
-    promise = API.transferSubStock({ toEmployeeId: toId, productId: _activeAction.productId, qty: qty });
+    promise = API.transferSubStock({ toEmployeeId: toId, productId: _activeAction.productId, qty: qty, size: _activeAction.size });
   } else if (_activeAction.type === 'return') {
-    promise = API.returnToMainStock({ productId: _activeAction.productId, qty: qty });
+    promise = API.returnToMainStock({ productId: _activeAction.productId, qty: qty, size: _activeAction.size });
   }
   
   if (promise) {

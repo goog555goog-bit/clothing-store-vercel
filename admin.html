@@ -2068,7 +2068,10 @@
         return '<tr class="hover-row ' + rowClass + '">'
           + '<td><img src="' + (p.imageUrl || 'https://placehold.co/100x100/12121e/fbbf24?text=📦') + '" style="width:32px;height:32px;object-fit:cover;border-radius:4px;background:rgba(255,255,255,0.05)" onerror="this.src=\'https://placehold.co/100x100/12121e/fbbf24?text=📦\'"></td>'
           + '<td data-label="รหัสสินค้า" class="hide-mobile" style="font-size:0.8rem;color:var(--text3)">' + escapeHTML(p.productId) + '</td>'
-          + '<td data-label="ชื่อสินค้า" style="font-weight:500">' + escapeHTML(p.name) + '</td>'
+          + '<td data-label="ชื่อสินค้า" style="font-weight:500">' 
+          +   escapeHTML(p.name) 
+          +   (p.sizes ? '<div style="font-size:0.7rem; color:var(--primary); font-weight:400; margin-top:2px">ไซส์: ' + escapeHTML(p.sizes) + '</div>' : '') 
+          + '</td>'
           + '<td data-label="หมวดหมู่">' + escapeHTML(getCategoryName(p.categoryId)) + '</td>'
           + '<td data-label="ราคา">' + (hasPermission('view_prices') ? '฿' + Number(p.price).toLocaleString() : '***') + '</td>'
           + '<td data-label="สต๊อก">'

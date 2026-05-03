@@ -214,6 +214,20 @@ var API = (function () {
     addToSubStock: function (data) {
       return this._call('addToSubStock', { data: data }, false, ['getSubStock', 'getProducts', 'getInventoryForecast']);
     },
+    deductSubStock: function (productId, qty, branchId, size) {
+      return this._call('deductSubStock', { productId: productId, qty: qty, branchId: branchId, size: size }, false, ['getSubStock', 'getInventoryLogs']);
+    },
+    receiveSubStock: function (productId, qty, size) {
+      return this._call('receiveSubStock', { productId: productId, qty: qty, size: size }, false, ['getSubStock']);
+    },
+    transferSubStock: function (data) {
+      // data: { toEmployeeId, productId, qty, size }
+      return this._call('transferSubStock', data, false, ['getSubStock']);
+    },
+    returnToMainStock: function (data) {
+      // data: { productId, qty, size }
+      return this._call('returnToMainStock', data, false, ['getSubStock', 'getProducts']);
+    },
 
     createRequest: function (items) {
       return this._call('createRequest', { items: items }, false, ['getMyRequests', 'getAllOrders', 'getDashboardStats', 'getAdvancedDashboardData']);
