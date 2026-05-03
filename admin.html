@@ -555,25 +555,7 @@
     </section>
   </div>
 
-  <!-- แถบเมนูด้านล่างสำหรับมือถือ (Admin) -->
-  <nav class="mobile-nav">
-    <button class="mobile-nav-item active tab" data-admin-page="dashboard" onclick="adminNav('dashboard', this)">
-      <i data-lucide="layout-dashboard"></i>
-      <span>ภาพรวม</span>
-    </button>
-    <button class="mobile-nav-item tab" data-admin-page="inventory" onclick="adminNav('inventory', this)">
-      <i data-lucide="package-check"></i>
-      <span>คลัง</span>
-    </button>
-    <button class="mobile-nav-item tab" data-admin-page="orders" onclick="adminNav('orders', this)">
-      <i data-lucide="clipboard-list"></i>
-      <span>ใบเบิก</span>
-    </button>
-    <button class="mobile-nav-item tab" data-admin-page="reports" onclick="adminNav('reports', this)">
-      <i data-lucide="bar-chart-3"></i>
-      <span>รายงาน</span>
-    </button>
-  </nav>
+
 
   <!-- ADD/EDIT PRODUCT MODAL -->
   <div id="productModal" class="modal-overlay" onclick="if(event.target===this) closeProductModal()">
@@ -1458,7 +1440,11 @@
           return;
         }
         body.innerHTML = res.data.logs.slice(0, 8).map(function (l) {
-          var time = l.timestamp ? String(l.timestamp).split(' ')[1].substring(0, 5) : '--:--';
+          var time = '--:--';
+          if (l.timestamp && String(l.timestamp).indexOf(' ') !== -1) {
+            var parts = String(l.timestamp).split(' ');
+            if (parts[1]) time = parts[1].substring(0, 5);
+          }
           var markerClass = 'status-dot';
           if (l.action.indexOf('เบิก') !== -1) markerClass += ' info';
           if (l.action.indexOf('อนุมัติ') !== -1) markerClass += ' success';
@@ -1718,7 +1704,12 @@
             initSearchableSelect('adminProductStockFilter', true);
           }
           filterAdminProducts(); // Initial render after categories loaded
+        }).catch(function (err) {
+          console.warn('Category Load Error in Products:', err);
+          filterAdminProducts();
         });
+      }).catch(function (err) {
+        showToast('ไม่สามารถโหลดข้อมูลสินค้าได้: ' + err, 'error');
       });
     }
 
@@ -1918,7 +1909,7 @@
           loadAdminCategories();
         }
         else { showToast(res.message || 'ไม่สามารถลบหมวดหมู่ได้', 'error'); }
-      });
+      }).catch(function (err) { showToast('ข้อผิดพลาด: ' + err, 'error'); });
     }
 
     function openProductModal(product) {
@@ -1931,7 +1922,6 @@
         var sel = document.getElementById('pf-cat');
         sel.innerHTML = (res.data || []).map(function (c) {
           var catId = c.id || c.categoryId || c.ID || c.CategoryID || c.CategoryCode || c.name;
-          console.log('Category Mapping:', { id: catId, name: c.name });
           return '<option value="' + catId + '" ' + (product && (product.categoryId === catId || product.categoryId === c.name) ? 'selected' : '') + '>' + c.name + '</option>';
         }).join('');
         initSearchableSelect('pf-cat');
@@ -1991,24 +1981,14 @@
       btn.disabled = true;
 
       var op = data.oldProductId ? 'update' : 'add';
-      console.log('=== saveProduct DEBUG ===');
-      console.log('op:', op);
-      console.log('oldProductId:', JSON.stringify(data.oldProductId));
-      console.log('productId:', JSON.stringify(data.productId));
-      console.log('categoryId to save:', data.categoryId);
-      console.log('Full data:', JSON.stringify(data));
       API.manageProduct(op, data).then(function (res) {
         if (res.success) {
           showToast('บันทึกเรียบร้อย', 'success');
           closeProductModal(); loadProducts();
         } else {
-          console.error('Save FAILED (then):', res.message);
-          alert('DEBUG: Save failed!\nop=' + op + '\noldProductId=' + data.oldProductId + '\nproductId=' + data.productId + '\nError: ' + res.message);
           showToast(res.message, 'error');
         }
       }).catch(function (err) {
-        console.error('Save FAILED (catch):', err);
-        alert('DEBUG: Save error!\nop=' + op + '\noldProductId=' + data.oldProductId + '\nproductId=' + data.productId + '\nError: ' + (typeof err === 'string' ? err : JSON.stringify(err)));
         showToast(err, 'error');
       }).finally(function () {
         btn.innerHTML = oldHtml;
@@ -2031,6 +2011,9 @@
       data.status = newStatus;
       API.manageProduct('update', data).then(function (res) {
         if (res.success) { showToast('อัปเดตสถานะแล้ว', 'success'); loadProducts(); }
+        else { showToast(res.message, 'error'); }
+      }).catch(function(err) {
+        showToast(err, 'error');
       });
     }
 
@@ -2043,7 +2026,7 @@
         } else {
           showToast(res.message || 'ไม่สามารถลบสินค้าได้', 'error');
         }
-      });
+      }).catch(function (err) { showToast('ข้อผิดพลาด: ' + err, 'error'); });
     }
 
     function handleImageUpload(input) {
@@ -2672,15 +2655,16 @@
 
       var membersDiv = document.getElementById('tf-members');
       membersDiv.innerHTML = '';
+      var teamIdToMatch = team ? team.teamId : '';
       var members = allAdminEmployees.filter(function (e) { 
-        return e.teamId && String(e.teamId) === String(teamId); 
+        return e.teamId && String(e.teamId) === String(teamIdToMatch); 
       });
 
       if (members.length > 0) {
         membersDiv.innerHTML = members.map(function (m) {
           return '<div class="badge badge-pending" style="font-size:0.75rem; padding:0.4rem 0.8rem; display:flex; align-items:center; gap:0.5rem">' + 
                  m.name + 
-                 '<span style="cursor:pointer; opacity:0.6" onclick="removeMemberFromTeam(\'' + String(m.employeeId).replace(/'/g, "\\'") + '\', \'' + String(teamId).replace(/'/g, "\\'") + '\'); this.parentElement.remove()">✕</span>' +
+                 '<span style="cursor:pointer; opacity:0.6" onclick="removeMemberFromTeam(\'' + String(m.employeeId).replace(/'/g, "\\'") + '\', \'' + String(teamIdToMatch).replace(/'/g, "\\'") + '\'); this.parentElement.remove()">✕</span>' +
                  '</div>';
         }).join('');
       } else {
@@ -2733,9 +2717,13 @@
     function delTeam(id) {
       if (!confirm('ยืนยันการลบทีม ' + id + ' ? (สมาชิกในทีมจะกลายเป็นผู้ไม่สังกัดทีม)')) return;
       API.manageTeam('delete', { teamId: id }).then(function (res) {
-        showToast('ลบทีมเรียบร้อย', 'success');
-        loadTeams();
-      });
+        if (res && res.success) {
+          showToast('ลบทีมเรียบร้อย', 'success');
+          loadTeams();
+        } else {
+          showToast(res.message || 'ไม่สามารถลบทีมได้', 'error');
+        }
+      }).catch(function (err) { showToast('ข้อผิดพลาด: ' + err, 'error'); });
     }
 
     function openSwapLeadModal() {
@@ -3166,7 +3154,8 @@
 
       // Update UI Buttons (Lucide Icons)
       document.querySelectorAll('.scanner-mode-btn').forEach(function (btn) {
-        btn.classList.toggle('active', btn.id === 'sm-' + mode);
+        var btnMode = btn.id.replace('scanMode', '').toLowerCase();
+        btn.classList.toggle('active', btnMode === mode.toLowerCase());
       });
 
       showToast('สลับโหมดเป็น: ' + mode, 'info');
@@ -3507,12 +3496,7 @@
       else backBtn.style.display = 'none';
     });
 
-    function escapeHTML(str) {
-      if (!str) return "";
-      var p = document.createElement("p");
-      p.textContent = str;
-      return p.innerHTML;
-    }
+
 
     function loadOrdersBasedOnFilter() {
       var filter = document.getElementById('adminOrderFilter').value;
@@ -3550,6 +3534,8 @@
             '</tr>';
         }).join('');
         refreshIcons();
+      }).catch(function (err) {
+        body.innerHTML = '<tr><td colspan="4" class="text-center" style="padding:2rem; color:var(--danger)">เกิดข้อผิดพลาด: ' + err + '</td></tr>';
       });
     }
 

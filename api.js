@@ -192,7 +192,7 @@ var API = (function () {
     getTopRequestedItems: function (month) { return this._call('getTopRequestedItems', { month: month }, true); },
     getDepartmentSpending: function (month) { return this._call('getDepartmentSpending', { month: month }, true); },
     getInventoryForecast: function () { return this._call('getInventoryForecast', {}, true); },
-    getSubStock: function (id) { return this._call('getSubStock', { employeeId: id }, true); },
+    getSubStock: function (params) { return this._call('getSubStock', params, true); },
     getSystemSettings: function () { return this._call('getSystemSettings', {}, true); },
 
     // ─── WRITE ACTIONS (Invalidate relevant caches) ───────────
@@ -275,8 +275,7 @@ var API = (function () {
 
     // Compatibility wrappers
     approveOrder: function (id, _, comment) { return this.approveRequest(id, comment); },
-    rejectOrder: function (id, _, comment) { return this.rejectRequest(id, comment); },
-    updateStock: function (id, qty) { return this.receiveStock(id, qty); }
+    rejectOrder: function (id, _, comment) { return this.rejectRequest(id, comment); }
   };
 
   return apiObj;
