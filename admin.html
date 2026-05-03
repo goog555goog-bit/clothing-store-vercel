@@ -643,7 +643,11 @@
         </div>
         <div class="form-group">
           <label class="form-label">ไซส์ (ระบุคั่นด้วยคอมม่า เช่น S, M, L, XL)</label>
-          <input id="pf-sizes" class="form-input" placeholder="S, M, L, XL หรือ เว้นว่างถ้าไม่มีไซส์">
+          <input id="pf-sizes" class="form-input" placeholder="S, M, L, XL หรือ เว้นว่างถ้าไม่มีไซส์" oninput="generateSizeStockInputs()">
+        </div>
+        <div id="size-stock-container" style="margin-bottom:1rem; display:none">
+          <label class="form-label" style="font-size:0.8rem; color:var(--text3)">กำหนดสต็อกแยกตามไซส์</label>
+          <div id="size-stock-list" class="flex flex-wrap gap-2" style="padding:0.5rem; background:rgba(255,255,255,0.02); border-radius:8px"></div>
         </div>
         <div class="form-group">
           <label class="form-label">รูปภาพสินค้า</label>
@@ -2044,7 +2048,10 @@
           + '<td data-label="ชื่อสินค้า" style="font-weight:500">' + escapeHTML(p.name) + '</td>'
           + '<td data-label="หมวดหมู่">' + escapeHTML(getCategoryName(p.categoryId)) + '</td>'
           + '<td data-label="ราคา">' + (hasPermission('view_prices') ? '฿' + Number(p.price).toLocaleString() : '***') + '</td>'
-          + '<td data-label="สต๊อก" class="' + stockClass + '">' + stock + '</td>'
+          + '<td data-label="สต๊อก">'
+          +   '<div class="' + stockClass + '" style="font-weight:700">' + stock + '</div>'
+          +   (p.variantStock ? '<div style="font-size:0.65rem; color:var(--text3); margin-top:2px">' + formatVariantStock(p.variantStock) + '</div>' : '')
+          + '</td>'
           + '<td data-label="สถานะ"><span class="badge ' + (p.status === 'active' ? 'badge-approved' : 'badge-rejected') + '" style="cursor:pointer" onclick="event.stopPropagation(); toggleProductStatus(\'' + p.productId + '\', \'' + p.status + '\')">' + (p.status === 'active' ? 'เปิด' : 'ปิด') + '</span></td>'
           + '<td data-label="จัดการ" onclick="event.stopPropagation()">'
           + '<button class="btn btn-sm btn-ghost" onclick="generateBarcode(\'' + escapeHTML(p.productId) + '\', \'' + String(p.name || "").replace(/'/g, "\\'") + '\')" title="ดูบาร์โค้ด"><i data-lucide="barcode" style="width:14px;height:14px"></i></button>'
@@ -2151,6 +2158,9 @@
       document.getElementById('pf-stock').value = product ? product.stock : '';
       document.getElementById('pf-min').value = product ? product.minStock || '5' : '5';
       document.getElementById('pf-sizes').value = product ? (product.sizes || '') : '';
+      
+      generateSizeStockInputs(product ? product.variantStock : null);
+      
       document.getElementById('pf-img').value = product ? product.imageUrl : '';
       updateImagePreview(document.getElementById('pf-img').value);
       document.getElementById('productModalTitle').textContent = product ? 'แก้ไขสินค้า' : 'เพิ่มสินค้า';
@@ -2169,6 +2179,69 @@
       }
     }
     function closeProductModal() { document.getElementById('productModal').classList.remove('open'); }
+
+    function generateSizeStockInputs(variantStock) {
+      var sizesStr = document.getElementById('pf-sizes').value;
+      var container = document.getElementById('size-stock-container');
+      var list = document.getElementById('size-stock-list');
+      var stockInput = document.getElementById('pf-stock');
+      
+      if (!sizesStr.trim()) {
+        container.style.display = 'none';
+        stockInput.disabled = false;
+        return;
+      }
+      
+      container.style.display = 'block';
+      stockInput.disabled = true; // Total stock will be calculated
+      
+      var sizes = sizesStr.split(',').map(function(s) { return s.trim(); }).filter(function(s) { return s !== ''; });
+      var vStock = {};
+      if (typeof variantStock === 'string' && variantStock.startsWith('{')) {
+        try { vStock = JSON.parse(variantStock); } catch(e) {}
+      } else if (typeof variantStock === 'object' && variantStock !== null) {
+        vStock = variantStock;
+      }
+      
+      list.innerHTML = sizes.map(function(s) {
+        var val = vStock[s] || 0;
+        return '<div style="display:flex; flex-direction:column; gap:2px; min-width:60px">' +
+          '<span style="font-size:0.7rem; font-weight:600">' + s + '</span>' +
+          '<input type="number" class="pf-size-stock-input form-input" style="padding:4px 8px; font-size:0.85rem" data-size="' + s + '" value="' + val + '" oninput="calculateTotalStock()">' +
+          '</div>';
+      }).join('');
+      
+      calculateTotalStock();
+    }
+
+    function calculateTotalStock() {
+      var inputs = document.querySelectorAll('.pf-size-stock-input');
+      var total = 0;
+      var vStock = {};
+      
+      inputs.forEach(function(input) {
+        var val = Number(input.value) || 0;
+        total += val;
+        vStock[input.getAttribute('data-size')] = val;
+      });
+      
+      if (inputs.length > 0) {
+        document.getElementById('pf-stock').value = total;
+        // Hidden field to store JSON? Or just collect it in saveProduct
+        document.getElementById('pf-stock').setAttribute('data-variant-json', JSON.stringify(vStock));
+      }
+    }
+
+    function formatVariantStock(vs) {
+      if (!vs) return '';
+      var obj = vs;
+      if (typeof vs === 'string' && vs.startsWith('{')) {
+        try { obj = JSON.parse(vs); } catch(e) { return vs; }
+      }
+      var parts = [];
+      for (var k in obj) { parts.push(k + ':' + obj[k]); }
+      return parts.join(' | ');
+    }
 
     function editProduct(id) {
       var p = allAdminProducts.filter(function (x) { return String(x.productId || x.id) === String(id); })[0];
@@ -2193,6 +2266,7 @@
         stock: Number(document.getElementById('pf-stock').value),
         minStock: Number(document.getElementById('pf-min').value),
         sizes: document.getElementById('pf-sizes').value.trim(),
+        variantStock: document.getElementById('pf-stock').getAttribute('data-variant-json') || '',
         imageUrl: document.getElementById('pf-img').value.trim()
       };
       if (!data.name || isNaN(data.price)) { showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warning'); return; }
@@ -3449,7 +3523,10 @@
           return '<tr>'
             + '<td>' + p.productId + '</td>'
             + '<td style="font-weight:500">' + p.name + '</td>'
-            + '<td style="font-weight:700;' + (isLow ? 'color:var(--danger)' : '') + '">' + p.stock + '</td>'
+            + '<td style="font-weight:700;' + (isLow ? 'color:var(--danger)' : '') + '">' 
+            +   '<div>' + p.stock + '</div>'
+            +   (p.variantStock ? '<div style="font-size:0.65rem; color:var(--text3); font-weight:normal">' + formatVariantStock(p.variantStock) + '</div>' : '')
+            + '</td>'
             + '<td>' + p.minStock + '</td>'
             + '<td>' + (isLow ? '<span class="badge badge-rejected">⚠️ ต่ำ</span>' : '<span class="badge badge-approved">ปกติ</span>') + '</td>'
             + '<td><button class="btn btn-sm btn-outline" onclick="openStockModal(\'' + p.productId + '\',\'' + p.name + '\')">ปรับ</button></td>'

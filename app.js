@@ -780,11 +780,11 @@ function openProductDetail(id) {
           : '<div class="alert alert-danger" style="margin-bottom:1rem; padding:0.75rem; border-radius:8px; font-size:0.85rem">⚠️ คุณไม่มีสิทธิ์ในการเบิกสินค้าชิ้นนี้หรือหมวดหมู่นี้</div>'
         )
     +   '<div class="card glass" style="margin-bottom:1.5rem;padding:1rem;background:rgba(255,255,255,0.02)">'
-    +     '<div style="font-size:0.85rem;color:var(--text3);margin-bottom:0.5rem">สถานะคลังสินค้าหลัก</div>'
-    +     '<div style="display:flex;align-items:center;gap:0.5rem">'
+    +     '<div style="font-size:0.85rem;color:var(--text3);margin-bottom:0.5rem">สถานะคลังสินค้า</div>'
+    +     '<div id="detail-stock-status" style="display:flex;align-items:center;gap:0.5rem">'
     +       '<div style="width:12px;height:12px;border-radius:50%;background:' + (Number(p.stock) > 0 ? 'var(--accent)' : 'var(--danger)') + '"></div>'
-    +       '<span style="font-weight:700;font-size:1.1rem">' + p.stock + ' ชิ้น</span>'
-    +       '<span style="font-size:0.9rem;color:var(--text3)">พร้อมเบิก</span>'
+    +       '<span id="detail-stock-count" style="font-weight:700;font-size:1.1rem">' + p.stock + ' ชิ้น</span>'
+    +       '<span id="detail-stock-label" style="font-size:0.9rem;color:var(--text3)">' + (Number(p.stock) > 0 ? 'พร้อมเบิก (รวมทุกไซส์)' : 'หมดสต็อก') + '</span>'
     +     '</div>'
     +   '</div>'
     +   '<div style="margin-bottom:1.5rem">'
@@ -800,7 +800,20 @@ function openProductDetail(id) {
         + '<h3 style="font-size:0.9rem;font-weight:700;margin-bottom:0.75rem">เลือกไซส์:</h3>'
         + '<div class="flex flex-wrap gap-2" id="size-selector-container">'
         + sizeList.map(function(s) {
-            return '<button class="btn btn-outline btn-sm size-btn" onclick="selectProductSize(this, \'' + escapeHTML(s) + '\')" style="min-width:44px; height:44px; border-radius:12px; font-weight:700">' + s + '</button>';
+            var vs = p.variantStock;
+            var vStock = {};
+            if (vs) {
+                try { vStock = (typeof vs === 'string' && vs.startsWith('{')) ? JSON.parse(vs) : vs; } catch(e) {}
+            }
+            var sStock = vStock[s] !== undefined ? Number(vStock[s]) : -1; 
+            var sOut = sStock === 0;
+            
+            return '<button class="btn btn-outline btn-sm size-btn' + (sOut ? ' out-of-stock-size' : '') + '" '
+                + 'onclick="selectProductSize(this, \'' + escapeHTML(s) + '\', \'' + escapeHTML(p.productId) + '\')" '
+                + 'style="min-width:44px; height:44px; border-radius:12px; font-weight:700; position:relative">' 
+                + s 
+                + (sOut ? '<div style="position:absolute;top:-5px;right:-5px;background:var(--danger);color:#fff;font-size:0.5rem;padding:2px 4px;border-radius:4px">หมด</div>' : '')
+                + '</button>';
           }).join('')
         + '</div><input type="hidden" id="selected-product-size"></div>';
       body.innerHTML += sizeHtml;
@@ -836,6 +849,46 @@ function openProductDetail(id) {
   
   document.getElementById('productDetailModal').classList.add('open');
   refreshIcons();
+}
+
+function selectProductSize(el, size, productId) {
+  var btns = document.querySelectorAll('.size-btn');
+  btns.forEach(function(b) { b.classList.remove('btn-primary'); b.classList.add('btn-outline'); });
+  el.classList.remove('btn-outline');
+  el.classList.add('btn-primary');
+  
+  document.getElementById('selected-product-size').value = size;
+  
+  // Update stock display for this size
+  var p = allProducts.find(function(x) { return String(x.productId) === String(productId); });
+  if (p) {
+    var vs = p.variantStock;
+    var vStock = {};
+    if (vs) {
+      try { vStock = (typeof vs === 'string' && vs.startsWith('{')) ? JSON.parse(vs) : vs; } catch(e) {}
+    }
+    
+    var sStock = vStock[size] !== undefined ? Number(vStock[size]) : Number(p.stock);
+    var countEl = document.getElementById('detail-stock-count');
+    var labelEl = document.getElementById('detail-stock-label');
+    var statusEl = document.getElementById('detail-stock-status');
+    
+    if (countEl) countEl.textContent = sStock + ' ชิ้น';
+    if (labelEl) labelEl.textContent = 'คงเหลือในไซส์ ' + size;
+    if (statusEl) {
+      var dot = statusEl.querySelector('div');
+      if (dot) dot.style.background = sStock > 0 ? 'var(--accent)' : 'var(--danger)';
+    }
+    
+    // Update Add to Cart button
+    var btn = document.getElementById('detailAddToCartBtn');
+    if (btn && hasPermission('can_request')) {
+      var out = sStock <= 0;
+      btn.disabled = out;
+      btn.style.opacity = out ? '0.5' : '1';
+      btn.innerHTML = out ? 'ไซส์นี้หมด' : '<i data-lucide="shopping-cart" style="width:18px;height:18px"></i> เพิ่มลงตะกร้า';
+    }
+  }
 }
 
 /**
