@@ -2265,7 +2265,11 @@
         try { obj = JSON.parse(vs); } catch(e) { return vs; }
       }
       var parts = [];
-      for (var k in obj) { parts.push(k + ':' + obj[k]); }
+      for (var k in obj) { 
+        var qty = Number(obj[k]);
+        var style = qty <= 2 ? 'color:var(--danger); font-weight:bold' : '';
+        parts.push('<span style="' + style + '">' + k + ':' + qty + '</span>');
+      }
       return parts.join(' | ');
     }
 
@@ -3545,16 +3549,23 @@
         var body = document.getElementById('inventoryBody');
         if (!body) return;
         body.innerHTML = res.data.map(function (p) {
-          var isLow = Number(p.stock) <= Number(p.minStock);
+          var isTotalLow = Number(p.stock) <= Number(p.minStock);
+          var isAnySizeLow = false;
+          if (p.variantStock) {
+             var vs = typeof p.variantStock === 'string' ? JSON.parse(p.variantStock) : p.variantStock;
+             for (var k in vs) { if (Number(vs[k]) <= 2) isAnySizeLow = true; }
+          }
+          var isLow = isTotalLow || isAnySizeLow;
+
           return '<tr>'
             + '<td>' + p.productId + '</td>'
             + '<td style="font-weight:500">' + p.name + '</td>'
-            + '<td style="font-weight:700;' + (isLow ? 'color:var(--danger)' : '') + '">' 
+            + '<td style="font-weight:700;' + (isTotalLow ? 'color:var(--danger)' : '') + '">' 
             +   '<div>' + p.stock + '</div>'
             +   (p.variantStock ? '<div style="font-size:0.65rem; color:var(--text3); font-weight:normal">' + formatVariantStock(p.variantStock) + '</div>' : '')
             + '</td>'
             + '<td>' + p.minStock + '</td>'
-            + '<td>' + (isLow ? '<span class="badge badge-rejected">⚠️ ต่ำ</span>' : '<span class="badge badge-approved">ปกติ</span>') + '</td>'
+            + '<td>' + (isLow ? '<span class="badge badge-rejected">⚠️ ต่ำ' + (isAnySizeLow && !isTotalLow ? ' (ไซส์)' : '') + '</span>' : '<span class="badge badge-approved">ปกติ</span>') + '</td>'
             + '<td><button class="btn btn-sm btn-outline" onclick="openStockModal(\'' + p.productId + '\',\'' + p.name + '\')">ปรับ</button></td>'
             + '</tr>';
         }).join('');
