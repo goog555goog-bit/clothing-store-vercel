@@ -1321,7 +1321,7 @@
       if (text) text.textContent = isDark ? 'โหมดสว่าง' : 'โหมดมืด';
     }
 
-    function hasPermission(key) {
+    function hasPermission(key, value) {
       if (!currentUser) return false;
       if (currentUser.role === 'superadmin') return true;
       
@@ -1338,6 +1338,16 @@
       if (typeof p === 'string') {
         try { p = JSON.parse(p); } catch (e) { return false; }
       }
+      
+      if (key === 'view_category') {
+        if (!p.allowed_categories || p.allowed_categories.length === 0) return true;
+        return p.allowed_categories.includes(String(value));
+      }
+      
+      if (key === 'can_request') {
+        return p.can_request !== false; // Default true if not explicitly false
+      }
+
       return !!p[key];
     }
 
@@ -2218,9 +2228,10 @@
     function formatVariantStock(vs) {
       if (!vs) return '';
       var obj = vs;
-      if (typeof vs === 'string' && vs.startsWith('{')) {
+      if (typeof vs === 'string' && vs.trim().startsWith('{')) {
         try { obj = JSON.parse(vs); } catch(e) { return vs; }
       }
+      if (typeof obj !== 'object' || obj === null) return String(vs);
       var parts = [];
       for (var k in obj) { 
         var qty = Number(obj[k]);
@@ -3361,7 +3372,10 @@
           var isTotalLow = Number(p.stock) <= Number(p.minStock);
           var isAnySizeLow = false;
           if (p.variantStock) {
-             var vs = typeof p.variantStock === 'string' ? JSON.parse(p.variantStock) : p.variantStock;
+             var vs = {};
+             try {
+               vs = typeof p.variantStock === 'string' ? JSON.parse(p.variantStock) : p.variantStock;
+             } catch(e) {}
              for (var k in vs) { if (Number(vs[k]) <= 2) isAnySizeLow = true; }
           }
           var isLow = isTotalLow || isAnySizeLow;
