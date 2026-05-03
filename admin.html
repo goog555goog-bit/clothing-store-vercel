@@ -1966,7 +1966,7 @@
         if (stock <= 0) { stockClass = 'stock-danger'; rowClass = 'row-stock-danger'; }
         else if (stock <= min) { stockClass = 'stock-warning'; rowClass = 'row-stock-warning'; }
 
-        return '<tr class="hover-row ' + rowClass + '" onclick="editProduct(\'' + escapeHTML(p.productId) + '\')">'
+        return '<tr class="hover-row ' + rowClass + '">'
           + '<td><img src="' + (p.imageUrl || 'https://placehold.co/100x100/12121e/fbbf24?text=📦') + '" style="width:32px;height:32px;object-fit:cover;border-radius:4px;background:rgba(255,255,255,0.05)" onerror="this.src=\'https://placehold.co/100x100/12121e/fbbf24?text=📦\'"></td>'
           + '<td data-label="รหัสสินค้า" class="hide-mobile" style="font-size:0.8rem;color:var(--text3)">' + escapeHTML(p.productId) + '</td>'
           + '<td data-label="ชื่อสินค้า" style="font-weight:500">' + escapeHTML(p.name) + '</td>'
