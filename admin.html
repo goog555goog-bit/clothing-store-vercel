@@ -720,8 +720,10 @@
         <button class="btn btn-ghost btn-sm" onclick="closeBranchModal()">✕</button>
       </div>
       <div class="modal-body">
-        <div class="form-group"><label class="form-label">รหัสสาขา *</label><input id="bf-id" class="form-input"
-            placeholder="BR-001"></div>
+        <div class="form-group" id="bf-id-wrap" style="display:none">
+          <label>รหัสสาขา (ID)</label>
+          <input type="text" id="bf-id" class="form-input" readonly style="background:var(--bg2); cursor:not-allowed">
+        </div>
         <div class="form-group"><label class="form-label">ชื่อสาขา *</label><input id="bf-name" class="form-input"
             placeholder="ชื่อสาขา"></div>
         <div class="form-group">
@@ -747,14 +749,13 @@
         <button class="btn btn-ghost btn-sm" onclick="closeCategoryModal()">✕</button>
       </div>
       <div class="modal-body">
-        <input type="hidden" id="cf-old-id">
-        <div class="form-group">
-          <label class="form-label">รหัสหมวดหมู่ *</label>
-          <input id="cf-id" class="form-input" placeholder="เช่น CAT001">
+        <div class="form-group" id="cf-id-wrap" style="display:none">
+          <label>รหัสหมวดหมู่ (ID)</label>
+          <input type="text" id="cf-id" class="form-input" readonly style="background:var(--bg2); cursor:not-allowed">
         </div>
         <div class="form-group">
           <label class="form-label">ชื่อหมวดหมู่ *</label>
-          <input id="cf-name" class="form-input" placeholder="เช่น เสื้อยืด">
+          <input id="cf-name" class="form-input" placeholder="ระบุชื่อหมวดหมู่">
         </div>
       </div>
       <div class="modal-footer flex-wrap">
@@ -772,9 +773,14 @@
         <button class="btn btn-ghost btn-sm" onclick="closeDeptModal()">✕</button>
       </div>
       <div class="modal-body">
-        <input type="hidden" id="df-id">
-        <div class="form-group"><label class="form-label">ชื่อแผนก *</label><input id="df-name" class="form-input"
-            placeholder="ชื่อแผนก"></div>
+        <div class="form-group" id="df-id-wrap" style="display:none">
+          <label>รหัสแผนก (ID)</label>
+          <input type="text" id="df-id" class="form-input" readonly style="background:var(--bg2); cursor:not-allowed">
+        </div>
+        <div class="form-group">
+          <label>ชื่อแผนก *</label>
+          <input type="text" id="df-name" class="form-input" placeholder="ชื่อแผนก">
+        </div>
       </div>
       <div class="modal-footer flex-wrap">
         <button class="btn btn-outline" onclick="closeDeptModal()">ยกเลิก</button>
@@ -923,31 +929,32 @@
 
   <!-- TEAM MODAL -->
   <div id="teamModal" class="modal-overlay" onclick="if(event.target===this) closeTeamModal()">
-    <div class="modal" style="max-width:400px">
+    <div class="modal" style="max-width:400px" onclick="event.stopPropagation()">
       <div class="modal-header">
-        <div id="teamModalTitle" style="font-weight:600">จัดการทีมช่าง</div>
-        <button class="btn btn-ghost btn-sm" onclick="closeTeamModal()">✕</button>
+        <h3 id="teamModalTitle">จัดการทีมช่าง</h3>
+        <button class="btn-close" onclick="closeTeamModal()">&times;</button>
       </div>
       <div class="modal-body">
-        <input type="hidden" id="tf-id">
-        <div class="form-group">
-          <label class="form-label">ชื่อทีม *</label>
-          <input id="tf-name" class="form-input" placeholder="เช่น ทีม A, ทีมสายใต้">
+        <div class="form-group" id="tf-id-wrap" style="display:none">
+          <label>รหัสทีม (ID)</label>
+          <input type="text" id="tf-id" class="form-input" readonly style="background:var(--bg2); cursor:not-allowed">
         </div>
         <div class="form-group">
-          <label class="form-label">หัวหน้าทีม (ตัวเอก) *</label>
-          <select id="tf-lead" class="input w-full">
-            <option value="">-- เลือกหัวหน้าทีม --</option>
-          </select>
+          <label>ชื่อทีม *</label>
+          <input type="text" id="tf-name" class="form-input" placeholder="เช่น ทีม A, ทีมหน้างาน">
+        </div>
+        <div class="form-group">
+          <label>หัวหน้าทีม (Lead) *</label>
+          <select id="tf-lead" class="input w-full"></select>
         </div>
         <div id="teamMemberList" style="margin-top:1rem; padding-top:1rem; border-top:1px solid var(--border)">
           <p style="font-size:0.85rem; color:var(--text3); margin-bottom:0.5rem">สมาชิกทีมปัจจุบัน:</p>
           <div id="tf-members" style="display:flex; flex-wrap:wrap; gap:0.5rem"></div>
         </div>
       </div>
-      <div class="modal-footer flex-wrap">
-        <button class="btn btn-outline" onclick="closeTeamModal()">ยกเลิก</button>
-        <button id="saveTeamBtn" class="btn btn-primary" onclick="saveTeam()">บันทึกข้อมูลทีม</button>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeTeamModal()">ยกเลิก</button>
+        <button class="btn btn-primary" id="saveTeamBtn" onclick="saveTeam()">บันทึกข้อมูลทีม</button>
       </div>
     </div>
   </div>
@@ -1261,59 +1268,6 @@
         <button class="btn btn-outline" onclick="closeLowStockModal()">ปิด</button>
         <button class="btn btn-primary"
           onclick="closeLowStockModal(); adminNav('products', null, {filter:'lowstock'})">ไปหน้าจัดการสินค้า</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Branch Modal -->
-  <div id="branchModal" class="modal-overlay" onclick="if(event.target===this) closeBranchModal()">
-    <div class="modal" style="max-width:400px" onclick="event.stopPropagation()">
-      <div class="modal-header">
-        <h3 id="branchModalTitle">จัดการสาขา</h3>
-        <button class="btn-close" onclick="closeBranchModal()">&times;</button>
-      </div>
-      <div class="modal-body">
-        <input type="hidden" id="bf-id">
-        <div class="form-group">
-          <label>ชื่อสาขา *</label>
-          <input type="text" id="bf-name" class="form-input" placeholder="ระบุชื่อสาขา">
-        </div>
-        <div class="form-group">
-          <label>สถานะ</label>
-          <select id="bf-status" class="input w-full">
-            <option value="active">เปิดใช้งาน (Active)</option>
-            <option value="inactive">ปิดใช้งาน (Inactive)</option>
-          </select>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-ghost" onclick="closeBranchModal()">ยกเลิก</button>
-        <button class="btn btn-primary" onclick="saveBranch()">บันทึกข้อมูล</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Team Modal -->
-  <div id="teamModal" class="modal-overlay" onclick="if(event.target===this) closeTeamModal()">
-    <div class="modal" style="max-width:400px" onclick="event.stopPropagation()">
-      <div class="modal-header">
-        <h3 id="teamModalTitle">จัดการทีมช่าง</h3>
-        <button class="btn-close" onclick="closeTeamModal()">&times;</button>
-      </div>
-      <div class="modal-body">
-        <input type="hidden" id="tf-id">
-        <div class="form-group">
-          <label>ชื่อทีม *</label>
-          <input type="text" id="tf-name" class="form-input" placeholder="เช่น ทีม A, ทีมหน้างาน">
-        </div>
-        <div class="form-group">
-          <label>หัวหน้าทีม (Lead) *</label>
-          <select id="tf-lead" class="input w-full"></select>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-ghost" onclick="closeTeamModal()">ยกเลิก</button>
-        <button class="btn btn-primary" onclick="saveTeam()">บันทึกข้อมูล</button>
       </div>
     </div>
   </div>
@@ -2961,59 +2915,10 @@
       });
     }
 
-    function loadSystemSettings() {
-      var container = document.getElementById('notifyTimesContainer');
-      if (container) container.innerHTML = '<div style="padding: 2rem; text-align: center;"><div class="spinner"></div></div>';
-      
-      API.getSystemSettings().then(function (res) {
-        var settings = res.data || {};
-        var times = settings.notifyTimes || [];
-        if (container) {
-          container.innerHTML = '';
-          times.forEach(function (t, idx) { addTimeSlot(t); });
-          if (times.length === 0) addTimeSlot();
-        }
-      });
-    }
-
-    function saveSystemSettings() {
-      var btn = document.getElementById('saveSetBtn');
-      var oldHtml = btn.innerHTML;
-      btn.innerHTML = '<div class="spinner" style="width:16px;height:16px"></div> กำลังบันทึก...';
-      btn.disabled = true;
-
-      var times = [];
-      document.querySelectorAll('.notify-time-input').forEach(function (input) {
-        if (input.value) times.push(input.value);
-      });
-
-      API.getSystemSettings().then(function (res) {
-        var settings = res.data || {};
-        settings.notifyTimes = times;
-        return API.saveSystemSettings(settings);
-      }).then(function (res) {
-        if (res.success) showToast('บันทึกการตั้งค่าเรียบร้อย', 'success');
-        else showToast(res.message, 'error');
-      }).finally(function () {
-        btn.innerHTML = oldHtml;
-        btn.disabled = false;
-      });
-    }
-
-    function addTimeSlot(val) {
-      var container = document.getElementById('notifyTimesContainer');
-      var div = document.createElement('div');
-      div.className = 'flex items-center gap-2';
-      div.innerHTML = '<input type="number" min="0" max="23" class="form-input notify-time-input" value="' + (val || '') + '" placeholder="0-23">' +
-        '<button type="button" class="btn btn-ghost btn-sm" onclick="this.parentElement.remove()"><i data-lucide="trash-2" style="width:14px;height:14px"></i></button>';
-      container.appendChild(div);
-      refreshIcons();
-    }
-
     // ─── TEAMS ──────────────────────────────────────────
     function loadTeams() {
       var grid = document.getElementById('teamsGrid');
-      grid.innerHTML = '<div class="text-center" style="grid-column:1/-1; padding:3rem; color:var(--text3)"><div class="spinner" style="margin:0 auto 1rem"></div>กำลังโหลดข้อมูล...</div>';
+      if (grid) grid.innerHTML = '<div class="text-center" style="grid-column:1/-1; padding:3rem; color:var(--text3)"><div class="spinner" style="margin:0 auto 1rem"></div>กำลังโหลดข้อมูล...</div>';
       
       Promise.all([API.getTeams(), API.getEmployees()]).then(function (results) {
         var resTeams = results[0];
@@ -3021,6 +2926,7 @@
         allAdminTeams = resTeams.data || [];
         allAdminEmployees = resEmp.data || [];
         
+        if (!grid) return;
         if (allAdminTeams.length === 0) {
           grid.innerHTML = '<div class="card text-center" style="grid-column:1/-1; padding:3rem; color:var(--text3)">ยังไม่มีทีมช่างในระบบ</div>';
           return;
@@ -3057,48 +2963,6 @@
       });
     }
 
-    function delTeam(id) {
-      if (!confirm('ยืนยันการลบทีม ' + id + ' ?')) return;
-      API.manageTeam('delete', { teamId: id }).then(function (res) {
-        if (res.success) { showToast('ลบทีมเรียบร้อย', 'success'); loadTeams(); }
-        else showToast(res.message, 'error');
-      });
-    }
-
-    function openTeamModal(team) {
-      document.getElementById('tf-id').value = team ? team.teamId : '';
-      document.getElementById('tf-name').value = team ? team.name : '';
-      
-      // Lead selection
-      var leadSel = document.getElementById('tf-lead');
-      leadSel.innerHTML = '<option value="">-- เลือกหัวหน้าทีม --</option>' + allAdminEmployees.map(function(e){
-        return '<option value="' + e.employeeId + '" ' + (team && team.leadId === e.employeeId ? 'selected' : '') + '>' + e.name + '</option>';
-      }).join('');
-      initSearchableSelect('tf-lead');
-
-      document.getElementById('teamModalTitle').textContent = team ? 'แก้ไขทีม' : 'เพิ่มทีมใหม่';
-      document.getElementById('teamModal').classList.add('open');
-    }
-    function closeTeamModal() { document.getElementById('teamModal').classList.remove('open'); }
-
-    function saveTeam() {
-      var id = document.getElementById('tf-id').value.trim();
-      var name = document.getElementById('tf-name').value.trim();
-      var leadId = document.getElementById('tf-lead').value;
-      if (!name || !leadId) { showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warning'); return; }
-
-      var op = id ? 'update' : 'add';
-      showToast('กำลังบันทึก...', 'info');
-      API.manageTeam(op, { teamId: id, name: name, leadId: leadId }).then(function (res) {
-        if (res.success) {
-          showToast('บันทึกทีมเรียบร้อย', 'success');
-          closeTeamModal();
-          loadTeams();
-        } else {
-          showToast(res.message, 'error');
-        }
-      });
-    }
 
     function openManageMembersModal(teamId) {
       document.getElementById('mm-team-id').value = teamId;
@@ -3194,8 +3058,10 @@
 
     function openTeamModal(team) {
       document.getElementById('tf-id').value = team ? team.teamId : '';
+      document.getElementById('tf-id-wrap').style.display = team ? 'block' : 'none';
       document.getElementById('tf-name').value = team ? team.name : '';
-
+      
+      // Filter for Technicians/FCs or the current lead
       var technicians = allAdminEmployees.filter(function (e) { 
         return e.role === 'technician' || e.role === 'fc' || (team && String(team.leadId) === String(e.employeeId)); 
       });
@@ -3391,6 +3257,7 @@
 
     function openDeptModal(dept) {
       document.getElementById('df-id').value = dept ? dept.departmentId : '';
+      document.getElementById('df-id-wrap').style.display = dept ? 'block' : 'none';
       document.getElementById('df-name').value = dept ? dept.name : '';
       document.getElementById('deptModalTitle').textContent = dept ? 'แก้ไขแผนก' : 'เพิ่มแผนก';
       document.getElementById('deptModal').classList.add('open');
@@ -3440,68 +3307,7 @@
     }
     function closeExportModal() { document.getElementById('exportModal').classList.remove('open'); }
 
-    function loadBranches() {
-      var body = document.getElementById('branchesBody');
-      if (body) body.innerHTML = '<tr><td colspan="4" class="text-center" style="padding:2rem"><div class="spinner"></div></td></tr>';
 
-      API.getBranches().then(function (res) {
-        if (!res.data || res.data.length === 0) {
-          body.innerHTML = '<tr><td colspan="4" class="text-center" style="padding:2rem;color:var(--text3)">ยังไม่มีข้อมูลสาขา</td></tr>';
-          return;
-        }
-        body.innerHTML = res.data.map(function (b) {
-          return '<tr>'
-            + '<td>' + (b.branchId || '-') + '</td>'
-            + '<td style="font-weight:600">' + b.name + '</td>'
-            + '<td><span class="badge ' + (b.status === 'active' ? 'badge-approved' : 'badge-rejected') + '">' + (b.status === 'active' ? 'เปิด' : 'ปิด') + '</span></td>'
-            + '<td class="flex gap-1">'
-            + '<button class="btn btn-sm btn-ghost" onclick="openBranchModal({branchId:\'' + b.branchId + '\', name:\'' + b.name + '\', status:\'' + b.status + '\'})"><i data-lucide="edit-2" style="width:14px;height:14px"></i></button>'
-            + '<button class="btn btn-sm btn-ghost" style="color:var(--danger)" onclick="delBranch(\'' + b.branchId + '\')"><i data-lucide="trash-2" style="width:14px;height:14px"></i></button></td>'
-            + '</tr>';
-        }).join('');
-        refreshIcons();
-      });
-    }
-
-    function openBranchModal(branch) {
-      document.getElementById('bf-id').value = branch ? branch.branchId : '';
-      document.getElementById('bf-name').value = branch ? branch.name : '';
-      document.getElementById('bf-status').value = branch ? (branch.status || 'active') : 'active';
-      document.getElementById('branchModalTitle').textContent = branch ? 'แก้ไขสาขา' : 'เพิ่มสาขา';
-      document.getElementById('branchModal').classList.add('open');
-    }
-    function closeBranchModal() { document.getElementById('branchModal').classList.remove('open'); }
-
-    function saveBranch() {
-      var id = document.getElementById('bf-id').value;
-      var name = document.getElementById('bf-name').value.trim();
-      var status = document.getElementById('bf-status').value;
-      if (!name) { showToast('กรุณากรอกชื่อสาขา', 'warning'); return; }
-
-      var op = id ? 'update' : 'add';
-      showToast('กำลังบันทึก...', 'info');
-      API.manageBranch(op, { branchId: id, name: name, status: status }).then(function (res) {
-        if (res.success) {
-          showToast('บันทึกสาขาเรียบร้อย', 'success');
-          closeBranchModal();
-          loadBranches();
-        } else {
-          showToast(res.message, 'error');
-        }
-      });
-    }
-
-    function delBranch(id) {
-      if (!confirm('ยืนยันการลบสาขา?')) return;
-      API.manageBranch('delete', { branchId: id }).then(function (res) {
-        if (res.success) {
-          showToast('ลบสาขาเรียบร้อย', 'success');
-          loadBranches();
-        } else {
-          showToast(res.message, 'error');
-        }
-      });
-    }
 
     var _subStockTarget = null;
     var _subStockType = null;
@@ -4179,7 +3985,7 @@
 
     function openBranchModal(b) {
       document.getElementById('bf-id').value = b ? b.branchId : '';
-      document.getElementById('bf-id').disabled = !!b;
+      document.getElementById('bf-id-wrap').style.display = b ? 'block' : 'none';
       document.getElementById('bf-name').value = b ? b.name : '';
       document.getElementById('bf-status').value = b ? b.status : 'active';
       document.getElementById('branchModalTitle').textContent = b ? 'แก้ไขข้อมูลสาขา' : 'เพิ่มสาขาใหม่';
@@ -4203,7 +4009,7 @@
         name: document.getElementById('bf-name').value.trim(),
         status: document.getElementById('bf-status').value
       };
-      if (!data.branchId || !data.name) { showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warning'); return; }
+      if (!data.name) { showToast('กรุณาระบุชื่อสาขา', 'warning'); return; }
 
       var op = allBranches.some(function (x) { return x.branchId === data.branchId; }) ? 'update' : 'add';
       API.manageBranch(op, data).then(function (res) {
