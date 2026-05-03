@@ -10,7 +10,7 @@ var currentUser = (function() {
   } catch(e) { return null; }
 })();
 
-function hasPermission(key) {
+function hasPermission(key, value) {
   if (!currentUser) return false;
   if (currentUser.role === 'superadmin') return true;
   var p = currentUser.permissions;
@@ -18,6 +18,16 @@ function hasPermission(key) {
   if (typeof p === 'string') {
     try { p = JSON.parse(p); } catch (e) { return false; }
   }
+  
+  if (key === 'view_category') {
+    if (!p.allowed_categories || p.allowed_categories.length === 0) return true;
+    return p.allowed_categories.includes(String(value));
+  }
+  
+  if (key === 'can_request') {
+    return p.can_request !== false; // Default true if not explicitly false
+  }
+
   return !!p[key];
 }
 var allProducts = [];
@@ -677,6 +687,11 @@ function renderProductGrid(pageNum) {
   }
 
   // --- Apply Pagination ---
+  // Apply category permission filtering
+  filtered = filtered.filter(function(p) {
+    return hasPermission('view_category', p.categoryId);
+  });
+
   if (pageNum) currentProductPage = pageNum;
   else currentProductPage = 1; // reset to 1 if applying filters
 
@@ -705,9 +720,12 @@ function renderProductGrid(pageNum) {
       +   '<div class="product-stock"><span class="product-stock-dot' + (outOfStock ? ' out' : '') + '"></span>' + (outOfStock ? '<span style="color:var(--danger)">หมดสต็อก</span>' : 'คงเหลือ: ' + Number(p.stock) + ' ชิ้น') + '</div>'
       +   '<div class="flex flex-wrap items-center justify-between gap-2" style="margin-top:auto">'
       +     '<div class="product-price">' + (hasPermission('view_prices') ? '฿' + Number(p.price).toLocaleString() : '***') + '</div>'
-      +     '<button class="btn btn-sm ' + (outOfStock ? 'btn-outline' : 'btn-primary') + '" '
-      +       (outOfStock ? 'disabled' : 'onclick="addToCart(\'' + escapeHTML(p.productId) + '\', event)"')
-      +     ' style="border-radius:99px; padding: 0.4rem 1rem;' + (outOfStock ? '' : 'background:var(--gradient-gold);color:#000;border:none;') + '">' + (outOfStock ? 'หมด' : '+ เบิกสินค้า') + '</button>'
+      +     (hasPermission('can_request') 
+              ? '<button class="btn btn-sm ' + (outOfStock ? 'btn-outline' : 'btn-primary') + '" '
+                + (outOfStock ? 'disabled' : 'onclick="addToCart(\'' + escapeHTML(p.productId) + '\', event)"')
+                + ' style="border-radius:99px; padding: 0.4rem 1rem;' + (outOfStock ? '' : 'background:var(--gradient-gold);color:#000;border:none;') + '">' + (outOfStock ? 'หมด' : '+ เบิกสินค้า') + '</button>'
+              : '<div style="font-size:0.75rem; color:var(--danger)">🔒 ไม่มีสิทธิ์เบิก</div>'
+            )
       +   '</div>'
       + '</div>'
       + '</div>';
@@ -740,6 +758,10 @@ function openProductDetail(id) {
     +     '</div>'
     +     '<div class="product-price" style="font-size:1.8rem">' + (hasPermission('view_prices') ? '฿' + Number(p.price).toLocaleString() : '***') + '</div>'
     +   '</div>'
+    +   (hasPermission('can_request') 
+          ? '' 
+          : '<div class="alert alert-danger" style="margin-bottom:1rem; padding:0.75rem; border-radius:8px; font-size:0.85rem">⚠️ คุณไม่มีสิทธิ์ในการเบิกสินค้าชิ้นนี้หรือหมวดหมู่นี้</div>'
+        )
     +   '<div class="card glass" style="margin-bottom:1.5rem;padding:1rem;background:rgba(255,255,255,0.02)">'
     +     '<div style="font-size:0.85rem;color:var(--text3);margin-bottom:0.5rem">สถานะคลังสินค้าหลัก</div>'
     +     '<div style="display:flex;align-items:center;gap:0.5rem">'
@@ -756,9 +778,18 @@ function openProductDetail(id) {
   
   var btn = document.getElementById('detailAddToCartBtn');
   var outOfStock = Number(p.stock) <= 0;
-  btn.disabled = outOfStock;
-  btn.onclick = function() { addToCart(p.productId); closeModal('productDetailModal'); toggleDrawer('cartDrawer'); };
-  btn.innerHTML = outOfStock ? 'สินค้าหมด' : '<i data-lucide="shopping-cart" style="width:18px;height:18px"></i> เพิ่มลงตะกร้า';
+  var canReq = hasPermission('can_request');
+  
+  if (!canReq) {
+    btn.disabled = true;
+    btn.style.opacity = '0.5';
+    btn.innerHTML = '<i data-lucide="lock" style="width:18px;height:18px"></i> ไม่มีสิทธิ์เบิก';
+  } else {
+    btn.disabled = outOfStock;
+    btn.style.opacity = outOfStock ? '0.5' : '1';
+    btn.onclick = function() { addToCart(p.productId); closeModal('productDetailModal'); toggleDrawer('cartDrawer'); };
+    btn.innerHTML = outOfStock ? 'สินค้าหมด' : '<i data-lucide="shopping-cart" style="width:18px;height:18px"></i> เพิ่มลงตะกร้า';
+  }
   
   document.getElementById('productDetailModal').classList.add('open');
   refreshIcons();

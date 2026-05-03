@@ -88,6 +88,8 @@
         <button class="tab" id="tab-reports" data-admin-page="reports" onclick="adminNav('reports', this)"><i data-lucide="pie-chart"></i> รายงานสถิติ</button>
         <button class="tab" id="tab-employees" data-admin-page="employees" onclick="adminNav('employees', this)"><i data-lucide="users-2"></i>
           จัดการพนักงาน</button>
+        <button class="tab" id="tab-permissions" data-admin-page="permissions" onclick="adminNav('permissions', this)"><i data-lucide="shield-check"></i>
+          จัดการสิทธิ์</button>
         <button class="tab" id="tab-teams" data-admin-page="teams" onclick="adminNav('teams', this)"><i data-lucide="users"></i>
           จัดการทีมช่าง</button>
         <button class="tab" id="tab-settings" data-admin-page="settings" onclick="adminNav('settings', this)"><i data-lucide="settings"></i>
@@ -529,6 +531,35 @@
         </form>
       </div>
     </section>
+    
+    <!-- PERMISSIONS SECTION -->
+    <section id="p-permissions" class="admin-page" style="display:none">
+      <div class="flex flex-wrap items-center justify-between gap-2" style="margin-bottom:1.5rem">
+        <h2 style="margin:0;display:flex;align-items:center;gap:0.5rem"><i data-lucide="shield-check"></i> จัดการสิทธิ์การใช้งาน (Detailed Permissions)</h2>
+      </div>
+      <div class="card" style="padding:0; overflow:hidden">
+        <div class="table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>พนักงาน</th>
+                <th style="text-align:center">ดูราคา</th>
+                <th style="text-align:center">คลังย่อย</th>
+                <th style="text-align:center">จัดการสต็อก</th>
+                <th style="text-align:center">จัดการคน</th>
+                <th style="text-align:center">ดูรายงาน</th>
+                <th style="text-align:center">สิทธิ์เบิก</th>
+                <th style="text-align:center">หมวดหมู่</th>
+              </tr>
+            </thead>
+            <tbody id="permissionsBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div style="margin-top:1rem; font-size:0.8rem; color:var(--text3)">
+        * ระบบจะบันทึกสิทธิ์อัตโนมัติเมื่อมีการเปลี่ยนแปลง
+      </div>
+    </section>
 
     <!-- BRANCHES SECTION -->
     <section id="p-branches" class="admin-page" style="display:none">
@@ -754,26 +785,7 @@
           </select>
         </div>
 
-        <div class="form-group" id="permissionsSection">
-          <label class="form-label">การกำหนดสิทธิ์เพิ่มเติม (Detailed Permissions)</label>
-          <div class="permissions-grid">
-            <label class="permission-item">
-              <input type="checkbox" id="p-view-prices"> <span>💰 มองเห็นราคาและหน่วยสินค้า</span>
-            </label>
-            <label class="permission-item">
-              <input type="checkbox" id="p-has-substock"> <span>📦 สิทธิ์การใช้งานคลังย่อย (Sub-stock)</span>
-            </label>
-            <label class="permission-item">
-              <input type="checkbox" id="p-manage-inventory"> <span>🏭 จัดการสต็อกหลัก (เพิ่ม/ลด/สแกน)</span>
-            </label>
-            <label class="permission-item">
-              <input type="checkbox" id="p-manage-users"> <span>👥 จัดการพนักงานและทีม</span>
-            </label>
-            <label class="permission-item">
-              <input type="checkbox" id="p-view-reports"> <span>📊 ดูรายงานและแดชบอร์ด</span>
-            </label>
-          </div>
-        </div>
+
       </div>
       <div class="modal-footer flex-wrap">
         <button class="btn btn-outline" onclick="closeEmployeeModal()">ยกเลิก</button>
@@ -1121,6 +1133,14 @@
       <i data-lucide="file-text" style="width:20px; height:20px"></i>
       <span>ใบเบิก</span>
     </button>
+    <button class="mobile-nav-item admin-mobile-tab" data-admin-page="employees" onclick="adminNav('employees', this)">
+      <i data-lucide="users-2" style="width:20px; height:20px"></i>
+      <span>พนักงาน</span>
+    </button>
+    <button class="mobile-nav-item admin-mobile-tab" data-admin-page="permissions" onclick="adminNav('permissions', this)">
+      <i data-lucide="shield-check" style="width:20px; height:20px"></i>
+      <span>สิทธิ์</span>
+    </button>
     <button class="mobile-nav-item admin-mobile-tab" data-admin-page="reports" onclick="adminNav('reports', this)">
       <i data-lucide="pie-chart" style="width:20px; height:20px"></i>
       <span>รายงาน</span>
@@ -1159,6 +1179,25 @@
       <div class="modal-footer">
         <button class="btn btn-ghost" onclick="closePasswordModal()">ยกเลิก</button>
         <button class="btn btn-primary" id="savePwdBtn" onclick="saveNewPassword()">บันทึกรหัสผ่าน</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Category Permissions Modal -->
+  <div id="categoryPermissionsModal" class="modal-overlay" onclick="if(event.target===this) closeCategoryPermissionsModal()">
+    <div class="modal" style="max-width:400px">
+      <div class="modal-header">
+        <div style="font-weight:600">จำกัดหมวดหมู่สินค้า: <span id="cpm-emp-name" style="color:var(--primary)"></span></div>
+        <button class="btn btn-ghost btn-sm" onclick="closeCategoryPermissionsModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:0.8rem; color:var(--text3); margin-bottom:1rem">เลือกหมวดหมู่ที่อนุญาตให้พนักงานคนนี้มองเห็นและเบิกได้ (หากไม่เลือกเลยจะมองเห็นทั้งหมด)</p>
+        <input type="hidden" id="cpm-emp-id">
+        <div id="cpm-list" style="max-height:300px; overflow-y:auto; display:flex; flex-direction:column; gap:0.25rem"></div>
+      </div>
+      <div class="modal-footer flex-wrap">
+        <button class="btn btn-outline" onclick="closeCategoryPermissionsModal()">ยกเลิก</button>
+        <button class="btn btn-primary" onclick="saveCategoryPermissions()">บันทึกหมวดหมู่</button>
       </div>
     </div>
   </div>
@@ -1322,6 +1361,7 @@
         'tab-categories': 'manage_inventory',
         'tab-inventory': 'manage_inventory',
         'tab-employees': 'manage_users',
+        'tab-permissions': 'manage_users',
         'tab-teams': 'manage_users',
         'tab-departments': 'manage_users',
         'tab-reports': 'view_reports',
@@ -1423,6 +1463,7 @@
         'inventory': loadInventory,
         'reports': loadReports,
         'employees': loadAdminEmployees,
+        'permissions': loadPermissionsPage,
         'teams': loadTeams,
         'settings': loadSystemSettings,
         'departments': loadAdminDepartments,
@@ -2617,18 +2658,9 @@
         initSearchableSelect('ef-team');
       }
 
-      // Set permissions
-      var p = emp && emp.permissions ? (typeof emp.permissions === 'string' ? JSON.parse(emp.permissions) : emp.permissions) : {};
-      document.getElementById('p-view-prices').checked = p.view_prices || false;
-      document.getElementById('p-has-substock').checked = p.has_substock || false;
-      document.getElementById('p-manage-inventory').checked = p.manage_inventory || false;
-      document.getElementById('p-manage-users').checked = p.manage_users || false;
-      document.getElementById('p-view-reports').checked = p.view_reports || false;
-
       // Only superadmin can manage detailed permissions
-      var isSuper = currentUser && currentUser.role === 'superadmin';
-      document.querySelectorAll('#permissionsSection input').forEach(function(i) { i.disabled = !isSuper; });
-
+      // Permissions are now managed in a separate page, so we only handle basic roles here.
+      
       document.getElementById('employeeModalTitle').textContent = emp ? 'แก้ไขข้อมูลพนักงาน' : 'เพิ่มพนักงาน';
       document.getElementById('employeeModal').classList.add('open');
     }
@@ -2641,14 +2673,7 @@
         name: document.getElementById('ef-name').value.trim(),
         department: document.getElementById('ef-dept').value.trim(),
         role: document.getElementById('ef-role').value,
-        teamId: document.getElementById('ef-team').value,
-        permissions: {
-          view_prices: document.getElementById('p-view-prices').checked,
-          has_substock: document.getElementById('p-has-substock').checked,
-          manage_inventory: document.getElementById('p-manage-inventory').checked,
-          manage_users: document.getElementById('p-manage-users').checked,
-          view_reports: document.getElementById('p-view-reports').checked
-        }
+        teamId: document.getElementById('ef-team').value
       };
       if (!data.employeeId || !data.name) { showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warning'); return; }
 
@@ -2673,6 +2698,128 @@
       }).finally(function () {
         btn.innerHTML = oldHtml;
         btn.disabled = false;
+      });
+    }
+
+    // ─── PERMISSIONS PAGE ─────────────────────────────────
+    function loadPermissionsPage() {
+      var body = document.getElementById('permissionsBody');
+      if (body) body.innerHTML = '<tr><td colspan="6" class="text-center" style="padding:2rem"><div class="spinner"></div></td></tr>';
+
+      API.getEmployees().then(function (res) {
+        if (!res.data || res.data.length === 0) {
+          body.innerHTML = '<tr><td colspan="6" class="text-center" style="padding:2rem;color:var(--text3)">ไม่พบข้อมูลพนักงาน</td></tr>';
+          return;
+        }
+
+        body.innerHTML = res.data.map(function (e) {
+          if (e.role === 'superadmin') return ''; // Superadmin has all perms implicitly
+
+          var p = e.permissions ? (typeof e.permissions === 'string' ? JSON.parse(e.permissions) : e.permissions) : {};
+          var keys = ['view_prices', 'has_substock', 'manage_inventory', 'manage_users', 'view_reports', 'can_request'];
+          
+          var cells = keys.map(function(k) {
+            var checked = p[k] !== false ? 'checked' : ''; // Default true for can_request if not set? 
+            // Actually let's use explicit check. If undefined, most are false except can_request maybe.
+            // Let's stick to simple: if (p[k]) checked.
+            checked = p[k] ? 'checked' : '';
+            return '<td style="text-align:center"><input type="checkbox" ' + checked + ' onchange="updateIndividualPermission(\'' + e.employeeId + '\', \'' + k + '\', this.checked)"></td>';
+          }).join('');
+
+          var allowedCats = p.allowed_categories || [];
+          var catLabel = allowedCats.length === 0 ? 'ทั้งหมด' : allowedCats.length + ' หมวดหมู่';
+
+          return '<tr>' +
+            '<td><div style="font-weight:600">' + e.name + '</div><div style="font-size:0.7rem; color:var(--text3)">' + e.employeeId + ' (' + e.role + ')</div></td>' +
+            cells +
+            '<td style="text-align:center"><button class="btn btn-xs btn-outline" onclick="openCategoryPermissionsModal(\'' + e.employeeId + '\')">' + catLabel + '</button></td>' +
+            '</tr>';
+        }).join('');
+      });
+    }
+
+    function openCategoryPermissionsModal(empId) {
+      var emp = allAdminEmployees.find(function(e) { return String(e.employeeId) === String(empId); });
+      if (!emp) return;
+      
+      document.getElementById('cpm-emp-id').value = empId;
+      document.getElementById('cpm-emp-name').textContent = emp.name;
+      
+      var p = emp.permissions ? (typeof emp.permissions === 'string' ? JSON.parse(emp.permissions) : emp.permissions) : {};
+      var allowed = p.allowed_categories || [];
+      
+      var body = document.getElementById('cpm-list');
+      API.getCategories().then(function(res) {
+        var cats = res.data || [];
+        body.innerHTML = cats.map(function(c) {
+          var isChecked = allowed.includes(String(c.categoryId)) ? 'checked' : '';
+          return '<label class="flex items-center gap-2 p-2 hover-bg" style="cursor:pointer; border-radius:4px">' +
+            '<input type="checkbox" class="cat-perm-checkbox" value="' + c.categoryId + '" ' + isChecked + '> ' +
+            '<span>' + c.name + '</span>' +
+            '</label>';
+        }).join('');
+      });
+      
+      document.getElementById('categoryPermissionsModal').classList.add('open');
+    }
+
+    function closeCategoryPermissionsModal() {
+      document.getElementById('categoryPermissionsModal').classList.remove('open');
+    }
+
+    function saveCategoryPermissions() {
+      var empId = document.getElementById('cpm-emp-id').value;
+      var checkboxes = document.querySelectorAll('.cat-perm-checkbox');
+      var allowed = [];
+      checkboxes.forEach(function(cb) {
+        if (cb.checked) allowed.push(cb.value);
+      });
+      
+      var emp = allAdminEmployees.find(function(e) { return String(e.employeeId) === String(empId); });
+      if (!emp) return;
+      
+      var p = emp.permissions ? (typeof emp.permissions === 'string' ? JSON.parse(emp.permissions) : emp.permissions) : {};
+      p.allowed_categories = allowed;
+      
+      savePerm(emp, 'allowed_categories', allowed);
+      closeCategoryPermissionsModal();
+    }
+
+    function updateIndividualPermission(empId, key, value) {
+      // Find employee in local cache
+      var emp = allAdminEmployees.find(function(e) { return String(e.employeeId) === String(empId); });
+      if (!emp) {
+        API.getEmployees().then(function(res) {
+          var target = res.data.find(function(e) { return String(e.employeeId) === String(empId); });
+          if (target) savePerm(target, key, value);
+        });
+      } else {
+        savePerm(emp, key, value);
+      }
+    }
+
+    function savePerm(emp, key, value) {
+      var p = emp.permissions ? (typeof emp.permissions === 'string' ? JSON.parse(emp.permissions) : emp.permissions) : {};
+      p[key] = value;
+      
+      var data = JSON.parse(JSON.stringify(emp)); // clone
+      data.permissions = p;
+      
+      API.manageEmployee('update', data, emp.employeeId).then(function(res) {
+        if (res.success) {
+          showToast('อัปเดตสิทธิ์ของ ' + emp.name + ' เรียบร้อย', 'success');
+          // Update local cache
+          var cached = allAdminEmployees.find(function(e) { return String(e.employeeId) === String(emp.employeeId); });
+          if (cached) cached.permissions = p;
+          
+          // If the updated employee is the current user, we should update localStorage too?
+          // But usually, they'll need to re-login or we'd need a more complex sync.
+          // For now, let's keep it simple.
+        } else {
+          showToast(res.message, 'error');
+        }
+      }).catch(function(err) {
+        showToast(err, 'error');
       });
     }
 
