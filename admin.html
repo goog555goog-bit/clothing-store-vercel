@@ -79,13 +79,13 @@
       <div class="tabs" style="display:flex; gap:1.5rem; overflow-x: auto; scrollbar-width: none;">
         <button class="tab active" onclick="adminNav('dashboard', this)"><i data-lucide="layout-dashboard"></i>
           แดชบอร์ด</button>
-        <button class="tab" onclick="adminNav('products', this)"><i data-lucide="package"></i> สินค้า</button>
+        <button class="tab" id="tab-products" onclick="adminNav('products', this)"><i data-lucide="package"></i> สินค้า</button>
         <button class="tab" id="tab-categories" onclick="adminNav('categories', this)"><i data-lucide="layers"></i>
           หมวดหมู่</button>
-        <button class="tab" onclick="adminNav('orders', this)"><i data-lucide="file-text"></i> ใบเบิกสินค้า <span
+        <button class="tab" id="tab-orders" onclick="adminNav('orders', this)"><i data-lucide="file-text"></i> ใบเบิกสินค้า <span
             id="ordersTabBadge" class="tab-badge" style="display:none">0</span></button>
-        <button class="tab" onclick="adminNav('inventory', this)"><i data-lucide="archive"></i> คลังสินค้าหลัก</button>
-        <button class="tab" onclick="adminNav('reports', this)"><i data-lucide="pie-chart"></i> รายงานสถิติ</button>
+        <button class="tab" id="tab-inventory" onclick="adminNav('inventory', this)"><i data-lucide="archive"></i> คลังสินค้าหลัก</button>
+        <button class="tab" id="tab-reports" onclick="adminNav('reports', this)"><i data-lucide="pie-chart"></i> รายงานสถิติ</button>
         <button class="tab" id="tab-employees" onclick="adminNav('employees', this)"><i data-lucide="users-2"></i>
           จัดการพนักงาน</button>
         <button class="tab" id="tab-teams" onclick="adminNav('teams', this)"><i data-lucide="users"></i>
@@ -96,7 +96,7 @@
           จัดการสาขา</button>
         <button class="tab" id="tab-departments" onclick="adminNav('departments', this)"><i data-lucide="building"></i>
           จัดการแผนก</button>
-        <button class="tab" onclick="adminNav('audit', this)"><i data-lucide="activity"></i> ประวัติกิจกรรม</button>
+        <button class="tab" id="tab-audit" onclick="adminNav('audit', this)"><i data-lucide="activity"></i> ประวัติกิจกรรม</button>
       </div>
     </div>
 
@@ -711,7 +711,7 @@
 
   <!-- ADD/EDIT EMPLOYEE MODAL -->
   <div id="employeeModal" class="modal-overlay" onclick="if(event.target===this) closeEmployeeModal()">
-    <div class="modal" style="max-width:400px">
+    <div class="modal" style="max-width:450px">
       <div class="modal-header">
         <div id="employeeModalTitle" style="font-weight:600">เพิ่มพนักงาน</div>
         <button class="btn btn-ghost btn-sm" onclick="closeEmployeeModal()">✕</button>
@@ -731,16 +731,37 @@
           </select>
         </div>
         <div class="form-group">
-          <label class="form-label">สิทธิ์การใช้งาน *</label>
+          <label class="form-label">สิทธิ์การใช้งานหลัก (Role) *</label>
           <select id="ef-role" class="input w-full">
-            <option value="employee">Employee</option>
-            <option value="fc">FC</option>
-            <option value="technician">Technician</option>
-            <option value="hr">HR</option>
-            <option value="manager">Manager</option>
-            <option value="admin">Admin</option>
-            <option value="superadmin">Superadmin</option>
+            <option value="employee">Employee (พนักงานทั่วไป)</option>
+            <option value="fc">FC (คลังสินค้า/จ่ายของ)</option>
+            <option value="technician">Technician (ช่างเทคนิค)</option>
+            <option value="hr">HR (บุคคล)</option>
+            <option value="manager">Manager (ผู้จัดการ)</option>
+            <option value="admin">Admin (ผู้ดูแลระบบ)</option>
+            <option value="superadmin">Superadmin (ผู้บริหารสูงสุด)</option>
           </select>
+        </div>
+
+        <div class="form-group" id="permissionsSection">
+          <label class="form-label">การกำหนดสิทธิ์เพิ่มเติม (Detailed Permissions)</label>
+          <div class="permissions-grid">
+            <label class="permission-item">
+              <input type="checkbox" id="p-view-prices"> <span>💰 มองเห็นราคาและหน่วยสินค้า</span>
+            </label>
+            <label class="permission-item">
+              <input type="checkbox" id="p-has-substock"> <span>📦 สิทธิ์การใช้งานคลังย่อย (Sub-stock)</span>
+            </label>
+            <label class="permission-item">
+              <input type="checkbox" id="p-manage-inventory"> <span>🏭 จัดการสต็อกหลัก (เพิ่ม/ลด/สแกน)</span>
+            </label>
+            <label class="permission-item">
+              <input type="checkbox" id="p-manage-users"> <span>👥 จัดการพนักงานและทีม</span>
+            </label>
+            <label class="permission-item">
+              <input type="checkbox" id="p-view-reports"> <span>📊 ดูรายงานและแดชบอร์ด</span>
+            </label>
+          </div>
         </div>
       </div>
       <div class="modal-footer flex-wrap">
@@ -1202,6 +1223,17 @@
       if (text) text.textContent = isDark ? 'โหมดสว่าง' : 'โหมดมืด';
     }
 
+    function hasPermission(key) {
+      if (!currentUser) return false;
+      if (currentUser.role === 'superadmin') return true;
+      var p = currentUser.permissions;
+      if (!p) return false;
+      if (typeof p === 'string') {
+        try { p = JSON.parse(p); } catch (e) { return false; }
+      }
+      return !!p[key];
+    }
+
     function checkAuth() {
       var stored = localStorage.getItem('_user');
       if (stored) try { currentUser = JSON.parse(stored); } catch (e) { }
@@ -1220,14 +1252,33 @@
         return;
       }
 
-      // จัดการการมองเห็น Tab เฉพาะ Superadmin
-      if (currentUser.role !== 'superadmin') {
-        var supTabs = ['tab-categories', 'tab-employees', 'tab-settings'];
-        supTabs.forEach(function (id) {
-          var el = document.getElementById(id);
-          if (el) el.style.display = 'none';
-        });
+      // จัดการการมองเห็น Tab ตามสิทธิ์
+      var tabPermissions = {
+        'tab-products': 'manage_inventory',
+        'tab-categories': 'manage_inventory',
+        'tab-inventory': 'manage_inventory',
+        'tab-employees': 'manage_users',
+        'tab-teams': 'manage_users',
+        'tab-departments': 'manage_users',
+        'tab-reports': 'view_reports',
+        'tab-audit': 'view_reports',
+        'tab-settings': 'superadmin_only',
+        'tab-branches': 'superadmin_only'
+      };
+
+      for (var id in tabPermissions) {
+        var el = document.getElementById(id);
+        if (!el) continue;
+        var pKey = tabPermissions[id];
+        var isVisible = (pKey === 'superadmin_only') ? (currentUser.role === 'superadmin') : hasPermission(pKey);
+        el.style.display = isVisible ? 'flex' : 'none';
       }
+
+      // Hide Inventory/Products management buttons if no permission
+      var canEditInventory = hasPermission('manage_inventory');
+      document.querySelectorAll('.btn-inventory-mgr').forEach(function(b) {
+        b.style.display = canEditInventory ? 'inline-flex' : 'none';
+      });
 
       // ปุ่มไปหน้า Manager (ถ้ามีสิทธิ์)
       var mgrBtn = document.getElementById('mgrPaneBtn');
@@ -1372,7 +1423,7 @@
             '<div onclick="adminNav(\'orders\', document.querySelector(\'[data-admin-page=orders]\'))" style="cursor:pointer">' + statCard('clock', 'รออนุมัติทั้งหมด', d.pendingCount || 0, 'warning') + '</div>' +
             statCard('check-circle', 'อนุมัติแล้ว', d.approvedCount || 0, 'success') +
             statCard('package-check', 'แจกจ่ายแล้ว', d.receivedCount || 0, 'primary') +
-            statCard('coins', 'ยอดการเบิก', '฿' + (Number(d.totalVolume) || 0).toLocaleString(), 'accent') +
+            statCard('coins', 'ยอดการเบิก', hasPermission('view_prices') ? '฿' + (Number(d.totalVolume) || 0).toLocaleString() : '***', 'accent') +
             statCard('package', 'สินค้าในระบบ', d.totalProducts || 0) +
             '<div onclick="showLowStockModal()" style="cursor:pointer">' +
             statCard('alert-octagon', 'สต๊อกต่ำ', d.lowStockCount || 0, (d.lowStockCount > 0 ? 'danger' : '')) +
@@ -1411,7 +1462,7 @@
             dbDeptList.innerHTML = '<div class="flex flex-col gap-1" style="padding:0 1rem 1rem; border-top:1px solid var(--border); margin-top:0.5rem; padding-top:1rem">' +
               '<div style="font-size:0.75rem; color:var(--text3); margin-bottom:0.5rem">สัดส่วนตามแผนก (Department):</div>' +
               res.data.deptSpending.slice(0, 3).map(function (ds) {
-                return '<div class="flex justify-between" style="font-size:0.8rem"><span>' + ds.department + '</span><span style="color:var(--primary-light)">฿' + (ds.totalSpending || 0).toLocaleString() + '</span></div>';
+                return '<div class="flex justify-between" style="font-size:0.8rem"><span>' + ds.department + '</span><span style="color:var(--primary-light)">' + (hasPermission('view_prices') ? '฿' + (ds.totalSpending || 0).toLocaleString() : '***') + '</span></div>';
               }).join('') + '</div>';
           }
 
@@ -1474,7 +1525,7 @@
         data: {
           labels: data.map(function (d) { return getCategoryName(d.category); }),
           datasets: [{
-            data: data.map(function (d) { return d.totalValue; }),
+            data: data.map(function (d) { return hasPermission('view_prices') ? d.totalValue : 0; }),
             backgroundColor: ['#6366f1', '#a855f7', '#ec4899', '#f43f5e', '#f59e0b', '#10b981', '#06b6d4'],
             borderWidth: 0,
             hoverOffset: 10
@@ -1545,8 +1596,8 @@
         data: {
           labels: labels,
           datasets: [{
-            label: 'ยอดการเบิก (บาท)',
-            data: data,
+            label: hasPermission('view_prices') ? 'ยอดการเบิก (บาท)' : 'ยอดการเบิก (🔒)',
+            data: data.map(function(v) { return hasPermission('view_prices') ? v : 0; }),
             borderColor: '#8b5cf6',
             backgroundColor: 'rgba(139, 92, 246, 0.1)',
             fill: true,
@@ -1826,13 +1877,13 @@
           + '<td data-label="รหัสสินค้า" class="hide-mobile" style="font-size:0.8rem;color:var(--text3)">' + escapeHTML(p.productId) + '</td>'
           + '<td data-label="ชื่อสินค้า" style="font-weight:500">' + escapeHTML(p.name) + '</td>'
           + '<td data-label="หมวดหมู่">' + escapeHTML(getCategoryName(p.categoryId)) + '</td>'
-          + '<td data-label="ราคา">฿' + Number(p.price).toLocaleString() + '</td>'
+          + '<td data-label="ราคา">' + (hasPermission('view_prices') ? '฿' + Number(p.price).toLocaleString() : '***') + '</td>'
           + '<td data-label="สต๊อก" class="' + stockClass + '">' + stock + '</td>'
           + '<td data-label="สถานะ"><span class="badge ' + (p.status === 'active' ? 'badge-approved' : 'badge-rejected') + '" style="cursor:pointer" onclick="event.stopPropagation(); toggleProductStatus(\'' + p.productId + '\', \'' + p.status + '\')">' + (p.status === 'active' ? 'เปิด' : 'ปิด') + '</span></td>'
           + '<td data-label="จัดการ" onclick="event.stopPropagation()">'
           + '<button class="btn btn-sm btn-ghost" onclick="generateBarcode(\'' + escapeHTML(p.productId) + '\', \'' + String(p.name || "").replace(/'/g, "\\'") + '\')" title="ดูบาร์โค้ด"><i data-lucide="barcode" style="width:14px;height:14px"></i></button>'
-          + '<button class="btn btn-sm btn-ghost" onclick="editProduct(\'' + escapeHTML(p.productId) + '\')"><i data-lucide="edit" style="width:14px;height:14px"></i></button>'
-          + '<button class="btn btn-sm btn-ghost" style="color:var(--danger)" onclick="delProduct(\'' + escapeHTML(p.productId) + '\')"><i data-lucide="trash-2" style="width:14px;height:14px"></i></button></td>'
+          + '<button class="btn btn-sm btn-ghost btn-inventory-mgr" onclick="editProduct(\'' + escapeHTML(p.productId) + '\')"><i data-lucide="edit" style="width:14px;height:14px"></i></button>'
+          + '<button class="btn btn-sm btn-ghost btn-inventory-mgr" style="color:var(--danger)" onclick="delProduct(\'' + escapeHTML(p.productId) + '\')"><i data-lucide="trash-2" style="width:14px;height:14px"></i></button></td>'
           + '</tr>';
       }).join('');
 
@@ -2415,9 +2466,9 @@
             + '<td>' + (isMe ? '<span class="badge badge-approved">คุณ (' + e.role + ')</span>' : roleSelect) + '</td>'
             + '<td class="hide-mobile"><span class="badge ' + (e.status === 'active' ? 'badge-approved' : 'badge-rejected') + '">' + (e.status === 'active' ? 'ปกติ' : 'ปิด') + '</span></td>'
             + '<td class="flex flex-wrap gap-1">'
-            + '<button class="btn btn-xs btn-outline" onclick="showUserSubStock(\'' + String(e.employeeId).replace(/'/g, "\\'") + '\', \'' + String(e.name || "").replace(/'/g, "\\'") + '\')" title="ดูคลังสินค้าส่วนตัว"><i data-lucide="eye" style="width:12px;height:12px;pointer-events:none"></i></button>'
-            + '<button class="btn btn-xs btn-outline" onclick="editEmployee(\'' + String(e.employeeId).replace(/'/g, "\\'") + '\')" title="แก้ไขข้อมูล"><i data-lucide="edit-2" style="width:12px;height:12px;pointer-events:none"></i></button>'
-            + (isMe ? '' : '<button class="btn btn-xs btn-ghost hide-mobile" style="color:var(--danger)" onclick="delEmployee(\'' + String(e.employeeId).replace(/'/g, "\\'") + '\')" title="ลบพนักงาน"><i data-lucide="trash-2" style="width:12px;height:12px;pointer-events:none"></i></button>')
+            + '<button class="btn btn-xs btn-outline" onclick="showUserSubStock(\'' + String(e.employeeId).replace(/'/g, "\\'") + '\', \'' + String(e.name || "").replace(/'/g, "\\'") + '\')" title="ดูคลังสินค้าส่วนตัว" ' + (hasPermission('has_substock') ? '' : 'style="display:none"') + '><i data-lucide="eye" style="width:12px;height:12px;pointer-events:none"></i></button>'
+            + '<button class="btn btn-xs btn-outline" onclick="editEmployee(\'' + String(e.employeeId).replace(/'/g, "\\'") + '\')" title="แก้ไขข้อมูล" ' + (hasPermission('manage_users') ? '' : 'style="display:none"') + '><i data-lucide="edit-2" style="width:12px;height:12px;pointer-events:none"></i></button>'
+            + (isMe || !hasPermission('manage_users') ? '' : '<button class="btn btn-xs btn-ghost hide-mobile" style="color:var(--danger)" onclick="delEmployee(\'' + String(e.employeeId).replace(/'/g, "\\'") + '\')" title="ลบพนักงาน"><i data-lucide="trash-2" style="width:12px;height:12px;pointer-events:none"></i></button>')
             + '</td>'
             + '</tr>';
         }).join('');
@@ -2461,6 +2512,18 @@
         initSearchableSelect('ef-team');
       }
 
+      // Set permissions
+      var p = emp && emp.permissions ? (typeof emp.permissions === 'string' ? JSON.parse(emp.permissions) : emp.permissions) : {};
+      document.getElementById('p-view-prices').checked = p.view_prices || false;
+      document.getElementById('p-has-substock').checked = p.has_substock || false;
+      document.getElementById('p-manage-inventory').checked = p.manage_inventory || false;
+      document.getElementById('p-manage-users').checked = p.manage_users || false;
+      document.getElementById('p-view-reports').checked = p.view_reports || false;
+
+      // Only superadmin can manage detailed permissions
+      var isSuper = currentUser && currentUser.role === 'superadmin';
+      document.querySelectorAll('#permissionsSection input').forEach(function(i) { i.disabled = !isSuper; });
+
       document.getElementById('employeeModalTitle').textContent = emp ? 'แก้ไขข้อมูลพนักงาน' : 'เพิ่มพนักงาน';
       document.getElementById('employeeModal').classList.add('open');
     }
@@ -2473,7 +2536,14 @@
         name: document.getElementById('ef-name').value.trim(),
         department: document.getElementById('ef-dept').value.trim(),
         role: document.getElementById('ef-role').value,
-        teamId: document.getElementById('ef-team').value
+        teamId: document.getElementById('ef-team').value,
+        permissions: {
+          view_prices: document.getElementById('p-view-prices').checked,
+          has_substock: document.getElementById('p-has-substock').checked,
+          manage_inventory: document.getElementById('p-manage-inventory').checked,
+          manage_users: document.getElementById('p-manage-users').checked,
+          view_reports: document.getElementById('p-view-reports').checked
+        }
       };
       if (!data.employeeId || !data.name) { showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warning'); return; }
 

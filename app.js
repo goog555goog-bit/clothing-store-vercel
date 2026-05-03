@@ -9,6 +9,17 @@ var currentUser = (function() {
     return stored ? JSON.parse(stored) : null;
   } catch(e) { return null; }
 })();
+
+function hasPermission(key) {
+  if (!currentUser) return false;
+  if (currentUser.role === 'superadmin') return true;
+  var p = currentUser.permissions;
+  if (!p) return false;
+  if (typeof p === 'string') {
+    try { p = JSON.parse(p); } catch (e) { return false; }
+  }
+  return !!p[key];
+}
 var allProducts = [];
 var allCategories = [];
 var allBranches = []; 
@@ -693,7 +704,7 @@ function renderProductGrid(pageNum) {
       +   '<div class="product-name" style="cursor:pointer" onclick="openProductDetail(\'' + escapeHTML(p.productId) + '\')">' + escapeHTML(p.name) + '</div>'
       +   '<div class="product-stock"><span class="product-stock-dot' + (outOfStock ? ' out' : '') + '"></span>' + (outOfStock ? '<span style="color:var(--danger)">หมดสต็อก</span>' : 'คงเหลือ: ' + Number(p.stock) + ' ชิ้น') + '</div>'
       +   '<div class="flex flex-wrap items-center justify-between gap-2" style="margin-top:auto">'
-      +     '<div class="product-price">฿' + Number(p.price).toLocaleString() + '</div>'
+      +     '<div class="product-price">' + (hasPermission('view_prices') ? '฿' + Number(p.price).toLocaleString() : '***') + '</div>'
       +     '<button class="btn btn-sm ' + (outOfStock ? 'btn-outline' : 'btn-primary') + '" '
       +       (outOfStock ? 'disabled' : 'onclick="addToCart(\'' + escapeHTML(p.productId) + '\', event)"')
       +     ' style="border-radius:99px; padding: 0.4rem 1rem;' + (outOfStock ? '' : 'background:var(--gradient-gold);color:#000;border:none;') + '">' + (outOfStock ? 'หมด' : '+ เบิกสินค้า') + '</button>'
@@ -727,7 +738,7 @@ function openProductDetail(id) {
     +       '<h2 style="font-size:1.5rem;font-weight:800;letter-spacing:-1px">' + p.name + '</h2>'
     +       '<div style="color:var(--text3);font-size:0.9rem;margin-top:0.25rem">หมวดหมู่: ' + (cat ? cat.name : '-') + ' | SKU: ' + p.productId + '</div>'
     +     '</div>'
-    +     '<div class="product-price" style="font-size:1.8rem">฿' + Number(p.price).toLocaleString() + '</div>'
+    +     '<div class="product-price" style="font-size:1.8rem">' + (hasPermission('view_prices') ? '฿' + Number(p.price).toLocaleString() : '***') + '</div>'
     +   '</div>'
     +   '<div class="card glass" style="margin-bottom:1.5rem;padding:1rem;background:rgba(255,255,255,0.02)">'
     +     '<div style="font-size:0.85rem;color:var(--text3);margin-bottom:0.5rem">สถานะคลังสินค้าหลัก</div>'

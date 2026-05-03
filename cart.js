@@ -93,11 +93,11 @@ var Cart = {
     var itemTotalEl = document.getElementById('item-total-' + productId);
     if (qtyValEl && itemTotalEl && currentItem) {
       qtyValEl.textContent = currentItem.qty;
-      itemTotalEl.textContent = '฿' + (currentItem.price * currentItem.qty).toLocaleString();
+      itemTotalEl.textContent = (typeof hasPermission === 'function' && !hasPermission('view_prices')) ? '***' : '฿' + (currentItem.price * currentItem.qty).toLocaleString();
       
       // Still need to update general cart totals
       var totalEl = document.getElementById('cartTotal');
-      if (totalEl) totalEl.textContent = '฿' + this.getTotal().toLocaleString();
+      if (totalEl) totalEl.textContent = (typeof hasPermission === 'function' && !hasPermission('view_prices')) ? '***' : '฿' + this.getTotal().toLocaleString();
       this.renderBadge();
     } else {
       this.render();
@@ -151,7 +151,7 @@ var Cart = {
     var items = this.getItems();
     this.renderBadge();
 
-    if (totalEl) totalEl.textContent = '฿' + this.getTotal().toLocaleString();
+    if (totalEl) totalEl.textContent = (typeof hasPermission === 'function' && !hasPermission('view_prices')) ? '***' : '฿' + this.getTotal().toLocaleString();
     if (checkBtn) checkBtn.disabled = items.length === 0;
 
     if (items.length === 0) {
@@ -166,7 +166,7 @@ var Cart = {
         + '<div style="flex:1">'
         +   '<div class="flex flex-wrap justify-between gap-2"><div>'
         +     '<div style="font-weight:600;font-size:0.9rem">' + item.name + '</div>'
-        +     '<div style="color:var(--accent);font-size:0.85rem">฿' + item.price.toLocaleString() + '</div>'
+        +     '<div style="color:var(--accent);font-size:0.85rem">' + (typeof hasPermission === 'function' && !hasPermission('view_prices') ? '***' : '฿' + item.price.toLocaleString()) + '</div>'
         +   '</div>'
         +   '<button class="btn btn-ghost btn-xs" style="color:var(--danger);padding:0.25rem" onclick="Cart.remove(\'' + item.productId + '\')"><i data-lucide="trash-2" style="width:14px;height:14px"></i></button></div>'
         +   '<div class="flex flex-wrap items-center justify-between gap-2" style="margin-top:0.5rem">'
@@ -175,7 +175,7 @@ var Cart = {
         +       '<div class="qty-val" id="qty-val-' + item.productId + '">' + item.qty + '</div>'
         +       '<button class="qty-btn" onclick="Cart.updateQty(\'' + item.productId + '\', 1)" aria-label="เพิ่มจำนวน"><i data-lucide="plus" style="width:12px;height:12px"></i></button>'
         +     '</div>'
-        +     '<div style="font-weight:700" id="item-total-' + item.productId + '">฿' + (item.price * item.qty).toLocaleString() + '</div>'
+        +     '<div style="font-weight:700" id="item-total-' + item.productId + '">' + (typeof hasPermission === 'function' && !hasPermission('view_prices') ? '***' : '฿' + (item.price * item.qty).toLocaleString()) + '</div>'
         +   '</div>'
         + '</div>'
         + '</div>';
