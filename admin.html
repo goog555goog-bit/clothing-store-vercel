@@ -2754,6 +2754,11 @@
       saveAllRolePermissions();
     }
 
+    function closeCategoryPermissionsModal() {
+      var m = document.getElementById('categoryPermissionsModal');
+      if (m) m.classList.remove('open');
+    }
+
     function openRoleCategoryModal(roleId) {
       var role = ADMIN_ROLES.find(function(r) { return r.id === roleId; });
       if (!role) return;
