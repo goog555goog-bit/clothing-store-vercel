@@ -2,7 +2,7 @@
 //  api.js — Frontend REST Adapter (Refactored & Optimized)
 // ============================================================
 
-const GAS_URL = "https://script.google.com/macros/s/AKfycbziv19Dx9cM6Vcy33gwIIDHiVauikafJsZMdSpdVVYGbA6Fvb4ZXBks_m2sN7sOSeEPqA/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbx1f5vl0fw93vx_Sr26_uqFkC1rgajtQSDgUFn0Q_DyOQ3Mhjl6w3t-TN44OpGIYA30-A/exec";
 
 var API = (function () {
   var CACHE_KEY = '_api_cache_v1';
@@ -286,7 +286,7 @@ var API = (function () {
     // ─── OTHERS ───────────────────────────────────────────────
     uploadToDrive: function (base64, fileName) { return this._call('uploadToDrive', { base64: base64, fileName: fileName }); },
     exportToCSV: function (sheetName) { return this._call('exportToCSV', { sheetName: sheetName }); },
-    setupSpreadsheet: function() { return this._call('setupSpreadsheet'); },
+    setupSpreadsheet: function () { return this._call('setupSpreadsheet'); },
 
     // Compatibility wrappers
     approveOrder: function (id, _, comment) { return this.approveRequest(id, comment); },
