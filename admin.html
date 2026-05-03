@@ -1367,7 +1367,16 @@
     function hasPermission(key) {
       if (!currentUser) return false;
       if (currentUser.role === 'superadmin') return true;
-      var p = currentUser.permissions;
+      
+      // Try Role-based permission first
+      var p = null;
+      if (globalRolePermissions && globalRolePermissions[currentUser.role]) {
+        p = globalRolePermissions[currentUser.role];
+      } else {
+        // Fallback to individual permissions (legacy)
+        p = currentUser.permissions;
+      }
+
       if (!p) return false;
       if (typeof p === 'string') {
         try { p = JSON.parse(p); } catch (e) { return false; }
@@ -1399,14 +1408,13 @@
         'tab-categories': 'manage_inventory',
         'tab-inventory': 'manage_inventory',
         'tab-employees': 'manage_users',
-        'tab-permissions': 'manage_users',
         'tab-teams': 'manage_users',
         'tab-departments': 'manage_users',
         'tab-reports': 'view_reports',
         'tab-audit': 'view_reports',
         'tab-settings': 'superadmin_only',
         'tab-branches': 'superadmin_only',
-        'tab-permissions': 'superadmin_only'
+        'tab-permissions': 'manage_users' // Now manageable by anyone with manage_users if needed, or keep superadmin_only
       };
 
       for (var id in tabPermissions) {
@@ -1434,11 +1442,26 @@
 
       document.getElementById('adminName').textContent = '👤 ' + currentUser.name;
       
-      // Load categories globally at startup to ensure charts and lists show names instead of IDs
-      API.getCategories().then(function(res) {
-        if (res.success && res.data) {
-          allAdminCategories = res.data;
+      // Load initial data
+      Promise.all([
+        API.getCategories(),
+        API.getSystemSettings()
+      ]).then(function(results) {
+        if (results[0].success && results[0].data) allAdminCategories = results[0].data;
+        if (results[1].success && results[1].data) {
+          var settings = results[1].data;
+          globalRolePermissions = settings.rolePermissions || {};
         }
+        
+        // After permissions loaded, refresh tab visibility
+        for (var id in tabPermissions) {
+          var el = document.getElementById(id);
+          if (!el) continue;
+          var pKey = tabPermissions[id];
+          var isVisible = (pKey === 'superadmin_only') ? (currentUser.role === 'superadmin') : hasPermission(pKey);
+          el.style.display = isVisible ? 'flex' : 'none';
+        }
+
         return API.getReportData('Departments');
       }).then(function(res) {
         if (res.success && res.data) {
