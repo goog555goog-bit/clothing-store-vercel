@@ -2,7 +2,7 @@
 //  api.js — Frontend REST Adapter (Refactored & Optimized)
 // ============================================================
 
-const GAS_URL = "https://script.google.com/macros/s/AKfycbzzqz0K_FzdL2flMcKoY4frRnM2f7Ya8n9ATvAI4geuAYBG2GGuVmC2nYPEJQsyQHJfRA/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbziv19Dx9cM6Vcy33gwIIDHiVauikafJsZMdSpdVVYGbA6Fvb4ZXBks_m2sN7sOSeEPqA/exec";
 
 var API = (function () {
   var CACHE_KEY = '_api_cache_v1';
@@ -196,42 +196,42 @@ var API = (function () {
     getSystemSettings: function () { return this._call('getSystemSettings', {}, true); },
 
     // ─── WRITE ACTIONS (Invalidate relevant caches) ───────────
-    manageProduct: function (op, data) { 
-      return this._call('manageProduct', { op: op, data: data }, false, ['getProducts', 'getStorefrontData', 'getAdvancedDashboardData', 'getInventoryForecast']); 
+    manageProduct: function (op, data) {
+      return this._call('manageProduct', { op: op, data: data }, false, ['getProducts', 'getStorefrontData', 'getAdvancedDashboardData', 'getInventoryForecast']);
     },
-    manageCategory: function (op, data) { 
-      return this._call('manageCategory', { op: op, data: data }, false, ['getCategories', 'getProducts', 'getStorefrontData']); 
+    manageCategory: function (op, data) {
+      return this._call('manageCategory', { op: op, data: data }, false, ['getCategories', 'getProducts', 'getStorefrontData']);
     },
     updateStock: function (productId, qty, adminId) {
       return this._call('updateStock', { productId: productId, qty: qty, adminId: adminId }, false, ['getProducts', 'getDashboardStats', 'getAdvancedDashboardData', 'getInventoryForecast']);
     },
-    receiveStock: function (productId, qty) { 
-      return this._call('receiveStock', { productId: productId, qty: qty }, false, ['getProducts', 'getAdvancedDashboardData', 'getInventoryForecast']); 
+    receiveStock: function (productId, qty) {
+      return this._call('receiveStock', { productId: productId, qty: qty }, false, ['getProducts', 'getAdvancedDashboardData', 'getInventoryForecast']);
     },
-    quickDeductStock: function (productId, qty) { 
-      return this._call('quickDeductStock', { productId: productId, qty: qty }, false, ['getProducts', 'getAdvancedDashboardData', 'getInventoryForecast']); 
+    quickDeductStock: function (productId, qty) {
+      return this._call('quickDeductStock', { productId: productId, qty: qty }, false, ['getProducts', 'getAdvancedDashboardData', 'getInventoryForecast']);
     },
     addToSubStock: function (data) {
       return this._call('addToSubStock', { data: data }, false, ['getSubStock', 'getProducts', 'getInventoryForecast']);
     },
-    
-    createRequest: function (items) { 
-      return this._call('createRequest', { items: items }, false, ['getMyRequests', 'getAllOrders', 'getDashboardStats', 'getAdvancedDashboardData']); 
+
+    createRequest: function (items) {
+      return this._call('createRequest', { items: items }, false, ['getMyRequests', 'getAllOrders', 'getDashboardStats', 'getAdvancedDashboardData']);
     },
-    approveRequest: function (requestId, comment) { 
-      return this._call('approveRequest', { requestId: requestId, comment: comment }, false, ['getPendingApprovals', 'getAllOrders', 'getAdvancedDashboardData', 'getDashboardStats']); 
+    approveRequest: function (requestId, comment) {
+      return this._call('approveRequest', { requestId: requestId, comment: comment }, false, ['getPendingApprovals', 'getAllOrders', 'getAdvancedDashboardData', 'getDashboardStats']);
     },
-    rejectRequest: function (requestId, comment) { 
-      return this._call('rejectRequest', { requestId: requestId, comment: comment }, false, ['getPendingApprovals', 'getAllOrders', 'getAdvancedDashboardData', 'getDashboardStats']); 
+    rejectRequest: function (requestId, comment) {
+      return this._call('rejectRequest', { requestId: requestId, comment: comment }, false, ['getPendingApprovals', 'getAllOrders', 'getAdvancedDashboardData', 'getDashboardStats']);
     },
-    setReady: function (requestId) { 
-      return this._call('setReady', { requestId: requestId }, false, ['getAllOrders', 'getAdvancedDashboardData']); 
+    setReady: function (requestId) {
+      return this._call('setReady', { requestId: requestId }, false, ['getAllOrders', 'getAdvancedDashboardData']);
     },
-    dispatchRequest: function (requestId) { 
-      return this._call('dispatchRequest', { requestId: requestId }, false, ['getAllOrders', 'getAdvancedDashboardData', 'getProducts', 'getInventoryForecast', 'getSubStock']); 
+    dispatchRequest: function (requestId) {
+      return this._call('dispatchRequest', { requestId: requestId }, false, ['getAllOrders', 'getAdvancedDashboardData', 'getProducts', 'getInventoryForecast', 'getSubStock']);
     },
-    signForReceipt: function (requestId, signature) { 
-      return this._call('signForReceipt', { requestId: requestId, signature: signature }, false, ['getAllOrders', 'getAdvancedDashboardData', 'getMyRequests', 'getProducts', 'getSubStock']); 
+    signForReceipt: function (requestId, signature) {
+      return this._call('signForReceipt', { requestId: requestId, signature: signature }, false, ['getAllOrders', 'getAdvancedDashboardData', 'getMyRequests', 'getProducts', 'getSubStock']);
     },
 
     manageEmployee: function (op, data, oldEmployeeId) {
@@ -246,9 +246,9 @@ var API = (function () {
     deleteEmployee: function (targetEmployeeId) {
       return this._call('deleteEmployee', { targetEmployeeId: targetEmployeeId }, false, ['getEmployees']);
     },
-    
-    manageTeam: function (op, data) { 
-      return this._call('manageTeam', { op: op, data: data }, false, ['getTeams', 'getEmployees']); 
+
+    manageTeam: function (op, data) {
+      return this._call('manageTeam', { op: op, data: data }, false, ['getTeams', 'getEmployees']);
     },
     swapTeamLead: function (data) {
       return this._call('swapTeamLead', data, false, ['getTeams', 'getEmployees']);
@@ -272,7 +272,7 @@ var API = (function () {
     // ─── OTHERS ───────────────────────────────────────────────
     uploadToDrive: function (base64, fileName) { return this._call('uploadToDrive', { base64: base64, fileName: fileName }); },
     exportToCSV: function (sheetName) { return this._call('exportToCSV', { sheetName: sheetName }); },
-    
+
     // Compatibility wrappers
     approveOrder: function (id, _, comment) { return this.approveRequest(id, comment); },
     rejectOrder: function (id, _, comment) { return this.rejectRequest(id, comment); },
