@@ -77,26 +77,26 @@
     <div class="tabs-scroll-wrap"
       style="margin-bottom: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; overflow-x: auto; -webkit-overflow-scrolling: touch;">
       <div class="tabs" style="display:flex; gap:1.5rem; overflow-x: auto; scrollbar-width: none;">
-        <button class="tab active" onclick="adminNav('dashboard', this)"><i data-lucide="layout-dashboard"></i>
+        <button class="tab active" data-admin-page="dashboard" onclick="adminNav('dashboard', this)"><i data-lucide="layout-dashboard"></i>
           แดชบอร์ด</button>
-        <button class="tab" id="tab-products" onclick="adminNav('products', this)"><i data-lucide="package"></i> สินค้า</button>
-        <button class="tab" id="tab-categories" onclick="adminNav('categories', this)"><i data-lucide="layers"></i>
+        <button class="tab" id="tab-products" data-admin-page="products" onclick="adminNav('products', this)"><i data-lucide="package"></i> สินค้า</button>
+        <button class="tab" id="tab-categories" data-admin-page="categories" onclick="adminNav('categories', this)"><i data-lucide="layers"></i>
           หมวดหมู่</button>
-        <button class="tab" id="tab-orders" onclick="adminNav('orders', this)"><i data-lucide="file-text"></i> ใบเบิกสินค้า <span
+        <button class="tab" id="tab-orders" data-admin-page="orders" onclick="adminNav('orders', this)"><i data-lucide="file-text"></i> ใบเบิกสินค้า <span
             id="ordersTabBadge" class="tab-badge" style="display:none">0</span></button>
-        <button class="tab" id="tab-inventory" onclick="adminNav('inventory', this)"><i data-lucide="archive"></i> คลังสินค้าหลัก</button>
-        <button class="tab" id="tab-reports" onclick="adminNav('reports', this)"><i data-lucide="pie-chart"></i> รายงานสถิติ</button>
-        <button class="tab" id="tab-employees" onclick="adminNav('employees', this)"><i data-lucide="users-2"></i>
+        <button class="tab" id="tab-inventory" data-admin-page="inventory" onclick="adminNav('inventory', this)"><i data-lucide="archive"></i> คลังสินค้าหลัก</button>
+        <button class="tab" id="tab-reports" data-admin-page="reports" onclick="adminNav('reports', this)"><i data-lucide="pie-chart"></i> รายงานสถิติ</button>
+        <button class="tab" id="tab-employees" data-admin-page="employees" onclick="adminNav('employees', this)"><i data-lucide="users-2"></i>
           จัดการพนักงาน</button>
-        <button class="tab" id="tab-teams" onclick="adminNav('teams', this)"><i data-lucide="users"></i>
+        <button class="tab" id="tab-teams" data-admin-page="teams" onclick="adminNav('teams', this)"><i data-lucide="users"></i>
           จัดการทีมช่าง</button>
-        <button class="tab" id="tab-settings" onclick="adminNav('settings', this)"><i data-lucide="settings"></i>
+        <button class="tab" id="tab-settings" data-admin-page="settings" onclick="adminNav('settings', this)"><i data-lucide="settings"></i>
           ตั้งค่าระบบ</button>
-        <button class="tab" id="tab-branches" onclick="adminNav('branches', this)"><i data-lucide="building-2"></i>
+        <button class="tab" id="tab-branches" data-admin-page="branches" onclick="adminNav('branches', this)"><i data-lucide="building-2"></i>
           จัดการสาขา</button>
-        <button class="tab" id="tab-departments" onclick="adminNav('departments', this)"><i data-lucide="building"></i>
+        <button class="tab" id="tab-departments" data-admin-page="departments" onclick="adminNav('departments', this)"><i data-lucide="building"></i>
           จัดการแผนก</button>
-        <button class="tab" id="tab-audit" onclick="adminNav('audit', this)"><i data-lucide="activity"></i> ประวัติกิจกรรม</button>
+        <button class="tab" id="tab-audit" data-admin-page="audit" onclick="adminNav('audit', this)"><i data-lucide="activity"></i> ประวัติกิจกรรม</button>
       </div>
     </div>
 
@@ -536,6 +536,17 @@
         <h2 style="margin:0;display:flex;align-items:center;gap:0.5rem"><i data-lucide="building-2"></i> จัดการสาขา
           (Branches)</h2>
         <button class="btn btn-accent" onclick="openBranchModal()"><i data-lucide="plus"></i> เพิ่มสาขาใหม่</button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+        <button class="btn btn-outline p-6 flex flex-col items-center gap-3 glass hover-lift" onclick="openTeamModal()">
+          <i data-lucide="users" style="width:32px; height:32px; color:var(--primary)"></i>
+          <span style="font-weight:600">สร้างทีมช่างใหม่</span>
+        </button>
+        <button class="btn btn-outline p-6 flex flex-col items-center gap-3 glass hover-lift" onclick="adminNav('departments')">
+          <i data-lucide="building" style="width:32px; height:32px; color:var(--accent)"></i>
+          <span style="font-weight:600">จัดการแผนก</span>
+        </button>
       </div>
       <div class="card" style="padding:0;overflow:hidden">
         <div class="table-wrap">
@@ -1174,6 +1185,59 @@
     </div>
   </div>
 
+  <!-- Branch Modal -->
+  <div id="branchModal" class="modal-overlay" onclick="if(event.target===this) closeBranchModal()">
+    <div class="modal" style="max-width:400px" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3 id="branchModalTitle">จัดการสาขา</h3>
+        <button class="btn-close" onclick="closeBranchModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="bf-id">
+        <div class="form-group">
+          <label>ชื่อสาขา *</label>
+          <input type="text" id="bf-name" class="form-input" placeholder="ระบุชื่อสาขา">
+        </div>
+        <div class="form-group">
+          <label>สถานะ</label>
+          <select id="bf-status" class="input w-full">
+            <option value="active">เปิดใช้งาน (Active)</option>
+            <option value="inactive">ปิดใช้งาน (Inactive)</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeBranchModal()">ยกเลิก</button>
+        <button class="btn btn-primary" onclick="saveBranch()">บันทึกข้อมูล</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Team Modal -->
+  <div id="teamModal" class="modal-overlay" onclick="if(event.target===this) closeTeamModal()">
+    <div class="modal" style="max-width:400px" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3 id="teamModalTitle">จัดการทีมช่าง</h3>
+        <button class="btn-close" onclick="closeTeamModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="tf-id">
+        <div class="form-group">
+          <label>ชื่อทีม *</label>
+          <input type="text" id="tf-name" class="form-input" placeholder="เช่น ทีม A, ทีมหน้างาน">
+        </div>
+        <div class="form-group">
+          <label>หัวหน้าทีม (Lead) *</label>
+          <select id="tf-lead" class="input w-full"></select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeTeamModal()">ยกเลิก</button>
+        <button class="btn btn-primary" onclick="saveTeam()">บันทึกข้อมูล</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     var currentAdminPage = 'dashboard';
 
@@ -1308,11 +1372,14 @@
       if (currentAdminPage === page && !el && !options) return;
       currentAdminPage = page;
 
+      // Close open elements
+      document.querySelectorAll('.modal-overlay').forEach(function(m) { m.classList.remove('open'); });
+      var suggestions = document.getElementById('adminProductSuggestions');
+      if (suggestions) suggestions.classList.remove('active');
+
       // 1. UI Sync
       document.querySelectorAll('.tab, .admin-mobile-tab').forEach(function (t) {
-        var isDesktopTarget = t.getAttribute('onclick') && t.getAttribute('onclick').indexOf("'" + page + "'") !== -1;
-        var isMobileTarget = t.getAttribute('data-admin-page') === page;
-        t.classList.toggle('active', isDesktopTarget || isMobileTarget);
+        t.classList.toggle('active', t.getAttribute('data-admin-page') === page);
       });
 
       document.querySelectorAll('.admin-page').forEach(function (p) {
@@ -1324,6 +1391,27 @@
       if (target) {
         target.style.display = 'block';
         setTimeout(function () { target.classList.add('active-page'); }, 10);
+      }
+
+      // Update Page Title and Description
+      var titles = {
+        'dashboard': { t: 'ภาพรวมระบบ', d: 'ข้อมูลสรุปและสถานะระบบแบบเรียลไทม์' },
+        'products': { t: 'จัดการสินค้า', d: 'เพิ่ม แก้ไข และบริหารจัดการรายการสินค้าทั้งหมด' },
+        'categories': { t: 'หมวดหมู่สินค้า', d: 'จัดการกลุ่มประเภทของสินค้าในระบบ' },
+        'orders': { t: 'ประวัติใบเบิก', d: 'ตรวจสอบและจัดการสถานะการเบิกพัสดุ' },
+        'inventory': { t: 'สต็อกสินค้า', d: 'ตรวจสอบจำนวนและปรับยอดสต็อกสินค้า' },
+        'reports': { t: 'รายงานสถิติ', d: 'วิเคราะห์ข้อมูลการเบิกพัสดุเชิงลึก' },
+        'employees': { t: 'จัดการพนักงาน', d: 'บริหารจัดการข้อมูลและสิทธิ์เข้าใช้งาน' },
+        'teams': { t: 'ทีมช่าง', d: 'จัดการทีมช่างและการสังกัดทีม' },
+        'settings': { t: 'ตั้งค่าระบบ', d: 'กำหนดค่าพื้นฐานและการตั้งค่าขั้นสูง' },
+        'departments': { t: 'แผนกงาน', d: 'จัดการรายชื่อแผนกในองค์กร' },
+        'branches': { t: 'จัดการสาขา', d: 'ตั้งค่าข้อมูลสาขาและที่ตั้ง' },
+        'audit': { t: 'ประวัติกิจกรรม', d: 'ตรวจสอบความเคลื่อนไหวและการใช้งานย้อนหลัง' }
+      };
+
+      if (titles[page]) {
+        document.getElementById('currentPageTitle').textContent = titles[page].t;
+        document.getElementById('currentPageDesc').textContent = titles[page].d;
       }
 
       // 2. Data Loading
@@ -1338,12 +1426,15 @@
         'teams': loadTeams,
         'settings': loadSystemSettings,
         'departments': loadAdminDepartments,
-        'branches': loadBranches
+        'branches': loadBranches,
+        'audit': loadAuditLogs
       };
 
       if (loaders[page]) {
         setTimeout(loaders[page], 50);
       }
+      
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       refreshIcons();
     }
 
@@ -1732,6 +1823,9 @@
     var currentAdminProductsPage = 1;
 
     function loadProducts(options) {
+      var body = document.getElementById('productsBody');
+      if (body) body.innerHTML = '<tr><td colspan="8" class="text-center" style="padding:2rem"><div class="spinner"></div></td></tr>';
+
       API.getProducts().then(function (res) {
         if (!res.data) res.data = [];
         allAdminProducts = res.data;
@@ -1903,6 +1997,9 @@
 
     // ─── CATEGORIES ───────────────────────────────────────
     function loadAdminCategories() {
+      var body = document.getElementById('categoriesBody');
+      if (body) body.innerHTML = '<tr><td colspan="3" class="text-center" style="padding:2rem"><div class="spinner"></div></td></tr>';
+
       API.getCategories().then(function (res) {
         var body = document.getElementById('categoriesBody');
         if (!res.data || res.data.length === 0) { body.innerHTML = '<tr><td colspan="3" class="text-center" style="padding:2rem;color:var(--text3)">ยังไม่มีหมวดหมู่</td></tr>'; return; }
@@ -2130,6 +2227,9 @@
     var currentAdminOrdersPage = 1;
 
     function loadAdminOrders() {
+      var body = document.getElementById('ordersBody');
+      if (body) body.innerHTML = '<tr><td colspan="7" class="text-center" style="padding:2rem"><div class="spinner"></div></td></tr>';
+
       API.getAllOrders().then(function (res) {
         masterAdminOrders = res.data || [];
 
@@ -2432,14 +2532,19 @@
     var allAdminEmployees = [];
 
     function loadAdminEmployees() {
+      var body = document.getElementById('employeesBody');
+      if (body) body.innerHTML = '<tr><td colspan="7" class="text-center" style="padding:2rem"><div class="spinner"></div></td></tr>';
+
       Promise.all([API.getEmployees(), API.getTeams()]).then(function (results) {
         var resEmp = results[0];
         var resTeams = results[1];
         allAdminTeams = resTeams.data || [];
         allAdminEmployees = resEmp.data || [];
 
-        var body = document.getElementById('employeesBody');
-        if (!resEmp.data) return;
+        if (!resEmp.data || resEmp.data.length === 0) {
+          body.innerHTML = '<tr><td colspan="7" class="text-center" style="padding:2rem;color:var(--text3)">ไม่พบข้อมูลพนักงาน</td></tr>';
+          return;
+        }
         body.innerHTML = resEmp.data.map(function (e) {
           var isMe = currentUser && e.employeeId === currentUser.employeeId;
           var roleSelect = '<select class="input input-sm" onchange="changeEmpRole(\'' + e.employeeId + '\', this)" ' + (isMe ? 'disabled' : '') + '>'
@@ -2615,6 +2720,49 @@
             '</div>';
         }).join('');
         refreshIcons();
+      });
+    }
+
+    function delTeam(id) {
+      if (!confirm('ยืนยันการลบทีม ' + id + ' ?')) return;
+      API.manageTeam('delete', { teamId: id }).then(function (res) {
+        if (res.success) { showToast('ลบทีมเรียบร้อย', 'success'); loadTeams(); }
+        else showToast(res.message, 'error');
+      });
+    }
+
+    function openTeamModal(team) {
+      document.getElementById('tf-id').value = team ? team.teamId : '';
+      document.getElementById('tf-name').value = team ? team.name : '';
+      
+      // Lead selection
+      var leadSel = document.getElementById('tf-lead');
+      leadSel.innerHTML = '<option value="">-- เลือกหัวหน้าทีม --</option>' + allAdminEmployees.map(function(e){
+        return '<option value="' + e.employeeId + '" ' + (team && team.leadId === e.employeeId ? 'selected' : '') + '>' + e.name + '</option>';
+      }).join('');
+      initSearchableSelect('tf-lead');
+
+      document.getElementById('teamModalTitle').textContent = team ? 'แก้ไขทีม' : 'เพิ่มทีมใหม่';
+      document.getElementById('teamModal').classList.add('open');
+    }
+    function closeTeamModal() { document.getElementById('teamModal').classList.remove('open'); }
+
+    function saveTeam() {
+      var id = document.getElementById('tf-id').value.trim();
+      var name = document.getElementById('tf-name').value.trim();
+      var leadId = document.getElementById('tf-lead').value;
+      if (!name || !leadId) { showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warning'); return; }
+
+      var op = id ? 'update' : 'add';
+      showToast('กำลังบันทึก...', 'info');
+      API.manageTeam(op, { teamId: id, name: name, leadId: leadId }).then(function (res) {
+        if (res.success) {
+          showToast('บันทึกทีมเรียบร้อย', 'success');
+          closeTeamModal();
+          loadTeams();
+        } else {
+          showToast(res.message, 'error');
+        }
       });
     }
 
@@ -2884,10 +3032,16 @@
     }
 
     function loadAdminDepartments() {
+      var body = document.getElementById('departmentsBody');
+      if (body) body.innerHTML = '<tr><td colspan="3" class="text-center" style="padding:2rem"><div class="spinner"></div></td></tr>';
+
       API.getReportData('Departments').then(function (res) {
-        var body = document.getElementById('departmentsBody');
         if (!body) return;
-        body.innerHTML = (res.data || []).map(function (d) {
+        if (!res.data || res.data.length === 0) {
+          body.innerHTML = '<tr><td colspan="3" class="text-center" style="padding:2rem;color:var(--text3)">ไม่พบข้อมูลแผนก</td></tr>';
+          return;
+        }
+        body.innerHTML = res.data.map(function (d) {
           return '<tr>'
             + '<td>' + (d.departmentId || '-') + '</td>'
             + '<td style="font-weight:600">' + d.name + '</td>'
@@ -2951,6 +3105,69 @@
     }
     function closeExportModal() { document.getElementById('exportModal').classList.remove('open'); }
 
+    function loadBranches() {
+      var body = document.getElementById('branchesBody');
+      if (body) body.innerHTML = '<tr><td colspan="4" class="text-center" style="padding:2rem"><div class="spinner"></div></td></tr>';
+
+      API.getBranches().then(function (res) {
+        if (!res.data || res.data.length === 0) {
+          body.innerHTML = '<tr><td colspan="4" class="text-center" style="padding:2rem;color:var(--text3)">ยังไม่มีข้อมูลสาขา</td></tr>';
+          return;
+        }
+        body.innerHTML = res.data.map(function (b) {
+          return '<tr>'
+            + '<td>' + (b.branchId || '-') + '</td>'
+            + '<td style="font-weight:600">' + b.name + '</td>'
+            + '<td><span class="badge ' + (b.status === 'active' ? 'badge-approved' : 'badge-rejected') + '">' + (b.status === 'active' ? 'เปิด' : 'ปิด') + '</span></td>'
+            + '<td class="flex gap-1">'
+            + '<button class="btn btn-sm btn-ghost" onclick="openBranchModal({branchId:\'' + b.branchId + '\', name:\'' + b.name + '\', status:\'' + b.status + '\'})"><i data-lucide="edit-2" style="width:14px;height:14px"></i></button>'
+            + '<button class="btn btn-sm btn-ghost" style="color:var(--danger)" onclick="delBranch(\'' + b.branchId + '\')"><i data-lucide="trash-2" style="width:14px;height:14px"></i></button></td>'
+            + '</tr>';
+        }).join('');
+        refreshIcons();
+      });
+    }
+
+    function openBranchModal(branch) {
+      document.getElementById('bf-id').value = branch ? branch.branchId : '';
+      document.getElementById('bf-name').value = branch ? branch.name : '';
+      document.getElementById('bf-status').value = branch ? (branch.status || 'active') : 'active';
+      document.getElementById('branchModalTitle').textContent = branch ? 'แก้ไขสาขา' : 'เพิ่มสาขา';
+      document.getElementById('branchModal').classList.add('open');
+    }
+    function closeBranchModal() { document.getElementById('branchModal').classList.remove('open'); }
+
+    function saveBranch() {
+      var id = document.getElementById('bf-id').value;
+      var name = document.getElementById('bf-name').value.trim();
+      var status = document.getElementById('bf-status').value;
+      if (!name) { showToast('กรุณากรอกชื่อสาขา', 'warning'); return; }
+
+      var op = id ? 'update' : 'add';
+      showToast('กำลังบันทึก...', 'info');
+      API.manageBranch(op, { branchId: id, name: name, status: status }).then(function (res) {
+        if (res.success) {
+          showToast('บันทึกสาขาเรียบร้อย', 'success');
+          closeBranchModal();
+          loadBranches();
+        } else {
+          showToast(res.message, 'error');
+        }
+      });
+    }
+
+    function delBranch(id) {
+      if (!confirm('ยืนยันการลบสาขา?')) return;
+      API.manageBranch('delete', { branchId: id }).then(function (res) {
+        if (res.success) {
+          showToast('ลบสาขาเรียบร้อย', 'success');
+          loadBranches();
+        } else {
+          showToast(res.message, 'error');
+        }
+      });
+    }
+
     var _subStockTarget = null;
     var _subStockType = null;
     function openScannerForSubStock(targetId, type) {
@@ -2959,7 +3176,6 @@
       setScanMode('sub');
       openScanner();
     }
-
     function doDetailedExport() {
       var filters = {
         startDate: document.getElementById('ex-start').value,
@@ -2993,6 +3209,9 @@
 
     // ─── INVENTORY ────────────────────────────────────────
     function loadInventory() {
+      var body = document.getElementById('inventoryBody');
+      if (body) body.innerHTML = '<tr><td colspan="6" class="text-center" style="padding:2rem"><div class="spinner"></div></td></tr>';
+
       API.getProducts().then(function (res) {
         if (!res.success) return;
         var body = document.getElementById('inventoryBody');
@@ -3008,6 +3227,7 @@
             + '<td><button class="btn btn-sm btn-outline" onclick="openStockModal(\'' + p.productId + '\',\'' + p.name + '\')">ปรับ</button></td>'
             + '</tr>';
         }).join('');
+        refreshIcons();
       });
     }
 
