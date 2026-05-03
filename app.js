@@ -786,6 +786,25 @@ function openProductDetail(id) {
     +       '<span id="detail-stock-count" style="font-weight:700;font-size:1.1rem">' + p.stock + ' ชิ้น</span>'
     +       '<span id="detail-stock-label" style="font-size:0.9rem;color:var(--text3)">' + (Number(p.stock) > 0 ? 'พร้อมเบิก (รวมทุกไซส์)' : 'หมดสต็อก') + '</span>'
     +     '</div>'
+    +     (function() {
+            var vs = p.variantStock;
+            if (!vs) return '';
+            var vStock = {};
+            try { vStock = (typeof vs === 'string' && vs.startsWith('{')) ? JSON.parse(vs) : vs; } catch(e) { return ''; }
+            if (Object.keys(vStock).length === 0) return '';
+            
+            var breakdownHtml = '<div style="margin-top:1rem; display:flex; flex-wrap:wrap; gap:0.4rem; border-top:1px solid rgba(255,255,255,0.05); padding-top:0.75rem">';
+            for (var s in vStock) {
+              var sQty = Number(vStock[s]);
+              var sColor = sQty > 0 ? 'var(--accent)' : 'var(--danger)';
+              var sBg = sQty > 0 ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)';
+              breakdownHtml += '<div style="background:' + sBg + '; color:' + sColor + '; padding:4px 8px; border-radius:6px; font-size:0.75rem; border:1px solid ' + sColor + '33">' +
+                '<span style="font-weight:700">' + s + ':</span> ' + sQty +
+                '</div>';
+            }
+            breakdownHtml += '</div>';
+            return breakdownHtml;
+          })()
     +   '</div>'
     +   '<div style="margin-bottom:1.5rem">'
     +     '<h3 style="font-size:1rem;font-weight:700;margin-bottom:0.75rem">รายละเอียดสินค้า</h3>'
@@ -793,8 +812,16 @@ function openProductDetail(id) {
     +   '</div>';
 
   // --- Size Selection Logic ---
-  if (p.sizes) {
-    var sizeList = p.sizes.split(',').map(function(s) { return s.trim(); }).filter(function(s) { return s !== ''; });
+  var sizes = p.sizes;
+  if (!sizes && p.variantStock) {
+    try {
+      var vsObj = (typeof p.variantStock === 'string' && p.variantStock.startsWith('{')) ? JSON.parse(p.variantStock) : p.variantStock;
+      sizes = Object.keys(vsObj).join(', ');
+    } catch(e) {}
+  }
+
+  if (sizes) {
+    var sizeList = sizes.split(',').map(function(s) { return s.trim(); }).filter(function(s) { return s !== ''; });
     if (sizeList.length > 0) {
       var sizeHtml = '<div style="margin-bottom:1.5rem">'
         + '<h3 style="font-size:0.9rem;font-weight:700;margin-bottom:0.75rem">เลือกไซส์:</h3>'
