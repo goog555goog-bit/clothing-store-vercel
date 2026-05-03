@@ -41,9 +41,10 @@ var API = (function () {
       }
     },
 
-    getCached: function (action) {
-      if (_cache[action] && (Date.now() - _cache[action].time < _cacheTTL)) {
-        return _cache[action].data;
+    getCached: function (action, data) {
+      var key = action + (data ? JSON.stringify(data) : '');
+      if (_cache[key] && (Date.now() - _cache[key].time < _cacheTTL)) {
+        return _cache[key].data;
       }
       return null;
     },
@@ -63,7 +64,7 @@ var API = (function () {
       if (!useCache) _locks.add(lockKey);
 
       // 2. Check Cache (Memory/Local)
-      var cachedData = self.getCached(action);
+      var cachedData = self.getCached(action, data);
       if (useCache && cachedData) {
         console.log('⚡ API Cache Hit [' + action + ']');
         return Promise.resolve(cachedData);
@@ -112,7 +113,8 @@ var API = (function () {
               if (res && res.success) {
                 // Save to Cache if needed
                 if (useCache) {
-                  _cache[action] = { data: res, time: Date.now() };
+                  var cKey = action + (data ? JSON.stringify(data) : '');
+                  _cache[cKey] = { data: res, time: Date.now() };
                   self._saveCache();
                 }
                 // Invalidate Groups
