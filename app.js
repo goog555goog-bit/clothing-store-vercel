@@ -10,10 +10,21 @@ var currentUser = (function() {
   } catch(e) { return null; }
 })();
 
+var globalSystemSettings = null;
+
 function hasPermission(key, value) {
   if (!currentUser) return false;
   if (currentUser.role === 'superadmin') return true;
-  var p = currentUser.permissions;
+  
+  // Try Role-based permission first
+  var p = null;
+  if (globalSystemSettings && globalSystemSettings.rolePermissions && globalSystemSettings.rolePermissions[currentUser.role]) {
+    p = globalSystemSettings.rolePermissions[currentUser.role];
+  } else {
+    // Fallback to individual permissions (legacy)
+    p = currentUser.permissions;
+  }
+
   if (!p) return false;
   if (typeof p === 'string') {
     try { p = JSON.parse(p); } catch (e) { return false; }
@@ -350,7 +361,13 @@ function loadStorefrontData() {
   }
   
   // 2. Fetch fresh data from network
-  API.getStorefrontData().then(function(res) {
+  Promise.all([
+    API.getStorefrontData(),
+    API.getSystemSettings()
+  ]).then(function(results) {
+    var res = results[0];
+    globalSystemSettings = results[1].data || {};
+
     if (res.success) {
       allProducts = res.products || [];
       allCategories = res.categories || [];

@@ -542,7 +542,7 @@
           <table class="admin-table">
             <thead>
               <tr>
-                <th>พนักงาน</th>
+                <th style="width:200px">บทบาท (Role)</th>
                 <th style="text-align:center">ดูราคา</th>
                 <th style="text-align:center">คลังย่อย</th>
                 <th style="text-align:center">จัดการสต็อก</th>
@@ -1183,21 +1183,21 @@
     </div>
   </div>
 
-  <!-- Category Permissions Modal -->
+  <!-- Category Permissions Modal (Role Based) -->
   <div id="categoryPermissionsModal" class="modal-overlay" onclick="if(event.target===this) closeCategoryPermissionsModal()">
     <div class="modal" style="max-width:400px">
       <div class="modal-header">
-        <div style="font-weight:600">จำกัดหมวดหมู่สินค้า: <span id="cpm-emp-name" style="color:var(--primary)"></span></div>
+        <div style="font-weight:600">จำกัดหมวดหมู่ตามบทบาท: <span id="cpm-role-name" style="color:var(--primary)"></span></div>
         <button class="btn btn-ghost btn-sm" onclick="closeCategoryPermissionsModal()">✕</button>
       </div>
       <div class="modal-body">
-        <p style="font-size:0.8rem; color:var(--text3); margin-bottom:1rem">เลือกหมวดหมู่ที่อนุญาตให้พนักงานคนนี้มองเห็นและเบิกได้ (หากไม่เลือกเลยจะมองเห็นทั้งหมด)</p>
-        <input type="hidden" id="cpm-emp-id">
+        <p style="font-size:0.8rem; color:var(--text3); margin-bottom:1rem">เลือกหมวดหมู่ที่อนุญาตให้บทบาทนี้มองเห็นและเบิกได้ (หากไม่เลือกเลยจะมองเห็นทั้งหมด)</p>
+        <input type="hidden" id="cpm-role-id">
         <div id="cpm-list" style="max-height:300px; overflow-y:auto; display:flex; flex-direction:column; gap:0.25rem"></div>
       </div>
       <div class="modal-footer flex-wrap">
         <button class="btn btn-outline" onclick="closeCategoryPermissionsModal()">ยกเลิก</button>
-        <button class="btn btn-primary" onclick="saveCategoryPermissions()">บันทึกหมวดหมู่</button>
+        <button class="btn btn-primary" onclick="saveRoleCategoryPermissions()">บันทึกหมวดหมู่</button>
       </div>
     </div>
   </div>
@@ -2701,51 +2701,60 @@
       });
     }
 
-    // ─── PERMISSIONS PAGE ─────────────────────────────────
+    // ─── PERMISSIONS PAGE (Role Based) ────────────────────
+    var ADMIN_ROLES = [
+      { id: 'employee', name: 'Employee (พนักงานทั่วไป)' },
+      { id: 'fc', name: 'FC (คลังสินค้า/จ่ายของ)' },
+      { id: 'technician', name: 'Technician (ช่างเทคนิค)' },
+      { id: 'hr', name: 'HR (บุคคล)' },
+      { id: 'manager', name: 'Manager (ผู้จัดการ)' },
+      { id: 'admin', name: 'Admin (ผู้ดูแลระบบ)' }
+    ];
+    var globalRolePermissions = {};
+
     function loadPermissionsPage() {
       var body = document.getElementById('permissionsBody');
-      if (body) body.innerHTML = '<tr><td colspan="6" class="text-center" style="padding:2rem"><div class="spinner"></div></td></tr>';
+      if (body) body.innerHTML = '<tr><td colspan="8" class="text-center" style="padding:2rem"><div class="spinner"></div></td></tr>';
 
-      API.getEmployees().then(function (res) {
-        if (!res.data || res.data.length === 0) {
-          body.innerHTML = '<tr><td colspan="6" class="text-center" style="padding:2rem;color:var(--text3)">ไม่พบข้อมูลพนักงาน</td></tr>';
-          return;
-        }
+      API.getSystemSettings().then(function (res) {
+        var settings = res.data || {};
+        globalRolePermissions = settings.rolePermissions || {};
 
-        body.innerHTML = res.data.map(function (e) {
-          if (e.role === 'superadmin') return ''; // Superadmin has all perms implicitly
-
-          var p = e.permissions ? (typeof e.permissions === 'string' ? JSON.parse(e.permissions) : e.permissions) : {};
+        body.innerHTML = ADMIN_ROLES.map(function (role) {
+          var p = globalRolePermissions[role.id] || {};
           var keys = ['view_prices', 'has_substock', 'manage_inventory', 'manage_users', 'view_reports', 'can_request'];
           
           var cells = keys.map(function(k) {
-            var checked = p[k] !== false ? 'checked' : ''; // Default true for can_request if not set? 
-            // Actually let's use explicit check. If undefined, most are false except can_request maybe.
-            // Let's stick to simple: if (p[k]) checked.
-            checked = p[k] ? 'checked' : '';
-            return '<td style="text-align:center"><input type="checkbox" ' + checked + ' onchange="updateIndividualPermission(\'' + e.employeeId + '\', \'' + k + '\', this.checked)"></td>';
+            var checked = p[k] ? 'checked' : '';
+            return '<td style="text-align:center"><input type="checkbox" ' + checked + ' onchange="updateRolePermission(\'' + role.id + '\', \'' + k + '\', this.checked)"></td>';
           }).join('');
 
           var allowedCats = p.allowed_categories || [];
           var catLabel = allowedCats.length === 0 ? 'ทั้งหมด' : allowedCats.length + ' หมวดหมู่';
 
           return '<tr>' +
-            '<td><div style="font-weight:600">' + e.name + '</div><div style="font-size:0.7rem; color:var(--text3)">' + e.employeeId + ' (' + e.role + ')</div></td>' +
+            '<td><div style="font-weight:700; color:var(--primary)">' + role.name + '</div><div style="font-size:0.7rem; color:var(--text3)">ID: ' + role.id + '</div></td>' +
             cells +
-            '<td style="text-align:center"><button class="btn btn-xs btn-outline" onclick="openCategoryPermissionsModal(\'' + e.employeeId + '\')">' + catLabel + '</button></td>' +
+            '<td style="text-align:center"><button class="btn btn-xs btn-outline" onclick="openRoleCategoryModal(\'' + role.id + '\')">' + catLabel + '</button></td>' +
             '</tr>';
         }).join('');
       });
     }
 
-    function openCategoryPermissionsModal(empId) {
-      var emp = allAdminEmployees.find(function(e) { return String(e.employeeId) === String(empId); });
-      if (!emp) return;
+    function updateRolePermission(roleId, key, value) {
+      if (!globalRolePermissions[roleId]) globalRolePermissions[roleId] = {};
+      globalRolePermissions[roleId][key] = value;
+      saveAllRolePermissions();
+    }
+
+    function openRoleCategoryModal(roleId) {
+      var role = ADMIN_ROLES.find(function(r) { return r.id === roleId; });
+      if (!role) return;
       
-      document.getElementById('cpm-emp-id').value = empId;
-      document.getElementById('cpm-emp-name').textContent = emp.name;
+      document.getElementById('cpm-role-id').value = roleId;
+      document.getElementById('cpm-role-name').textContent = role.name;
       
-      var p = emp.permissions ? (typeof emp.permissions === 'string' ? JSON.parse(emp.permissions) : emp.permissions) : {};
+      var p = globalRolePermissions[roleId] || {};
       var allowed = p.allowed_categories || [];
       
       var body = document.getElementById('cpm-list');
@@ -2754,73 +2763,87 @@
         body.innerHTML = cats.map(function(c) {
           var isChecked = allowed.includes(String(c.categoryId)) ? 'checked' : '';
           return '<label class="flex items-center gap-2 p-2 hover-bg" style="cursor:pointer; border-radius:4px">' +
-            '<input type="checkbox" class="cat-perm-checkbox" value="' + c.categoryId + '" ' + isChecked + '> ' +
+            '<input type="checkbox" class="role-cat-checkbox" value="' + c.categoryId + '" ' + isChecked + '> ' +
             '<span>' + c.name + '</span>' +
             '</label>';
         }).join('');
       });
-      
       document.getElementById('categoryPermissionsModal').classList.add('open');
     }
 
-    function closeCategoryPermissionsModal() {
-      document.getElementById('categoryPermissionsModal').classList.remove('open');
-    }
-
-    function saveCategoryPermissions() {
-      var empId = document.getElementById('cpm-emp-id').value;
-      var checkboxes = document.querySelectorAll('.cat-perm-checkbox');
+    function saveRoleCategoryPermissions() {
+      var roleId = document.getElementById('cpm-role-id').value;
+      var checkboxes = document.querySelectorAll('.role-cat-checkbox');
       var allowed = [];
-      checkboxes.forEach(function(cb) {
-        if (cb.checked) allowed.push(cb.value);
-      });
+      checkboxes.forEach(function(cb) { if (cb.checked) allowed.push(cb.value); });
       
-      var emp = allAdminEmployees.find(function(e) { return String(e.employeeId) === String(empId); });
-      if (!emp) return;
+      if (!globalRolePermissions[roleId]) globalRolePermissions[roleId] = {};
+      globalRolePermissions[roleId].allowed_categories = allowed;
       
-      var p = emp.permissions ? (typeof emp.permissions === 'string' ? JSON.parse(emp.permissions) : emp.permissions) : {};
-      p.allowed_categories = allowed;
-      
-      savePerm(emp, 'allowed_categories', allowed);
+      saveAllRolePermissions();
       closeCategoryPermissionsModal();
+      loadPermissionsPage();
     }
 
-    function updateIndividualPermission(empId, key, value) {
-      // Find employee in local cache
-      var emp = allAdminEmployees.find(function(e) { return String(e.employeeId) === String(empId); });
-      if (!emp) {
-        API.getEmployees().then(function(res) {
-          var target = res.data.find(function(e) { return String(e.employeeId) === String(empId); });
-          if (target) savePerm(target, key, value);
-        });
-      } else {
-        savePerm(emp, key, value);
-      }
-    }
-
-    function savePerm(emp, key, value) {
-      var p = emp.permissions ? (typeof emp.permissions === 'string' ? JSON.parse(emp.permissions) : emp.permissions) : {};
-      p[key] = value;
-      
-      var data = JSON.parse(JSON.stringify(emp)); // clone
-      data.permissions = p;
-      
-      API.manageEmployee('update', data, emp.employeeId).then(function(res) {
-        if (res.success) {
-          showToast('อัปเดตสิทธิ์ของ ' + emp.name + ' เรียบร้อย', 'success');
-          // Update local cache
-          var cached = allAdminEmployees.find(function(e) { return String(e.employeeId) === String(emp.employeeId); });
-          if (cached) cached.permissions = p;
-          
-          // If the updated employee is the current user, we should update localStorage too?
-          // But usually, they'll need to re-login or we'd need a more complex sync.
-          // For now, let's keep it simple.
-        } else {
-          showToast(res.message, 'error');
-        }
-      }).catch(function(err) {
-        showToast(err, 'error');
+    function saveAllRolePermissions() {
+      showToast('กำลังบันทึกสิทธิ์บทบาท...', 'info');
+      API.getSystemSettings().then(function(res) {
+        var settings = res.data || {};
+        settings.rolePermissions = globalRolePermissions;
+        return API.saveSystemSettings(settings);
+      }).then(function(res) {
+        if (res.success) showToast('บันทึกสิทธิ์บทบาทเรียบร้อย', 'success');
+        else showToast(res.message, 'error');
       });
+    }
+
+    function loadSystemSettings() {
+      var container = document.getElementById('notifyTimesContainer');
+      if (container) container.innerHTML = '<div style="padding: 2rem; text-align: center;"><div class="spinner"></div></div>';
+      
+      API.getSystemSettings().then(function (res) {
+        var settings = res.data || {};
+        var times = settings.notifyTimes || [];
+        if (container) {
+          container.innerHTML = '';
+          times.forEach(function (t, idx) { addTimeSlot(t); });
+          if (times.length === 0) addTimeSlot();
+        }
+      });
+    }
+
+    function saveSystemSettings() {
+      var btn = document.getElementById('saveSetBtn');
+      var oldHtml = btn.innerHTML;
+      btn.innerHTML = '<div class="spinner" style="width:16px;height:16px"></div> กำลังบันทึก...';
+      btn.disabled = true;
+
+      var times = [];
+      document.querySelectorAll('.notify-time-input').forEach(function (input) {
+        if (input.value) times.push(input.value);
+      });
+
+      API.getSystemSettings().then(function (res) {
+        var settings = res.data || {};
+        settings.notifyTimes = times;
+        return API.saveSystemSettings(settings);
+      }).then(function (res) {
+        if (res.success) showToast('บันทึกการตั้งค่าเรียบร้อย', 'success');
+        else showToast(res.message, 'error');
+      }).finally(function () {
+        btn.innerHTML = oldHtml;
+        btn.disabled = false;
+      });
+    }
+
+    function addTimeSlot(val) {
+      var container = document.getElementById('notifyTimesContainer');
+      var div = document.createElement('div');
+      div.className = 'flex items-center gap-2';
+      div.innerHTML = '<input type="number" min="0" max="23" class="form-input notify-time-input" value="' + (val || '') + '" placeholder="0-23">' +
+        '<button type="button" class="btn btn-ghost btn-sm" onclick="this.parentElement.remove()"><i data-lucide="trash-2" style="width:14px;height:14px"></i></button>';
+      container.appendChild(div);
+      refreshIcons();
     }
 
     // ─── TEAMS ──────────────────────────────────────────
