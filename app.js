@@ -844,12 +844,26 @@ function openProductDetail(id) {
             
             return '<div class="choice-chip' + (sOut ? ' out-of-stock' : '') + '" '
                 + 'onclick="if(!this.classList.contains(\'out-of-stock\')) selectProductSize(this, \'' + escapeHTML(s) + '\', \'' + escapeHTML(p.productId) + '\')">' 
-                + s 
+                + '<span>' + s + '</span>'
                 + (sOut ? '<div class="badge-soldout">หมด</div>' : '')
                 + '</div>';
           }).join('')
         + '</div><input type="hidden" id="selected-product-size"></div>';
       body.innerHTML += sizeHtml;
+
+      // Auto-select first available size
+      setTimeout(function() {
+        var firstChip = document.querySelector('#size-selector-container .choice-chip:not(.out-of-stock)');
+        if (firstChip) {
+          var s = sizeList.find(function(val) {
+             var vs = p.variantStock;
+             var vStock = {};
+             if (vs) { try { vStock = (typeof vs === 'string' && vs.startsWith('{')) ? JSON.parse(vs) : vs; } catch(e) {} }
+             return (vStock[val] === undefined || Number(vStock[val]) > 0);
+          });
+          if (s) selectProductSize(firstChip, s, p.productId);
+        }
+      }, 50);
     }
   }
 
@@ -885,9 +899,19 @@ function openProductDetail(id) {
 }
 
 function selectProductSize(el, size, productId) {
-  var chips = document.querySelectorAll('.choice-chip');
-  chips.forEach(function(c) { c.classList.remove('active'); });
+  var container = el.closest('.choice-chips');
+  if (!container) return;
+  
+  var chips = container.querySelectorAll('.choice-chip');
+  chips.forEach(function(c) { 
+    c.classList.remove('active'); 
+    var existingCheck = c.querySelector('.check-icon');
+    if (existingCheck) existingCheck.remove();
+  });
+  
   el.classList.add('active');
+  el.insertAdjacentHTML('beforeend', '<i class="check-icon" data-lucide="check" style="width:12px;height:12px;margin-left:6px;display:inline-block"></i>');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
   
   document.getElementById('selected-product-size').value = size;
   
