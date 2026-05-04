@@ -924,17 +924,22 @@ function selectProductSize(el, size, productId) {
 function getImageUrl(url) {
   if (!url) return '';
   if (typeof url !== 'string') return '';
-  if (url.indexOf('drive.google.com') !== -1 || url.indexOf('lh3.googleusercontent.com') !== -1) {
+  // หากเป็นลิงก์ Google Drive หรือ googleusercontent
+  if (url.indexOf('drive.google.com') !== -1 || url.indexOf('googleusercontent.com') !== -1) {
     var id = '';
     if (url.indexOf('id=') !== -1) {
       id = url.split('id=')[1].split('&')[0];
     } else if (url.indexOf('/d/') !== -1) {
       id = url.split('/d/')[1].split('/')[0];
-    } else if (url.indexOf('lh3.googleusercontent.com') !== -1) {
-      id = url.split('/').pop();
+    } else if (url.indexOf('googleusercontent.com') !== -1) {
+      var parts = url.split('/');
+      id = parts[parts.length - 1].split('=')[0];
     }
-    // ใช้ thumbnail endpoint พร้อมกำหนดขนาด (sz) เพื่อความเสถียรสูงสุดใน iframe
-    if (id) return 'https://drive.google.com/thumbnail?id=' + id + '&sz=w1000';
+    
+    if (id) {
+      // ใช้ thumbnail endpoint ของ Google Drive ซึ่งเสถียรที่สุดสำหรับการแสดงผลในเว็บ
+      return 'https://drive.google.com/thumbnail?id=' + id + '&sz=w1000';
+    }
   }
   return url;
 }
