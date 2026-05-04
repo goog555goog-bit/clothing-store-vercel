@@ -780,9 +780,11 @@ function openProductDetail(id) {
           : '<div class="alert alert-danger" style="margin-bottom:1rem; padding:0.75rem; border-radius:8px; font-size:0.85rem">⚠️ คุณไม่มีสิทธิ์ในการเบิกสินค้าชิ้นนี้หรือหมวดหมู่นี้</div>'
         )
     +   '<div class="card glass" style="margin-bottom:1.5rem;padding:1.25rem;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05)">'
-    +     '<div style="font-size:0.85rem;color:var(--text3);margin-bottom:0.75rem;display:flex;justify-content:space-between;align-items:center">'
-    +       '<span>สถานะคลังสินค้าแยกตามไซส์</span>'
-    +       '<span style="font-size:0.75rem;opacity:0.6">ทั้งหมด: ' + p.stock + ' ชิ้น</span>'
+    +     '<div style="font-size:0.85rem;color:var(--text3);margin-bottom:0.75rem">สถานะคลังสินค้า</div>'
+    +     '<div id="detail-stock-status" style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1rem">'
+    +       '<div style="width:12px;height:12px;border-radius:50%;background:' + (Number(p.stock) > 0 ? 'var(--accent)' : 'var(--danger)') + '"></div>'
+    +       '<span id="detail-stock-count" style="font-weight:700;font-size:1.1rem">' + p.stock + ' ชิ้น</span>'
+    +       '<span id="detail-stock-label" style="font-size:0.9rem;color:var(--text3)">' + (Number(p.stock) > 0 ? 'พร้อมเบิก (รวมทุกไซส์)' : 'หมดสต็อก') + '</span>'
     +     '</div>'
     +     (function() {
             var vs = p.variantStock;
@@ -792,19 +794,13 @@ function openProductDetail(id) {
             } catch(e) {}
             
             var sizeKeys = p.sizes ? p.sizes.split(',').map(function(s){return s.trim();}).filter(function(s){return s!=='';}) : Object.keys(vStock);
-            if (sizeKeys.length === 0 && Object.keys(vStock).length === 0) {
-              return '<div id="detail-stock-status" style="display:flex;align-items:center;gap:0.5rem">'
-                + '<div style="width:12px;height:12px;border-radius:50%;background:' + (Number(p.stock) > 0 ? 'var(--accent)' : 'var(--danger)') + '"></div>'
-                + '<span id="detail-stock-count" style="font-weight:700;font-size:1.1rem">' + p.stock + ' ชิ้น</span>'
-                + '<span id="detail-stock-label" style="font-size:0.9rem;color:var(--text3)">' + (Number(p.stock) > 0 ? 'พร้อมเบิก' : 'หมดสต็อก') + '</span>'
-                + '</div>';
-            }
+            if (sizeKeys.length === 0) return '';
 
-            var gridHtml = '<div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap:0.5rem">';
+            var gridHtml = '<div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap:0.5rem; border-top:1px solid rgba(255,255,255,0.05); padding-top:0.75rem">';
             sizeKeys.forEach(function(s) {
               var sQty = vStock[s] !== undefined ? Number(vStock[s]) : 0;
               var isOut = sQty <= 0;
-              gridHtml += '<div style="background:rgba(255,255,255,0.03); padding:8px 4px; border-radius:12px; text-align:center; border:1px solid ' + (isOut ? 'rgba(239, 68, 68, 0.2)' : 'rgba(255,255,255,0.05)') + '">' +
+              gridHtml += '<div id="stock-grid-' + s + '" class="stock-grid-item" style="background:rgba(255,255,255,0.03); padding:8px 4px; border-radius:12px; text-align:center; border:1px solid ' + (isOut ? 'rgba(239, 68, 68, 0.2)' : 'rgba(255,255,255,0.05)') + '; transition:all 0.2s">' +
                 '<div style="font-size:0.7rem; color:var(--text3); font-weight:700; margin-bottom:2px; text-transform:uppercase">' + s + '</div>' +
                 '<div style="font-size:1rem; font-weight:800; color:' + (isOut ? 'var(--danger)' : 'var(--text)') + '">' + sQty + '</div>' +
                 '</div>';
@@ -934,6 +930,19 @@ function selectProductSize(el, size, productId) {
     if (statusEl) {
       var dot = statusEl.querySelector('div');
       if (dot) dot.style.background = sStock > 0 ? 'var(--accent)' : 'var(--danger)';
+    }
+
+    // Highlight the item in the grid
+    document.querySelectorAll('.stock-grid-item').forEach(function(item) {
+      item.style.background = 'rgba(255,255,255,0.03)';
+      item.style.borderColor = item.querySelector('div:last-child').style.color === 'var(--danger)' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(255,255,255,0.05)';
+      item.style.transform = 'scale(1)';
+    });
+    var gridItem = document.getElementById('stock-grid-' + size);
+    if (gridItem) {
+      gridItem.style.background = sStock > 0 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)';
+      gridItem.style.borderColor = sStock > 0 ? 'var(--accent)' : 'var(--danger)';
+      gridItem.style.transform = 'scale(1.05)';
     }
     
     // Update Add to Cart button

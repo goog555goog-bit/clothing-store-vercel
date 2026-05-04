@@ -77,28 +77,41 @@
     <div class="tabs-scroll-wrap"
       style="margin-bottom: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; overflow-x: auto; -webkit-overflow-scrolling: touch;">
       <div class="tabs" style="display:flex; gap:1.5rem; overflow-x: auto; scrollbar-width: none;">
-        <button class="tab active" data-admin-page="dashboard" onclick="adminNav('dashboard', this)"><i data-lucide="layout-dashboard"></i>
+        <button class="tab active" data-admin-page="dashboard" onclick="adminNav('dashboard', this)"><i
+            data-lucide="layout-dashboard"></i>
           แดชบอร์ด</button>
-        <button class="tab" id="tab-products" data-admin-page="products" onclick="adminNav('products', this)"><i data-lucide="package"></i> สินค้า</button>
-        <button class="tab" id="tab-categories" data-admin-page="categories" onclick="adminNav('categories', this)"><i data-lucide="layers"></i>
+        <button class="tab" id="tab-products" data-admin-page="products" onclick="adminNav('products', this)"><i
+            data-lucide="package"></i> สินค้า</button>
+        <button class="tab" id="tab-categories" data-admin-page="categories" onclick="adminNav('categories', this)"><i
+            data-lucide="layers"></i>
           หมวดหมู่</button>
-        <button class="tab" id="tab-orders" data-admin-page="orders" onclick="adminNav('orders', this)"><i data-lucide="file-text"></i> ใบเบิกสินค้า <span
-            id="ordersTabBadge" class="tab-badge" style="display:none">0</span></button>
-        <button class="tab" id="tab-inventory" data-admin-page="inventory" onclick="adminNav('inventory', this)"><i data-lucide="archive"></i> คลังสินค้าหลัก</button>
-        <button class="tab" id="tab-reports" data-admin-page="reports" onclick="adminNav('reports', this)"><i data-lucide="pie-chart"></i> รายงานสถิติ</button>
-        <button class="tab" id="tab-employees" data-admin-page="employees" onclick="adminNav('employees', this)"><i data-lucide="users-2"></i>
+        <button class="tab" id="tab-orders" data-admin-page="orders" onclick="adminNav('orders', this)"><i
+            data-lucide="file-text"></i> ใบเบิกสินค้า <span id="ordersTabBadge" class="tab-badge"
+            style="display:none">0</span></button>
+        <button class="tab" id="tab-inventory" data-admin-page="inventory" onclick="adminNav('inventory', this)"><i
+            data-lucide="archive"></i> คลังสินค้าหลัก</button>
+        <button class="tab" id="tab-reports" data-admin-page="reports" onclick="adminNav('reports', this)"><i
+            data-lucide="pie-chart"></i> รายงานสถิติ</button>
+        <button class="tab" id="tab-employees" data-admin-page="employees" onclick="adminNav('employees', this)"><i
+            data-lucide="users-2"></i>
           จัดการพนักงาน</button>
-        <button class="tab" id="tab-permissions" data-admin-page="permissions" onclick="adminNav('permissions', this)"><i data-lucide="shield-check"></i>
+        <button class="tab" id="tab-permissions" data-admin-page="permissions"
+          onclick="adminNav('permissions', this)"><i data-lucide="shield-check"></i>
           จัดการสิทธิ์</button>
-        <button class="tab" id="tab-teams" data-admin-page="teams" onclick="adminNav('teams', this)"><i data-lucide="users"></i>
+        <button class="tab" id="tab-teams" data-admin-page="teams" onclick="adminNav('teams', this)"><i
+            data-lucide="users"></i>
           จัดการทีมช่าง</button>
-        <button class="tab" id="tab-settings" data-admin-page="settings" onclick="adminNav('settings', this)"><i data-lucide="settings"></i>
+        <button class="tab" id="tab-settings" data-admin-page="settings" onclick="adminNav('settings', this)"><i
+            data-lucide="settings"></i>
           ตั้งค่าระบบ</button>
-        <button class="tab" id="tab-branches" data-admin-page="branches" onclick="adminNav('branches', this)"><i data-lucide="building-2"></i>
+        <button class="tab" id="tab-branches" data-admin-page="branches" onclick="adminNav('branches', this)"><i
+            data-lucide="building-2"></i>
           จัดการสาขา</button>
-        <button class="tab" id="tab-departments" data-admin-page="departments" onclick="adminNav('departments', this)"><i data-lucide="building"></i>
+        <button class="tab" id="tab-departments" data-admin-page="departments"
+          onclick="adminNav('departments', this)"><i data-lucide="building"></i>
           จัดการแผนก</button>
-        <button class="tab" id="tab-audit" data-admin-page="audit" onclick="adminNav('audit', this)"><i data-lucide="activity"></i> ประวัติกิจกรรม</button>
+        <button class="tab" id="tab-audit" data-admin-page="audit" onclick="adminNav('audit', this)"><i
+            data-lucide="activity"></i> ประวัติกิจกรรม</button>
       </div>
     </div>
 
@@ -531,11 +544,12 @@
         </form>
       </div>
     </section>
-    
+
     <!-- PERMISSIONS SECTION -->
     <section id="p-permissions" class="admin-page" style="display:none">
       <div class="flex flex-wrap items-center justify-between gap-2" style="margin-bottom:1.5rem">
-        <h2 style="margin:0;display:flex;align-items:center;gap:0.5rem"><i data-lucide="shield-check"></i> จัดการสิทธิ์การใช้งาน (Detailed Permissions)</h2>
+        <h2 style="margin:0;display:flex;align-items:center;gap:0.5rem"><i data-lucide="shield-check"></i>
+          จัดการสิทธิ์การใช้งาน (Detailed Permissions)</h2>
       </div>
       <div class="card" style="padding:0; overflow:hidden">
         <div class="table-wrap">
@@ -574,7 +588,7 @@
           </div>
           <div class="card-body" style="padding:1.5rem">
             <p style="font-size:0.9rem; color:var(--text3); margin-bottom:1.5rem">
-              หากคุณเพิ่งอัปเดตเวอร์ชันของระบบ หรือพบว่าบางฟีเจอร์ (เช่น การเลือกไซส์สินค้า) ใช้งานไม่ได้ 
+              หากคุณเพิ่งอัปเดตเวอร์ชันของระบบ หรือพบว่าบางฟีเจอร์ (เช่น การเลือกไซส์สินค้า) ใช้งานไม่ได้
               กรุณากดปุ่มด้านล่างเพื่อตรวจสอบและอัปเดตหัวตารางใน Google Sheets ให้เป็นเวอร์ชันล่าสุด
             </p>
             <button class="btn btn-primary w-full" id="btnUpdateDB" onclick="runDBMaintenance()">
@@ -598,7 +612,8 @@
           <i data-lucide="users" style="width:32px; height:32px; color:var(--primary)"></i>
           <span style="font-weight:600">สร้างทีมช่างใหม่</span>
         </button>
-        <button class="btn btn-outline p-6 flex flex-col items-center gap-3 glass hover-lift" onclick="adminNav('departments')">
+        <button class="btn btn-outline p-6 flex flex-col items-center gap-3 glass hover-lift"
+          onclick="adminNav('departments')">
           <i data-lucide="building" style="width:32px; height:32px; color:var(--accent)"></i>
           <span style="font-weight:600">จัดการแผนก</span>
         </button>
@@ -643,11 +658,13 @@
         </div>
         <div class="form-group">
           <label class="form-label">ไซส์ (ระบุคั่นด้วยคอมม่า เช่น S, M, L, XL)</label>
-          <input id="pf-sizes" class="form-input" placeholder="S, M, L, XL หรือ เว้นว่างถ้าไม่มีไซส์" oninput="generateSizeStockInputs()">
+          <input id="pf-sizes" class="form-input" placeholder="S, M, L, XL หรือ เว้นว่างถ้าไม่มีไซส์"
+            oninput="generateSizeStockInputs()">
         </div>
         <div id="size-stock-container" style="margin-bottom:1rem; display:none">
           <label class="form-label" style="font-size:0.8rem; color:var(--text3)">กำหนดสต็อกแยกตามไซส์</label>
-          <div id="size-stock-list" class="flex flex-wrap gap-2" style="padding:0.5rem; background:rgba(255,255,255,0.02); border-radius:8px"></div>
+          <div id="size-stock-list" class="flex flex-wrap gap-2"
+            style="padding:0.5rem; background:rgba(255,255,255,0.02); border-radius:8px"></div>
         </div>
         <div class="form-group">
           <label class="form-label">รูปภาพสินค้า</label>
@@ -892,11 +909,13 @@
           <input id="approvalComment" class="form-input" placeholder="ระบุเหตุผลการอนุมัติ/ปฏิเสธ...">
         </div>
       </div>
-      <div class="modal-footer flex-wrap" style="display:flex; justify-content:space-between; align-items:center; gap:1rem">
+      <div class="modal-footer flex-wrap"
+        style="display:flex; justify-content:space-between; align-items:center; gap:1rem">
         <button class="btn btn-outline" onclick="closeApprovalModal()">ยกเลิก</button>
         <div class="flex gap-2" style="flex:1; justify-content:flex-end">
           <button class="btn btn-danger" onclick="submitOrderDecision('reject')">ปฏิเสธ</button>
-          <button class="btn btn-accent" style="flex:1; min-width:150px" onclick="submitOrderDecision('approve')">อนุมัติคำขอ</button>
+          <button class="btn btn-accent" style="flex:1; min-width:150px"
+            onclick="submitOrderDecision('approve')">อนุมัติคำขอ</button>
         </div>
       </div>
     </div>
@@ -968,7 +987,7 @@
       </div>
       <div class="modal-body">
         <input type="hidden" id="mm-team-id">
-        
+
         <div class="form-group">
           <label class="form-label">เพิ่มสมาชิกใหม่</label>
           <div class="flex gap-2">
@@ -979,7 +998,8 @@
             </div>
             <button class="btn btn-accent" onclick="addMemberToTeam()">เพิ่มเข้าทีม</button>
           </div>
-          <p style="font-size:0.75rem; color:var(--text3); margin-top:0.25rem">หมายเหตุ: พนักงานที่แสดงคือกลุ่ม Technician/FC ที่ยังไม่มีสังกัดทีม</p>
+          <p style="font-size:0.75rem; color:var(--text3); margin-top:0.25rem">หมายเหตุ: พนักงานที่แสดงคือกลุ่ม
+            Technician/FC ที่ยังไม่มีสังกัดทีม</p>
         </div>
 
         <div style="margin-top:1.5rem">
@@ -1185,7 +1205,8 @@
       <i data-lucide="users-2" style="width:20px; height:20px"></i>
       <span>พนักงาน</span>
     </button>
-    <button class="mobile-nav-item admin-mobile-tab" data-admin-page="permissions" onclick="adminNav('permissions', this)">
+    <button class="mobile-nav-item admin-mobile-tab" data-admin-page="permissions"
+      onclick="adminNav('permissions', this)">
       <i data-lucide="shield-check" style="width:20px; height:20px"></i>
       <span>สิทธิ์</span>
     </button>
@@ -1232,16 +1253,20 @@
   </div>
 
   <!-- Category Permissions Modal (Role Based) -->
-  <div id="categoryPermissionsModal" class="modal-overlay" onclick="if(event.target===this) closeCategoryPermissionsModal()">
+  <div id="categoryPermissionsModal" class="modal-overlay"
+    onclick="if(event.target===this) closeCategoryPermissionsModal()">
     <div class="modal" style="max-width:400px">
       <div class="modal-header">
-        <div style="font-weight:600">จำกัดหมวดหมู่ตามบทบาท: <span id="cpm-role-name" style="color:var(--primary)"></span></div>
+        <div style="font-weight:600">จำกัดหมวดหมู่ตามบทบาท: <span id="cpm-role-name"
+            style="color:var(--primary)"></span></div>
         <button class="btn btn-ghost btn-sm" onclick="closeCategoryPermissionsModal()">✕</button>
       </div>
       <div class="modal-body">
-        <p style="font-size:0.8rem; color:var(--text3); margin-bottom:1rem">เลือกหมวดหมู่ที่อนุญาตให้บทบาทนี้มองเห็นและเบิกได้ (หากไม่เลือกเลยจะมองเห็นทั้งหมด)</p>
+        <p style="font-size:0.8rem; color:var(--text3); margin-bottom:1rem">
+          เลือกหมวดหมู่ที่อนุญาตให้บทบาทนี้มองเห็นและเบิกได้ (หากไม่เลือกเลยจะมองเห็นทั้งหมด)</p>
         <input type="hidden" id="cpm-role-id">
-        <div id="cpm-list" style="max-height:300px; overflow-y:auto; display:flex; flex-direction:column; gap:0.25rem"></div>
+        <div id="cpm-list" style="max-height:300px; overflow-y:auto; display:flex; flex-direction:column; gap:0.25rem">
+        </div>
       </div>
       <div class="modal-footer flex-wrap">
         <button class="btn btn-outline" onclick="closeCategoryPermissionsModal()">ยกเลิก</button>
@@ -1324,7 +1349,7 @@
     function hasPermission(key, value) {
       if (!currentUser) return false;
       if (currentUser.role === 'superadmin') return true;
-      
+
       // Try Role-based permission first
       var p = null;
       if (globalRolePermissions && globalRolePermissions[currentUser.role]) {
@@ -1338,12 +1363,12 @@
       if (typeof p === 'string') {
         try { p = JSON.parse(p); } catch (e) { return false; }
       }
-      
+
       if (key === 'view_category') {
         if (!p.allowed_categories || p.allowed_categories.length === 0) return true;
         return p.allowed_categories.includes(String(value));
       }
-      
+
       if (key === 'can_request') {
         return p.can_request !== false; // Default true if not explicitly false
       }
@@ -1394,7 +1419,7 @@
 
       // Hide Inventory/Products management buttons if no permission
       var canEditInventory = hasPermission('manage_inventory');
-      document.querySelectorAll('.btn-inventory-mgr').forEach(function(b) {
+      document.querySelectorAll('.btn-inventory-mgr').forEach(function (b) {
         b.style.display = canEditInventory ? 'inline-flex' : 'none';
       });
 
@@ -1408,18 +1433,18 @@
       }
 
       document.getElementById('adminName').textContent = '👤 ' + currentUser.name;
-      
+
       // Load initial data
       Promise.all([
         API.getCategories(),
         API.getSystemSettings()
-      ]).then(function(results) {
+      ]).then(function (results) {
         if (results[0].success && results[0].data) allAdminCategories = results[0].data;
         if (results[1].success && results[1].data) {
           var settings = results[1].data;
           globalRolePermissions = settings.rolePermissions || {};
         }
-        
+
         // After permissions loaded, refresh tab visibility
         for (var id in tabPermissions) {
           var el = document.getElementById(id);
@@ -1430,12 +1455,12 @@
         }
 
         return API.getReportData('Departments');
-      }).then(function(res) {
+      }).then(function (res) {
         if (res.success && res.data) {
           allAdminDepartments = res.data;
         }
         loadDashboard();
-      }).catch(function(err) {
+      }).catch(function (err) {
         console.warn('Initial Data Load Failed:', err);
         loadDashboard();
       });
@@ -1447,7 +1472,7 @@
       currentAdminPage = page;
 
       // Close open elements
-      document.querySelectorAll('.modal-overlay').forEach(function(m) { m.classList.remove('open'); });
+      document.querySelectorAll('.modal-overlay').forEach(function (m) { m.classList.remove('open'); });
       var suggestions = document.getElementById('adminProductSuggestions');
       if (suggestions) suggestions.classList.remove('active');
 
@@ -1508,7 +1533,7 @@
       if (loaders[page]) {
         setTimeout(loaders[page], 50);
       }
-      
+
       window.scrollTo({ top: 0, behavior: 'smooth' });
       refreshIcons();
     }
@@ -1764,7 +1789,7 @@
           labels: labels,
           datasets: [{
             label: hasPermission('view_prices') ? 'ยอดการเบิก (บาท)' : 'ยอดการเบิก (🔒)',
-            data: data.map(function(v) { return hasPermission('view_prices') ? v : 0; }),
+            data: data.map(function (v) { return hasPermission('view_prices') ? v : 0; }),
             borderColor: '#8b5cf6',
             backgroundColor: 'rgba(139, 92, 246, 0.1)',
             fill: true,
@@ -2035,15 +2060,15 @@
         return '<tr class="hover-row ' + rowClass + '">'
           + '<td><img src="' + (p.imageUrl || 'https://placehold.co/100x100/12121e/fbbf24?text=📦') + '" style="width:32px;height:32px;object-fit:cover;border-radius:4px;background:rgba(255,255,255,0.05)" onerror="this.src=\'https://placehold.co/100x100/12121e/fbbf24?text=📦\'"></td>'
           + '<td data-label="รหัสสินค้า" class="hide-mobile" style="font-size:0.8rem;color:var(--text3)">' + escapeHTML(p.productId) + '</td>'
-          + '<td data-label="ชื่อสินค้า" style="font-weight:500">' 
-          +   escapeHTML(p.name) 
-          +   (p.sizes ? '<div style="font-size:0.7rem; color:var(--primary); font-weight:400; margin-top:2px">ไซส์: ' + escapeHTML(p.sizes) + '</div>' : '') 
+          + '<td data-label="ชื่อสินค้า" style="font-weight:500">'
+          + escapeHTML(p.name)
+          + (p.sizes ? '<div style="font-size:0.7rem; color:var(--primary); font-weight:400; margin-top:2px">ไซส์: ' + escapeHTML(p.sizes) + '</div>' : '')
           + '</td>'
           + '<td data-label="หมวดหมู่">' + escapeHTML(getCategoryName(p.categoryId)) + '</td>'
           + '<td data-label="ราคา">' + (hasPermission('view_prices') ? '฿' + Number(p.price).toLocaleString() : '***') + '</td>'
           + '<td data-label="สต๊อก">'
-          +   '<div class="' + stockClass + '" style="font-weight:700; font-size:1rem">' + stock + '</div>'
-          +   '<div style="font-size:0.75rem; color:var(--text2); margin-top:4px; line-height:1.2">' + (p.variantStock ? formatVariantStock(p.variantStock) : '<span style="opacity:0.4; font-size:0.65rem">(ยังไม่ระบุไซส์)</span>') + '</div>'
+          + '<div class="' + stockClass + '" style="font-weight:700; font-size:1rem">' + stock + '</div>'
+          + '<div style="font-size:0.75rem; color:var(--text2); margin-top:4px; line-height:1.2">' + (p.variantStock ? formatVariantStock(p.variantStock) : '<span style="opacity:0.4; font-size:0.65rem">(ยังไม่ระบุไซส์)</span>') + '</div>'
           + '</td>'
           + '<td data-label="สถานะ"><span class="badge ' + (p.status === 'active' ? 'badge-approved' : 'badge-rejected') + '" style="cursor:pointer" onclick="event.stopPropagation(); toggleProductStatus(\'' + p.productId + '\', \'' + p.status + '\')">' + (p.status === 'active' ? 'เปิด' : 'ปิด') + '</span></td>'
           + '<td data-label="จัดการ" onclick="event.stopPropagation()">'
@@ -2151,9 +2176,9 @@
       document.getElementById('pf-stock').value = product ? product.stock : '';
       document.getElementById('pf-min').value = product ? product.minStock || '5' : '5';
       document.getElementById('pf-sizes').value = product ? (product.sizes || '') : '';
-      
+
       generateSizeStockInputs(product ? product.variantStock : null);
-      
+
       document.getElementById('pf-img').value = product ? product.imageUrl : '';
       updateImagePreview(document.getElementById('pf-img').value);
       document.getElementById('productModalTitle').textContent = product ? 'แก้ไขสินค้า' : 'เพิ่มสินค้า';
@@ -2178,32 +2203,32 @@
       var container = document.getElementById('size-stock-container');
       var list = document.getElementById('size-stock-list');
       var stockInput = document.getElementById('pf-stock');
-      
+
       if (!sizesStr.trim()) {
         container.style.display = 'none';
         stockInput.disabled = false;
         return;
       }
-      
+
       container.style.display = 'block';
       stockInput.disabled = true; // Total stock will be calculated
-      
-      var sizes = sizesStr.split(',').map(function(s) { return s.trim(); }).filter(function(s) { return s !== ''; });
+
+      var sizes = sizesStr.split(',').map(function (s) { return s.trim(); }).filter(function (s) { return s !== ''; });
       var vStock = {};
       if (typeof variantStock === 'string' && variantStock.startsWith('{')) {
-        try { vStock = JSON.parse(variantStock); } catch(e) {}
+        try { vStock = JSON.parse(variantStock); } catch (e) { }
       } else if (typeof variantStock === 'object' && variantStock !== null) {
         vStock = variantStock;
       }
-      
-      list.innerHTML = sizes.map(function(s) {
+
+      list.innerHTML = sizes.map(function (s) {
         var val = vStock[s] || 0;
         return '<div style="display:flex; flex-direction:column; gap:2px; min-width:60px">' +
           '<span style="font-size:0.7rem; font-weight:600">' + s + '</span>' +
           '<input type="number" class="pf-size-stock-input form-input" style="padding:4px 8px; font-size:0.85rem" data-size="' + s + '" value="' + val + '" oninput="calculateTotalStock()">' +
           '</div>';
       }).join('');
-      
+
       calculateTotalStock();
     }
 
@@ -2211,13 +2236,13 @@
       var inputs = document.querySelectorAll('.pf-size-stock-input');
       var total = 0;
       var vStock = {};
-      
-      inputs.forEach(function(input) {
+
+      inputs.forEach(function (input) {
         var val = Number(input.value) || 0;
         total += val;
         vStock[input.getAttribute('data-size')] = val;
       });
-      
+
       if (inputs.length > 0) {
         document.getElementById('pf-stock').value = total;
         // Hidden field to store JSON? Or just collect it in saveProduct
@@ -2229,11 +2254,11 @@
       if (!vs) return '';
       var obj = vs;
       if (typeof vs === 'string' && vs.trim().startsWith('{')) {
-        try { obj = JSON.parse(vs); } catch(e) { return vs; }
+        try { obj = JSON.parse(vs); } catch (e) { return vs; }
       }
       if (typeof obj !== 'object' || obj === null) return String(vs);
       var parts = [];
-      for (var k in obj) { 
+      for (var k in obj) {
         var qty = Number(obj[k]);
         var style = qty <= 2 ? 'color:var(--danger); font-weight:bold' : '';
         parts.push('<span style="' + style + '">' + k + ':' + qty + '</span>');
@@ -2306,7 +2331,7 @@
       API.manageProduct('update', data).then(function (res) {
         if (res.success) { showToast('อัปเดตสถานะแล้ว', 'success'); loadProducts(); }
         else { showToast(res.message, 'error'); }
-      }).catch(function(err) {
+      }).catch(function (err) {
         showToast(err, 'error');
       });
     }
@@ -2744,8 +2769,8 @@
     }
 
     function editEmployee(id) {
-      var emp = allAdminEmployees.find(function (e) { 
-        return String(e.employeeId) === String(id); 
+      var emp = allAdminEmployees.find(function (e) {
+        return String(e.employeeId) === String(id);
       });
       if (emp) openEmployeeModal(emp);
     }
@@ -2754,7 +2779,7 @@
       document.getElementById('ef-old-id').value = emp ? emp.employeeId : '';
       document.getElementById('ef-id').value = emp ? emp.employeeId : '';
       document.getElementById('ef-name').value = emp ? emp.name : '';
-      
+
       // Load departments into dropdown
       var deptSel = document.getElementById('ef-dept');
       if (deptSel) {
@@ -2777,7 +2802,7 @@
 
       // Only superadmin can manage detailed permissions
       // Permissions are now managed in a separate page, so we only handle basic roles here.
-      
+
       document.getElementById('employeeModalTitle').textContent = emp ? 'แก้ไขข้อมูลพนักงาน' : 'เพิ่มพนักงาน';
       document.getElementById('employeeModal').classList.add('open');
     }
@@ -2840,8 +2865,8 @@
         body.innerHTML = ADMIN_ROLES.map(function (role) {
           var p = globalRolePermissions[role.id] || {};
           var keys = ['view_prices', 'has_substock', 'manage_inventory', 'manage_users', 'view_reports', 'can_request'];
-          
-          var cells = keys.map(function(k) {
+
+          var cells = keys.map(function (k) {
             var checked = p[k] ? 'checked' : '';
             return '<td style="text-align:center"><input type="checkbox" ' + checked + ' onchange="updateRolePermission(\'' + role.id + '\', \'' + k + '\', this.checked)"></td>';
           }).join('');
@@ -2855,7 +2880,7 @@
             '<td style="text-align:center"><button class="btn btn-xs btn-outline" onclick="openRoleCategoryModal(\'' + role.id + '\')">' + catLabel + '</button></td>' +
             '</tr>';
         }).join('');
-      }).catch(function(err) {
+      }).catch(function (err) {
         console.error('Failed to load role permissions:', err);
         body.innerHTML = '<tr><td colspan="8" class="text-center" style="padding:2rem">' +
           '<div style="color:var(--danger);margin-bottom:1rem">⚠️ ไม่สามารถโหลดข้อมูลสิทธิ์จากเซิร์ฟเวอร์ได้</div>' +
@@ -2877,19 +2902,19 @@
     }
 
     function openRoleCategoryModal(roleId) {
-      var role = ADMIN_ROLES.find(function(r) { return r.id === roleId; });
+      var role = ADMIN_ROLES.find(function (r) { return r.id === roleId; });
       if (!role) return;
-      
+
       document.getElementById('cpm-role-id').value = roleId;
       document.getElementById('cpm-role-name').textContent = role.name;
-      
+
       var p = globalRolePermissions[roleId] || {};
       var allowed = p.allowed_categories || [];
-      
+
       var body = document.getElementById('cpm-list');
-      API.getCategories().then(function(res) {
+      API.getCategories().then(function (res) {
         var cats = res.data || [];
-        body.innerHTML = cats.map(function(c) {
+        body.innerHTML = cats.map(function (c) {
           var isChecked = allowed.includes(String(c.categoryId)) ? 'checked' : '';
           return '<label class="flex items-center gap-2 p-2 hover-bg" style="cursor:pointer; border-radius:4px">' +
             '<input type="checkbox" class="role-cat-checkbox" value="' + c.categoryId + '" ' + isChecked + '> ' +
@@ -2904,11 +2929,11 @@
       var roleId = document.getElementById('cpm-role-id').value;
       var checkboxes = document.querySelectorAll('.role-cat-checkbox');
       var allowed = [];
-      checkboxes.forEach(function(cb) { if (cb.checked) allowed.push(cb.value); });
-      
+      checkboxes.forEach(function (cb) { if (cb.checked) allowed.push(cb.value); });
+
       if (!globalRolePermissions[roleId]) globalRolePermissions[roleId] = {};
       globalRolePermissions[roleId].allowed_categories = allowed;
-      
+
       saveAllRolePermissions();
       closeCategoryPermissionsModal();
       loadPermissionsPage();
@@ -2916,11 +2941,11 @@
 
     function saveAllRolePermissions() {
       showToast('กำลังบันทึกสิทธิ์บทบาท...', 'info');
-      API.getSystemSettings().then(function(res) {
+      API.getSystemSettings().then(function (res) {
         var settings = res.data || {};
         settings.rolePermissions = globalRolePermissions;
         return API.saveSystemSettings(settings);
-      }).then(function(res) {
+      }).then(function (res) {
         if (res.success) showToast('บันทึกสิทธิ์บทบาทเรียบร้อย', 'success');
         else showToast(res.message, 'error');
       });
@@ -2930,13 +2955,13 @@
     function loadTeams() {
       var grid = document.getElementById('teamsGrid');
       if (grid) grid.innerHTML = '<div class="text-center" style="grid-column:1/-1; padding:3rem; color:var(--text3)"><div class="spinner" style="margin:0 auto 1rem"></div>กำลังโหลดข้อมูล...</div>';
-      
+
       Promise.all([API.getTeams(), API.getEmployees()]).then(function (results) {
         var resTeams = results[0];
         var resEmp = results[1];
         allAdminTeams = resTeams.data || [];
         allAdminEmployees = resEmp.data || [];
-        
+
         if (!grid) return;
         if (allAdminTeams.length === 0) {
           grid.innerHTML = '<div class="card text-center" style="grid-column:1/-1; padding:3rem; color:var(--text3)">ยังไม่มีทีมช่างในระบบ</div>';
@@ -2957,8 +2982,8 @@
             '<div style="font-size:0.7rem; color:var(--primary); text-transform:uppercase; font-weight:800; letter-spacing:0.05em; margin-bottom:0.25rem">ตัวเอก (Lead)</div>' +
             '<div style="font-weight:700; display:flex; align-items:center; gap:0.5rem; margin-bottom:0.5rem"><i data-lucide="crown" style="width:14px; color:var(--primary)"></i> ' + (t.leadName || t.leadId) + '</div>' +
             '<div style="font-size:0.7rem; color:var(--text3); text-transform:uppercase; margin-bottom:0.25rem">สมาชิกในทีม:</div>' +
-            '<div style="font-size:0.85rem; color:var(--text2); line-height:1.4">' + 
-              (t.members && t.members.length > 0 ? t.members.map(function(m){ return m.name; }).join(', ') : 'ไม่มีสมาชิก') + 
+            '<div style="font-size:0.85rem; color:var(--text2); line-height:1.4">' +
+            (t.members && t.members.length > 0 ? t.members.map(function (m) { return m.name; }).join(', ') : 'ไม่มีสมาชิก') +
             '</div>' +
             '</div>' +
             '<div class="flex flex-wrap items-center justify-between gap-2" style="font-size:0.85rem; color:var(--text2)">' +
@@ -2989,8 +3014,8 @@
 
     function renderMemberList(teamId) {
       var list = document.getElementById('mm-list');
-      var members = allAdminEmployees.filter(function (e) { 
-        return e.teamId && String(e.teamId) === String(teamId); 
+      var members = allAdminEmployees.filter(function (e) {
+        return e.teamId && String(e.teamId) === String(teamId);
       });
 
       if (members.length === 0) {
@@ -3071,10 +3096,10 @@
       document.getElementById('tf-id').value = team ? team.teamId : '';
       document.getElementById('tf-id-wrap').style.display = team ? 'block' : 'none';
       document.getElementById('tf-name').value = team ? team.name : '';
-      
+
       // Filter for Technicians/FCs or the current lead
-      var technicians = allAdminEmployees.filter(function (e) { 
-        return e.role === 'technician' || e.role === 'fc' || (team && String(team.leadId) === String(e.employeeId)); 
+      var technicians = allAdminEmployees.filter(function (e) {
+        return e.role === 'technician' || e.role === 'fc' || (team && String(team.leadId) === String(e.employeeId));
       });
       var leadSel = document.getElementById('tf-lead');
       leadSel.innerHTML = '<option value="">-- เลือกหัวหน้าทีม --</option>' + technicians.map(function (e) {
@@ -3085,16 +3110,16 @@
       var membersDiv = document.getElementById('tf-members');
       membersDiv.innerHTML = '';
       var teamIdToMatch = team ? team.teamId : '';
-      var members = allAdminEmployees.filter(function (e) { 
-        return e.teamId && String(e.teamId) === String(teamIdToMatch); 
+      var members = allAdminEmployees.filter(function (e) {
+        return e.teamId && String(e.teamId) === String(teamIdToMatch);
       });
 
       if (members.length > 0) {
         membersDiv.innerHTML = members.map(function (m) {
-          return '<div class="badge badge-pending" style="font-size:0.75rem; padding:0.4rem 0.8rem; display:flex; align-items:center; gap:0.5rem">' + 
-                 m.name + 
-                 '<span style="cursor:pointer; opacity:0.6" onclick="removeMemberFromTeam(\'' + String(m.employeeId).replace(/'/g, "\\'") + '\', \'' + String(teamIdToMatch).replace(/'/g, "\\'") + '\'); this.parentElement.remove()">✕</span>' +
-                 '</div>';
+          return '<div class="badge badge-pending" style="font-size:0.75rem; padding:0.4rem 0.8rem; display:flex; align-items:center; gap:0.5rem">' +
+            m.name +
+            '<span style="cursor:pointer; opacity:0.6" onclick="removeMemberFromTeam(\'' + String(m.employeeId).replace(/'/g, "\\'") + '\', \'' + String(teamIdToMatch).replace(/'/g, "\\'") + '\'); this.parentElement.remove()">✕</span>' +
+            '</div>';
         }).join('');
       } else {
         membersDiv.innerHTML = '<span style="font-size:0.8rem; color:var(--text3)">ยังไม่มีสมาชิก</span>';
@@ -3107,8 +3132,8 @@
     function closeTeamModal() { document.getElementById('teamModal').classList.remove('open'); }
 
     function editTeam(id) {
-      var team = allAdminTeams.find(function (t) { 
-        return String(t.teamId) === String(id); 
+      var team = allAdminTeams.find(function (t) {
+        return String(t.teamId) === String(id);
       });
       if (team) openTeamModal(team);
     }
@@ -3372,20 +3397,20 @@
           var isTotalLow = Number(p.stock) <= Number(p.minStock);
           var isAnySizeLow = false;
           if (p.variantStock) {
-             var vs = {};
-             try {
-               vs = typeof p.variantStock === 'string' ? JSON.parse(p.variantStock) : p.variantStock;
-             } catch(e) {}
-             for (var k in vs) { if (Number(vs[k]) <= 2) isAnySizeLow = true; }
+            var vs = {};
+            try {
+              vs = typeof p.variantStock === 'string' ? JSON.parse(p.variantStock) : p.variantStock;
+            } catch (e) { }
+            for (var k in vs) { if (Number(vs[k]) <= 2) isAnySizeLow = true; }
           }
           var isLow = isTotalLow || isAnySizeLow;
 
           return '<tr>'
             + '<td>' + p.productId + '</td>'
             + '<td style="font-weight:500">' + p.name + '</td>'
-            + '<td style="font-weight:700;' + (isTotalLow ? 'color:var(--danger)' : '') + '">' 
-            +   '<div>' + p.stock + '</div>'
-            +   (p.variantStock ? '<div style="font-size:0.65rem; color:var(--text3); font-weight:normal">' + formatVariantStock(p.variantStock) + '</div>' : '')
+            + '<td style="font-weight:700;' + (isTotalLow ? 'color:var(--danger)' : '') + '">'
+            + '<div>' + p.stock + '</div>'
+            + (p.variantStock ? '<div style="font-size:0.65rem; color:var(--text3); font-weight:normal">' + formatVariantStock(p.variantStock) + '</div>' : '')
             + '</td>'
             + '<td>' + p.minStock + '</td>'
             + '<td>' + (isLow ? '<span class="badge badge-rejected">⚠️ ต่ำ' + (isAnySizeLow && !isTotalLow ? ' (ไซส์)' : '') + '</span>' : '<span class="badge badge-approved">ปกติ</span>') + '</td>'
@@ -3518,8 +3543,8 @@
               '<td style="font-weight:500">' + p.productName + '</td>' +
               '<td>' + getCategoryName(p.category) + '</td>' +
               '<td>' +
-                '<div style="font-weight:700">' + p.currentStock + '</div>' +
-                (p.variantStock ? '<div style="font-size:0.7rem; color:var(--text3)">' + formatVariantStock(p.variantStock) + '</div>' : '') +
+              '<div style="font-weight:700">' + p.currentStock + '</div>' +
+              (p.variantStock ? '<div style="font-size:0.7rem; color:var(--text3)">' + formatVariantStock(p.variantStock) + '</div>' : '') +
               '</td>' +
               '<td>' + (p.minStock || 5) + '</td>' +
               '<td><span class="badge ' + statusClass + '">' + statusText + '</span></td>' +
@@ -3555,7 +3580,7 @@
           var parts = url.split('/');
           id = parts[parts.length - 1].split('=')[0];
         }
-        
+
         if (id) {
           // ใช้ thumbnail endpoint ของ Google Drive ซึ่งเสถียรที่สุดสำหรับการแสดงผลในเว็บ
           return 'https://drive.google.com/thumbnail?id=' + id + '&sz=w1000';
@@ -3796,9 +3821,9 @@
       } else if (mode === 'sub') {
         if (_subStockTarget) {
           // สแกนใช้งานจากคลังย่อย (ตัดออก)
-          promise = API.addToSubStock({ 
-            productId: id, 
-            qty: -qty, 
+          promise = API.addToSubStock({
+            productId: id,
+            qty: -qty,
             employeeId: _subStockType === 'personal' ? _subStockTarget : null,
             teamId: _subStockType === 'team' ? _subStockTarget : null
           });
@@ -3832,9 +3857,9 @@
       var config = {
         'deduct': { title: 'ตัดจ่ายพัสดุ', desc: 'ระบุจำนวนที่ต้องการตัดออกจากสต็อกหลัก' },
         'receive': { title: 'รับพัสดุเข้าคลัง', desc: 'ระบุจำนวนพัสดุที่รับเข้าคลังหลัก' },
-        'sub': { 
-          title: _subStockTarget ? 'บันทึกการใช้งานพัสดุ' : 'รับเข้าคลังย่อย', 
-          desc: _subStockTarget ? 'ระบุจำนวนที่นำไปใช้งานจริง' : 'ระบุจำนวนที่รับเข้าคลังย่อยของคุณ' 
+        'sub': {
+          title: _subStockTarget ? 'บันทึกการใช้งานพัสดุ' : 'รับเข้าคลังย่อย',
+          desc: _subStockTarget ? 'ระบุจำนวนที่นำไปใช้งานจริง' : 'ระบุจำนวนที่รับเข้าคลังย่อยของคุณ'
         }
       }[currentScanMode];
 
@@ -4287,22 +4312,22 @@
     function runDBMaintenance() {
       var btn = document.getElementById('btnUpdateDB');
       if (!btn) return;
-      
+
       if (!confirm('ยืนยันการตรวจสอบและอัปเดตโครงสร้างฐานข้อมูล (Google Sheets)?')) return;
-      
+
       var oldHtml = btn.innerHTML;
       btn.disabled = true;
       btn.innerHTML = '<div class="spinner"></div> กำลังดำเนินการ...';
-      
-      API.setupSpreadsheet().then(function(res) {
+
+      API.setupSpreadsheet().then(function (res) {
         if (res.success) {
           showToast(res.message || 'อัปเดตโครงสร้างฐานข้อมูลเรียบร้อย', 'success');
         } else {
           showToast(res.message || 'เกิดข้อผิดพลาดในการอัปเดต', 'error');
         }
-      }).catch(function(err) {
+      }).catch(function (err) {
         showToast('เซิร์ฟเวอร์ขัดข้อง: ' + err, 'error');
-      }).finally(function() {
+      }).finally(function () {
         btn.disabled = false;
         btn.innerHTML = oldHtml;
       });
