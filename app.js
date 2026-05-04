@@ -11,6 +11,7 @@ var currentUser = (function() {
 })();
 
 var globalSystemSettings = null;
+var isUpdatingSize = false;
 
 function hasPermission(key, value) {
   if (!currentUser) return false;
@@ -1011,23 +1012,6 @@ function addToCart(productId, event, size) {
   }
 }
 
-// Global helper for size selection
-function selectProductSize(btn, size) {
-  var container = document.getElementById('size-selector-container');
-  if (!container) return;
-  container.querySelectorAll('.size-btn').forEach(function(b) {
-    b.classList.remove('btn-primary');
-    b.classList.add('btn-outline');
-    b.style.background = '';
-    b.style.color = '';
-  });
-  btn.classList.remove('btn-outline');
-  btn.classList.add('btn-primary');
-  btn.style.background = 'var(--gradient-gold)';
-  btn.style.color = '#000';
-  btn.style.border = 'none';
-  document.getElementById('selected-product-size').value = size;
-}
 
 /**
  * animateFlyToCart - แอนิเมชันสินค้าบินเข้าตะกร้า

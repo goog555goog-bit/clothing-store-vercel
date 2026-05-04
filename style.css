@@ -236,7 +236,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   100% { transform: scale(1.05); }
 }
 .choice-chip span { pointer-events: none; }
-.choice-chip .check-icon { vertical-align: middle; }
+.choice-chip .check-icon { vertical-align: middle; pointer-events: none; }
 .choice-chip.out-of-stock {
   opacity: 0.4;
   cursor: not-allowed;
