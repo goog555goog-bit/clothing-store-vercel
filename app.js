@@ -825,7 +825,7 @@ function openProductDetail(id) {
     if (sizeList.length > 0) {
       var sizeHtml = '<div style="margin-bottom:1.5rem">'
         + '<h3 style="font-size:0.9rem;font-weight:700;margin-bottom:0.75rem">เลือกไซส์:</h3>'
-        + '<div class="flex flex-wrap gap-2" id="size-selector-container">'
+        + '<div class="choice-chips" id="size-selector-container">'
         + sizeList.map(function(s) {
             var vs = p.variantStock;
             var vStock = {};
@@ -835,12 +835,11 @@ function openProductDetail(id) {
             var sStock = vStock[s] !== undefined ? Number(vStock[s]) : -1; 
             var sOut = sStock === 0;
             
-            return '<button class="btn btn-outline btn-sm size-btn' + (sOut ? ' out-of-stock-size' : '') + '" '
-                + 'onclick="selectProductSize(this, \'' + escapeHTML(s) + '\', \'' + escapeHTML(p.productId) + '\')" '
-                + 'style="min-width:44px; height:44px; border-radius:12px; font-weight:700; position:relative">' 
+            return '<div class="choice-chip' + (sOut ? ' out-of-stock' : '') + '" '
+                + 'onclick="if(!this.classList.contains(\'out-of-stock\')) selectProductSize(this, \'' + escapeHTML(s) + '\', \'' + escapeHTML(p.productId) + '\')">' 
                 + s 
-                + (sOut ? '<div style="position:absolute;top:-5px;right:-5px;background:var(--danger);color:#fff;font-size:0.5rem;padding:2px 4px;border-radius:4px">หมด</div>' : '')
-                + '</button>';
+                + (sOut ? '<div class="badge-soldout">หมด</div>' : '')
+                + '</div>';
           }).join('')
         + '</div><input type="hidden" id="selected-product-size"></div>';
       body.innerHTML += sizeHtml;
@@ -879,10 +878,9 @@ function openProductDetail(id) {
 }
 
 function selectProductSize(el, size, productId) {
-  var btns = document.querySelectorAll('.size-btn');
-  btns.forEach(function(b) { b.classList.remove('btn-primary'); b.classList.add('btn-outline'); });
-  el.classList.remove('btn-outline');
-  el.classList.add('btn-primary');
+  var chips = document.querySelectorAll('.choice-chip');
+  chips.forEach(function(c) { c.classList.remove('active'); });
+  el.classList.add('active');
   
   document.getElementById('selected-product-size').value = size;
   
