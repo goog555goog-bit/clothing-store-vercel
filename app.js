@@ -894,20 +894,26 @@ function openProductDetail(id) {
   refreshIcons();
 }
 
+var isUpdatingSize = false;
 function selectProductSize(el, size, productId) {
-  var container = el.closest('.choice-chips');
-  if (!container) return;
+  if (isUpdatingSize) return;
+  isUpdatingSize = true;
   
-  var chips = container.querySelectorAll('.choice-chip');
-  chips.forEach(function(c) { 
-    c.classList.remove('active'); 
-    var existingCheck = c.querySelector('.check-icon');
-    if (existingCheck) existingCheck.remove();
-  });
-  
-  el.classList.add('active');
-  el.insertAdjacentHTML('beforeend', '<i class="check-icon" data-lucide="check" style="width:12px;height:12px;margin-left:6px;display:inline-block"></i>');
-  if (typeof lucide !== 'undefined') lucide.createIcons();
+  try {
+    // 1. Clear all active chips in the current modal to ensure mutual exclusivity
+    var modal = el.closest('.modal');
+    var allChips = modal ? modal.querySelectorAll('.choice-chip') : document.querySelectorAll('.choice-chip');
+    
+    allChips.forEach(function(c) { 
+      c.classList.remove('active'); 
+      var existingCheck = c.querySelector('.check-icon');
+      if (existingCheck) existingCheck.remove();
+    });
+    
+    // 2. Set the current one to active (Set, not Toggle)
+    el.classList.add('active');
+    el.insertAdjacentHTML('beforeend', '<i class="check-icon" data-lucide="check" style="width:12px;height:12px;margin-left:6px;display:inline-block"></i>');
+    if (typeof lucide !== 'undefined') lucide.createIcons();
   
   document.getElementById('selected-product-size').value = size;
   
@@ -953,6 +959,8 @@ function selectProductSize(el, size, productId) {
       btn.style.opacity = out ? '0.5' : '1';
       btn.innerHTML = out ? 'ไซส์นี้หมด' : '<i data-lucide="shopping-cart" style="width:18px;height:18px"></i> เพิ่มลงตะกร้า';
     }
+  } finally {
+    setTimeout(function() { isUpdatingSize = false; }, 50);
   }
 }
 
