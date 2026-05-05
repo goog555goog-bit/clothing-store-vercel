@@ -132,7 +132,7 @@ function updateUserUI() {
     var substockBtn = document.getElementById('substockBtn');
     var substockMob = document.querySelector('.mobile-nav-item[data-view="substock"]');
     if (substockBtn || substockMob) {
-      var isAllowed = hasPermission('has_substock');
+      var isAllowed = hasPermission('has_substock') || hasPermission('manage_team_substock');
       if (substockBtn) substockBtn.classList.toggle('hidden', !isAllowed);
       if (substockMob) substockMob.classList.toggle('hidden', !isAllowed);
     }
@@ -1791,3 +1791,81 @@ if (document.readyState === 'loading') {
 } else {
   initMobileTableLabeller();
 }
+
+// ─── SUB-STOCK SCANNER ────────────────────────────────────
+var substockScanner = null;
+
+function openSubStockScanner() {
+  document.getElementById('subStockScannerModal').classList.add('open');
+  document.getElementById('substockScannerPlaceholder').style.display = 'flex';
+  refreshIcons();
+}
+
+function closeSubStockScanner() {
+  if (substockScanner) {
+    substockScanner.stop().then(function() {
+      substockScanner = null;
+    }).catch(function(err) { console.error('Stop scanner error:', err); });
+  }
+  document.getElementById('subStockScannerModal').classList.remove('open');
+}
+
+function startSubStockScan() {
+  if (typeof Html5Qrcode === 'undefined') {
+    showToast('กำลังโหลดระบบสแกนเนอร์...', 'info');
+    return;
+  }
+  
+  document.getElementById('substockScannerPlaceholder').style.display = 'none';
+  substockScanner = new Html5Qrcode("substock-reader");
+
+  var config = { 
+    fps: 10, 
+    qrbox: { width: 250, height: 250 },
+    aspectRatio: 1.0
+  };
+
+  substockScanner.start(
+    { facingMode: "environment" }, 
+    config,
+    function(decodedText) {
+      // Success callback
+      onSubStockScanned(decodedText);
+    },
+    function(err) {
+      // Error callback (optional, silences constant frame errors)
+    }
+  ).catch(function(err) {
+    console.error('Scanner start error:', err);
+    showToast('ไม่สามารถเปิดกล้องได้: ' + err, 'error');
+    document.getElementById('substockScannerPlaceholder').style.display = 'flex';
+  });
+}
+
+function onSubStockScanned(code) {
+  if (!code) return;
+  
+  // 1. Play success sound/vibration
+  if (navigator.vibrate) navigator.vibrate(100);
+  
+  // 2. Stop scanner
+  closeSubStockScanner();
+  
+  // 3. Find item in current sub-stock data
+  if (!currentSubStockData) {
+    showToast('ไม่พบข้อมูลคลังย่อยในขณะนี้', 'warning');
+    return;
+  }
+  
+  var item = currentSubStockData.find(function(i) {
+    return String(i.productId).toLowerCase() === String(code).toLowerCase();
+  });
+  
+  if (item) {
+    showToast('พบสินค้า: ' + item.productName, 'success');
+    openActionModal('use', item.productId, item.productName, item.quantity, item.size || '');
+  } else {
+    showToast('ไม่พบรหัส "' + code + '" ในคลังย่อยของคุณ', 'warning');
+  }
+}
+

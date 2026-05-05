@@ -13,6 +13,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <script src="https://unpkg.com/lucide@latest" defer></script>
+  <script src="https://unpkg.com/html5-qrcode" defer></script>
 </head>
 
 <body>
@@ -156,9 +157,14 @@
   <main id="view-substock" class="view-section" style="display:none;">
 
     <div class="container" style="padding-top:2rem;">
-      <h2 style="font-size:1.25rem;font-weight:700;margin-bottom:1.5rem;display:flex;align-items:center;gap:0.5rem;">
-        <i data-lucide="package-search" style="width:20px;height:20px;color:var(--primary);"></i> คลังย่อยของฉัน
-      </h2>
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem">
+        <h2 id="substockTitle" style="font-size:1.25rem;font-weight:700;margin:0;display:flex;align-items:center;gap:0.5rem;">
+          <i data-lucide="package-search" style="width:20px;height:20px;color:var(--primary);"></i> คลังย่อยของฉัน
+        </h2>
+        <button class="btn btn-accent btn-sm" onclick="openSubStockScanner()">
+          <i data-lucide="scan"></i> สแกนใช้งาน
+        </button>
+      </div>
       <div id="subStockGrid" class="product-grid" style="padding-bottom:3rem;">
         <div class="empty-state" style="grid-column:1/-1;">
           <i data-lucide="package" style="width:48px;height:48px;"></i>
@@ -342,6 +348,36 @@
         <button class="btn btn-primary flex-1" style="justify-content:center;" id="actionModalBtn">
           ยืนยัน
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SCANNER MODAL
+  ══════════════════════════════════════════ -->
+  <div id="subStockScannerModal" class="modal-overlay" onclick="if(event.target===this) closeSubStockScanner()">
+    <div class="modal" style="max-width:450px; padding:0; overflow:hidden;">
+      <div class="modal-header" style="background:rgba(255,255,255,0.03); border-bottom:1px solid rgba(255,255,255,0.05)">
+        <div style="font-weight:700; display:flex; align-items:center; gap:0.5rem">
+          <i data-lucide="scan" style="color:var(--primary)"></i> สแกนพัสดุในคลังย่อย
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="closeSubStockScanner()">✕</button>
+      </div>
+      <div class="modal-body" style="padding:1.5rem">
+        <div id="substock-scanner-ui" style="width:100%; min-height:250px; background:#000; border-radius:12px; overflow:hidden; position:relative">
+          <div id="substock-reader"></div>
+          <div id="substockScannerPlaceholder" style="position:absolute; top:0; left:0; width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:2; background:rgba(0,0,0,0.7); text-align:center; padding:1rem">
+             <i data-lucide="camera" style="width:48px;height:48px;margin-bottom:1rem;opacity:0.3"></i>
+             <p style="font-size:0.9rem;color:#fff;margin-bottom:1rem">พร้อมสำหรับการสแกนบาร์โค้ด/QR</p>
+             <button class="btn btn-primary" onclick="startSubStockScan()">เปิดกล้องสแกน</button>
+          </div>
+        </div>
+        <div style="margin-top:1.5rem; text-align:center">
+          <p style="font-size:0.8rem; color:var(--text3)">สแกนรหัสสินค้าเพื่อ "ใช้งาน" หรือ "โอน" ทันที</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline w-full" onclick="closeSubStockScanner()">ปิด</button>
       </div>
     </div>
   </div>
