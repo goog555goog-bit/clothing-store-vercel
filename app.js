@@ -350,14 +350,7 @@ function loadStorefrontData() {
   }
   
   // 2. Fetch fresh data from network
-  Promise.all([
-    API.getStorefrontData(),
-    API.getSystemSettings()
-  ]).then(function(results) {
-    var res = results[0];
-    globalSystemSettings = results[1].data || {};
-    updateUserUI(); // Refresh UI now that we have permissions
-
+  API.getStorefrontData().then(function(res) {
     if (res.success) {
       allProducts = res.products || [];
       allCategories = res.categories || [];
@@ -369,13 +362,22 @@ function loadStorefrontData() {
       initSearchableSelect('headerCategoryFilter');
       initSearchableSelect('stockFilter');
       
-      // Fetch fresh Branches
+      // Fetch fresh Branches (usually public or low-privilege)
       API.getBranches().then(function(r) {
         if (r.success) allBranches = r.data || [];
-      });
+      }).catch(function(e){ console.warn('Branches fetch skipped:', e); });
+
+      // Only attempt to load system settings if we have administrative hints or after a short delay
+      // to avoid blocking the main UI if it fails for low-privilege users.
+      if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'superadmin' || currentUser.role === 'manager')) {
+        API.getSystemSettings().then(function(sRes) {
+          globalSystemSettings = sRes.data || {};
+          updateUserUI(); // Refresh UI with fresh settings
+        }).catch(function(e) { console.warn('System settings skipped (Access denied or network):', e); });
+      }
     }
   }).catch(function(err) {
-    // Only show error toast if we don't even have cached data (to avoid noisy errors on transient network blips)
+    // Only show error toast if we don't even have cached data
     if (!allProducts || allProducts.length === 0) {
       showToast('โหลดข้อมูลไม่สำเร็จ: ' + err, 'error');
     }
