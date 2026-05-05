@@ -231,8 +231,9 @@ var API = (function () {
       return this._call('returnToMainStock', data, false, ['getSubStock', 'getProducts']);
     },
 
-    createRequest: function (items) {
-      return this._call('createRequest', { items: items }, false, ['getMyRequests', 'getAllOrders', 'getDashboardStats', 'getAdvancedDashboardData']);
+    createRequest: function (data) {
+      // data: { items, teamId, ... }
+      return this._call('createRequest', data, false, ['getMyRequests', 'getAllOrders', 'getDashboardStats', 'getAdvancedDashboardData']);
     },
     approveRequest: function (requestId, comment) {
       return this._call('approveRequest', { requestId: requestId, comment: comment }, false, ['getPendingApprovals', 'getAllOrders', 'getAdvancedDashboardData', 'getDashboardStats']);

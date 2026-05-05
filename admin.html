@@ -557,7 +557,7 @@
             <thead>
               <tr class="perm-cat-header">
                 <th rowspan="2" style="width:180px; vertical-align:middle; background:rgba(255,255,255,0.02)">บทบาท (Role)</th>
-                <th colspan="4" style="text-align:center; background:rgba(99,102,241,0.1); color:#818cf8">คลังสินค้า (Inventory)</th>
+                <th colspan="6" style="text-align:center; background:rgba(99,102,241,0.1); color:#818cf8">คลังสินค้า (Inventory)</th>
                 <th colspan="3" style="text-align:center; background:rgba(245,158,11,0.1); color:#fbbf24">การเบิกจ่าย (Orders)</th>
                 <th colspan="3" style="text-align:center; background:rgba(16,185,129,0.1); color:#34d399">รายงาน (Reports)</th>
                 <th colspan="3" style="text-align:center; background:rgba(236,72,153,0.1); color:#f472b6">ระบบ (System)</th>
@@ -567,7 +567,9 @@
                 <th class="perm-th" title="ดูราคาสินค้า">ราคา</th>
                 <th class="perm-th" title="จัดการข้อมูลพัสดุ">สต็อก</th>
                 <th class="perm-th" title="จัดการหมวดหมู่">หมวด</th>
-                <th class="perm-th" title="เข้าถึงคลังย่อยส่วนตัว/ทีม">คลังย่อย</th>
+                <th class="perm-th" title="คลังย่อยส่วนตัว">คลังส่วนตัว</th>
+                <th class="perm-th" title="คลังย่อยของทีม">คลังทีม</th>
+                <th class="perm-th" title="ดูแล/ตรวจสอบคลังย่อยทั้งหมด">ดูแลคลังย่อย</th>
                 <!-- Orders -->
                 <th class="perm-th" title="สามารถสร้างใบเบิกได้">เบิก</th>
                 <th class="perm-th" title="อนุมัติหรือปฏิเสธใบเบิก">อนุมัติ</th>
@@ -2764,7 +2766,7 @@
             + '<td>' + (isMe ? '<span class="badge badge-approved">คุณ (' + e.role + ')</span>' : roleSelect) + '</td>'
             + '<td class="hide-mobile"><span class="badge ' + (e.status === 'active' ? 'badge-approved' : 'badge-rejected') + '">' + (e.status === 'active' ? 'ปกติ' : 'ปิด') + '</span></td>'
             + '<td class="flex flex-wrap gap-1">'
-            + '<button class="btn btn-xs btn-outline" onclick="showUserSubStock(\'' + String(e.employeeId).replace(/'/g, "\\'") + '\', \'' + String(e.name || "").replace(/'/g, "\\'") + '\')" title="ดูคลังสินค้าส่วนตัว" ' + (hasPermission('has_substock') ? '' : 'style="display:none"') + '><i data-lucide="eye" style="width:12px;height:12px;pointer-events:none"></i></button>'
+            + '<button class="btn btn-xs btn-outline" onclick="showUserSubStock(\'' + String(e.employeeId).replace(/'/g, "\\'") + '\', \'' + String(e.name || "").replace(/'/g, "\\'") + '\')" title="ดูคลังสินค้าส่วนตัว" ' + (hasPermission('supervise_substock') ? '' : 'style="display:none"') + '><i data-lucide="eye" style="width:12px;height:12px;pointer-events:none"></i></button>'
             + '<button class="btn btn-xs btn-outline" onclick="editEmployee(\'' + String(e.employeeId).replace(/'/g, "\\'") + '\')" title="แก้ไขข้อมูล" ' + (hasPermission('manage_users') ? '' : 'style="display:none"') + '><i data-lucide="edit-2" style="width:12px;height:12px;pointer-events:none"></i></button>'
             + (isMe || !hasPermission('manage_users') ? '' : '<button class="btn btn-xs btn-ghost hide-mobile" style="color:var(--danger)" onclick="delEmployee(\'' + String(e.employeeId).replace(/'/g, "\\'") + '\')" title="ลบพนักงาน"><i data-lucide="trash-2" style="width:12px;height:12px;pointer-events:none"></i></button>')
             + '</td>'
@@ -2875,7 +2877,9 @@
       { key: 'view_prices', label: 'ดูราคา', cat: 'inventory' },
       { key: 'manage_inventory', label: 'จัดการสต็อก', cat: 'inventory' },
       { key: 'manage_categories', label: 'จัดการหมวดหมู่', cat: 'inventory' },
-      { key: 'has_substock', label: 'คลังย่อย', cat: 'inventory' },
+      { key: 'has_substock', label: 'คลังย่อยส่วนตัว', cat: 'inventory' },
+      { key: 'manage_team_substock', label: 'คลังย่อยทีม', cat: 'inventory' },
+      { key: 'supervise_substock', label: 'ดูแลคลังย่อย', cat: 'inventory' },
 
       { key: 'can_request', label: 'สิทธิ์เบิก', cat: 'orders' },
       { key: 'approve_orders', label: 'อนุมัติใบเบิก', cat: 'orders' },
@@ -2893,7 +2897,7 @@
 
     function loadPermissionsPage() {
       var body = document.getElementById('permissionsBody');
-      if (body) body.innerHTML = '<tr><td colspan="14" class="text-center" style="padding:2rem"><div class="spinner"></div></td></tr>';
+      if (body) body.innerHTML = '<tr><td colspan="16" class="text-center" style="padding:2rem"><div class="spinner"></div></td></tr>';
 
       API.getSystemSettings().then(function (res) {
         var settings = res.data || {};
@@ -2921,7 +2925,7 @@
         refreshIcons();
       }).catch(function (err) {
         console.error('Failed to load role permissions:', err);
-        body.innerHTML = '<tr><td colspan="14" class="text-center" style="padding:2rem">' +
+        body.innerHTML = '<tr><td colspan="16" class="text-center" style="padding:2rem">' +
           '<div style="color:var(--danger);margin-bottom:1rem">⚠️ ไม่สามารถโหลดข้อมูลสิทธิ์จากเซิร์ฟเวอร์ได้</div>' +
           '<button class="btn btn-sm btn-outline" onclick="loadPermissionsPage()">ลองใหม่อีกครั้ง</button>' +
           '</td></tr>';
@@ -3028,7 +3032,7 @@
             '<div class="flex flex-wrap items-center justify-between gap-2" style="font-size:0.85rem; color:var(--text2)">' +
             '<span>สมาชิก: ' + (t.memberCount || 0) + ' คน</span>' +
             '<div class="flex gap-1">' +
-            '<button class="btn btn-outline btn-xs" onclick="viewTeamInventory(\'' + String(t.teamId).replace(/'/g, "\\'") + '\')">ดูสต๊อกทีม</button>' +
+            (hasPermission('supervise_substock') || hasPermission('manage_team_substock') ? '<button class="btn btn-outline btn-xs" onclick="viewTeamInventory(\'' + String(t.teamId).replace(/'/g, "\\'") + '\')">ดูสต๊อกทีม</button>' : '') +
             '<button class="btn btn-primary btn-xs" onclick="openManageMembersModal(\'' + String(t.teamId).replace(/'/g, "\\'") + '\')">จัดการสมาชิก</button>' +
             '</div>' +
             '</div>' +

@@ -1296,13 +1296,14 @@ function loadSubStock() {
   }
 
   var options = {};
-  if (currentUser && currentUser.teamId) {
+  var useTeamStock = hasPermission('manage_team_substock') && currentUser && currentUser.teamId;
+  if (useTeamStock) {
     options.teamId = currentUser.teamId;
   }
 
   API.getSubStock(options).then(function(res) {
     subStockCache = res.data;
-    renderSubStock(res.data, res.teamName);
+    renderSubStock(res.data, useTeamStock ? res.teamName : null);
   }).catch(function(err) {
     showToast('โหลดสต๊อกย่อยไม่สำเร็จ: ' + err, 'error');
   });
@@ -1546,9 +1547,13 @@ function confirmCheckout() {
   var btn = document.getElementById('confirmCheckoutBtn');
   if (btn) { btn.disabled = true; btn.innerHTML = '<div class="spinner"></div> กำลังดำเนินการ...'; }
 
-  var payload = items.map(function(i) { return { productId: i.productId, qty: i.qty, size: i.size || '' }; });
+  var itemsPayload = items.map(function(i) { return { productId: i.productId, qty: i.qty, size: i.size || '' }; });
+  var requestData = {
+    items: itemsPayload,
+    teamId: currentUser.teamId || null
+  };
 
-  API.createRequest(payload)
+  API.createRequest(requestData)
     .then(function(res) {
       closeModal('checkoutModal');
       triggerConfetti();
