@@ -79,7 +79,8 @@ var API = (function () {
       var payload = {
         action: action,
         data: data || {},
-        user: user
+        user: JSON.parse(localStorage.getItem('_user') || 'null'),
+        token: localStorage.getItem('_tok') // ส่ง Token ไปกับทุก Request
       };
 
       self.isPending = true;
