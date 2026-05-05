@@ -15,7 +15,7 @@ var isUpdatingSize = false;
 
 function hasPermission(key, value) {
   if (!currentUser) return false;
-  if (currentUser.role === 'superadmin') return true;
+  if (String(currentUser.role || '').toLowerCase() === 'superadmin') return true;
   
   // Try Role-based permission first
   var p = null;
