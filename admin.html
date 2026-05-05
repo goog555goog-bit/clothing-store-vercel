@@ -553,17 +553,33 @@
       </div>
       <div class="card" style="padding:0; overflow:hidden">
         <div class="table-wrap">
-          <table class="admin-table">
+          <table class="admin-table permission-table">
             <thead>
-              <tr>
-                <th style="width:200px">บทบาท (Role)</th>
-                <th style="text-align:center">ดูราคา</th>
-                <th style="text-align:center">คลังย่อย</th>
-                <th style="text-align:center">จัดการสต็อก</th>
-                <th style="text-align:center">จัดการคน</th>
-                <th style="text-align:center">ดูรายงาน</th>
-                <th style="text-align:center">สิทธิ์เบิก</th>
-                <th style="text-align:center">หมวดหมู่</th>
+              <tr class="perm-cat-header">
+                <th rowspan="2" style="width:180px; vertical-align:middle; background:rgba(255,255,255,0.02)">บทบาท (Role)</th>
+                <th colspan="4" style="text-align:center; background:rgba(99,102,241,0.1); color:#818cf8">คลังสินค้า (Inventory)</th>
+                <th colspan="3" style="text-align:center; background:rgba(245,158,11,0.1); color:#fbbf24">การเบิกจ่าย (Orders)</th>
+                <th colspan="3" style="text-align:center; background:rgba(16,185,129,0.1); color:#34d399">รายงาน (Reports)</th>
+                <th colspan="3" style="text-align:center; background:rgba(236,72,153,0.1); color:#f472b6">ระบบ (System)</th>
+              </tr>
+              <tr class="perm-key-header">
+                <!-- Inventory -->
+                <th class="perm-th" title="ดูราคาสินค้า">ราคา</th>
+                <th class="perm-th" title="จัดการข้อมูลพัสดุ">สต็อก</th>
+                <th class="perm-th" title="จัดการหมวดหมู่">หมวด</th>
+                <th class="perm-th" title="เข้าถึงคลังย่อยส่วนตัว/ทีม">คลังย่อย</th>
+                <!-- Orders -->
+                <th class="perm-th" title="สามารถสร้างใบเบิกได้">เบิก</th>
+                <th class="perm-th" title="อนุมัติหรือปฏิเสธใบเบิก">อนุมัติ</th>
+                <th class="perm-th" title="จัดของและจ่ายพัสดุ">จ่ายของ</th>
+                <!-- Reports -->
+                <th class="perm-th" title="ดูแดชบอร์ดและสถิติ">รายงาน</th>
+                <th class="perm-th" title="ดูประวัติการทำรายการ">กิจกรรม</th>
+                <th class="perm-th" title="ดาวน์โหลดข้อมูลเป็น Excel">Excel</th>
+                <!-- System -->
+                <th class="perm-th" title="จัดการพนักงานและทีม">ผู้ใช้</th>
+                <th class="perm-th" title="จัดการข้อมูลสาขา">สาขา</th>
+                <th class="perm-th" title="ตั้งค่าระบบพื้นฐาน">ตั้งค่า</th>
               </tr>
             </thead>
             <tbody id="permissionsBody"></tbody>
@@ -1397,16 +1413,16 @@
       // จัดการการมองเห็น Tab ตามสิทธิ์
       var tabPermissions = {
         'tab-products': 'manage_inventory',
-        'tab-categories': 'manage_inventory',
+        'tab-categories': 'manage_categories',
         'tab-inventory': 'manage_inventory',
         'tab-employees': 'manage_users',
         'tab-teams': 'manage_users',
         'tab-departments': 'manage_users',
         'tab-reports': 'view_reports',
-        'tab-audit': 'view_reports',
-        'tab-settings': 'superadmin_only',
-        'tab-branches': 'superadmin_only',
-        'tab-permissions': 'manage_users' // Now manageable by anyone with manage_users if needed, or keep superadmin_only
+        'tab-audit': 'view_audit_logs',
+        'tab-settings': 'manage_settings',
+        'tab-branches': 'manage_branches',
+        'tab-permissions': 'manage_users'
       };
 
       for (var id in tabPermissions) {
@@ -2443,11 +2459,14 @@
         if (o.status === 'Rejected') bc = 'badge-rejected';
 
         var actions = '';
-        if (o.status === 'Pending') {
+        var canApprove = hasPermission('approve_orders');
+        var canDispatch = hasPermission('dispatch_orders');
+
+        if (o.status === 'Pending' && canApprove) {
           actions = '<button class="btn btn-sm btn-accent" onclick="doApprove(\'' + o.orderId + '\', \'' + (o.employeeName || o.employeeId) + '\')"><i data-lucide="check" style="width:14px;height:14px"></i> อนุมัติ</button>';
-        } else if (o.status === 'Approved') {
+        } else if (o.status === 'Approved' && canDispatch) {
           actions = '<button class="btn btn-sm btn-warning" onclick="doReady(\'' + o.orderId + '\')"><i data-lucide="package-check" style="width:14px;height:14px"></i> จัดเสร็จแล้ว</button>';
-        } else if (o.status === 'Ready') {
+        } else if (o.status === 'Ready' && canDispatch) {
           actions = '<button class="btn btn-sm btn-primary" onclick="doDispatch(\'' + o.orderId + '\', this)"><i data-lucide="package" style="width:14px;height:14px"></i> จ่ายของ</button>';
         } else if (o.status === 'Dispatched') {
           actions = '<button class="btn btn-primary btn-sm" onclick="openSignatureModal(\'' + o.orderId + '\')"><i data-lucide="edit-3" style="width:14px;height:14px"></i> เซ็นรับของ</button>';
@@ -2852,11 +2871,29 @@
       { id: 'manager', name: 'Manager (ผู้จัดการ)' },
       { id: 'admin', name: 'Admin (ผู้ดูแลระบบ)' }
     ];
+    var PERMISSION_KEYS = [
+      { key: 'view_prices', label: 'ดูราคา', cat: 'inventory' },
+      { key: 'manage_inventory', label: 'จัดการสต็อก', cat: 'inventory' },
+      { key: 'manage_categories', label: 'จัดการหมวดหมู่', cat: 'inventory' },
+      { key: 'has_substock', label: 'คลังย่อย', cat: 'inventory' },
+
+      { key: 'can_request', label: 'สิทธิ์เบิก', cat: 'orders' },
+      { key: 'approve_orders', label: 'อนุมัติใบเบิก', cat: 'orders' },
+      { key: 'dispatch_orders', label: 'จ่ายของ', cat: 'orders' },
+
+      { key: 'view_reports', label: 'ดูรายงาน', cat: 'reports' },
+      { key: 'view_audit_logs', label: 'ดูประวัติกิจกรรม', cat: 'reports' },
+      { key: 'export_excel', label: 'ส่งออก Excel', cat: 'reports' },
+
+      { key: 'manage_users', label: 'จัดการคน/ทีม', cat: 'system' },
+      { key: 'manage_branches', label: 'จัดการสาขา', cat: 'system' },
+      { key: 'manage_settings', label: 'ตั้งค่าระบบ', cat: 'system' }
+    ];
     var globalRolePermissions = {};
 
     function loadPermissionsPage() {
       var body = document.getElementById('permissionsBody');
-      if (body) body.innerHTML = '<tr><td colspan="8" class="text-center" style="padding:2rem"><div class="spinner"></div></td></tr>';
+      if (body) body.innerHTML = '<tr><td colspan="14" class="text-center" style="padding:2rem"><div class="spinner"></div></td></tr>';
 
       API.getSystemSettings().then(function (res) {
         var settings = res.data || {};
@@ -2864,25 +2901,27 @@
 
         body.innerHTML = ADMIN_ROLES.map(function (role) {
           var p = globalRolePermissions[role.id] || {};
-          var keys = ['view_prices', 'has_substock', 'manage_inventory', 'manage_users', 'view_reports', 'can_request'];
 
-          var cells = keys.map(function (k) {
-            var checked = p[k] ? 'checked' : '';
-            return '<td style="text-align:center"><input type="checkbox" ' + checked + ' onchange="updateRolePermission(\'' + role.id + '\', \'' + k + '\', this.checked)"></td>';
+          var cells = PERMISSION_KEYS.map(function (k) {
+            var checked = p[k.key] ? 'checked' : '';
+            return '<td style="text-align:center"><input type="checkbox" ' + checked + ' onchange="updateRolePermission(\'' + role.id + '\', \'' + k.key + '\', this.checked)"></td>';
           }).join('');
 
           var allowedCats = p.allowed_categories || [];
-          var catLabel = allowedCats.length === 0 ? 'ทั้งหมด' : allowedCats.length + ' หมวดหมู่';
+          var catLabel = allowedCats.length === 0 ? 'ทั้งหมด' : allowedCats.length + ' หมวด';
 
-          return '<tr>' +
-            '<td><div style="font-weight:700; color:var(--primary)">' + role.name + '</div><div style="font-size:0.7rem; color:var(--text3)">ID: ' + role.id + '</div></td>' +
+          return '<tr class="hover-row">' +
+            '<td style="background:rgba(255,255,255,0.02); position:sticky; left:0; z-index:5">' +
+            '<div style="font-weight:700; color:var(--primary)">' + role.name + '</div>' +
+            '<button class="btn btn-xs btn-outline" style="margin-top:0.5rem" onclick="openRoleCategoryModal(\'' + role.id + '\')"><i data-lucide="layers" style="width:10px;height:10px"></i> ' + catLabel + '</button>' +
+            '</td>' +
             cells +
-            '<td style="text-align:center"><button class="btn btn-xs btn-outline" onclick="openRoleCategoryModal(\'' + role.id + '\')">' + catLabel + '</button></td>' +
             '</tr>';
         }).join('');
+        refreshIcons();
       }).catch(function (err) {
         console.error('Failed to load role permissions:', err);
-        body.innerHTML = '<tr><td colspan="8" class="text-center" style="padding:2rem">' +
+        body.innerHTML = '<tr><td colspan="14" class="text-center" style="padding:2rem">' +
           '<div style="color:var(--danger);margin-bottom:1rem">⚠️ ไม่สามารถโหลดข้อมูลสิทธิ์จากเซิร์ฟเวอร์ได้</div>' +
           '<button class="btn btn-sm btn-outline" onclick="loadPermissionsPage()">ลองใหม่อีกครั้ง</button>' +
           '</td></tr>';

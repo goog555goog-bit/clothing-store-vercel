@@ -128,41 +128,29 @@ function updateUserUI() {
     if (ordersBtn) ordersBtn.classList.remove('hidden');
     if (changePwdBtn) changePwdBtn.classList.remove('hidden');
     
-    // แสดงปุ่มคลังย่อยสำหรับ FC/Technician/Admin
+    // แสดงปุ่มคลังย่อย
     var substockBtn = document.getElementById('substockBtn');
     var substockMob = document.querySelector('.mobile-nav-item[data-view="substock"]');
     if (substockBtn || substockMob) {
-      var allowed = ['fc', 'technician', 'hr', 'admin', 'superadmin'];
-      var isAllowed = allowed.indexOf(currentUser.role) !== -1;
+      var isAllowed = hasPermission('has_substock');
       if (substockBtn) substockBtn.classList.toggle('hidden', !isAllowed);
       if (substockMob) substockMob.classList.toggle('hidden', !isAllowed);
     }
 
     // ปุ่ม Admin
     var adminBtn = document.getElementById('adminPaneBtn');
-    if (adminBtn) {
-      if (['superadmin', 'admin'].indexOf(currentUser.role) !== -1) adminBtn.classList.remove('hidden');
-      else adminBtn.classList.add('hidden');
-    }
+    var adMob = document.getElementById('adminMobileBtn');
+    var canAdmin = hasPermission('manage_inventory') || hasPermission('manage_users') || hasPermission('view_reports');
+    if (adminBtn) adminBtn.classList.toggle('hidden', !canAdmin);
+    if (adMob) adMob.classList.toggle('hidden', !canAdmin);
 
     // ปุ่ม Manager
     var mgrBtn = document.getElementById('mgrPaneBtn');
     var mgrMob = document.getElementById('mgrMobileBtn');
     if (mgrBtn || mgrMob) {
-      if (['superadmin', 'admin', 'manager'].indexOf(currentUser.role) !== -1) {
-        if (mgrBtn) mgrBtn.classList.remove('hidden');
-        if (mgrMob) mgrMob.classList.remove('hidden');
-      } else {
-        if (mgrBtn) mgrBtn.classList.add('hidden');
-        if (mgrMob) mgrMob.classList.add('hidden');
-      }
-    }
-
-    // ปุ่ม Admin Mobile
-    var adMob = document.getElementById('adminMobileBtn');
-    if (adMob) {
-      if (['superadmin', 'admin'].indexOf(currentUser.role) !== -1) adMob.classList.remove('hidden');
-      else adMob.classList.add('hidden');
+      var canManage = hasPermission('approve_orders');
+      if (mgrBtn) mgrBtn.classList.toggle('hidden', !canManage);
+      if (mgrMob) mgrMob.classList.toggle('hidden', !canManage);
     }
   } else {
     if (nameEl) nameEl.textContent = 'เข้าสู่ระบบ';
@@ -368,6 +356,7 @@ function loadStorefrontData() {
   ]).then(function(results) {
     var res = results[0];
     globalSystemSettings = results[1].data || {};
+    updateUserUI(); // Refresh UI now that we have permissions
 
     if (res.success) {
       allProducts = res.products || [];
