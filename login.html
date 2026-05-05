@@ -173,14 +173,8 @@
             localStorage.setItem('_user', JSON.stringify(res.data));
             localStorage.setItem('_tok', res.data.token);
 
-            // redirect ตาม role
-            var role = res.data.role;
-            var page = 'index.html';
-            var adminRoles = ['admin', 'superadmin', 'fc', 'technician', 'hr'];
-            if (adminRoles.indexOf(role) !== -1) page = 'admin.html';
-            else if (role === 'manager') page = 'manager.html';
-
-            navigateTo(page);
+            // ทุก Role ให้เริ่มต้นที่หน้า index.html ตามความต้องการ
+            navigateTo('index.html');
           } else {
             btn.disabled = false;
             btn.textContent = 'เข้าสู่ระบบ';
