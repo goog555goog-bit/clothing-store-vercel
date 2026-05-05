@@ -367,13 +367,14 @@ function loadStorefrontData() {
         if (r.success) allBranches = r.data || [];
       }).catch(function(e){ console.warn('Branches fetch skipped:', e); });
 
-      // Only attempt to load system settings if we have administrative hints or after a short delay
-      // to avoid blocking the main UI if it fails for low-privilege users.
-      if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'superadmin' || currentUser.role === 'manager')) {
+      // Sync system settings for all users to ensure UI permissions are up-to-date
+      if (currentUser) {
         API.getSystemSettings().then(function(sRes) {
           globalSystemSettings = sRes.data || {};
           updateUserUI(); // Refresh UI with fresh settings
-        }).catch(function(e) { console.warn('System settings skipped (Access denied or network):', e); });
+        }).catch(function(e) { 
+          console.warn('System settings sync skipped:', e); 
+        });
       }
     }
   }).catch(function(err) {
