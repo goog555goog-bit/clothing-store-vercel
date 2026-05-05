@@ -15,16 +15,19 @@ var isUpdatingSize = false;
 
 function hasPermission(key, value) {
   if (!currentUser) return false;
-  if (String(currentUser.role || '').toLowerCase() === 'superadmin') return true;
+  var userRole = String(currentUser.role || '').toLowerCase();
+  if (userRole === 'superadmin') return true;
   
-  // Try Role-based permission first
   var p = null;
-  if (globalSystemSettings && globalSystemSettings.rolePermissions && globalSystemSettings.rolePermissions[currentUser.role]) {
-    p = globalSystemSettings.rolePermissions[currentUser.role];
-  } else {
-    // Fallback to individual permissions (legacy)
-    p = currentUser.permissions;
+  // 🔥 [FIX] Case-insensitive role matching for system settings
+  if (globalSystemSettings && globalSystemSettings.rolePermissions) {
+    var roles = globalSystemSettings.rolePermissions;
+    var matchKey = Object.keys(roles).find(k => k.toLowerCase() === userRole);
+    if (matchKey) p = roles[matchKey];
   }
+  
+  // Fallback to individual permissions (legacy or fresh login)
+  if (!p) p = currentUser.permissions;
 
   if (!p) return false;
   if (typeof p === 'string') {
@@ -32,12 +35,18 @@ function hasPermission(key, value) {
   }
   
   if (key === 'view_category') {
-    if (!p.allowed_categories || p.allowed_categories.length === 0) return true;
-    return p.allowed_categories.includes(String(value));
+    // If no restrictions, allowed all
+    if (!p.allowed_categories || p.allowed_categories.length === 0 || p.allowed_categories.includes('all')) return true;
+    
+    // Check both string and potentially numeric ID matches
+    var sVal = String(value || '').trim();
+    return p.allowed_categories.some(function(c) {
+      return String(c).trim() === sVal;
+    });
   }
   
   if (key === 'can_request') {
-    return p.can_request !== false; // Default true if not explicitly false
+    return p.can_request !== false;
   }
 
   return !!p[key];
