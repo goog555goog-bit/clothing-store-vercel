@@ -20,7 +20,7 @@ function hasPermission(key, value) {
   if (userRole === 'superadmin') return true;
 
   // 1. Check dynamic role-based permissions from settings (Real-time update)
-  if (typeof globalSystemSettings !== 'undefined' && globalSystemSettings.rolePermissions) {
+  if (globalSystemSettings && globalSystemSettings.rolePermissions) {
     var rolePerms = globalSystemSettings.rolePermissions[userRole] || {};
     if (rolePerms[key] === true) return true;
     
@@ -44,7 +44,7 @@ function hasPermission(key, value) {
       allowed = allowed.concat(currentUser.allowed_categories);
     }
     // From role-based settings (fetched real-time)
-    if (typeof globalSystemSettings !== 'undefined' && globalSystemSettings.roleCategoryPermissions) {
+    if (globalSystemSettings && globalSystemSettings.roleCategoryPermissions) {
       var roleCats = globalSystemSettings.roleCategoryPermissions[userRole] || [];
       allowed = allowed.concat(roleCats);
     }
