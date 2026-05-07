@@ -774,6 +774,12 @@ function renderProductGrid(pageNum) {
 function openProductDetail(id) {
   var p = allProducts.filter(function(x) { return String(x.productId) === String(id); })[0];
   if (!p) return;
+
+  // Security Check: Ensure user has permission to view this category
+  if (!hasPermission('view_category', p.categoryId)) {
+    showToast('คุณไม่มีสิทธิ์เข้าถึงสินค้าในหมวดหมู่นี้', 'warning');
+    return;
+  }
   
   var cat = allCategories.filter(function(c) { return String(c.categoryId) === String(p.categoryId); })[0];
   var body = document.getElementById('productDetailBody');
