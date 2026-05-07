@@ -2,7 +2,7 @@
 //  api.js — Frontend REST Adapter (Refactored & Optimized)
 // ============================================================
 
-const GAS_URL = "https://script.google.com/macros/s/AKfycbx1f5vl0fw93vx_Sr26_uqFkC1rgajtQSDgUFn0Q_DyOQ3Mhjl6w3t-TN44OpGIYA30-A/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbygZ9roG6OfeitNNCX-T8EwK-mCz1RGnfNasdOyubYKpUqbHEo-1GPjqp4v6404Sj3xfw/exec";
 
 var API = (function () {
   var CACHE_KEY = '_api_cache_v1';
@@ -36,7 +36,7 @@ var API = (function () {
     VIEW_REPORTS: 'view_reports',
     MANAGE_SETTINGS: 'manage_settings',
     MANAGE_STRUCTURE: 'manage_structure',
-    
+
     // UI-facing keys (matching Admin UI)
     CAN_REQUEST: 'can_request',
     VIEW_PRICES: 'view_prices',
