@@ -44,8 +44,8 @@ function hasPermission(key, value) {
       allowed = allowed.concat(currentUser.allowed_categories);
     }
     // From role-based settings (fetched real-time)
-    if (globalSystemSettings && globalSystemSettings.roleCategoryPermissions) {
-      var roleCats = globalSystemSettings.roleCategoryPermissions[userRole] || [];
+    if (globalSystemSettings && globalSystemSettings.rolePermissions && globalSystemSettings.rolePermissions[userRole]) {
+      var roleCats = globalSystemSettings.rolePermissions[userRole].allowed_categories || [];
       allowed = allowed.concat(roleCats);
     }
     
@@ -601,6 +601,8 @@ function renderCategories() {
   var unique = allCategories.filter(function(c) {
     var cid = c.id || c.categoryId;
     if (!cid || seen[cid]) return false;
+    // Check category permission
+    if (!hasPermission('view_category', cid)) return false;
     seen[cid] = true;
     return true;
   });
