@@ -16,38 +16,53 @@ var isUpdatingSize = false;
 function hasPermission(key, value) {
   if (!currentUser) return false;
   
+  var userRole = String(currentUser.role || '').toLowerCase();
+  if (userRole === 'superadmin') return true;
+
+  // 1. Check dynamic role-based permissions from settings (Real-time update)
+  if (typeof globalSystemSettings !== 'undefined' && globalSystemSettings.rolePermissions) {
+    var rolePerms = globalSystemSettings.rolePermissions[userRole] || {};
+    if (rolePerms[key] === true) return true;
+    
+    // Compatibility mapping for internal keys -> UI keys
+    var revMapping = {
+      'create_request': 'can_request',
+      'view_products': 'view_prices',
+      'approve_request': 'approve_orders',
+      'process_request': 'dispatch_orders',
+      'manage_employees': 'manage_users',
+      'manage_structure': 'manage_branches'
+    };
+    if (revMapping[key] && rolePerms[revMapping[key]] === true) return true;
+  }
+
+  // 2. view_category logic (Merging individual + role-based)
+  if (key === 'view_category') {
+    var allowed = [];
+    // From individual user object (sent at login)
+    if (currentUser.allowed_categories && Array.isArray(currentUser.allowed_categories)) {
+      allowed = allowed.concat(currentUser.allowed_categories);
+    }
+    // From role-based settings (fetched real-time)
+    if (typeof globalSystemSettings !== 'undefined' && globalSystemSettings.roleCategoryPermissions) {
+      var roleCats = globalSystemSettings.roleCategoryPermissions[userRole] || [];
+      allowed = allowed.concat(roleCats);
+    }
+    
+    if (allowed.length === 0 || allowed.includes('all')) return true;
+    var sVal = String(value || '').trim();
+    return allowed.some(function(c) { return String(c).trim() === sVal; });
+  }
+
   // 🔥 [RBAC] ถ้า key เป็นหนึ่งในสิทธิ์ที่กำหนดใน API.PERMS ให้ใช้ API.hasPermission โดยตรง
   var permValue = Object.values(API.PERMS).find(v => v === key);
   if (permValue) {
-    return API.hasPermission(key);
+    if (API.hasPermission(key)) return true;
   }
 
-  // Logic เดิมสำหรับเคสพิเศษ
-  var userRole = String(currentUser.role || '').toLowerCase();
-  if (userRole === 'superadmin') return true;
-  
-  var p = currentUser.permissions || [];
-  if (!p) return false;
-  
-  if (key === 'view_category') {
-    // กรองสินค้าตามหมวดหมู่ที่ได้รับอนุญาต (ถ้ามีระบบจำกัดหมวดหมู่รายบุคคล/บทบาท)
-    // หมายเหตุ: ปัจจุบันระบบ RBAC ใหม่ยังใช้การรวมกลุ่มสิทธิ์กว้างๆ 
-    // หากต้องการจำกัดหมวดหมู่รายบุคคล สามารถเก็บค่าใน permissions ของ user ได้
-    if (!p.allowed_categories || p.allowed_categories.length === 0 || p.allowed_categories.includes('all')) return true;
-    
-    var sVal = String(value || '').trim();
-    return p.allowed_categories.some(function(c) {
-      return String(c).trim() === sVal;
-    });
-  }
-  
-  if (key === 'can_request') {
-    return API.hasPermission(API.PERMS.CREATE_REQUEST);
-  }
-  
-  if (key === 'view_prices') {
-    return API.hasPermission(API.PERMS.VIEW_PRODUCTS);
-  }
+  // 3. Fallback Compatibility mappings
+  if (key === 'can_request') return API.hasPermission(API.PERMS.CREATE_REQUEST);
+  if (key === 'view_prices') return API.hasPermission(API.PERMS.VIEW_PRODUCTS);
 
   return API.hasPermission(key);
 }

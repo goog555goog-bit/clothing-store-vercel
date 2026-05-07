@@ -35,7 +35,15 @@ var API = (function () {
     MANAGE_EMPLOYEES: 'manage_employees',
     VIEW_REPORTS: 'view_reports',
     MANAGE_SETTINGS: 'manage_settings',
-    MANAGE_STRUCTURE: 'manage_structure'
+    MANAGE_STRUCTURE: 'manage_structure',
+    
+    // UI-facing keys (matching Admin UI)
+    CAN_REQUEST: 'can_request',
+    VIEW_PRICES: 'view_prices',
+    APPROVE_ORDERS: 'approve_orders',
+    DISPATCH_ORDERS: 'dispatch_orders',
+    MANAGE_USERS: 'manage_users',
+    MANAGE_BRANCHES: 'manage_branches'
   };
 
   var apiObj = {
