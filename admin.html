@@ -3880,11 +3880,14 @@
       }[currentScanMode];
 
       API.getStorefrontData().then(function (res) {
-        var products = res.data && res.data.products ? res.data.products : [];
-        var prod = products.find(function (p) { return String(p.productId || p.id) === String(text); });
+        var products = res.products || [];
+        var scannedCode = String(text || '').trim();
+        var prod = products.find(function (p) { 
+          return String(p.productId || p.id).toLowerCase() === scannedCode.toLowerCase(); 
+        });
 
         if (!prod) {
-          showToast('ไม่พบรหัสสินค้า: ' + text, 'error');
+          showToast('ไม่พบรหัสสินค้า: ' + scannedCode, 'error');
           isScannerBusy = false;
           return;
         }

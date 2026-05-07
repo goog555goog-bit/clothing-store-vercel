@@ -1887,7 +1887,7 @@ function onSubStockScanned(code) {
   }
   
   var item = currentSubStockData.find(function(i) {
-    return String(i.productId).toLowerCase() === String(code).toLowerCase();
+    return String(i.productId).toLowerCase() === String(code).trim().toLowerCase();
   });
   
   if (item) {
