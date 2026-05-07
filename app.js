@@ -373,8 +373,8 @@ function loadStorefrontData() {
     }
   }
   
-  // 2. Fetch fresh data from network
-  API.getStorefrontData().then(function(res) {
+  // 2. Fetch fresh data from network (Bypass cache for revalidation)
+  API.getStorefrontData(true).then(function(res) {
     if (res.success) {
       allProducts = res.products || [];
       allCategories = res.categories || [];

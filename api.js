@@ -227,7 +227,7 @@ var API = (function () {
     getEmployees: function () { return this._call('getEmployees', {}, true); },
     getTeams: function () { return this._call('getTeams', {}, true); },
     getBranches: function () { return this._call('getBranches', {}, true); },
-    getStorefrontData: function () { return this._call('getStorefrontData', {}, true); },
+    getStorefrontData: function (bypassCache) { return this._call('getStorefrontData', {}, !bypassCache); },
     getMyRequests: function () { return this._call('getMyRequests', {}, true); },
     getAllOrders: function () { return this._call('getAllOrders', {}, true); },
     getFilteredOrders: function (filters) { return this._call('getFilteredOrders', { filters: filters }, true); },
@@ -241,7 +241,7 @@ var API = (function () {
     getDepartmentSpending: function (month) { return this._call('getDepartmentSpending', { month: month }, true); },
     getInventoryForecast: function () { return this._call('getInventoryForecast', {}, true); },
     getSubStock: function (params) { return this._call('getSubStock', params, true); },
-    getSystemSettings: function () { return this._call('getSystemSettings', {}, true); },
+    getSystemSettings: function () { return this._call('getSystemSettings', {}, false); }, // Always fresh for permissions
 
     // ─── WRITE ACTIONS (Invalidate relevant caches) ───────────
     manageProduct: function (op, data) {
