@@ -1367,86 +1367,63 @@
 
     function hasPermission(key, value) {
       if (!currentUser) return false;
-      if (String(currentUser.role || '').toLowerCase() === 'superadmin') return true;
-
-      // Try Role-based permission first
-      var p = null;
-      if (globalRolePermissions && globalRolePermissions[currentUser.role]) {
-        p = globalRolePermissions[currentUser.role];
-      } else {
-        // Fallback to individual permissions (legacy)
-        p = currentUser.permissions;
-      }
-
-      if (!p) return false;
-      if (typeof p === 'string') {
-        try { p = JSON.parse(p); } catch (e) { return false; }
-      }
-
-      if (key === 'view_category') {
-        if (!p.allowed_categories || p.allowed_categories.length === 0) return true;
-        return p.allowed_categories.includes(String(value));
-      }
-
-      if (key === 'can_request') {
-        return p.can_request !== false; // Default true if not explicitly false
-      }
-
-      return !!p[key];
+      return API.hasPermission(key);
     }
 
     function checkAuth() {
       var stored = localStorage.getItem('_user');
       if (stored) try { currentUser = JSON.parse(stored); } catch (e) { }
-      if (!currentUser || !currentUser.role) {
+      
+      if (!currentUser) {
         document.querySelector('.container').innerHTML = '<div class="card text-center" style="padding:3rem;margin-top:2rem">'
-          + '<p style="color:var(--danger);font-size:1.1rem">⛔ ไม่มีสิทธิ์เข้าถึงหน้าแอดมิน</p>'
+          + '<p style="color:var(--danger);font-size:1.1rem">⛔ กรุณาเข้าสู่ระบบ</p>'
           + '<button class="btn btn-primary" style="margin-top:1rem" onclick="navigateTo(\'login.html\')">เข้าสู่ระบบ</button></div>';
         return;
       }
 
-      var allowedRoles = ['admin', 'superadmin', 'fc', 'technician'];
-      if (allowedRoles.indexOf(currentUser.role) === -1) {
+      // ตรวจสอบสิทธิ์ขั้นพื้นฐานในการเข้าหน้า Admin
+      var hasAnyAdminPerm = API.hasPermission(API.PERMS.MANAGE_PRODUCTS) || 
+                            API.hasPermission(API.PERMS.APPROVE_REQUEST) || 
+                            API.hasPermission(API.PERMS.MANAGE_INVENTORY);
+                            
+      if (!hasAnyAdminPerm) {
         document.querySelector('.container').innerHTML = '<div class="card text-center" style="padding:3rem;margin-top:2rem">'
           + '<p style="color:var(--danger);font-size:1.1rem">⛔ คุณไม่มีสิทธิ์เข้าถึงส่วนงานแอดมิน</p>'
           + '<button class="btn btn-primary" style="margin-top:1rem" onclick="navigateTo(scriptUrl)">กลับหน้าหลัก</button></div>';
         return;
       }
 
-      // จัดการการมองเห็น Tab ตามสิทธิ์
+      // จัดการการมองเห็น Tab ตามสิทธิ์จริง
       var tabPermissions = {
-        'tab-products': 'manage_inventory',
-        'tab-categories': 'manage_categories',
-        'tab-inventory': 'manage_inventory',
-        'tab-employees': 'manage_users',
-        'tab-teams': 'manage_users',
-        'tab-departments': 'manage_users',
-        'tab-reports': 'view_reports',
-        'tab-audit': 'view_audit_logs',
-        'tab-settings': 'manage_settings',
-        'tab-branches': 'manage_branches',
-        'tab-permissions': 'manage_users'
+        'tab-products': API.PERMS.MANAGE_PRODUCTS,
+        'tab-categories': API.PERMS.MANAGE_CATEGORIES,
+        'tab-inventory': API.PERMS.MANAGE_INVENTORY,
+        'tab-employees': API.PERMS.VIEW_EMPLOYEES,
+        'tab-teams': API.PERMS.VIEW_EMPLOYEES,
+        'tab-departments': API.PERMS.MANAGE_STRUCTURE,
+        'tab-reports': API.PERMS.VIEW_REPORTS,
+        'tab-audit': API.PERMS.VIEW_REPORTS,
+        'tab-settings': API.PERMS.MANAGE_SETTINGS,
+        'tab-branches': API.PERMS.MANAGE_STRUCTURE,
+        'tab-permissions': API.PERMS.MANAGE_EMPLOYEES
       };
 
       for (var id in tabPermissions) {
         var el = document.getElementById(id);
         if (!el) continue;
-        var pKey = tabPermissions[id];
-        var isVisible = (pKey === 'superadmin_only') ? (currentUser.role === 'superadmin') : hasPermission(pKey);
-        el.style.display = isVisible ? 'flex' : 'none';
+        el.style.display = API.hasPermission(tabPermissions[id]) ? 'flex' : 'none';
       }
 
       // Hide Inventory/Products management buttons if no permission
-      var canEditInventory = hasPermission('manage_inventory');
+      var canEditInventory = API.hasPermission(API.PERMS.MANAGE_INVENTORY);
       document.querySelectorAll('.btn-inventory-mgr').forEach(function (b) {
         b.style.display = canEditInventory ? 'inline-flex' : 'none';
       });
 
-      // ปุ่มไปหน้า Manager (ถ้ามีสิทธิ์)
+      // ปุ่มไปหน้า Manager (ถ้ามีสิทธิ์อนุมัติ)
       var mgrBtn = document.getElementById('mgrPaneBtn');
       var mgrMob = document.getElementById('mgrMobileBtn');
-      var canManage = ['superadmin', 'admin', 'manager'].indexOf(currentUser.role) !== -1;
-      if (canManage) {
+      if (API.hasPermission(API.PERMS.APPROVE_REQUEST)) {
         if (mgrBtn) mgrBtn.classList.remove('hidden');
         if (mgrMob) mgrMob.classList.remove('hidden');
       }
@@ -1456,27 +1433,15 @@
       // Load initial data
       Promise.all([
         API.getCategories(),
-        API.getSystemSettings()
+        API.getSystemSettings(),
+        API.getReportData('Departments')
       ]).then(function (results) {
         if (results[0].success && results[0].data) allAdminCategories = results[0].data;
         if (results[1].success && results[1].data) {
-          var settings = results[1].data;
-          globalRolePermissions = settings.rolePermissions || {};
+          globalRolePermissions = results[1].data.rolePermissions || {};
         }
-
-        // After permissions loaded, refresh tab visibility
-        for (var id in tabPermissions) {
-          var el = document.getElementById(id);
-          if (!el) continue;
-          var pKey = tabPermissions[id];
-          var isVisible = (pKey === 'superadmin_only') ? (currentUser.role === 'superadmin') : hasPermission(pKey);
-          el.style.display = isVisible ? 'flex' : 'none';
-        }
-
-        return API.getReportData('Departments');
-      }).then(function (res) {
-        if (res.success && res.data) {
-          allAdminDepartments = res.data;
+        if (results[2].success && results[2].data) {
+          allAdminDepartments = results[2].data;
         }
         loadDashboard();
       }).catch(function (err) {

@@ -15,30 +15,26 @@ var isUpdatingSize = false;
 
 function hasPermission(key, value) {
   if (!currentUser) return false;
+  
+  // 🔥 [RBAC] ถ้า key เป็นหนึ่งในสิทธิ์ที่กำหนดใน API.PERMS ให้ใช้ API.hasPermission โดยตรง
+  var permValue = Object.values(API.PERMS).find(v => v === key);
+  if (permValue) {
+    return API.hasPermission(key);
+  }
+
+  // Logic เดิมสำหรับเคสพิเศษ
   var userRole = String(currentUser.role || '').toLowerCase();
   if (userRole === 'superadmin') return true;
   
-  var p = null;
-  // 🔥 [FIX] Case-insensitive role matching for system settings
-  if (globalSystemSettings && globalSystemSettings.rolePermissions) {
-    var roles = globalSystemSettings.rolePermissions;
-    var matchKey = Object.keys(roles).find(k => k.toLowerCase() === userRole);
-    if (matchKey) p = roles[matchKey];
-  }
-  
-  // Fallback to individual permissions (legacy or fresh login)
-  if (!p) p = currentUser.permissions;
-
+  var p = currentUser.permissions || [];
   if (!p) return false;
-  if (typeof p === 'string') {
-    try { p = JSON.parse(p); } catch (e) { return false; }
-  }
   
   if (key === 'view_category') {
-    // If no restrictions, allowed all
+    // กรองสินค้าตามหมวดหมู่ที่ได้รับอนุญาต (ถ้ามีระบบจำกัดหมวดหมู่รายบุคคล/บทบาท)
+    // หมายเหตุ: ปัจจุบันระบบ RBAC ใหม่ยังใช้การรวมกลุ่มสิทธิ์กว้างๆ 
+    // หากต้องการจำกัดหมวดหมู่รายบุคคล สามารถเก็บค่าใน permissions ของ user ได้
     if (!p.allowed_categories || p.allowed_categories.length === 0 || p.allowed_categories.includes('all')) return true;
     
-    // Check both string and potentially numeric ID matches
     var sVal = String(value || '').trim();
     return p.allowed_categories.some(function(c) {
       return String(c).trim() === sVal;
@@ -46,10 +42,14 @@ function hasPermission(key, value) {
   }
   
   if (key === 'can_request') {
-    return p.can_request !== false;
+    return API.hasPermission(API.PERMS.CREATE_REQUEST);
+  }
+  
+  if (key === 'view_prices') {
+    return API.hasPermission(API.PERMS.VIEW_PRODUCTS);
   }
 
-  return !!p[key];
+  return API.hasPermission(key);
 }
 var allProducts = [];
 var allCategories = [];
@@ -141,7 +141,7 @@ function updateUserUI() {
     var substockBtn = document.getElementById('substockBtn');
     var substockMob = document.querySelector('.mobile-nav-item[data-view="substock"]');
     if (substockBtn || substockMob) {
-      var isAllowed = hasPermission('has_substock') || hasPermission('manage_team_substock');
+      var isAllowed = API.hasPermission(API.PERMS.MANAGE_INVENTORY);
       if (substockBtn) substockBtn.classList.toggle('hidden', !isAllowed);
       if (substockMob) substockMob.classList.toggle('hidden', !isAllowed);
     }
@@ -149,7 +149,7 @@ function updateUserUI() {
     // ปุ่ม Admin
     var adminBtn = document.getElementById('adminPaneBtn');
     var adMob = document.getElementById('adminMobileBtn');
-    var canAdmin = hasPermission('manage_inventory') || hasPermission('manage_users') || hasPermission('view_reports');
+    var canAdmin = API.hasPermission(API.PERMS.MANAGE_PRODUCTS); // หรือเช็คสิทธิ์อื่นๆ ที่เกี่ยวข้องกับ Admin
     if (adminBtn) adminBtn.classList.toggle('hidden', !canAdmin);
     if (adMob) adMob.classList.toggle('hidden', !canAdmin);
 
@@ -157,7 +157,7 @@ function updateUserUI() {
     var mgrBtn = document.getElementById('mgrPaneBtn');
     var mgrMob = document.getElementById('mgrMobileBtn');
     if (mgrBtn || mgrMob) {
-      var canManage = hasPermission('approve_orders');
+      var canManage = API.hasPermission(API.PERMS.APPROVE_REQUEST);
       if (mgrBtn) mgrBtn.classList.toggle('hidden', !canManage);
       if (mgrMob) mgrMob.classList.toggle('hidden', !canManage);
     }

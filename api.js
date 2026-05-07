@@ -22,8 +22,45 @@ var API = (function () {
     }
   } catch (e) { _cache = {}; }
 
+  var PERMS = {
+    VIEW_PRODUCTS: 'view_products',
+    MANAGE_PRODUCTS: 'manage_products',
+    MANAGE_CATEGORIES: 'manage_categories',
+    VIEW_REQUESTS: 'view_requests',
+    CREATE_REQUEST: 'create_request',
+    APPROVE_REQUEST: 'approve_request',
+    PROCESS_REQUEST: 'process_request',
+    MANAGE_INVENTORY: 'manage_inventory',
+    VIEW_EMPLOYEES: 'view_employees',
+    MANAGE_EMPLOYEES: 'manage_employees',
+    VIEW_REPORTS: 'view_reports',
+    MANAGE_SETTINGS: 'manage_settings',
+    MANAGE_STRUCTURE: 'manage_structure'
+  };
+
   var apiObj = {
     isPending: false,
+    PERMS: PERMS,
+
+    // 🔥 [RBAC] Helper สำหรับตรวจสอบสิทธิ์ที่หน้า Frontend
+    hasPermission: function (perm) {
+      try {
+        var user = JSON.parse(localStorage.getItem('_user'));
+        if (!user) return false;
+        if (user.role === 'superadmin') return true;
+        if (!user.permissions) return false;
+        return user.permissions.indexOf(perm) !== -1;
+      } catch (e) { return false; }
+    },
+
+    hasRole: function (role) {
+      try {
+        var user = JSON.parse(localStorage.getItem('_user'));
+        if (!user) return false;
+        if (user.role === 'superadmin') return true;
+        return String(user.role).toLowerCase() === String(role).toLowerCase();
+      } catch (e) { return false; }
+    },
 
     _saveCache: function () {
       try {

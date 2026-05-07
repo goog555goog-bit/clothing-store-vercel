@@ -175,22 +175,25 @@
       if (stored) {
         try { currentUser = JSON.parse(stored); } catch(e) {}
       }
-      if (!currentUser || (currentUser.role !== 'manager' && currentUser.role !== 'admin' && currentUser.role !== 'superadmin')) {
+      
+      // ตรวจสอบสิทธิ์การเข้าถึงหน้า Manager (สิทธิ์อนุมัติใบเบิก)
+      if (!currentUser || !API.hasPermission(API.PERMS.APPROVE_REQUEST)) {
         document.getElementById('pendingList').innerHTML = '<div class="card text-center" style="padding:3rem">'
           + '<p style="color:var(--danger);font-size:1.1rem;display:flex;align-items:center;justify-content:center;gap:0.5rem"><i data-lucide="shield-alert"></i> ไม่มีสิทธิ์เข้าถึง</p>'
-          + '<p style="color:var(--text3);margin-top:0.5rem">กรุณาเข้าสู่ระบบด้วยบัญชีผู้จัดการ</p>'
+          + '<p style="color:var(--text3);margin-top:0.5rem">คุณไม่มีสิทธิ์ในการอนุมัติใบเบิกสินค้า</p>'
           + '<button class="btn btn-primary" style="margin-top:1rem" onclick="navigateTo(\'login.html\')">เข้าสู่ระบบ</button></div>';
         refreshIcons();
         return;
       }
+
       if (currentUser) {
         document.getElementById('mgrName').textContent = currentUser.name;
         
-        // ปุ่ม Admin (ถ้ามีสิทธิ์)
-        var isAdmin = ['superadmin', 'admin'].indexOf(currentUser.role) !== -1;
+        // ปุ่ม Admin (ถ้ามีสิทธิ์จัดการสินค้า/คลัง)
+        var canAdmin = API.hasPermission(API.PERMS.MANAGE_PRODUCTS) || API.hasPermission(API.PERMS.MANAGE_INVENTORY);
         var adBtn = document.getElementById('adminPaneBtn');
         var adMob = document.getElementById('mgrMobileAdmin');
-        if (isAdmin) {
+        if (canAdmin) {
           if (adBtn) adBtn.classList.remove('hidden');
           if (adMob) adMob.classList.remove('hidden');
         }
