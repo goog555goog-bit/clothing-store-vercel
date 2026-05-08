@@ -22,7 +22,7 @@ var Cart = {
     var size = (productSize || '').trim();
 
     for (var i = 0; i < items.length; i++) {
-      if (items[i].productId === product.productId && (items[i].size || '') === size) { 
+      if (String(items[i].productId) === String(product.productId) && (items[i].size || '') === size) { 
         existing = items[i]; 
         break; 
       }
@@ -31,12 +31,12 @@ var Cart = {
     // Re-verify stock with global products cache if available
     var currentStoreStock = Number(product.stock);
     if (typeof allProducts !== 'undefined' && allProducts) {
-      var freshP = allProducts.filter(function(p) { return String(p.productId) === String(product.productId); })[0];
+      var freshP = allProducts.find(function(p) { return String(p.productId) === String(product.productId); });
       if (freshP) currentStoreStock = Number(freshP.stock);
     }
     
     if (existing) {
-      existing.maxStock = currentStoreStock; // update maxStock reference
+      existing.maxStock = currentStoreStock; 
       if (existing.qty >= currentStoreStock) {
         showToast('หยิบถึงขีดจำกัดสต๊อกแล้ว (' + currentStoreStock + ')', 'warning');
         return;
@@ -60,7 +60,7 @@ var Cart = {
 
     this.save(items);
     this.render();
-    showToast('เพิ่ม "' + product.name + '" ลงตะกร้าแล้ว', 'success');
+    showToast('เพิ่ม "' + product.name + (size ? ' ('+size+')' : '') + '" ลงตะกร้าแล้ว', 'success');
   },
 
   updateQty: function(productId, delta, size) {
@@ -74,14 +74,14 @@ var Cart = {
     }
 
     for (var i = 0; i < items.length; i++) {
-      if (items[i].productId === productId && (items[i].size || '') === targetSize) {
+      if (String(items[i].productId) === String(productId) && (items[i].size || '') === targetSize) {
         if (currentStock !== null) items[i].maxStock = currentStock;
 
         var nextQty = items[i].qty + delta;
         if (nextQty <= 0) {
           items.splice(i, 1);
           this.save(items);
-          this.render(); // If removed, full render is needed
+          this.render(); 
           return;
         } else if (nextQty > items[i].maxStock) {
           items[i].qty = items[i].maxStock;
@@ -95,16 +95,18 @@ var Cart = {
     }
     this.save(items);
 
-    // Try targeted update to prevent flickering
-    var qtyValEl = document.getElementById('qty-val-' + productId);
-    var itemTotalEl = document.getElementById('item-total-' + productId);
+    // Try targeted update to prevent flickering - fixed ID selection
+    var safeSize = targetSize || '';
+    var qtyValEl = document.getElementById('qty-val-' + productId + '-' + safeSize);
+    var itemTotalEl = document.getElementById('item-total-' + productId + '-' + safeSize);
+    
     if (qtyValEl && itemTotalEl && currentItem) {
       qtyValEl.textContent = currentItem.qty;
-      itemTotalEl.textContent = (typeof hasPermission === 'function' && !hasPermission('view_prices')) ? '***' : '฿' + (currentItem.price * currentItem.qty).toLocaleString();
+      var canViewPrice = (typeof hasPermission === 'function') ? hasPermission('view_prices') : true;
+      itemTotalEl.textContent = !canViewPrice ? '***' : '฿' + (currentItem.price * currentItem.qty).toLocaleString();
       
-      // Still need to update general cart totals
       var totalEl = document.getElementById('cartTotal');
-      if (totalEl) totalEl.textContent = (typeof hasPermission === 'function' && !hasPermission('view_prices')) ? '***' : '฿' + this.getTotal().toLocaleString();
+      if (totalEl) totalEl.textContent = !canViewPrice ? '***' : '฿' + this.getTotal().toLocaleString();
       this.renderBadge();
     } else {
       this.render();
@@ -114,7 +116,7 @@ var Cart = {
   remove: function(productId, size) {
     var targetSize = size || '';
     var items = this.getItems().filter(function(i) { 
-      return !(i.productId === productId && (i.size || '') === targetSize); 
+      return !(String(i.productId) === String(productId) && (i.size || '') === targetSize); 
     });
     this.save(items);
     this.render();
