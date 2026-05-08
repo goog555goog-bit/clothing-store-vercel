@@ -2852,6 +2852,7 @@
     var PERMISSION_KEYS = [
       { key: 'view_prices', label: 'ดูราคา', cat: 'inventory' },
       { key: 'manage_inventory', label: 'จัดการสต็อก', cat: 'inventory' },
+      { key: 'manage_products', label: 'จัดการรายการสินค้า', cat: 'inventory' },
       { key: 'manage_categories', label: 'จัดการหมวดหมู่', cat: 'inventory' },
       { key: 'has_substock', label: 'คลังย่อยส่วนตัว', cat: 'inventory' },
       { key: 'manage_team_substock', label: 'คลังย่อยทีม', cat: 'inventory' },
@@ -2870,6 +2871,7 @@
       { key: 'manage_settings', label: 'ตั้งค่าระบบ', cat: 'system' }
     ];
     var globalRolePermissions = {};
+    var defaultRolePermissions = {};
 
     function loadPermissionsPage() {
       var body = document.getElementById('permissionsBody');
@@ -2878,13 +2880,38 @@
       API.getSystemSettings().then(function (res) {
         var settings = res.data || {};
         globalRolePermissions = settings.rolePermissions || {};
+        defaultRolePermissions = res.defaultPermissions || {};
+
+        var mapping = {
+          'can_request': 'create_request',
+          'view_prices': 'view_products',
+          'approve_orders': 'approve_request',
+          'dispatch_orders': 'dispatch_request',
+          'manage_users': 'manage_employees',
+          'manage_branches': 'manage_structure',
+          'manage_inventory': 'manage_inventory',
+          'manage_products': 'manage_products',
+          'manage_categories': 'manage_categories',
+          'view_reports': 'view_reports',
+          'manage_settings': 'manage_settings'
+        };
 
         body.innerHTML = ADMIN_ROLES.map(function (role) {
           var p = globalRolePermissions[role.id] || {};
+          var defaults = defaultRolePermissions[role.id] || [];
 
           var cells = PERMISSION_KEYS.map(function (k) {
-            var checked = p[k.key] ? 'checked' : '';
-            return '<td style="text-align:center"><input type="checkbox" ' + checked + ' onchange="updateRolePermission(\'' + role.id + '\', \'' + k.key + '\', this.checked)"></td>';
+            var isChecked = false;
+            if (p.hasOwnProperty(k.key)) {
+              isChecked = p[k.key];
+            } else {
+              // Check hardcoded defaults
+              var mapped = mapping[k.key];
+              isChecked = defaults.indexOf(mapped) !== -1 || defaults.indexOf(k.key) !== -1;
+            }
+
+            var checkedAttr = isChecked ? 'checked' : '';
+            return '<td style="text-align:center"><input type="checkbox" ' + checkedAttr + ' onchange="updateRolePermission(\'' + role.id + '\', \'' + k.key + '\', this.checked)"></td>';
           }).join('');
 
           var allowedCats = p.allowed_categories || [];
