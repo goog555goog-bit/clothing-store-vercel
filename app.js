@@ -152,11 +152,11 @@ function updateUserUI() {
     if (ordersBtn) ordersBtn.classList.remove('hidden');
     if (changePwdBtn) changePwdBtn.classList.remove('hidden');
     
-    // แสดงปุ่มคลังย่อย
+    // แสดงปุ่มคลังย่อยสำหรับผู้ที่มีสิทธิ์จัดการคลังย่อย (Technicians, Admins, FC)
     var substockBtn = document.getElementById('substockBtn');
     var substockMob = document.querySelector('.mobile-nav-item[data-view="substock"]');
     if (substockBtn || substockMob) {
-      var isAllowed = API.hasPermission(API.PERMS.MANAGE_INVENTORY);
+      var isAllowed = API.hasPermission(API.PERMS.MANAGE_INVENTORY) || API.hasRole('technician');
       if (substockBtn) substockBtn.classList.toggle('hidden', !isAllowed);
       if (substockMob) substockMob.classList.toggle('hidden', !isAllowed);
     }
@@ -1330,15 +1330,9 @@ function loadSubStock() {
       + '</div></div>').join('');
   }
 
-  var options = {};
-  var useTeamStock = hasPermission('manage_team_substock') && currentUser && currentUser.teamId;
-  if (useTeamStock) {
-    options.teamId = currentUser.teamId;
-  }
-
-  API.getSubStock(options).then(function(res) {
+  API.getSubStock().then(function(res) {
     subStockCache = res.data;
-    renderSubStock(res.data, useTeamStock ? res.teamName : null);
+    renderSubStock(res.data, res.teamName);
   }).catch(function(err) {
     showToast('โหลดสต๊อกย่อยไม่สำเร็จ: ' + err, 'error');
   });
