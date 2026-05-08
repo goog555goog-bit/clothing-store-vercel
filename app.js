@@ -152,14 +152,20 @@ function updateUserUI() {
     if (ordersBtn) ordersBtn.classList.remove('hidden');
     if (changePwdBtn) changePwdBtn.classList.remove('hidden');
     
-    // แสดงปุ่มคลังย่อยสำหรับผู้ที่มีสิทธิ์จัดการคลังย่อย (Technicians, Admins, FC)
-    var substockBtn = document.getElementById('substockBtn');
-    var substockMob = document.querySelector('.mobile-nav-item[data-view="substock"]');
-    if (substockBtn || substockMob) {
-      var isAllowed = API.hasPermission(API.PERMS.MANAGE_INVENTORY) || API.hasRole('technician');
-      if (substockBtn) substockBtn.classList.toggle('hidden', !isAllowed);
-      if (substockMob) substockMob.classList.toggle('hidden', !isAllowed);
-    }
+      // แสดงปุ่มคลังย่อยสำหรับผู้ที่มีสิทธิ์จัดการคลังย่อย (Technicians, Admins, FC หรือผู้ที่ถูกติ๊กสิทธิ์เพิ่ม)
+      var substockBtn = document.getElementById('substockBtn');
+      var substockMob = document.getElementById('substockMob') || document.querySelector('.mobile-nav-item[data-view="substock"]');
+      
+      if (substockBtn || substockMob) {
+        var isAllowed = API.hasPermission(API.PERMS.MANAGE_INVENTORY) || 
+                         API.hasPermission('has_substock') || 
+                         API.hasPermission('manage_team_substock') || 
+                         API.hasPermission('supervise_substock') || 
+                         API.hasRole('technician');
+                         
+        if (substockBtn) substockBtn.classList.toggle('hidden', !isAllowed);
+        if (substockMob) substockMob.classList.toggle('hidden', !isAllowed);
+      }
 
     // ปุ่ม Admin
     var adminBtn = document.getElementById('adminPaneBtn');
