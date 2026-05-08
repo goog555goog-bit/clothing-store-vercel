@@ -1368,7 +1368,8 @@
     function hasPermission(key, value) {
       if (!currentUser) return false;
       var role = String(currentUser.role || '').toLowerCase();
-      if (role === 'superadmin') return true;
+      var isSuperAdmin = (role === 'superadmin' || role === 'owner' || String(currentUser.employeeId || '').toLowerCase() === 'admin');
+      if (isSuperAdmin) return true;
 
       // Compatibility for admin check
       if (key === 'manage_inventory') return API.hasPermission(API.PERMS.MANAGE_INVENTORY);

@@ -55,8 +55,9 @@ var API = (function () {
       try {
         var user = JSON.parse(localStorage.getItem('_user'));
         if (!user) return false;
-        // [แก้ไข BUG-6] ใช้ lowercase เปรียบเทียบเพื่อรองรับ Role ตัวพิมพ์ใหญ่/เล็ก
-        if (String(user.role || '').toLowerCase() === 'superadmin') return true;
+        var role = String(user.role || '').toLowerCase();
+        var isSuperAdmin = (role === 'superadmin' || role === 'owner' || String(user.employeeId || '').toLowerCase() === 'admin');
+        if (isSuperAdmin) return true;
         if (!user.permissions) return false;
         return user.permissions.indexOf(perm) !== -1;
       } catch (e) { return false; }
@@ -67,8 +68,8 @@ var API = (function () {
         var user = JSON.parse(localStorage.getItem('_user'));
         if (!user) return false;
         var uRole = String(user.role || '').toLowerCase();
-        // [แก้ไข BUG-6] Case-insensitive role check
-        if (uRole === 'superadmin') return true;
+        var isSuperAdmin = (uRole === 'superadmin' || uRole === 'owner' || String(user.employeeId || '').toLowerCase() === 'admin');
+        if (isSuperAdmin) return true;
         return uRole === String(role).toLowerCase();
       } catch (e) { return false; }
     },
