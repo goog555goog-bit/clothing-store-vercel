@@ -55,7 +55,8 @@ var API = (function () {
       try {
         var user = JSON.parse(localStorage.getItem('_user'));
         if (!user) return false;
-        if (user.role === 'superadmin') return true;
+        // [แก้ไข BUG-6] ใช้ lowercase เปรียบเทียบเพื่อรองรับ Role ตัวพิมพ์ใหญ่/เล็ก
+        if (String(user.role || '').toLowerCase() === 'superadmin') return true;
         if (!user.permissions) return false;
         return user.permissions.indexOf(perm) !== -1;
       } catch (e) { return false; }
@@ -65,8 +66,10 @@ var API = (function () {
       try {
         var user = JSON.parse(localStorage.getItem('_user'));
         if (!user) return false;
-        if (user.role === 'superadmin') return true;
-        return String(user.role).toLowerCase() === String(role).toLowerCase();
+        var uRole = String(user.role || '').toLowerCase();
+        // [แก้ไข BUG-6] Case-insensitive role check
+        if (uRole === 'superadmin') return true;
+        return uRole === String(role).toLowerCase();
       } catch (e) { return false; }
     },
 
@@ -124,7 +127,7 @@ var API = (function () {
       var payload = {
         action: action,
         data: data || {},
-        user: JSON.parse(localStorage.getItem('_user') || 'null'),
+        user: user, // [แก้ไข BUG-7] อ่าน localStorage ครั้งเดียวและส่ง Object ที่ Parse แล้ว
         token: localStorage.getItem('_tok') // ส่ง Token ไปกับทุก Request
       };
 

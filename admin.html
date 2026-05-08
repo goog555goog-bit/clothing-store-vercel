@@ -1388,8 +1388,9 @@
         return;
       }
 
-      // ตรวจสอบสิทธิ์ขั้นพื้นฐานในการเข้าหน้า Admin
-      var hasAnyAdminPerm = API.hasPermission(API.PERMS.MANAGE_PRODUCTS) || 
+      // [แก้ไข BUG-10] ตรวจสอบ Role Superadmin ก่อนเช็ค Permission ย่อย
+      var hasAnyAdminPerm = API.hasRole('superadmin') ||
+                            API.hasPermission(API.PERMS.MANAGE_PRODUCTS) || 
                             API.hasPermission(API.PERMS.APPROVE_REQUEST) || 
                             API.hasPermission(API.PERMS.MANAGE_INVENTORY);
                             
