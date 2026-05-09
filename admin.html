@@ -489,6 +489,8 @@
       </div>
     </section>
 
+    </section>
+
     <!-- AUDIT LOGS -->
     <section id="p-audit" class="admin-page" style="display:none">
       <div class="flex flex-wrap items-center justify-between gap-2"
@@ -515,6 +517,33 @@
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- [NEW] Inventory Usage Logs Section -->
+      <div style="margin-top:3rem; margin-bottom:1rem; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem">
+        <h3 style="color:var(--primary)"><i data-lucide="package-search"></i> ประวัติการเบิกใช้พัสดุ (Inventory Usage History)</h3>
+        <button class="btn btn-outline btn-sm" onclick="downloadCSV('InventoryLogs')">📥 Export CSV</button>
+      </div>
+      <div class="card" style="padding:0; overflow:hidden; border:1px solid var(--border)">
+        <div class="table-wrap">
+          <table class="table-compact">
+            <thead>
+              <tr style="background:rgba(255,255,255,0.02)">
+                <th>วันที่/เวลา</th>
+                <th>พนักงาน</th>
+                <th>สินค้า</th>
+                <th class="text-center">จำนวน</th>
+                <th>สาขาที่ใช้งาน</th>
+                <th>รายละเอียด</th>
+              </tr>
+            </thead>
+            <tbody id="inventoryAuditBody">
+              <tr>
+                <td colspan="6" class="text-center" style="padding:2rem; color:var(--text3)">กำลังโหลดข้อมูลประวัติการใช้งาน...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </section>
 
@@ -3531,6 +3560,36 @@
       }).catch(function (err) {
         body.innerHTML = '<tr><td colspan="5" class="text-center" style="padding:2rem;color:var(--danger)">ไม่สามารถโหลดข้อมูลได้: ' + err + '</td></tr>';
       });
+
+      loadInventoryAudit();
+    }
+
+    function loadInventoryAudit() {
+      var body = document.getElementById('inventoryAuditBody');
+      if (!body) return;
+      body.innerHTML = '<tr><td colspan="6" class="text-center" style="padding:2rem"><div class="spinner"></div></td></tr>';
+
+      API.getInventoryLogs({ limit: 50 }).then(function (res) {
+        var logs = res.data || [];
+        if (logs.length === 0) {
+          body.innerHTML = '<tr><td colspan="6" class="text-center" style="padding:2rem; color:var(--text3)">ยังไม่มีประวัติการเบิกใช้พัสดุ</td></tr>';
+          return;
+        }
+        body.innerHTML = logs.map(function (l) {
+          var color = Number(l.quantity) < 0 ? 'var(--danger)' : 'var(--accent)';
+          var icon = Number(l.quantity) < 0 ? '📤' : '📥';
+          return '<tr>'
+            + '<td style="font-size:0.75rem">' + (l.date || '-') + '</td>'
+            + '<td style="font-weight:500">' + (l.userName || l.user) + '</td>'
+            + '<td>' + l.productName + '</td>'
+            + '<td class="text-center" style="font-weight:700; color:' + color + '">' + icon + ' ' + Math.abs(l.quantity) + '</td>'
+            + '<td>' + (l.branchName || l.branchId || '-') + '</td>'
+            + '<td style="font-size:0.8rem; color:var(--text3)">' + l.action + '</td>'
+            + '</tr>';
+        }).join('');
+      }).catch(function (err) {
+        body.innerHTML = '<tr><td colspan="6" class="text-center" style="padding:2rem; color:var(--danger)">เกิดข้อผิดพลาดในการโหลดประวัติการใช้งาน</td></tr>';
+      });
     }
 
     // ─── REPORTS ──────────────────────────────────────────
@@ -4358,6 +4417,59 @@
       }, true);
     }
 
+    function downloadCSV(type) {
+      showToast('กำลังเตรียมไฟล์ CSV...', 'info');
+      var promise;
+      var fileName = type + '_' + new Date().getTime() + '.csv';
+
+      if (type === 'InventoryLogs') {
+        promise = API.getInventoryLogs({ limit: 500 }).then(function (res) {
+          return res.data || [];
+        });
+      } else if (type === 'AuditLogs') {
+        promise = API.getReportData('auditActivities').then(function (res) {
+          return (res.data && res.data.logs) ? res.data.logs : [];
+        });
+      } else {
+        showToast('ไม่รองรับการ Export ประเภทนี้ในขณะนี้', 'warning');
+        return;
+      }
+
+      promise.then(function (data) {
+        if (data.length === 0) {
+          showToast('ไม่มีข้อมูลสำหรับการส่งออก', 'warning');
+          return;
+        }
+
+        // Simple CSV generation
+        var headers = Object.keys(data[0]);
+        var csvContent = "\uFEFF"; // BOM for Excel Thai support
+        csvContent += headers.join(",") + "\n";
+
+        data.forEach(function (row) {
+          var rowData = headers.map(function (header) {
+            var val = row[header] === null || row[header] === undefined ? "" : String(row[header]);
+            // Escape quotes and wrap in quotes
+            return '"' + val.replace(/"/g, '""') + '"';
+          });
+          csvContent += rowData.join(",") + "\n";
+        });
+
+        var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        var link = document.createElement("a");
+        var url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", fileName);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        showToast('✅ ดาวน์โหลด CSV เรียบร้อย', 'success');
+      }).catch(function (err) {
+        showToast('เกิดข้อผิดพลาด: ' + err, 'error');
+      });
+    }
+
     function runDBMaintenance() {
       var btn = document.getElementById('btnUpdateDB');
       if (!btn) return;
@@ -4381,6 +4493,32 @@
         btn.innerHTML = oldHtml;
       });
     }
+
+    // ─── SCANNER INTEGRATION ──────────────────────────────
+    function openScanner() {
+      // Open separate scanner window
+      window.open('scanner.html?mode=receive', 'QRScanner', 'width=450,height=700');
+    }
+
+    window.addEventListener('message', function(event) {
+      if (event.data && event.data.type === 'QR_SCAN_RESULT') {
+        var code = event.data.text;
+        showToast('สแกนสำเร็จ: ' + code, 'success');
+        
+        // Logic: Search for product in inventory or auto-populate receive field
+        // For now, let's just search it
+        var searchInput = document.querySelector('.search-box input');
+        if (searchInput) {
+          searchInput.value = code;
+          // Trigger search logic
+          var allRows = masterAdminProducts || [];
+          allAdminProducts = allRows.filter(function(p) {
+            return String(p.productId).toLowerCase().includes(code.toLowerCase());
+          });
+          renderAdminProducts(1);
+        }
+      }
+    });
   </script>
 </body>
 

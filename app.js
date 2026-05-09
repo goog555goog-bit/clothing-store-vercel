@@ -1342,6 +1342,33 @@ function loadSubStock() {
   }).catch(function(err) {
     showToast('โหลดสต๊อกย่อยไม่สำเร็จ: ' + err, 'error');
   });
+  
+  loadUsageHistory();
+}
+
+function loadUsageHistory() {
+  var body = document.getElementById('usageHistoryBody');
+  if (!body) return;
+
+  API.getInventoryLogs({ userFilter: currentUser.employeeId, limit: 20 }).then(function(res) {
+    var logs = res.data || [];
+    if (logs.length === 0) {
+      body.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:2rem; color:var(--text3)">ยังไม่มีประวัติการใช้งาน</td></tr>';
+      return;
+    }
+    body.innerHTML = logs.map(function(l) {
+      var dateStr = String(l.date || '').split(' ')[0];
+      var timeStr = String(l.date || '').split(' ')[1] || '';
+      return '<tr>'
+        + '<td><div style="font-weight:500">' + dateStr + '</div><div style="font-size:0.7rem; color:var(--text3)">' + timeStr + '</div></td>'
+        + '<td>' + l.productName + (l.action.includes('ทีม') ? ' <span class="badge badge-pending" style="font-size:0.65rem">ทีม</span>' : '') + '</td>'
+        + '<td style="font-weight:600; color:' + (Number(l.quantity) < 0 ? 'var(--danger)' : 'var(--accent)') + '">' + l.quantity + '</td>'
+        + '<td>' + (l.branchName || '-') + '</td>'
+        + '</tr>';
+    }).join('');
+  }).catch(function(err) {
+    body.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:1rem; color:var(--danger)">โหลดประวัติไม่สำเร็จ</td></tr>';
+  });
 }
 
 function renderSubStock(data, teamName) {
@@ -1883,12 +1910,10 @@ function onSubStockScanned(code) {
   // 1. Play success sound/vibration
   if (navigator.vibrate) navigator.vibrate(100);
   
-  // 2. Stop scanner
-  closeSubStockScanner();
-  
-  // 3. Find item in current sub-stock data
+  // 2. Find item in current sub-stock data
   if (!currentSubStockData) {
     showToast('ไม่พบข้อมูลคลังย่อยในขณะนี้', 'warning');
+    closeSubStockScanner();
     return;
   }
   
@@ -1897,10 +1922,42 @@ function onSubStockScanned(code) {
   });
   
   if (item) {
+    // Stop scanner ONLY when found
+    closeSubStockScanner();
     showToast('พบสินค้า: ' + item.productName, 'success');
     openActionModal('use', item.productId, item.productName, item.quantity, item.size || '');
   } else {
+    // Provide feedback but keep scanner open
     showToast('ไม่พบรหัส "' + code + '" ในคลังย่อยของคุณ', 'warning');
+    // Visual feedback in placeholder
+    var p = document.getElementById('substockScannerPlaceholder');
+    if (p) {
+      p.style.display = 'flex';
+      p.innerHTML = '<i data-lucide="alert-circle" style="color:var(--danger);width:48px;height:48px;margin-bottom:1rem"></i>'
+                  + '<p style="color:#fff">ไม่พบรหัส "' + code + '"</p>'
+                  + '<button class="btn btn-outline btn-sm" style="margin-top:1rem" onclick="startSubStockScan()">ลองใหม่</button>';
+      refreshIcons();
+    }
   }
 }
+
+// ─── EXTERNAL SCANNER LISTENER ──────────────────────────────
+window.addEventListener('message', function(event) {
+  if (event.data && event.data.type === 'QR_SCAN_RESULT') {
+    var code = event.data.text;
+    console.log('External Scan Result:', code);
+    
+    // If we are in substock view, handle it
+    if (document.getElementById('view-substock').style.display === 'block') {
+      onSubStockScanned(code);
+    } else {
+      // Otherwise maybe search or open product detail
+      var input = document.getElementById('searchInput');
+      if (input) {
+        input.value = code;
+        handleSearchInput(code);
+      }
+    }
+  }
+});
 

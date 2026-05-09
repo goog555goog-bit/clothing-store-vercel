@@ -246,6 +246,7 @@ var API = (function () {
     getInventoryForecast: function () { return this._call('getInventoryForecast', {}, true); },
     getSubStock: function (params) { return this._call('getSubStock', params, true); },
     getSystemSettings: function () { return this._call('getSystemSettings', {}, false); }, // Always fresh for permissions
+    getInventoryLogs: function (filters) { return this._call('getInventoryLogs', filters || {}, true); },
 
     // ─── WRITE ACTIONS (Invalidate relevant caches) ───────────
     manageProduct: function (op, data) {

@@ -165,11 +165,37 @@
           <i data-lucide="scan"></i> สแกนใช้งาน
         </button>
       </div>
-      <div id="subStockGrid" class="product-grid" style="padding-bottom:3rem;">
+      <div id="subStockGrid" class="product-grid" style="padding-bottom:1.5rem;">
         <div class="empty-state" style="grid-column:1/-1;">
           <i data-lucide="package" style="width:48px;height:48px;"></i>
           <p>กำลังโหลดข้อมูลคลังย่อย</p>
           <small>กรุณารอสักครู่...</small>
+        </div>
+      </div>
+
+      <!-- [NEW] Usage History Section -->
+      <div id="usageHistorySection" style="margin-top:2rem; padding-bottom:5rem;">
+        <h3 style="font-size:1.1rem; font-weight:700; color:var(--text1); margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem;">
+          <i data-lucide="history" style="width:18px; height:18px; color:var(--accent)"></i> ประวัติการเบิกใช้ของทีม/ส่วนตัว
+        </h3>
+        <div class="card" style="padding:0; overflow:hidden; background:rgba(255,255,255,0.02); border:1px solid var(--border)">
+          <div class="table-wrap">
+            <table style="font-size:0.85rem">
+              <thead>
+                <tr>
+                  <th>วันที่</th>
+                  <th>รายการ</th>
+                  <th>จำนวน</th>
+                  <th>สถานที่/สาขา</th>
+                </tr>
+              </thead>
+              <tbody id="usageHistoryBody">
+                <tr>
+                  <td colspan="4" style="text-align:center; padding:2rem; color:var(--text3)">กำลังโหลดประวัติ...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
