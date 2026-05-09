@@ -1507,6 +1507,12 @@
         if (results[2].success && results[2].data) {
           allAdminDepartments = results[2].data;
         }
+        
+        // [NEW] บันทึกสินค้าลง LocalStorage สำหรับหน้าสแกนในโหมด Admin
+        API.getProducts().then(function(res) {
+          if (res.success) localStorage.setItem('_all_products_cache', JSON.stringify(res.data));
+        });
+
         loadDashboard();
       }).catch(function (err) {
         console.warn('Initial Data Load Failed:', err);

@@ -47,6 +47,10 @@
   --surface: #0a0a0f;
   --glass: rgba(0,0,0,0.8);
 }
+/* [เพิ่ม UX] Smooth transition เมื่อสลับ Dark Mode ป้องกันการกระพริบ */
+body, .app-header, .card, .modal, .cart-drawer, .mobile-nav {
+  transition: background-color 0.4s ease, border-color 0.3s ease;
+}
 
 
 
@@ -108,11 +112,16 @@ h1,h2,h3,h4 { letter-spacing: -0.025em; font-weight: 700; }
   width: 100%; padding: 0.75rem 1rem; border-radius: var(--radius-sm);
   border: 1px solid var(--border); background: var(--surface);
   color: var(--text); font-size: 0.95rem; transition: all 0.2s; font-family: inherit;
-  appearance: none; /* Premium custom arrow styling */
+  /* [แก้ไข UX] ลบ background-image ออกจาก input ทั่วไป — ลูกศรควรแสดงเฉพาะ dropdown เท่านั้น */
+}
+/* [แก้ไข UX] ลูกศร Dropdown แสดงเฉพาะ <select> เท่านั้น ป้องกันความสับสนบน text/password input */
+select.form-input, select.input {
+  appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23fbbf24' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 0.75rem center;
   background-size: 1.25rem;
+  cursor: pointer;
 }
 .form-input:focus, .input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(251,191,36,0.25); }
 
@@ -1434,6 +1443,21 @@ button:active, .btn:active, .nav-item:active, .category-pill:active, .cart-item-
   transform: scale(0.95);
 }
 
+/* [เพิ่ม UX] Pulse Animation สำหรับปุ่มที่อยู่ระหว่างโหลด — ช่วยบอกผู้ใช้ว่าระบบยังทำงานอยู่ */
+.btn:disabled .spinner,
+.btn[disabled] .spinner {
+  width: 18px; height: 18px;
+  border-width: 2px;
+}
+.btn-loading {
+  pointer-events: none;
+  animation: btnPulse 1.5s ease-in-out infinite;
+}
+@keyframes btnPulse {
+  0%, 100% { opacity: 0.85; box-shadow: 0 0 0 0 rgba(251,191,36,0.3); }
+  50% { opacity: 1; box-shadow: 0 0 0 8px rgba(251,191,36,0); }
+}
+
 /* ─── INVENTORY HEATMAP (Visual Cues) ─────────────── */
 .stock-safe { color: #10b981; }
 .stock-warning { color: #f59e0b; font-weight: 700; }
@@ -1531,31 +1555,8 @@ tr.row-stock-warning { background: rgba(245, 158, 11, 0.02) !important; }
   padding: 0.75rem 0.5rem;
 }
 
-/* ─── PREMIUM UX UPGRADES ──────────────────────────── */
-
-/* 1. Skeleton Loaders */
-@keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-
-.skeleton {
-  position: relative;
-  overflow: hidden;
-  background-color: rgba(255, 255, 255, 0.05); /* Base shimmer color */
-  background-image: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(251, 191, 36, 0.1) 50%, /* Gold-ish shimmer */
-    transparent 100%
-  );
-  background-size: 200% 100%;
-  background-repeat: no-repeat;
-  animation: shimmer 1.5s infinite linear;
-  border-radius: var(--radius-sm);
-}
-
-/* Skeleton Utilities */
+/* [แก้ไข UX] ลบ CSS ซ้ำซ้อน: .skeleton และ @keyframes shimmer ถูกรวมไว้ที่บรรทัด ~932 แล้ว */
+/* Skeleton Utilities (ไม่ซ้ำซ้อน — เก็บไว้) */
 .sk-line { height: 16px; margin-bottom: 8px; width: 100%; border-radius: 4px; }
 .sk-line-short { width: 60%; }
 .sk-avatar { width: 40px; height: 40px; border-radius: 50%; }

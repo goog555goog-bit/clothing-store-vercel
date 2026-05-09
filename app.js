@@ -402,6 +402,10 @@ function loadStorefrontData() {
     if (res.success) {
       allProducts = res.products || [];
       allCategories = res.categories || [];
+      
+      // [NEW] บันทึกสินค้าลง LocalStorage เพื่อให้หน้าสแกนดึงไปใช้งานได้
+      localStorage.setItem('_all_products_cache', JSON.stringify(allProducts));
+
       renderCategories();
       renderProductGrid();
       
@@ -1378,9 +1382,10 @@ function loadUsageHistory() {
       var dateStr = String(l.date || '').split(' ')[0];
       var timeStr = String(l.date || '').split(' ')[1] || '';
       
-      // [แก้ไข] ค้นหาชื่อสินค้าจากรายการสินค้าทั้งหมดในเครื่อง เพื่อให้แสดงชื่อภาษาไทยแทนรหัส
-      var p = allProducts.filter(function(x) { return String(x.productId) === String(l.productId); })[0];
-      var displayName = p ? p.name : l.productName;
+      // [แก้ไข] แสดงชื่อสินค้าภาษาไทย (ข้อมูลใหม่จาก Backend จะส่งชื่อมาให้เลย)
+      var pId = String(l.productId || '').trim();
+      var p = allProducts.filter(function(x) { return String(x.productId).trim() === pId; })[0];
+      var displayName = p ? p.name : (l.productName || pId);
 
       return '<tr>'
         + '<td><div style="font-weight:500">' + dateStr + '</div><div style="font-size:0.7rem; color:var(--text3)">' + timeStr + '</div></td>'

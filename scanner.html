@@ -262,10 +262,14 @@
     </div>
 
     <!-- Success Screen -->
+    <!-- [แก้ไข UX] ปรับปรุง Success Screen ให้เป็น Product Card ที่อ่านง่ายและ Responsive -->
     <div id="successScreen" class="success-screen">
       <div class="check-icon"><i data-lucide="check" style="width:32px;height:32px;color:white"></i></div>
       <h2 style="margin: 0 0 0.5rem; font-weight: 800;">สแกนสำเร็จ!</h2>
-      <p id="resultText" style="color: var(--primary); font-size: 1.2rem; font-weight: 700; margin-bottom: 1rem;"></p>
+      
+      <!-- [แก้ไข UX] Product Card Container — แสดงชื่อสินค้าอย่างชัดเจน -->
+      <div id="resultText" style="width:100%; max-width:300px; text-align:center; margin-bottom:1rem;"></div>
+      
       <p style="color: var(--text-dim); font-size: 0.85rem;">กำลังบันทึกข้อมูลและปิดหน้าต่างนี้...</p>
     </div>
   </main>
@@ -408,34 +412,66 @@
     }
 
     function onScanSuccess(decodedText) {
-      // แสดงหน้าจอสำเร็จ
       const successScreen = document.getElementById('successScreen');
       const resultText = document.getElementById('resultText');
       
-      resultText.innerText = decodedText;
+      // [แก้ไข] ดึงข้อมูลสินค้าจาก Cache เพื่อแสดงชื่อภาษาไทย
+      let productName = 'ไม่พบข้อมูลสินค้า';
+      let productImg = '';
+      let productId = String(decodedText).trim();
+      
+      try {
+        const cached = localStorage.getItem('_all_products_cache');
+        if (cached) {
+          const products = JSON.parse(cached);
+          const p = products.find(x => String(x.productId).trim() === productId);
+          if (p) {
+            productName = p.name;
+            productImg = p.imageUrl || '';
+          }
+        }
+      } catch (e) { console.error('Cache error:', e); }
+
+      // ปรับปรุง UI หน้าจอสำเร็จ
+      resultText.innerHTML = 
+        (productImg ? '<img src="' + getImageUrl(productImg) + '" style="width:120px; height:120px; object-fit:cover; border-radius:16px; margin: 0 auto 1rem; border:2px solid var(--primary)">' : '') +
+        '<div style="font-size: 1.8rem; line-height: 1.2; color: var(--primary); margin-bottom: 0.5rem; word-break: break-word;">' + productName + '</div>' +
+        '<div style="font-size: 0.9rem; color: var(--text-dim); opacity: 0.8;">รหัส: ' + productId + '</div>';
+
       successScreen.style.display = 'flex';
 
       // Haptic Feedback: สั่นเมื่อสแกนสำเร็จ
       if (navigator.vibrate) {
-        navigator.vibrate([100, 50, 100]); // สั่น 2 ครั้งสั้นๆ
+        navigator.vibrate([100, 50, 100]); 
       }
 
       // บันทึกข้อมูล
       const scanData = {
-        text: decodedText,
+        text: productId,
         timestamp: Date.now()
       };
       localStorage.setItem('_qr_scan_res', JSON.stringify(scanData));
 
       // ส่ง postMessage สำรอง
       if (window.opener) {
-        try { window.opener.postMessage({ type: 'QR_SCAN_RESULT', text: decodedText }, "*"); } catch(e) {}
+        try { window.opener.postMessage({ type: 'QR_SCAN_RESULT', text: productId }, "*"); } catch(e) {}
       }
 
-      // ปิดหน้าจออัตโนมัติ
+      // ปิดหน้าจออัตโนมัติ (ขยายเวลาขึ้นนิดหน่อยให้ช่างอ่านชื่อทัน)
       setTimeout(() => {
         window.close();
-      }, 1500);
+      }, 2500);
+    }
+
+    function getImageUrl(url) {
+      if (!url) return '';
+      if (url.indexOf('drive.google.com') !== -1 || url.indexOf('googleusercontent.com') !== -1) {
+        var id = '';
+        if (url.indexOf('id=') !== -1) id = url.split('id=')[1].split('&')[0];
+        else if (url.indexOf('/d/') !== -1) id = url.split('/d/')[1].split('/')[0];
+        return 'https://drive.google.com/thumbnail?id=' + id + '&sz=w200';
+      }
+      return url;
     }
     function toggleDarkMode() {
       var isDark = document.body.classList.toggle('dark-mode');

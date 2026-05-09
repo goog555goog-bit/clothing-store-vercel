@@ -37,23 +37,27 @@
       <div class="search-wrapper">
         <div class="search-box glass">
           <i data-lucide="search" style="width:18px;height:18px;color:var(--text3);margin-left:1rem;"></i>
+          <!-- [แก้ไข A11y] เพิ่ม aria-label สำหรับช่องค้นหา -->
           <input id="searchInput" type="text" placeholder="ค้นหาสินค้า..." autocomplete="off"
+            aria-label="ค้นหาสินค้าด้วยชื่อหรือรหัส"
             onfocus="handleSearchInput(this.value, event)" onclick="handleSearchInput(this.value, event)"
             onkeydown="handleSearchInput(this.value, event)" oninput="handleSearchInput(this.value, event)"
             style="padding-left:0.5rem;background:transparent;border:none;height:100%;color:var(--text);min-width:80px;">
         </div>
         <div class="search-options hide-mobile">
-          <select id="searchType" class="search-select-minimal glass">
+          <!-- [แก้ไข A11y] เพิ่ม aria-label ให้ตัวกรองทุกตัว -->
+          <select id="searchType" class="search-select-minimal glass" aria-label="ประเภทการค้นหา">
             <option value="all">ทั้งหมด</option>
             <option value="name">ชื่อสินค้า</option>
             <option value="productId">รหัสสินค้า</option>
             <option value="description">รายละเอียด</option>
           </select>
           <select id="headerCategoryFilter" class="search-select-minimal glass"
+            aria-label="กรองตามหมวดหมู่"
             onchange="onStoreCategoryChange(this.value)">
             <option value="all">ทุกหมวดหมู่</option>
           </select>
-          <select id="stockFilter" class="search-select-minimal glass" onchange="renderProductGrid()">
+          <select id="stockFilter" class="search-select-minimal glass" aria-label="กรองตามสถานะสต็อก" onchange="renderProductGrid()">
             <option value="all">ทุกสถานะ</option>
             <option value="instock">มีในคลัง</option>
           </select>
@@ -135,8 +139,9 @@
   <main id="view-orders" class="view-section" style="display:none;">
 
     <div class="container" style="padding-top:2rem;">
+      <!-- [แก้ไข UX] ลบ CSS ซ้ำซ้อน: flex-wrap และ gap ถูกประกาศ 2 ครั้ง -->
       <div
-        style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem;">
+        style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem;">
         <h2 style="font-size:1.25rem;font-weight:700;display:flex;align-items:center;gap:0.5rem;">
           <i data-lucide="clipboard-list" style="width:20px;height:20px;color:var(--primary);"></i> ประวัติการเบิก
         </h2>

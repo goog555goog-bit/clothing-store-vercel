@@ -19,6 +19,31 @@
       justify-content: center;
       overflow: hidden;
     }
+    /* [เพิ่ม] Ambient Background Orbs เพื่อความรู้สึก Premium */
+    .login-bg-orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.15;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .login-bg-orb-1 {
+      width: 400px; height: 400px;
+      background: var(--primary);
+      top: -100px; right: -100px;
+      animation: orbFloat 8s ease-in-out infinite;
+    }
+    .login-bg-orb-2 {
+      width: 300px; height: 300px;
+      background: #6366f1;
+      bottom: -50px; left: -50px;
+      animation: orbFloat 10s ease-in-out infinite reverse;
+    }
+    @keyframes orbFloat {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(20px, -30px) scale(1.1); }
+    }
     .login-container {
       width: 100%;
       padding: 1rem;
@@ -84,7 +109,11 @@
     }
   </style>
 
-  <div class="login-container">
+  <!-- [เพิ่ม] Ambient Background Orbs -->
+  <div class="login-bg-orb login-bg-orb-1"></div>
+  <div class="login-bg-orb login-bg-orb-2"></div>
+
+  <div class="login-container" style="position:relative; z-index:1;">
     <div class="login-card">
       <div class="logo-icon" style="width:72px;height:72px;font-size:2rem;margin:0 auto 2rem; border-radius: 20px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); display: flex; align-items: center; justify-content: center; box-shadow: 0 15px 30px -5px rgba(251, 191, 36, 0.4);"><i data-lucide="package" style="width:36px;height:36px;color:#000"></i></div>
       <h1 style="color:#fff">EMETIX <span style="color:var(--primary)">PREMIUM</span></h1>
@@ -107,7 +136,8 @@
         ยืนยันตัวตน
       </button>
 
-      <div id="loginError" style="color:var(--danger);margin-top:1.25rem;font-size:0.9rem; font-weight: 500;"></div>
+      <!-- [แก้ไข A11y] เพิ่ม role="alert" และ aria-live เพื่อ Screen Reader อ่านข้อผิดพลาดได้ -->
+      <div id="loginError" role="alert" aria-live="assertive" style="color:var(--danger);margin-top:1.25rem;font-size:0.9rem; font-weight: 500;"></div>
       
       <div style="margin-top:2rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 1.5rem;">
         <button class="btn btn-ghost btn-sm w-full" style="justify-content:center; color: var(--text3);" onclick="navigateTo('index.html')">
