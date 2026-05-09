@@ -1416,15 +1416,17 @@ function renderSubStock(data, teamName) {
       ? '<img src="' + imgUrl + '" class="product-img" loading="lazy" onerror="this.src=\'\';this.parentElement.innerHTML=\'<div class=\\\'product-img\\\' style=\\\'display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:2rem\\\'>📦</div>\'">'
       : '<div class="product-img" style="display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:2rem">📦</div>';
 
+    var pNameSafe = String(item.productName || 'ไม่ทราบชื่อ').replace(/'/g, "\\'");
+
     return '<div class="product-card">'
       + imgHtml
       + '<div class="product-info">'
-      +   '<div class="product-name">' + item.productName + (item.size ? ' <span class="badge" style="font-size:0.7rem; padding:2px 6px">' + item.size + '</span>' : '') + '</div>'
+      +   '<div class="product-name">' + (item.productName || 'ไม่ทราบชื่อ') + (item.size ? ' <span class="badge" style="font-size:0.7rem; padding:2px 6px">' + item.size + '</span>' : '') + '</div>'
       +   '<div class="product-stock">คงเหลือ: <span id="ss-qty-' + item.productId + '-' + (item.size || 'default') + '">' + item.quantity + '</span></div>'
       +   '<div style="margin-top:1rem; display:flex; gap:0.5rem; flex-wrap:wrap">'
-      +     '<button class="btn btn-primary btn-sm flex-1" onclick="openActionModal(\'use\', \'' + item.productId + '\', \'' + item.productName.replace(/'/g, "\\'") + '\', ' + item.quantity + ', \'' + (item.size || '') + '\')"><i data-lucide="sparkles" style="width:14px;height:14px"></i> เบิกใช้งาน</button>'
-      +     '<button class="btn btn-outline btn-sm" title="โอนให้เพื่อน" onclick="openActionModal(\'transfer\', \'' + item.productId + '\', \'' + item.productName.replace(/'/g, "\\'") + '\', ' + item.quantity + ', \'' + (item.size || '') + '\')"><i data-lucide="repeat" style="width:14px;height:14px"></i> โอน</button>'
-      +     '<button class="btn btn-ghost btn-sm" title="คืนคลังหลัก" onclick="openActionModal(\'return\', \'' + item.productId + '\', \'' + item.productName.replace(/'/g, "\\'") + '\', ' + item.quantity + ', \'' + (item.size || '') + '\')"><i data-lucide="archive" style="width:14px;height:14px"></i> คืน</button>'
+      +     '<button class="btn btn-primary btn-sm flex-1" onclick="openActionModal(\'use\', \'' + item.productId + '\', \'' + pNameSafe + '\', ' + item.quantity + ', \'' + (item.size || '') + '\')"><i data-lucide="sparkles" style="width:14px;height:14px"></i> เบิกใช้งาน</button>'
+      +     '<button class="btn btn-outline btn-sm" title="โอนให้เพื่อน" onclick="openActionModal(\'transfer\', \'' + item.productId + '\', \'' + pNameSafe + '\', ' + item.quantity + ', \'' + (item.size || '') + '\')"><i data-lucide="repeat" style="width:14px;height:14px"></i> โอน</button>'
+      +     '<button class="btn btn-ghost btn-sm" title="คืนคลังหลัก" onclick="openActionModal(\'return\', \'' + item.productId + '\', \'' + pNameSafe + '\', ' + item.quantity + ', \'' + (item.size || '') + '\')"><i data-lucide="archive" style="width:14px;height:14px"></i> คืน</button>'
       +   '</div>'
       + '</div>'
       + '</div>';
