@@ -1892,9 +1892,19 @@ function openSubStockScanner() {
 
 function closeSubStockScanner() {
   if (substockScanner) {
-    substockScanner.stop().then(function() {
+    try {
+      // Check if scanner is actually running before trying to stop it
+      if (substockScanner.getState() === 2) { // 2 = SCANNING
+        substockScanner.stop().finally(function() {
+          substockScanner = null;
+        });
+      } else {
+        substockScanner = null;
+      }
+    } catch (e) {
+      console.error('Stop scanner error:', e);
       substockScanner = null;
-    }).catch(function(err) { console.error('Stop scanner error:', err); });
+    }
   }
   document.getElementById('subStockScannerModal').classList.remove('open');
 }
@@ -1926,7 +1936,11 @@ function startSubStockScan() {
     }
   ).catch(function(err) {
     console.error('Scanner start error:', err);
-    showToast('ไม่สามารถเปิดกล้องได้: ' + err, 'error');
+    var msg = 'ไม่สามารถเปิดกล้องได้: ' + err;
+    if (String(err).includes('NotAllowedError') || String(err).includes('Permission denied')) {
+      msg = 'กรุณาอนุญาตให้เข้าถึงกล้องถ่ายรูปในการตั้งค่าเบราว์เซอร์ของคุณ เพื่อใช้งานระบบสแกน';
+    }
+    showToast(msg, 'error');
     document.getElementById('substockScannerPlaceholder').style.display = 'flex';
   });
 }

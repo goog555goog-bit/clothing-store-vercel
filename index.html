@@ -4,13 +4,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EMETIX STORE - Digital Procurement</title>
+  <title>YY STOCK-SYSTEM - Digital Procurement</title>
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="dns-prefetch" href="https://unpkg.com">
   <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <script src="https://unpkg.com/lucide@latest" defer></script>
   <script src="https://unpkg.com/html5-qrcode" defer></script>
@@ -27,8 +29,8 @@
       <!-- Logo -->
       <div class="logo" onclick="switchView('store')">
         <div class="logo-icon"><i data-lucide="package"></i></div>
-        <span style="font-size:1.35rem;font-weight:800;letter-spacing:-1px;color:#fff;">EMETIX <span
-            style="font-weight:300;opacity:0.6;color:var(--primary);">STORE</span></span>
+        <span style="font-size:1.35rem;font-weight:800;letter-spacing:-1px;color:#fff;">YY <span
+            style="font-weight:300;opacity:0.6;color:var(--primary);">STOCK-SYSTEM</span></span>
       </div>
 
       <!-- Search Bar -->
@@ -37,8 +39,7 @@
           <i data-lucide="search" style="width:18px;height:18px;color:var(--text3);margin-left:1rem;"></i>
           <input id="searchInput" type="text" placeholder="ค้นหาสินค้า..." autocomplete="off"
             onfocus="handleSearchInput(this.value, event)" onclick="handleSearchInput(this.value, event)"
-            onkeydown="handleSearchInput(this.value, event)" 
-            oninput="handleSearchInput(this.value, event)"
+            onkeydown="handleSearchInput(this.value, event)" oninput="handleSearchInput(this.value, event)"
             style="padding-left:0.5rem;background:transparent;border:none;height:100%;color:var(--text);min-width:80px;">
         </div>
         <div class="search-options hide-mobile">
@@ -48,7 +49,8 @@
             <option value="productId">รหัสสินค้า</option>
             <option value="description">รายละเอียด</option>
           </select>
-          <select id="headerCategoryFilter" class="search-select-minimal glass" onchange="onStoreCategoryChange(this.value)">
+          <select id="headerCategoryFilter" class="search-select-minimal glass"
+            onchange="onStoreCategoryChange(this.value)">
             <option value="all">ทุกหมวดหมู่</option>
           </select>
           <select id="stockFilter" class="search-select-minimal glass" onchange="renderProductGrid()">
@@ -64,19 +66,24 @@
 
       <!-- User Actions (compact — nav tabs live in mobile nav) -->
       <div class="nav-actions">
-        <button id="adminPaneBtn" class="btn btn-accent btn-sm hidden" onclick="navigateTo('admin.html')" aria-label="เข้าสู่หน้าแอดมิน">
+        <button id="adminPaneBtn" class="btn btn-accent btn-sm hidden" onclick="navigateTo('admin.html')"
+          aria-label="เข้าสู่หน้าแอดมิน">
           <i data-lucide="settings"></i> <span class="hide-mobile">แอดมิน</span>
         </button>
-        <button id="mgrPaneBtn" class="btn btn-warning btn-sm hidden" onclick="navigateTo('manager.html')" aria-label="เข้าสู่หน้าผู้อนุมัติ">
+        <button id="mgrPaneBtn" class="btn btn-warning btn-sm hidden" onclick="navigateTo('manager.html')"
+          aria-label="เข้าสู่หน้าผู้อนุมัติ">
           <i data-lucide="scale"></i> <span class="hide-mobile">ผู้อนุมัติ</span>
         </button>
-        <button id="ordersBtn" class="btn btn-ghost btn-sm hidden" onclick="switchView('orders')" aria-label="ดูรายการเบิกของฉัน">
+        <button id="ordersBtn" class="btn btn-ghost btn-sm hidden" onclick="switchView('orders')"
+          aria-label="ดูรายการเบิกของฉัน">
           <i data-lucide="clipboard-list"></i> <span class="hide-mobile">รายการเบิก</span>
         </button>
-        <button id="substockBtn" class="btn btn-primary btn-sm hidden" onclick="switchView('substock')" aria-label="จัดการคลังย่อย">
+        <button id="substockBtn" class="btn btn-primary btn-sm hidden" onclick="switchView('substock')"
+          aria-label="จัดการคลังย่อย">
           <i data-lucide="package-search"></i> <span class="hide-mobile">คลังย่อย</span>
         </button>
-        <button id="teamStockBtn" class="btn btn-accent btn-sm hidden" onclick="switchView('substock')" aria-label="จัดการคลังทีม">
+        <button id="teamStockBtn" class="btn btn-accent btn-sm hidden" onclick="switchView('substock')"
+          aria-label="จัดการคลังทีม">
           <i data-lucide="users"></i> <span class="hide-mobile">สต๊อกทีม</span>
         </button>
         <button id="loginBtn" class="btn btn-outline btn-sm" onclick="navigateTo('login.html')">
@@ -85,7 +92,8 @@
         <button id="logoutBtn" class="btn btn-ghost btn-sm hidden" onclick="logout()" aria-label="ออกจากระบบ">
           <span id="navUserName"></span> <i data-lucide="log-out"></i>
         </button>
-        <button id="changePwdBtn" class="btn btn-ghost btn-sm hidden" onclick="openPasswordModal()" title="เปลี่ยนรหัสผ่าน">
+        <button id="changePwdBtn" class="btn btn-ghost btn-sm hidden" onclick="openPasswordModal()"
+          title="เปลี่ยนรหัสผ่าน">
           <i data-lucide="key" style="width:16px;height:16px"></i>
         </button>
         <button class="btn btn-ghost hide-mobile" style="position:relative" onclick="toggleDrawer('cartDrawer')"
@@ -160,8 +168,10 @@
   <main id="view-substock" class="view-section" style="display:none;">
 
     <div class="container" style="padding-top:2rem;">
-      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem">
-        <h2 id="substockTitle" style="font-size:1.25rem;font-weight:700;margin:0;display:flex;align-items:center;gap:0.5rem;">
+      <div
+        style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem">
+        <h2 id="substockTitle"
+          style="font-size:1.25rem;font-weight:700;margin:0;display:flex;align-items:center;gap:0.5rem;">
           <i data-lucide="package-search" style="width:20px;height:20px;color:var(--primary);"></i> คลังย่อยของฉัน
         </h2>
         <button class="btn btn-accent btn-sm" onclick="openSubStockScanner()">
@@ -178,10 +188,13 @@
 
       <!-- [NEW] Usage History Section -->
       <div id="usageHistorySection" style="margin-top:2rem; padding-bottom:5rem;">
-        <h3 style="font-size:1.1rem; font-weight:700; color:var(--text1); margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem;">
-          <i data-lucide="history" style="width:18px; height:18px; color:var(--accent)"></i> ประวัติการเบิกใช้ของทีม/ส่วนตัว
+        <h3
+          style="font-size:1.1rem; font-weight:700; color:var(--text1); margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem;">
+          <i data-lucide="history" style="width:18px; height:18px; color:var(--accent)"></i>
+          ประวัติการเบิกใช้ของทีม/ส่วนตัว
         </h3>
-        <div class="card" style="padding:0; overflow:hidden; background:rgba(255,255,255,0.02); border:1px solid var(--border)">
+        <div class="card"
+          style="padding:0; overflow:hidden; background:rgba(255,255,255,0.02); border:1px solid var(--border)">
           <div class="table-wrap">
             <table style="font-size:0.85rem">
               <thead>
@@ -386,19 +399,22 @@
   ══════════════════════════════════════════ -->
   <div id="subStockScannerModal" class="modal-overlay" onclick="if(event.target===this) closeSubStockScanner()">
     <div class="modal" style="max-width:450px; padding:0; overflow:hidden;">
-      <div class="modal-header" style="background:rgba(255,255,255,0.03); border-bottom:1px solid rgba(255,255,255,0.05)">
+      <div class="modal-header"
+        style="background:rgba(255,255,255,0.03); border-bottom:1px solid rgba(255,255,255,0.05)">
         <div style="font-weight:700; display:flex; align-items:center; gap:0.5rem">
           <i data-lucide="scan" style="color:var(--primary)"></i> สแกนพัสดุในคลังย่อย
         </div>
         <button class="btn btn-ghost btn-sm" onclick="closeSubStockScanner()">✕</button>
       </div>
       <div class="modal-body" style="padding:1.5rem">
-        <div id="substock-scanner-ui" style="width:100%; min-height:250px; background:#000; border-radius:12px; overflow:hidden; position:relative">
+        <div id="substock-scanner-ui"
+          style="width:100%; min-height:250px; background:#000; border-radius:12px; overflow:hidden; position:relative">
           <div id="substock-reader"></div>
-          <div id="substockScannerPlaceholder" style="position:absolute; top:0; left:0; width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:2; background:rgba(0,0,0,0.7); text-align:center; padding:1rem">
-             <i data-lucide="camera" style="width:48px;height:48px;margin-bottom:1rem;opacity:0.3"></i>
-             <p style="font-size:0.9rem;color:#fff;margin-bottom:1rem">พร้อมสำหรับการสแกนบาร์โค้ด/QR</p>
-             <button class="btn btn-primary" onclick="startSubStockScan()">เปิดกล้องสแกน</button>
+          <div id="substockScannerPlaceholder"
+            style="position:absolute; top:0; left:0; width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:2; background:rgba(0,0,0,0.7); text-align:center; padding:1rem">
+            <i data-lucide="camera" style="width:48px;height:48px;margin-bottom:1rem;opacity:0.3"></i>
+            <p style="font-size:0.9rem;color:#fff;margin-bottom:1rem">พร้อมสำหรับการสแกนบาร์โค้ด/QR</p>
+            <button class="btn btn-primary" onclick="startSubStockScan()">เปิดกล้องสแกน</button>
           </div>
         </div>
         <div style="margin-top:1.5rem; text-align:center">
@@ -460,17 +476,16 @@
       <i data-lucide="clipboard-list"></i>
       <span>รายการ</span>
     </button>
-    <button id="substockMob" class="mobile-nav-item main-tab hidden" data-view="substock" onclick="switchView('substock')">
+    <button id="substockMob" class="mobile-nav-item main-tab hidden" data-view="substock"
+      onclick="switchView('substock')">
       <i data-lucide="package-search"></i>
       <span>คลังย่อย</span>
     </button>
-    <button id="adminMobileBtn" class="mobile-nav-item hidden" data-view="admin"
-      onclick="navigateTo('admin.html')">
+    <button id="adminMobileBtn" class="mobile-nav-item hidden" data-view="admin" onclick="navigateTo('admin.html')">
       <i data-lucide="shield-check"></i>
       <span>แอดมิน</span>
     </button>
-    <button id="mgrMobileBtn" class="mobile-nav-item hidden" data-view="manager"
-      onclick="navigateTo('manager.html')">
+    <button id="mgrMobileBtn" class="mobile-nav-item hidden" data-view="manager" onclick="navigateTo('manager.html')">
       <i data-lucide="scale"></i>
       <span>ผู้อนุมัติ</span>
     </button>
@@ -487,7 +502,9 @@
   <script src="cart.js"></script>
   <script src="app.js"></script>
   <!-- Back to Top Button -->
-  <button id="backToTopBtn" class="btn btn-primary" style="position:fixed; bottom:5rem; right:1.5rem; border-radius:50%; width:50px; height:50px; display:none; align-items:center; justify-content:center; box-shadow:var(--shadow-lg); z-index:1200; padding:0; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1)" onclick="window.scrollTo({top:0, behavior:'smooth'})" title="กลับขึ้นด้านบน">
+  <button id="backToTopBtn" class="btn btn-primary"
+    style="position:fixed; bottom:5rem; right:1.5rem; border-radius:50%; width:50px; height:50px; display:none; align-items:center; justify-content:center; box-shadow:var(--shadow-lg); z-index:1200; padding:0; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1)"
+    onclick="window.scrollTo({top:0, behavior:'smooth'})" title="กลับขึ้นด้านบน">
     <i data-lucide="arrow-up" style="width:24px;height:24px"></i>
   </button>
   <script>
@@ -508,27 +525,27 @@
       var input = document.createElement('input');
       input.type = 'text';
       input.className = 'form-input search-select-input';
-      
+
       // Fix Placeholder Logic: Only set value if it's NOT the placeholder option
       var initialOpt = select.options[select.selectedIndex];
       var placeholderText = select.options[0] ? select.options[0].text : 'พิมพ์เพื่อค้นหา...';
       input.placeholder = placeholderText;
-      
+
       if (select.value && select.selectedIndex > 0) {
         input.value = initialOpt.text;
       } else {
         input.value = ''; // Ensure placeholder shows
       }
-      
+
       // Safety: ensure select is hidden if we re-init
       select.style.display = 'none';
-      
+
       input.autocomplete = 'off';
-      
+
       var chevron = document.createElement('div');
       chevron.className = 'search-select-chevron';
       chevron.innerHTML = '<i data-lucide="chevron-down" style="width:16px;height:16px;color:var(--text3)"></i>';
-      
+
       var dropdown = document.createElement('div');
       dropdown.className = 'search-select-dropdown';
 
@@ -540,8 +557,8 @@
       function updateDropdown(filter) {
         var options = Array.from(select.options);
         var filterLower = (filter || '').toLowerCase().trim();
-        
-        var filtered = options.filter(function(o, i) {
+
+        var filtered = options.filter(function (o, i) {
           if (i === 0 && !o.value && !showAllOnEmpty) return false; // skip placeholder if not showing all
           if (!filterLower) return true;
           return o.text.toLowerCase().includes(filterLower);
@@ -554,18 +571,18 @@
         if (filtered.length === 0) {
           dropdown.innerHTML = '<div class="search-select-empty">ไม่พบตัวเลือกที่ตรงกัน</div>';
         } else {
-          var html = shown.map(function(o) {
+          var html = shown.map(function (o) {
             return '<div class="search-select-item ' + (o.value === select.value ? 'selected' : '') + '" data-value="' + o.value + '">' + o.text + '</div>';
           }).join('');
-          
+
           if (filtered.length > displayLimit) {
             html += '<div class="search-select-empty" style="font-size:0.75rem; border-top:1px solid var(--border)">... และอีก ' + (filtered.length - displayLimit) + ' รายการ (โปรดพิมพ์เพื่อกรองเพิ่มเติม)</div>';
           }
           dropdown.innerHTML = html;
         }
 
-        dropdown.querySelectorAll('.search-select-item').forEach(function(item) {
-          item.onclick = function(e) {
+        dropdown.querySelectorAll('.search-select-item').forEach(function (item) {
+          item.onclick = function (e) {
             e.stopPropagation();
             select.value = this.dataset.value;
             input.value = this.textContent;
@@ -575,7 +592,7 @@
         });
       }
 
-      input.onfocus = function() {
+      input.onfocus = function () {
         if (!dropdown.classList.contains('active')) {
           // If current value is placeholder-ish, clear it to show placeholder
           if (select.selectedIndex <= 0) this.value = '';
@@ -584,7 +601,7 @@
         }
       };
 
-      input.onclick = function(e) {
+      input.onclick = function (e) {
         e.stopPropagation();
         if (dropdown.classList.contains('active')) {
           dropdown.classList.remove('active');
@@ -604,16 +621,16 @@
         }
       }
 
-      input.oninput = function() {
+      input.oninput = function () {
         var val = this.value;
         if (_ssDebounceTimer) clearTimeout(_ssDebounceTimer);
-        _ssDebounceTimer = setTimeout(function() {
+        _ssDebounceTimer = setTimeout(function () {
           updateDropdown(val);
           dropdown.classList.add('active');
         }, 250); // 250ms Debounce
       };
 
-      document.addEventListener('click', function(e) {
+      document.addEventListener('click', function (e) {
         if (!wrapper.contains(e.target)) {
           if (dropdown.classList.contains('active')) {
             dropdown.classList.remove('active');
@@ -623,7 +640,7 @@
       }, true);
     }
 
-    window.addEventListener('scroll', function() {
+    window.addEventListener('scroll', function () {
       var btn = document.getElementById('backToTopBtn');
       if (btn) {
         if (window.scrollY > 400) {
