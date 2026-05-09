@@ -519,11 +519,37 @@
         </table>
       </div>
 
-      <!-- [NEW] Inventory Usage Logs Section -->
-      <div style="margin-top:3rem; margin-bottom:1rem; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem">
-        <h3 style="color:var(--primary)"><i data-lucide="package-search"></i> ประวัติการเบิกใช้พัสดุ (Inventory Usage History)</h3>
+      <!-- [NEW] Inventory Usage Logs Section with Filters -->
+      <div style="margin-top:3rem; margin-bottom:1rem; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem">
+        <h3 style="color:var(--primary); margin:0"><i data-lucide="package-search"></i> ประวัติการเบิกใช้พัสดุ (Inventory Usage History)</h3>
         <button class="btn btn-outline btn-sm" onclick="downloadCSV('InventoryLogs')">📥 Export CSV</button>
       </div>
+
+      <!-- Filters Row -->
+      <div class="card glass" style="margin-bottom: 1rem; padding: 1rem; border: 1px solid var(--primary-light); background: rgba(99, 102, 241, 0.03);">
+        <div class="grid grid-3-tablet gap-2">
+          <div>
+            <label class="form-label" style="font-size:0.8rem; color:var(--text2)">กรองตามทีม</label>
+            <select id="logFilterTeam" class="input w-full" onchange="onLogTeamChange()" style="background:var(--surface)">
+              <option value="all">ทุกทีม (All Teams)</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label" style="font-size:0.8rem; color:var(--text2)">กรองตามพนักงาน</label>
+            <select id="logFilterUser" class="input w-full" onchange="loadInventoryAudit()" style="background:var(--surface)">
+              <option value="all">ทุกคน (All Employees)</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label" style="font-size:0.8rem; color:var(--text2)">ค้นหาสินค้า</label>
+            <div style="position:relative">
+              <i data-lucide="search" style="position:absolute; left:0.75rem; top:50%; transform:translateY(-50%); width:14px; height:14px; color:var(--text3)"></i>
+              <input type="text" id="logFilterProduct" class="input w-full" placeholder="รหัสหรือชื่อสินค้า..." oninput="loadInventoryAudit()" style="padding-left:2.25rem; background:var(--surface)">
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="card" style="padding:0; overflow:hidden; border:1px solid var(--border)">
         <div class="table-wrap">
           <table class="table-compact">
@@ -3562,17 +3588,30 @@
       });
 
       loadInventoryAudit();
+      initLogFilters(); // [NEW] โหลดรายชื่อทีมและพนักงานสำหรับตัวกรอง
     }
 
     function loadInventoryAudit() {
       var body = document.getElementById('inventoryAuditBody');
       if (!body) return;
+      
+      // ดึงค่าจากตัวกรอง
+      var teamId = document.getElementById('logFilterTeam') ? document.getElementById('logFilterTeam').value : 'all';
+      var userId = document.getElementById('logFilterUser') ? document.getElementById('logFilterUser').value : 'all';
+      var productQuery = document.getElementById('logFilterProduct') ? document.getElementById('logFilterProduct').value : '';
+
       body.innerHTML = '<tr><td colspan="6" class="text-center" style="padding:2rem"><div class="spinner"></div></td></tr>';
 
-      API.getInventoryLogs({ limit: 50 }).then(function (res) {
+      // ส่ง Parameter ไปยัง Backend
+      API.getInventoryLogs({ 
+        userFilter: userId, 
+        productIdFilter: productQuery, 
+        limit: 100,
+        teamFilter: teamId 
+      }).then(function (res) {
         var logs = res.data || [];
         if (logs.length === 0) {
-          body.innerHTML = '<tr><td colspan="6" class="text-center" style="padding:2rem; color:var(--text3)">ยังไม่มีประวัติการเบิกใช้พัสดุ</td></tr>';
+          body.innerHTML = '<tr><td colspan="6" class="text-center" style="padding:2rem; color:var(--text3)">ยังไม่มีประวัติการเบิกใช้พัสดุตามเงื่อนไขที่เลือก</td></tr>';
           return;
         }
         body.innerHTML = logs.map(function (l) {
@@ -3590,6 +3629,50 @@
       }).catch(function (err) {
         body.innerHTML = '<tr><td colspan="6" class="text-center" style="padding:2rem; color:var(--danger)">เกิดข้อผิดพลาดในการโหลดประวัติการใช้งาน</td></tr>';
       });
+    }
+
+    // ฟังก์ชันเมื่อเปลี่ยนทีม -> กรองรายชื่อพนักงาน
+    function onLogTeamChange() {
+      var teamId = document.getElementById('logFilterTeam').value;
+      var userSelect = document.getElementById('logFilterUser');
+      
+      // กรองพนักงานในทีม
+      var filteredEmps = allEmployees.filter(function(e) {
+        return teamId === 'all' || String(e.teamId) === String(teamId);
+      });
+
+      userSelect.innerHTML = '<option value="all">ทุกคน (All Employees)</option>' + 
+        filteredEmps.map(function(e) {
+          return '<option value="' + e.employeeId + '">' + e.name + ' (' + e.employeeId + ')</option>';
+        }).join('');
+      
+      loadInventoryAudit();
+    }
+
+    // เริ่มต้นตัวกรองทีมและพนักงาน
+    function initLogFilters() {
+      var teamSelect = document.getElementById('logFilterTeam');
+      if (!teamSelect) return;
+
+      // เติมรายชื่อทีม
+      API.getTeams().then(function(res) {
+        var teams = res.data || [];
+        teamSelect.innerHTML = '<option value="all">ทุกทีม (All Teams)</option>' + 
+          teams.map(function(t) {
+            return '<option value="' + t.teamId + '">' + t.name + '</option>';
+          }).join('');
+        refreshIcons();
+      });
+
+      // ดึงรายชื่อพนักงานทั้งหมดไว้รอ (ถ้ายังไม่มี)
+      if (!allEmployees || allEmployees.length === 0) {
+        API.getEmployees().then(function(res) {
+          allEmployees = res.data || [];
+          onLogTeamChange(); // Init user list
+        });
+      } else {
+        onLogTeamChange();
+      }
     }
 
     // ─── REPORTS ──────────────────────────────────────────

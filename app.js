@@ -1377,9 +1377,14 @@ function loadUsageHistory() {
     body.innerHTML = logs.map(function(l) {
       var dateStr = String(l.date || '').split(' ')[0];
       var timeStr = String(l.date || '').split(' ')[1] || '';
+      
+      // [แก้ไข] ค้นหาชื่อสินค้าจากรายการสินค้าทั้งหมดในเครื่อง เพื่อให้แสดงชื่อภาษาไทยแทนรหัส
+      var p = allProducts.filter(function(x) { return String(x.productId) === String(l.productId); })[0];
+      var displayName = p ? p.name : l.productName;
+
       return '<tr>'
         + '<td><div style="font-weight:500">' + dateStr + '</div><div style="font-size:0.7rem; color:var(--text3)">' + timeStr + '</div></td>'
-        + '<td>' + l.productName + (l.action.includes('ทีม') ? ' <span class="badge badge-pending" style="font-size:0.65rem">ทีม</span>' : '') + '</td>'
+        + '<td>' + displayName + (l.action.includes('ทีม') ? ' <span class="badge badge-pending" style="font-size:0.65rem">ทีม</span>' : '') + '</td>'
         + '<td style="font-weight:600; color:' + (Number(l.quantity) < 0 ? 'var(--danger)' : 'var(--accent)') + '">' + l.quantity + '</td>'
         + '<td>' + (l.branchName || '-') + '</td>'
         + '</tr>';
@@ -1403,12 +1408,17 @@ function renderSubStock(data, teamName) {
     refreshIcons();
   }
 
-  if (!data || data.length === 0) {
-    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><p>ไม่มีสินค้าในคลังย่อย' + (teamName ? 'ของทีม' : '') + '</p></div>';
+  // [แก้ไข] กรองเอาเฉพาะสินค้าที่มีจำนวนมากกว่า 0 มาแสดง
+  var visibleData = (data || []).filter(function(item) {
+    return Number(item.quantity) > 0;
+  });
+
+  if (visibleData.length === 0) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><p>ไม่มีสินค้าคงเหลือในคลังย่อย' + (teamName ? 'ของทีม' : '') + '</p></div>';
     return;
   }
 
-  grid.innerHTML = data.map(function(item) {
+  grid.innerHTML = visibleData.map(function(item) {
     // ใช้ String() ป้องกัน type mismatch ของ productId
     var prod = allProducts.filter(function(p) { return String(p.productId) === String(item.productId); })[0];
     var imgUrl = getImageUrl(prod ? prod.imageUrl : '');
