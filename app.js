@@ -1625,9 +1625,16 @@ function confirmCheckout() {
       toggleDrawer('cartDrawer');
       if (typeof loadMyOrders === 'function') loadMyOrders();
     })
-    .catch(function(err) { showToast('เกิดข้อผิดพลาด: ' + err, 'error'); })
+    .catch(function(err) { 
+      console.error('Checkout Error:', err);
+      showToast('เกิดข้อผิดพลาดในการส่งคำขอ: ' + err, 'error'); 
+    })
     .finally(function() {
-      if (btn) { btn.disabled = false; btn.innerHTML = '<i data-lucide="send" style="width:16px;height:16px;"></i> ส่งคำขอเบิก'; refreshIcons(); }
+      if (btn) { 
+        btn.disabled = false; 
+        btn.innerHTML = '<i data-lucide="send" style="width:16px;height:16px;"></i> ส่งคำขอเบิก'; 
+        refreshIcons(); 
+      }
     });
 }
 
@@ -1907,37 +1914,32 @@ function startSubStockScan() {
 function onSubStockScanned(code) {
   if (!code) return;
   
-  // 1. Play success sound/vibration
   if (navigator.vibrate) navigator.vibrate(100);
   
-  // 2. Find item in current sub-stock data
-  if (!currentSubStockData) {
-    showToast('ไม่พบข้อมูลคลังย่อยในขณะนี้', 'warning');
-    closeSubStockScanner();
-    return;
-  }
-  
-  var item = currentSubStockData.find(function(i) {
-    return String(i.productId).toLowerCase() === String(code).trim().toLowerCase();
-  });
-  
-  if (item) {
-    // Stop scanner ONLY when found
-    closeSubStockScanner();
-    showToast('พบสินค้า: ' + item.productName, 'success');
-    openActionModal('use', item.productId, item.productName, item.quantity, item.size || '');
-  } else {
-    // Provide feedback but keep scanner open
-    showToast('ไม่พบรหัส "' + code + '" ในคลังย่อยของคุณ', 'warning');
-    // Visual feedback in placeholder
-    var p = document.getElementById('substockScannerPlaceholder');
-    if (p) {
-      p.style.display = 'flex';
-      p.innerHTML = '<i data-lucide="alert-circle" style="color:var(--danger);width:48px;height:48px;margin-bottom:1rem"></i>'
-                  + '<p style="color:#fff">ไม่พบรหัส "' + code + '"</p>'
-                  + '<button class="btn btn-outline btn-sm" style="margin-top:1rem" onclick="startSubStockScan()">ลองใหม่</button>';
-      refreshIcons();
+  var processScan = function() {
+    var item = subStockCache.find(function(i) {
+      return String(i.productId).toLowerCase() === String(code).trim().toLowerCase();
+    });
+    
+    if (item) {
+      closeSubStockScanner();
+      showToast('พบสินค้า: ' + item.productName, 'success');
+      openActionModal('use', item.productId, item.productName, item.quantity, item.size || '');
+    } else {
+      showToast('ไม่พบสินค้ารหัส ' + code + ' ในคลังย่อยของคุณ', 'warning');
     }
+  };
+
+  if (!subStockCache) {
+    showToast('กำลังโหลดข้อมูลคลังย่อย...', 'info');
+    API.getSubStock().then(function(res) {
+      subStockCache = res.data;
+      processScan();
+    }).catch(function(err) {
+      showToast('โหลดข้อมูลคลังย่อยไม่สำเร็จ: ' + err, 'error');
+    });
+  } else {
+    processScan();
   }
 }
 

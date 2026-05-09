@@ -517,6 +517,9 @@
         input.value = ''; // Ensure placeholder shows
       }
       
+      // Safety: ensure select is hidden if we re-init
+      select.style.display = 'none';
+      
       input.autocomplete = 'off';
       
       var chevron = document.createElement('div');
