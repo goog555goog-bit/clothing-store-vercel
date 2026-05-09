@@ -154,17 +154,33 @@ function updateUserUI() {
     
       // แสดงปุ่มคลังย่อยสำหรับผู้ที่มีสิทธิ์จัดการคลังย่อย (Technicians, Admins, FC หรือผู้ที่ถูกติ๊กสิทธิ์เพิ่ม)
       var substockBtn = document.getElementById('substockBtn');
+      var teamStockBtn = document.getElementById('teamStockBtn');
       var substockMob = document.getElementById('substockMob') || document.querySelector('.mobile-nav-item[data-view="substock"]');
       
-      if (substockBtn || substockMob) {
+      if (substockBtn || substockMob || teamStockBtn) {
         var isAllowed = API.hasPermission(API.PERMS.MANAGE_INVENTORY) || 
                          API.hasPermission('has_substock') || 
                          API.hasPermission('manage_team_substock') || 
                          API.hasPermission('supervise_substock') || 
                          API.hasRole('technician');
                          
-        if (substockBtn) substockBtn.classList.toggle('hidden', !isAllowed);
-        if (substockMob) substockMob.classList.toggle('hidden', !isAllowed);
+        var hasTeam = currentUser && currentUser.teamId;
+
+        if (substockBtn) {
+          // If user has team, hide "My Stock" and show "Team Stock" instead?
+          // Or show both? User asked for "Team Stock button", so if they have a team, we show it.
+          substockBtn.classList.toggle('hidden', !isAllowed || hasTeam);
+        }
+        if (teamStockBtn) {
+          teamStockBtn.classList.toggle('hidden', !isAllowed || !hasTeam);
+        }
+        if (substockMob) {
+          substockMob.classList.toggle('hidden', !isAllowed);
+          if (hasTeam) {
+            var mobSpan = substockMob.querySelector('span');
+            if (mobSpan) mobSpan.textContent = 'สต๊อกทีม';
+          }
+        }
       }
 
     // ปุ่ม Admin
@@ -189,7 +205,9 @@ function updateUserUI() {
     if (ordersBtn) ordersBtn.classList.add('hidden');
     if (changePwdBtn) changePwdBtn.classList.add('hidden');
     var substockBtn = document.getElementById('substockBtn');
+    var teamStockBtn = document.getElementById('teamStockBtn');
     if (substockBtn) substockBtn.classList.add('hidden');
+    if (teamStockBtn) teamStockBtn.classList.add('hidden');
   }
   refreshIcons();
 }
