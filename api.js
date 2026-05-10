@@ -321,11 +321,11 @@ var API = (function () {
     swapTeamLead: function (data) {
       return this._call('swapTeamLead', data, false, ['getTeams', 'getEmployees']);
     },
-    manageBranch: function (op, data) {
-      return this._call('manageBranch', { op: op, data: data }, false, ['getBranches']);
+    manageBranch: function (op, data, oldBranchId) {
+      return this._call('manageBranch', { op: op, data: data, oldBranchId: oldBranchId }, false, ['getBranches']);
     },
-    manageDepartment: function (op, data) {
-      return this._call('manageDepartment', { op: op, data: data }, false, ['getReportData', 'getEmployees']);
+    manageDepartment: function (op, data, oldDepartmentId) {
+      return this._call('manageDepartment', { op: op, data: data, oldDepartmentId: oldDepartmentId }, false, ['getReportData', 'getEmployees']);
     },
 
     saveSystemSettings: function (settings) {

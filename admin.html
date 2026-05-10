@@ -183,7 +183,9 @@
           onclick="adminNav('departments', this)"><i data-lucide="building"></i>
           จัดการแผนก</button>
         <button class="tab" id="tab-audit" data-admin-page="audit" onclick="adminNav('audit', this)"><i
-            data-lucide="activity"></i> ประวัติกิจกรรม</button>
+            data-lucide="activity"></i> ประวัติกิจกรรมระบบ</button>
+        <button class="tab" id="tab-usage" data-admin-page="usage" onclick="adminNav('usage', this)"><i
+            data-lucide="package-search"></i> ประวัติการเบิกใช้</button>
       </div>
     </div>
 
@@ -561,8 +563,6 @@
       </div>
     </section>
 
-    </section>
-
     <!-- AUDIT LOGS -->
     <section id="p-audit" class="admin-page" style="display:none">
       <div class="flex flex-wrap items-center justify-between gap-2"
@@ -591,8 +591,11 @@
         </table>
       </div>
 
-      <!-- [NEW] Inventory Usage Logs Section with Filters -->
-      <div style="margin-top:3rem; margin-bottom:1rem; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem">
+    </section>
+    
+    <!-- INVENTORY USAGE HISTORY -->
+    <section id="p-usage" class="admin-page" style="display:none">
+      <div style="margin-bottom:1rem; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem">
         <h3 style="color:var(--primary); margin:0"><i data-lucide="package-search"></i> ประวัติการเบิกใช้พัสดุ (Inventory Usage History)</h3>
         <button class="btn btn-outline btn-sm" onclick="downloadCSV('InventoryLogs')">📥 Export CSV</button>
       </div>
@@ -882,9 +885,10 @@
         <button class="btn btn-ghost btn-sm" onclick="closeBranchModal()">✕</button>
       </div>
       <div class="modal-body">
-        <div class="form-group" id="bf-id-wrap" style="display:none">
-          <label>รหัสสาขา (ID)</label>
-          <input type="text" id="bf-id" class="form-input" readonly style="background:var(--bg2); cursor:not-allowed">
+        <div class="form-group" id="bf-id-wrap">
+          <label class="form-label">รหัสสาขา (Branch Code)</label>
+          <input type="hidden" id="bf-old-id">
+          <input type="text" id="bf-id" class="form-input" placeholder="BR-XXX (เว้นว่างเพื่อสร้างอัตโนมัติ)">
         </div>
         <div class="form-group"><label class="form-label">ชื่อสาขา *</label><input id="bf-name" class="form-input"
             placeholder="ชื่อสาขา"></div>
@@ -936,9 +940,10 @@
         <button class="btn btn-ghost btn-sm" onclick="closeDeptModal()">✕</button>
       </div>
       <div class="modal-body">
-        <div class="form-group" id="df-id-wrap" style="display:none">
-          <label>รหัสแผนก (ID)</label>
-          <input type="text" id="df-id" class="form-input" readonly style="background:var(--bg2); cursor:not-allowed">
+        <div class="form-group" id="df-id-wrap">
+          <label class="form-label">รหัสแผนก (Department Code)</label>
+          <input type="hidden" id="df-old-id">
+          <input type="text" id="df-id" class="form-input" placeholder="DPT-XXX (เว้นว่างเพื่อสร้างอัตโนมัติ)">
         </div>
         <div class="form-group">
           <label>ชื่อแผนก *</label>
@@ -1300,9 +1305,12 @@
       </div>
       <div class="modal-body">
         <div id="scanActionProduct"
-          style="margin-bottom:1.5rem; padding:1.25rem; background:rgba(255,255,255,0.03); border-radius:12px; border:1px solid var(--border)">
-          <div id="sa-name" style="font-weight:800; font-size:1.1rem; color:white; margin-bottom:0.25rem"></div>
-          <div id="sa-id" style="font-size:0.8rem; color:var(--text3)"></div>
+          style="margin-bottom:1.5rem; padding:1.5rem; background:linear-gradient(135deg, rgba(251,191,36,0.1) 0%, rgba(0,0,0,0) 100%); border-radius:16px; border:1px solid rgba(251,191,36,0.2); text-align:center;">
+          <div id="sa-img-container" style="margin-bottom:1rem; display:none">
+            <img id="sa-img" style="width:120px; height:120px; object-fit:cover; border-radius:12px; margin:0 auto; border:2px solid var(--primary); box-shadow:0 8px 20px rgba(0,0,0,0.3)">
+          </div>
+          <div id="sa-name" style="font-weight:800; font-size:1.4rem; color:var(--primary); line-height:1.2; margin-bottom:0.5rem"></div>
+          <div id="sa-id" style="font-size:0.9rem; color:var(--text3); font-family:monospace; opacity:0.8"></div>
         </div>
 
         <div class="form-group">
@@ -1403,7 +1411,11 @@
       </button>
       <button class="admin-more-item" onclick="adminNav('audit'); toggleAdminMoreMenu()">
         <i data-lucide="activity" style="width:20px;height:20px;color:var(--danger)"></i>
-        <span>ประวัติ</span>
+        <span>กิจกรรมระบบ</span>
+      </button>
+      <button class="admin-more-item" onclick="adminNav('usage'); toggleAdminMoreMenu()">
+        <i data-lucide="package-search" style="width:20px;height:20px;color:var(--primary)"></i>
+        <span>ประวัติเบิกใช้</span>
       </button>
       <button class="admin-more-item" id="mgrMobileBtn2" style="display:none" onclick="navigateTo('manager.html')">
         <i data-lucide="scale" style="width:20px;height:20px;color:var(--warning)"></i>
@@ -1491,6 +1503,12 @@
 
   <script>
     var currentAdminPage = 'dashboard';
+    var allEmployees = [];
+    var allAdminCategories = [];
+    var allAdminDepartments = [];
+    var allBranches = [];
+    var globalRolePermissions = {};
+    var currentUser = null;
 
     window.onload = function () {
       initDarkMode();
@@ -1585,6 +1603,7 @@
         'tab-departments': API.PERMS.MANAGE_STRUCTURE,
         'tab-reports': API.PERMS.VIEW_REPORTS,
         'tab-audit': API.PERMS.VIEW_REPORTS,
+        'tab-usage': API.PERMS.VIEW_REPORTS,
         'tab-settings': API.PERMS.MANAGE_SETTINGS,
         'tab-branches': API.PERMS.MANAGE_STRUCTURE,
         'tab-permissions': API.PERMS.MANAGE_EMPLOYEES
@@ -1679,7 +1698,8 @@
         'settings': { t: 'ตั้งค่าระบบ', d: 'กำหนดค่าพื้นฐานและการตั้งค่าขั้นสูง' },
         'departments': { t: 'แผนกงาน', d: 'จัดการรายชื่อแผนกในองค์กร' },
         'branches': { t: 'จัดการสาขา', d: 'ตั้งค่าข้อมูลสาขาและที่ตั้ง' },
-        'audit': { t: 'ประวัติกิจกรรม', d: 'ตรวจสอบความเคลื่อนไหวและการใช้งานย้อนหลัง' }
+        'audit': { t: 'ประวัติกิจกรรมระบบ', d: 'ตรวจสอบความเคลื่อนไหวและการทำงานของระบบ' },
+        'usage': { t: 'ประวัติการเบิกใช้', d: 'ตรวจสอบข้อมูลการเบิกใช้พัสดุรายทีมและรายบุคคล' }
       };
 
       if (titles[page]) {
@@ -1701,7 +1721,11 @@
         'settings': loadSystemSettings,
         'departments': loadAdminDepartments,
         'branches': loadBranches,
-        'audit': loadAuditLogs
+        'audit': loadAuditLogs,
+        'usage': function() {
+          loadInventoryAudit();
+          initLogFilters();
+        }
       };
 
       if (loaders[page]) {
@@ -2094,6 +2118,9 @@
       API.getProducts().then(function (res) {
         if (!res.data) res.data = [];
         allAdminProducts = res.data;
+        
+        // Sync products to cache for scanner
+        localStorage.setItem('_all_products_cache', JSON.stringify(res.data));
 
         // Load categories for filter
         API.getCategories().then(function (cRes) {
@@ -3519,8 +3546,8 @@
     }
 
     function openDeptModal(dept) {
+      document.getElementById('df-old-id').value = dept ? dept.departmentId : '';
       document.getElementById('df-id').value = dept ? dept.departmentId : '';
-      document.getElementById('df-id-wrap').style.display = dept ? 'block' : 'none';
       document.getElementById('df-name').value = dept ? dept.name : '';
       document.getElementById('deptModalTitle').textContent = dept ? 'แก้ไขแผนก' : 'เพิ่มแผนก';
       document.getElementById('deptModal').classList.add('open');
@@ -3528,20 +3555,25 @@
     function closeDeptModal() { document.getElementById('deptModal').classList.remove('open'); }
 
     function saveDept() {
-      var id = document.getElementById('df-id').value;
-      var name = document.getElementById('df-name').value.trim();
-      if (!name) { showToast('กรุณากรอกชื่อแผนก', 'warning'); return; }
+      var oldId = document.getElementById('df-old-id').value.trim();
+      var data = {
+        departmentId: document.getElementById('df-id').value.trim(),
+        name: document.getElementById('df-name').value.trim()
+      };
+      if (!data.name) { showToast('กรุณากรอกชื่อแผนก', 'warning'); return; }
 
-      var op = id ? 'update' : 'add';
+      var op = oldId ? 'update' : 'add';
       showToast('กำลังบันทึก...', 'info');
-      API.manageDepartment(op, { departmentId: id, name: name }).then(function (res) {
+      API.manageDepartment(op, data, oldId).then(function (res) {
         if (res.success) {
-          showToast('บันทึกแผนกเรียบร้อย', 'success');
+          showToast(res.message || 'บันทึกแผนกเรียบร้อย', 'success');
           closeDeptModal();
           loadAdminDepartments();
         } else {
-          showToast(res.message, 'error');
+          showToast(res.message || 'เกิดข้อผิดพลาด', 'error');
         }
+      }).catch(function(err) {
+        showToast('ผิดพลาด: ' + err, 'error');
       });
     }
 
@@ -3712,9 +3744,6 @@
       }).catch(function (err) {
         body.innerHTML = '<tr><td colspan="5" class="text-center" style="padding:2rem;color:var(--danger)">ไม่สามารถโหลดข้อมูลได้: ' + err + '</td></tr>';
       });
-
-      loadInventoryAudit();
-      initLogFilters(); // [NEW] โหลดรายชื่อทีมและพนักงานสำหรับตัวกรอง
     }
 
     function loadInventoryAudit() {
@@ -4111,6 +4140,18 @@
       document.getElementById('sa-id').textContent = 'SKU: ' + (prod.productId || prod.id);
       document.getElementById('sa-qty-input').value = '1';
 
+      var imgEl = document.getElementById('sa-img');
+      var imgCont = document.getElementById('sa-img-container');
+      if (imgEl && imgCont) {
+        var url = prod.imageUrl || prod.image || '';
+        if (url) {
+          imgEl.src = getImageUrl(url);
+          imgCont.style.display = 'block';
+        } else {
+          imgCont.style.display = 'none';
+        }
+      }
+
       var btn = document.getElementById('sa-confirm-btn');
       btn.onclick = function () {
         var qty = parseInt(document.getElementById('sa-qty-input').value);
@@ -4346,8 +4387,8 @@
     }
 
     function openBranchModal(b) {
+      document.getElementById('bf-old-id').value = b ? b.branchId : '';
       document.getElementById('bf-id').value = b ? b.branchId : '';
-      document.getElementById('bf-id-wrap').style.display = b ? 'block' : 'none';
       document.getElementById('bf-name').value = b ? b.name : '';
       document.getElementById('bf-status').value = b ? b.status : 'active';
       document.getElementById('branchModalTitle').textContent = b ? 'แก้ไขข้อมูลสาขา' : 'เพิ่มสาขาใหม่';
@@ -4355,17 +4396,12 @@
     }
     function closeBranchModal() { document.getElementById('branchModal').classList.remove('open'); }
     function editBranch(id) {
-      var b = null;
-      for (var i = 0; i < allBranches.length; i++) {
-        if (allBranches[i].branchId === id) {
-          b = allBranches[i];
-          break;
-        }
-      }
+      var b = allBranches.find(function (x) { return x.branchId === id; });
       if (b) openBranchModal(b);
     }
 
     function saveBranch() {
+      var oldId = document.getElementById('bf-old-id').value.trim();
       var data = {
         branchId: document.getElementById('bf-id').value.trim(),
         name: document.getElementById('bf-name').value.trim(),
@@ -4373,10 +4409,18 @@
       };
       if (!data.name) { showToast('กรุณาระบุชื่อสาขา', 'warning'); return; }
 
-      var op = allBranches.some(function (x) { return x.branchId === data.branchId; }) ? 'update' : 'add';
-      API.manageBranch(op, data).then(function (res) {
-        showToast(res.message, res.success ? 'success' : 'error');
-        if (res.success) { closeBranchModal(); loadBranches(); }
+      var op = oldId ? 'update' : 'add';
+      showToast('กำลังบันทึก...', 'info');
+      API.manageBranch(op, data, oldId).then(function (res) {
+        if (res.success) {
+          showToast(res.message || 'บันทึกเรียบร้อย', 'success');
+          closeBranchModal();
+          loadBranches();
+        } else {
+          showToast(res.message || 'เกิดข้อผิดพลาด', 'error');
+        }
+      }).catch(function (err) {
+        showToast('ผิดพลาด: ' + err, 'error');
       });
     }
 

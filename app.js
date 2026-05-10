@@ -1375,27 +1375,28 @@ function loadUsageHistory() {
   API.getInventoryLogs({ userFilter: currentUser.employeeId, limit: 20 }).then(function(res) {
     var logs = res.data || [];
     if (logs.length === 0) {
-      body.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:2rem; color:var(--text3)">ยังไม่มีประวัติการใช้งาน</td></tr>';
+      body.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:2rem; color:var(--text3)">ยังไม่มีประวัติการใช้งาน</td></tr>';
       return;
     }
     body.innerHTML = logs.map(function(l) {
       var dateStr = String(l.date || '').split(' ')[0];
       var timeStr = String(l.date || '').split(' ')[1] || '';
       
-      // [แก้ไข] แสดงชื่อสินค้าภาษาไทย (ข้อมูลใหม่จาก Backend จะส่งชื่อมาให้เลย)
+      // [แก้ไข] ดึงชื่อสินค้ามาแสดงแยกคอลัมน์
       var pId = String(l.productId || '').trim();
       var p = allProducts.filter(function(x) { return String(x.productId).trim() === pId; })[0];
       var displayName = p ? p.name : (l.productName || pId);
 
       return '<tr>'
         + '<td><div style="font-weight:500">' + dateStr + '</div><div style="font-size:0.7rem; color:var(--text3)">' + timeStr + '</div></td>'
-        + '<td>' + displayName + (l.action.includes('ทีม') ? ' <span class="badge badge-pending" style="font-size:0.65rem">ทีม</span>' : '') + '</td>'
+        + '<td>' + pId + (l.action.includes('ทีม') ? ' <span class="badge badge-pending" style="font-size:0.65rem">ทีม</span>' : '') + '</td>'
+        + '<td style="color:var(--primary); font-weight:500">' + displayName + '</td>'
         + '<td style="font-weight:600; color:' + (Number(l.quantity) < 0 ? 'var(--danger)' : 'var(--accent)') + '">' + l.quantity + '</td>'
         + '<td>' + (l.branchName || '-') + '</td>'
         + '</tr>';
     }).join('');
   }).catch(function(err) {
-    body.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:1rem; color:var(--danger)">โหลดประวัติไม่สำเร็จ</td></tr>';
+    body.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:1rem; color:var(--danger)">โหลดประวัติไม่สำเร็จ</td></tr>';
   });
 }
 
