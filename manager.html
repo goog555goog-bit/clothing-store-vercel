@@ -176,8 +176,16 @@
         try { currentUser = JSON.parse(stored); } catch(e) {}
       }
       
+      if (!currentUser) {
+        var loginUrl = window.location.hostname.indexOf('script.google.com') !== -1 
+          ? (typeof scriptUrl !== 'undefined' ? scriptUrl + '?page=login' : '?page=login')
+          : 'login.html';
+        window.location.href = loginUrl;
+        return;
+      }
+      
       // ตรวจสอบสิทธิ์การเข้าถึงหน้า Manager (สิทธิ์อนุมัติใบเบิก)
-      if (!currentUser || !API.hasPermission(API.PERMS.APPROVE_REQUEST)) {
+      if (!API.hasPermission(API.PERMS.APPROVE_REQUEST)) {
         document.getElementById('pendingList').innerHTML = '<div class="card text-center" style="padding:3rem">'
           + '<p style="color:var(--danger);font-size:1.1rem;display:flex;align-items:center;justify-content:center;gap:0.5rem"><i data-lucide="shield-alert"></i> ไม่มีสิทธิ์เข้าถึง</p>'
           + '<p style="color:var(--text3);margin-top:0.5rem">คุณไม่มีสิทธิ์ในการอนุมัติใบเบิกสินค้า</p>'

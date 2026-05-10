@@ -180,6 +180,12 @@
     
     window.onload = function() {
       if (typeof lucide !== 'undefined') lucide.createIcons();
+      
+      // [ENFORCE AUTH] ถ้า Login แล้วให้ข้ามไปหน้า Index ทันที
+      var stored = localStorage.getItem('_user');
+      if (stored) {
+        window.location.href = 'index.html';
+      }
     }
 
     function doLogin() {

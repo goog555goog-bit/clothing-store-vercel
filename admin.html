@@ -1574,9 +1574,10 @@
       if (stored) try { currentUser = JSON.parse(stored); } catch (e) { }
       
       if (!currentUser) {
-        document.querySelector('.container').innerHTML = '<div class="card text-center" style="padding:3rem;margin-top:2rem">'
-          + '<p style="color:var(--danger);font-size:1.1rem">⛔ กรุณาเข้าสู่ระบบ</p>'
-          + '<button class="btn btn-primary" style="margin-top:1rem" onclick="navigateTo(\'login.html\')">เข้าสู่ระบบ</button></div>';
+        var loginUrl = window.location.hostname.indexOf('script.google.com') !== -1 
+          ? (typeof scriptUrl !== 'undefined' ? scriptUrl + '?page=login' : '?page=login')
+          : 'login.html';
+        window.location.href = loginUrl;
         return;
       }
 

@@ -492,6 +492,15 @@
         document.body.classList.add('dark-mode');
         updateDarkModeUI(true);
       }
+      
+      // [ENFORCE AUTH]
+      var stored = localStorage.getItem('_user');
+      if (!stored) {
+        var loginUrl = window.location.hostname.indexOf('script.google.com') !== -1 ? 'index.html?page=login' : 'login.html';
+        window.location.href = loginUrl;
+        return;
+      }
+
       refreshIcons(); 
     }
   </script>

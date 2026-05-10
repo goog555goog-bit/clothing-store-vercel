@@ -105,6 +105,15 @@ window.onload = function() {
 function checkAuth() {
   updateUserUI();
   
+  // 🔥 [ENFORCE AUTH] ถ้ายังไม่ได้ Login ให้ไปหน้า Login ก่อน
+  if (!currentUser) {
+    var loginUrl = window.location.hostname.indexOf('script.google.com') !== -1 
+      ? (typeof scriptUrl !== 'undefined' ? scriptUrl + '?page=login' : '?page=login')
+      : 'login.html';
+    window.location.href = loginUrl;
+    return;
+  }
+
   // Robust API Initialization - safer retry logic
   function startApp() {
     if (typeof API !== 'undefined' && API.getProducts) {
