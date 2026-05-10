@@ -42,6 +42,77 @@
       navigateTo('login.html');
     }
   </script>
+
+  <!-- [แก้ไข Mobile UX] CSS สำหรับเมนูเพิ่มเติมบนมือถือ -->
+  <style>
+    /* ซ่อน Desktop Tabs บนมือถือ — ใช้ Bottom Nav แทน */
+    @media (max-width: 767px) {
+      .tabs-scroll-wrap { display: none !important; }
+    }
+
+    /* สไตล์ปุ่มในเมนูเพิ่มเติม */
+    .admin-more-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      padding: 0.85rem 0.5rem;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 14px;
+      color: var(--text2);
+      font-size: 0.68rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      min-height: 70px;
+    }
+    .admin-more-item:hover, .admin-more-item:active {
+      background: rgba(251,191,36,0.08);
+      border-color: rgba(251,191,36,0.2);
+      color: var(--primary);
+      transform: scale(0.96);
+    }
+
+    /* Animation สำหรับ More Menu */
+    @keyframes slideUpMore {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+
+  <!-- [แก้ไข Mobile UX] JS สำหรับ Toggle เมนูเพิ่มเติม -->
+  <script>
+    function toggleAdminMoreMenu() {
+      var menu = document.getElementById('adminMoreMenu');
+      var btn = document.getElementById('adminMoreBtn');
+      if (!menu) return;
+      
+      var isOpen = menu.style.display !== 'none';
+      menu.style.display = isOpen ? 'none' : 'block';
+      
+      // เปลี่ยนสีปุ่ม "เพิ่มเติม" เมื่อเปิด
+      if (btn) {
+        btn.style.color = isOpen ? '' : 'var(--primary)';
+      }
+      
+      refreshIcons();
+    }
+    
+    // ปิด More Menu เมื่อกดที่อื่น
+    document.addEventListener('click', function(e) {
+      var menu = document.getElementById('adminMoreMenu');
+      var btn = document.getElementById('adminMoreBtn');
+      if (menu && menu.style.display !== 'none') {
+        if (!menu.contains(e.target) && btn && !btn.contains(e.target)) {
+          menu.style.display = 'none';
+          if (btn) btn.style.color = '';
+        }
+      }
+    });
+  </script>
 </head>
 
 <body>
@@ -57,14 +128,15 @@
         <div id="adminName" class="hide-mobile"
           style="color:var(--text2); font-weight: 500; font-size: 0.9rem; background: var(--surface); padding: 0.4rem 1rem; border-radius: 99px; border: 1px solid var(--border);">
         </div>
-        <button class="btn btn-ghost btn-sm" onclick="openPasswordModal()" title="เปลี่ยนรหัสผ่าน">
+        <!-- [แก้ไข A11y] เพิ่ม aria-label ให้ปุ่ม header ทุกตัว -->
+        <button class="btn btn-ghost btn-sm" onclick="openPasswordModal()" title="เปลี่ยนรหัสผ่าน" aria-label="เปลี่ยนรหัสผ่าน">
           <i data-lucide="key"></i>
         </button>
-        <button class="btn btn-ghost btn-sm" onclick="navigateTo(scriptUrl)"><i data-lucide="shopping-bag"></i> <span
+        <button class="btn btn-ghost btn-sm" onclick="navigateTo(scriptUrl)" aria-label="ไปหน้าร้าน"><i data-lucide="shopping-bag"></i> <span
             class="hide-mobile">หน้าร้าน</span></button>
         <button id="mgrPaneBtn" class="btn btn-warning btn-sm hidden hide-mobile"
-          onclick="navigateTo('manager.html')"><i data-lucide="scale"></i> ผู้อนุมัติ</button>
-        <button class="btn btn-outline btn-sm" onclick="adminLogout()"
+          onclick="navigateTo('manager.html')" aria-label="ไปหน้าผู้อนุมัติ"><i data-lucide="scale"></i> ผู้อนุมัติ</button>
+        <button class="btn btn-outline btn-sm" onclick="adminLogout()" aria-label="ออกจากระบบ"
           style="color: var(--danger); border-color: rgba(239, 68, 68, 0.2);"><i data-lucide="log-out"></i></button>
       </div>
     </div>
@@ -1260,8 +1332,8 @@
 
   <div class="toast-container" id="toastContainer"></div>
 
-  <!-- แถบเมนูด้านล่างสำหรับมือถือ (Admin) -->
-  <nav class="mobile-nav" style="border-top: 1px solid var(--glass-border); background: rgba(5, 5, 5, 0.9);">
+  <!-- [แก้ไข Mobile UX] แถบเมนูด้านล่างสำหรับมือถือ — จำกัดเหลือ 5 ปุ่มหลัก + ปุ่ม "เพิ่มเติม" -->
+  <nav class="mobile-nav" style="border-top: 1px solid var(--glass-border); background: rgba(5, 5, 5, 0.95);">
     <button class="mobile-nav-item active admin-mobile-tab" data-admin-page="dashboard"
       onclick="adminNav('dashboard', this)">
       <i data-lucide="layout-dashboard" style="width:20px; height:20px"></i>
@@ -1279,24 +1351,70 @@
       <i data-lucide="users-2" style="width:20px; height:20px"></i>
       <span>พนักงาน</span>
     </button>
-    <button class="mobile-nav-item admin-mobile-tab" data-admin-page="permissions"
-      onclick="adminNav('permissions', this)">
-      <i data-lucide="shield-check" style="width:20px; height:20px"></i>
-      <span>สิทธิ์</span>
-    </button>
     <button class="mobile-nav-item admin-mobile-tab" data-admin-page="reports" onclick="adminNav('reports', this)">
       <i data-lucide="pie-chart" style="width:20px; height:20px"></i>
       <span>รายงาน</span>
     </button>
-    <button id="mgrMobileBtn" class="mobile-nav-item hidden" onclick="navigateTo('manager.html')">
-      <i data-lucide="scale" style="width:20px; height:20px"></i>
-      <span>ผู้อนุมัติ</span>
-    </button>
-    <button class="mobile-nav-item" onclick="navigateTo(scriptUrl)" style="color: var(--primary);">
-      <i data-lucide="external-link" style="width:20px; height:20px"></i>
-      <span>หน้าร้าน</span>
+    <button class="mobile-nav-item" onclick="toggleAdminMoreMenu()" id="adminMoreBtn">
+      <i data-lucide="menu" style="width:20px; height:20px"></i>
+      <span>เพิ่มเติม</span>
     </button>
   </nav>
+
+  <!-- [แก้ไข Mobile UX] เมนูเพิ่มเติม — แสดงแท็บที่ซ่อนอยู่ -->
+  <div id="adminMoreMenu" style="display:none; position:fixed; bottom:60px; left:0; right:0; z-index:1200;
+    background: rgba(10,10,20,0.98); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+    border-top:1px solid rgba(251,191,36,0.2); padding:1rem 1.25rem 1.5rem;
+    animation: slideUpMore 0.25s cubic-bezier(0.16,1,0.3,1);">
+    
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem;">
+      <span style="font-weight:700; font-size:0.9rem; color:var(--text2);">เมนูทั้งหมด</span>
+      <button class="btn btn-ghost btn-xs" onclick="toggleAdminMoreMenu()">✕</button>
+    </div>
+    
+    <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:0.75rem;">
+      <button class="admin-more-item" onclick="adminNav('categories'); toggleAdminMoreMenu()">
+        <i data-lucide="layers" style="width:20px;height:20px;color:var(--primary)"></i>
+        <span>หมวดหมู่</span>
+      </button>
+      <button class="admin-more-item" onclick="adminNav('inventory'); toggleAdminMoreMenu()">
+        <i data-lucide="archive" style="width:20px;height:20px;color:var(--accent)"></i>
+        <span>คลังสินค้า</span>
+      </button>
+      <button class="admin-more-item" onclick="adminNav('permissions'); toggleAdminMoreMenu()">
+        <i data-lucide="shield-check" style="width:20px;height:20px;color:var(--info)"></i>
+        <span>สิทธิ์</span>
+      </button>
+      <button class="admin-more-item" onclick="adminNav('teams'); toggleAdminMoreMenu()">
+        <i data-lucide="users" style="width:20px;height:20px;color:var(--accent)"></i>
+        <span>ทีมช่าง</span>
+      </button>
+      <button class="admin-more-item" onclick="adminNav('settings'); toggleAdminMoreMenu()">
+        <i data-lucide="settings" style="width:20px;height:20px;color:var(--text3)"></i>
+        <span>ตั้งค่า</span>
+      </button>
+      <button class="admin-more-item" onclick="adminNav('branches'); toggleAdminMoreMenu()">
+        <i data-lucide="building-2" style="width:20px;height:20px;color:var(--warning)"></i>
+        <span>สาขา</span>
+      </button>
+      <button class="admin-more-item" onclick="adminNav('departments'); toggleAdminMoreMenu()">
+        <i data-lucide="building" style="width:20px;height:20px;color:var(--info)"></i>
+        <span>แผนก</span>
+      </button>
+      <button class="admin-more-item" onclick="adminNav('audit'); toggleAdminMoreMenu()">
+        <i data-lucide="activity" style="width:20px;height:20px;color:var(--danger)"></i>
+        <span>ประวัติ</span>
+      </button>
+      <button class="admin-more-item" id="mgrMobileBtn2" style="display:none" onclick="navigateTo('manager.html')">
+        <i data-lucide="scale" style="width:20px;height:20px;color:var(--warning)"></i>
+        <span>ผู้อนุมัติ</span>
+      </button>
+      <button class="admin-more-item" onclick="navigateTo(scriptUrl)">
+        <i data-lucide="external-link" style="width:20px;height:20px;color:var(--primary)"></i>
+        <span>หน้าร้าน</span>
+      </button>
+    </div>
+  </div>
 
   <!-- Change Password Modal -->
   <div id="passwordModal" class="modal-overlay" onclick="if(event.target===this) closePasswordModal()">
@@ -1487,9 +1605,11 @@
       // ปุ่มไปหน้า Manager (ถ้ามีสิทธิ์อนุมัติ)
       var mgrBtn = document.getElementById('mgrPaneBtn');
       var mgrMob = document.getElementById('mgrMobileBtn');
+      var mgrMob2 = document.getElementById('mgrMobileBtn2');
       if (API.hasPermission(API.PERMS.APPROVE_REQUEST)) {
         if (mgrBtn) mgrBtn.classList.remove('hidden');
         if (mgrMob) mgrMob.classList.remove('hidden');
+        if (mgrMob2) mgrMob2.style.display = 'flex';
       }
 
       document.getElementById('adminName').textContent = '👤 ' + currentUser.name;
