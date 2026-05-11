@@ -255,8 +255,14 @@ var API = (function () {
     manageCategory: function (op, data) {
       return this._call('manageCategory', { op: op, data: data }, false, ['getCategories', 'getProducts', 'getStorefrontData']);
     },
-    updateStock: function (productId, qty, adminId) {
-      return this._call('updateStock', { productId: productId, qty: qty, adminId: adminId }, false, ['getProducts', 'getDashboardStats', 'getAdvancedDashboardData', 'getInventoryForecast']);
+    updateStock: function (productId, qty, adminId, size, adjustments) {
+      return this._call('updateStock', { 
+        productId: productId, 
+        qty: qty, 
+        adminId: adminId, 
+        size: size, 
+        adjustments: adjustments 
+      }, false, ['getProducts', 'getDashboardStats', 'getAdvancedDashboardData', 'getInventoryForecast']);
     },
     receiveStock: function (productId, qty) {
       return this._call('receiveStock', { productId: productId, qty: qty }, false, ['getProducts', 'getAdvancedDashboardData', 'getInventoryForecast']);

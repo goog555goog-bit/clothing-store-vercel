@@ -159,7 +159,7 @@
       if (document.getElementById('globalLoader')) {
         document.getElementById('globalLoader').classList.add('active');
       }
-      window.open(url, '_top');
+      window.top.location.href = url;
     }
 
     // Preview ชื่อพนักงานขณะพิมพ์

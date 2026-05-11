@@ -128,7 +128,7 @@
       else if (url.includes('?page=admin')) url = 'admin.html';
       else if (url.includes('?page=scanner')) url = 'scanner.html';
       else if (url === scriptUrl) url = 'index.html';
-      window.open(url, '_top');
+      window.top.location.href = url;
     }
 
     function initDarkMode() {

@@ -22,7 +22,8 @@
 
 > [!IMPORTANT]
 > เมื่อแก้ไขไฟล์ **Backend** (.gs) ให้แก้ที่ `clothing-store/` เท่านั้น
-> เมื่อแก้ไข **Frontend Logic** (api.js, app.js, admin.html ฯลฯ) ต้องแก้`clothing-store-vercel/` เท่านั้น 
+> เมื่อแก้ไข **Frontend** (html, css, js ทั้งหมด) **ต้องแก้ไขที่ `clothing-store-vercel/` เท่านั้น** 
+> ห้ามแก้ไขไฟล์ .html ใน `clothing-store/` เนื่องจากถือเป็นไฟล์ Legacy/Deprecated 
 
 ---
 
@@ -93,6 +94,11 @@
 | `Upload.gs` | Google Drive File Upload | 🟢 MEDIUM |
 | `Debug.gs` | Debug/Test Utilities | ⚪ LOW |
 | `Tests.gs` | Automated Test Suite | ⚪ LOW |
+
+> [!CAUTION]
+> **ห้ามแก้ไขไฟล์ .html / .js.html ในโฟลเดอร์ `clothing-store/`** 
+> ไฟล์เหล่านั้นถือเป็นไฟล์เก่า (Legacy) และไม่ได้ถูกใช้งานในระบบปัจจุบัน 
+> การพัฒนา Frontend ทั้งหมดต้องทำในโฟลเดอร์นี้ (`clothing-store-vercel/`) เท่านั้น
 
 ### Frontend — HTML Pages (`clothing-store-vercel/`)
 | ไฟล์ (Vercel) | หน้าที่ |

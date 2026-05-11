@@ -23,7 +23,7 @@
       else if (url.includes('?page=manager')) url = 'manager.html';
       else if (url.includes('?page=admin')) url = 'admin.html';
       else if (url.includes('?page=scanner')) url = 'scanner.html';
-      window.open(url, '_top');
+      window.top.location.href = url;
     }
     // Admin Safety placeholders
     function refreshIcons() { if (typeof lucide !== 'undefined') lucide.createIcons(); }
@@ -78,8 +78,30 @@
 
     /* Animation สำหรับ More Menu */
     @keyframes slideUpMore {
-      from { opacity: 0; transform: translateY(20px); }
+      from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
+    }
+
+    .menu-item-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      width: 100%;
+      padding: 0.7rem 0.85rem;
+      background: transparent;
+      border: none;
+      border-radius: 10px;
+      color: var(--text2);
+      font-size: 0.82rem;
+      font-weight: 500;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+    .menu-item-btn:hover {
+      background: rgba(255,255,255,0.06);
+      color: var(--primary);
     }
   </style>
 
@@ -102,13 +124,20 @@
     }
     
     // ปิด More Menu เมื่อกดที่อื่น
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', function (e) {
       var menu = document.getElementById('adminMoreMenu');
       var btn = document.getElementById('adminMoreBtn');
       if (menu && menu.style.display !== 'none') {
         if (!menu.contains(e.target) && btn && !btn.contains(e.target)) {
           menu.style.display = 'none';
           if (btn) btn.style.color = '';
+        }
+      }
+      
+      var scanMenu = document.getElementById('scanModeDropdown');
+      if (scanMenu && scanMenu.style.display !== 'none') {
+        if (!scanMenu.contains(e.target)) {
+          scanMenu.style.display = 'none';
         }
       }
     });
@@ -196,8 +225,26 @@
         <p id="currentPageDesc" class="hide-mobile" style="font-size: 0.85rem; color: var(--text3);">
           ข้อมูลสรุปและสถานะระบบแบบเรียลไทม์</p>
       </div>
-      <button class="btn btn-accent" onclick="openScanner()"><i data-lucide="qr-code"></i> <span
-          class="hide-mobile">สแกนด่วน</span></button>
+      <div style="position:relative; display:inline-flex; align-items:stretch; border-radius:12px; overflow:visible; box-shadow: 0 4px 15px rgba(251,191,36,0.15);">
+        <button class="btn btn-accent" onclick="openScanner(currentScanMode)" id="quickScanBtn" 
+          style="border-radius:12px 0 0 12px; border-right: 1px solid rgba(0,0,0,0.1); padding-right:0.75rem; margin:0; height:42px">
+          <i data-lucide="qr-code"></i> <span class="hide-mobile">สแกนด่วน</span> 
+          <span id="qsModeTag" style="font-size:0.6rem; opacity:0.8; margin-left:0.3rem; border:1px solid rgba(255,255,255,0.3); padding:1px 5px; border-radius:4px; font-weight:700; white-space:nowrap">จ่ายออก</span>
+        </button>
+        <button class="btn btn-accent" onclick="toggleScanModeDropdown(event)" 
+          style="border-radius:0 12px 12px 0; padding-inline:0.5rem; min-width:auto; margin:0; height:42px">
+          <i data-lucide="chevron-down" style="width:16px;height:16px"></i>
+        </button>
+        
+        <!-- Scan Mode Dropdown Menu -->
+        <div id="scanModeDropdown" class="glass card" 
+          style="display:none; position:absolute; top:110%; right:0; z-index:1000; min-width:200px; padding:0.5rem; box-shadow: 0 10px 40px rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); animation: slideUpMore 0.2s ease;">
+          <div style="font-size:0.65rem; color:var(--text3); font-weight:700; margin-bottom:0.4rem; padding-inline:0.85rem; text-transform:uppercase; letter-spacing:0.05em">เลือกโหมดสแกน</div>
+          <button class="menu-item-btn" onclick="updateScanMode('deduct', 'จ่ายออก', event)">📤 จ่ายออก (Main)</button>
+          <button class="menu-item-btn" onclick="updateScanMode('receive', 'รับเข้า', event)">📥 รับเข้า (Main)</button>
+          <button class="menu-item-btn" onclick="updateScanMode('sub', 'คลังย่อย', event)">📦 รับเข้าคลังย่อย</button>
+        </div>
+      </div>
     </div>
 
     <!-- DASHBOARD -->
@@ -1083,10 +1130,14 @@
         <div id="stockProductName"
           style="font-weight:800; font-size:1.1rem; color:var(--primary); margin-bottom:1.5rem">--</div>
         <input type="hidden" id="stockProductId">
-        <div class="form-group">
+        <div class="form-group" id="stockAdjustWrap">
           <label class="form-label">ระบุจำนวน (บวกเพิ่มกดยอดบวก เช่น 10, ตัดออกใช้เครื่องหมายลบ เช่น -5) *</label>
           <input type="number" id="stockAdjust" class="form-input" placeholder="0"
             style="font-size:1.5rem; text-align:center; font-weight:700">
+        </div>
+        <div id="sizeStockContainer" style="display:none">
+          <div style="font-size:0.85rem; color:var(--text3); margin-bottom:1rem; border-bottom:1px solid var(--border); padding-bottom:0.5rem">ระบุจำนวนที่ต้องการปรับปรุงในแต่ละไซส์:</div>
+          <div id="sizeStockInputs" style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem"></div>
         </div>
       </div>
       <div class="modal-footer flex-wrap">
@@ -2050,8 +2101,28 @@
           '</tr></thead><tbody>';
 
         items.forEach(function (itm) {
+          var isTotalLow = Number(itm.stock) <= Number(itm.minStock);
+          var lowSizes = [];
+          if (itm.variantStock) {
+            try {
+              var vs = typeof itm.variantStock === 'string' ? JSON.parse(itm.variantStock) : itm.variantStock;
+              for (var k in vs) { if (Number(vs[k]) <= 2) lowSizes.push(k); }
+            } catch(e) {}
+          }
+
+          var detail = '';
+          if (lowSizes.length > 0 && !isTotalLow) {
+            detail = '<div style="font-size:0.7rem; color:var(--danger); font-weight:600">ต่ำเฉพาะไซส์: ' + lowSizes.join(', ') + '</div>';
+          } else if (isTotalLow) {
+            detail = '<div style="font-size:0.7rem; color:var(--danger); font-weight:600">ต่ำกว่าเกณฑ์ขั้นต่ำรวม</div>';
+          }
+
           html += '<tr>' +
-            '<td><div style="font-weight:600">' + itm.name + '</div><div style="font-size:0.7rem; color:var(--text3)">ID: ' + itm.productId + '</div></td>' +
+            '<td>' +
+            '<div style="font-weight:600">' + itm.name + '</div>' +
+            '<div style="font-size:0.7rem; color:var(--text3)">ID: ' + itm.productId + '</div>' +
+            detail +
+            '</td>' +
             '<td style="text-align:center; color:var(--danger); font-weight:700">' + itm.stock + '</td>' +
             '<td style="text-align:center; opacity:0.6">' + itm.minStock + '</td>' +
             '</tr>';
@@ -2452,8 +2523,9 @@
       }
     }
 
-    function formatVariantStock(vs) {
+    function formatVariantStock(vs, threshold) {
       if (!vs) return '';
+      var limit = threshold || 2;
       var obj = vs;
       if (typeof vs === 'string' && vs.trim().startsWith('{')) {
         try { obj = JSON.parse(vs); } catch (e) { return vs; }
@@ -2462,7 +2534,7 @@
       var parts = [];
       for (var k in obj) {
         var qty = Number(obj[k]);
-        var style = qty <= 2 ? 'color:var(--danger); font-weight:bold' : '';
+        var style = qty <= limit ? 'color:var(--danger); font-weight:bold' : '';
         parts.push('<span style="' + style + '">' + k + ':' + qty + '</span>');
       }
       return parts.join(' | ');
@@ -3230,6 +3302,7 @@
             '<span style="font-size:0.75rem; color:var(--text3)">ID: ' + t.teamId + '</span>' +
             '</div>' +
             '<div class="flex flex-wrap gap-1">' +
+            '<button class="btn btn-ghost btn-xs" onclick="editTeam(\'' + String(t.teamId).replace(/'/g, "\\'") + '\')"><i data-lucide="edit-3" style="pointer-events:none"></i></button>' +
             '<button class="btn btn-ghost btn-xs" style="color:var(--danger)" onclick="delTeam(\'' + String(t.teamId).replace(/'/g, "\\'") + '\')"><i data-lucide="trash" style="pointer-events:none"></i></button>' +
             '</div>' +
             '</div>' +
@@ -3506,10 +3579,11 @@
         }
         body.innerHTML = '<div class="flex justify-between items-center mb-4"><h4>📦 คลังย่อย: ' + title + '</h4>' +
           '<button class="btn btn-accent btn-sm" onclick="openScannerForSubStock(\'' + targetId + '\', \'' + (isTeam ? 'team' : 'personal') + '\')"><i data-lucide="scan"></i> สแกนใช้งาน</button></div>' +
-          '<div class="table-wrap"><table><thead><tr><th>สินค้า</th><th>จำนวน</th></tr></thead><tbody>' +
+          '<div class="table-wrap"><table><thead><tr><th>สินค้า</th><th>ไซส์</th><th>จำนวน</th></tr></thead><tbody>' +
           items.map(function (i) {
-            return '<tr><td>' + (i.productName || i.productId) + '</td><td style="font-weight:700">' + i.quantity + '</td></tr>';
+            return '<tr><td>' + (i.productName || i.productId) + '</td><td>' + (i.size || '-') + '</td><td style="font-weight:700">' + i.quantity + '</td></tr>';
           }).join('') + '</tbody></table></div>';
+        refreshIcons();
       });
     }
 
@@ -3538,8 +3612,8 @@
             + '<td>' + (d.departmentId || '-') + '</td>'
             + '<td style="font-weight:600">' + d.name + '</td>'
             + '<td class="flex gap-1">'
-            + '<button class="btn btn-sm btn-ghost" onclick="openDeptModal({departmentId:\'' + d.departmentId + '\', name:\'' + d.name + '\'})"><i data-lucide="edit-2" style="width:14px;height:14px"></i></button>'
-            + '<button class="btn btn-sm btn-ghost" style="color:var(--danger)" onclick="delDept(\'' + d.departmentId + '\')"><i data-lucide="trash-2" style="width:14px;height:14px"></i></button></td>'
+            + '<button class="btn btn-sm btn-ghost" onclick="openDeptModal({departmentId:\'' + d.departmentId + '\', name:\'' + d.name + '\'})"><i data-lucide="edit-2" style="width:14px;height:14px;pointer-events:none"></i></button>'
+            + '<button class="btn btn-sm btn-ghost" style="color:var(--danger)" onclick="delDept(\'' + d.departmentId + '\')"><i data-lucide="trash-2" style="width:14px;height:14px;pointer-events:none"></i></button></td>'
             + '</tr>';
         }).join('');
         refreshIcons();
@@ -3656,24 +3730,36 @@
         body.innerHTML = res.data.map(function (p) {
           var isTotalLow = Number(p.stock) <= Number(p.minStock);
           var isAnySizeLow = false;
+          var lowSizes = [];
           if (p.variantStock) {
             var vs = {};
             try {
               vs = typeof p.variantStock === 'string' ? JSON.parse(p.variantStock) : p.variantStock;
             } catch (e) { }
-            for (var k in vs) { if (Number(vs[k]) <= 2) isAnySizeLow = true; }
+            for (var k in vs) { 
+              if (Number(vs[k]) <= 2) {
+                isAnySizeLow = true; 
+                lowSizes.push(k);
+              } 
+            }
           }
           var isLow = isTotalLow || isAnySizeLow;
+
+          var statusBadge = '<span class="badge badge-approved">ปกติ</span>';
+          if (isLow) {
+            var lowText = isTotalLow ? 'ทั้งหมด' : lowSizes.join(', ');
+            statusBadge = '<span class="badge badge-rejected">⚠️ ต่ำ: ' + lowText + '</span>';
+          }
 
           return '<tr>'
             + '<td>' + p.productId + '</td>'
             + '<td style="font-weight:500">' + p.name + '</td>'
             + '<td style="font-weight:700;' + (isTotalLow ? 'color:var(--danger)' : '') + '">'
             + '<div>' + p.stock + '</div>'
-            + (p.variantStock ? '<div style="font-size:0.65rem; color:var(--text3); font-weight:normal">' + formatVariantStock(p.variantStock) + '</div>' : '')
+            + (p.variantStock ? '<div style="font-size:0.65rem; color:var(--text3); font-weight:normal">' + formatVariantStock(p.variantStock, 2) + '</div>' : '')
             + '</td>'
             + '<td>' + p.minStock + '</td>'
-            + '<td>' + (isLow ? '<span class="badge badge-rejected">⚠️ ต่ำ' + (isAnySizeLow && !isTotalLow ? ' (ไซส์)' : '') + '</span>' : '<span class="badge badge-approved">ปกติ</span>') + '</td>'
+            + '<td>' + statusBadge + '</td>'
             + '<td><button class="btn btn-sm btn-outline" onclick="openStockModal(\'' + p.productId + '\',\'' + p.name + '\')">ปรับ</button></td>'
             + '</tr>';
         }).join('');
@@ -3685,6 +3771,40 @@
       document.getElementById('stockProductId').value = id;
       document.getElementById('stockProductName').textContent = '📦 ' + name;
       document.getElementById('stockAdjust').value = '';
+      
+      var sizeContainer = document.getElementById('sizeStockContainer');
+      var sizeInputs = document.getElementById('sizeStockInputs');
+      var adjustWrap = document.getElementById('stockAdjustWrap');
+      
+      sizeInputs.innerHTML = '';
+      sizeContainer.style.display = 'none';
+      adjustWrap.style.display = 'block';
+
+      // ค้นหาสินค้าเพื่อดูว่ามีไซส์ไหม
+      var p = allAdminProducts.find(function(x) { return String(x.productId) === String(id); });
+      if (p && (p.sizes || p.variantStock)) {
+        var sizes = [];
+        if (p.sizes) {
+          sizes = p.sizes.split(',').map(function(s) { return s.trim(); }).filter(function(s) { return s !== ''; });
+        } else if (p.variantStock) {
+          try {
+            var vs = typeof p.variantStock === 'string' ? JSON.parse(p.variantStock) : p.variantStock;
+            sizes = Object.keys(vs);
+          } catch(e) {}
+        }
+
+        if (sizes.length > 0) {
+          adjustWrap.style.display = 'none';
+          sizeContainer.style.display = 'block';
+          sizeInputs.innerHTML = sizes.map(function(s) {
+            return '<div class="form-group" style="margin:0">' +
+              '<label class="form-label" style="font-size:0.75rem;margin-bottom:0.25rem">ไซส์ ' + s + '</label>' +
+              '<input type="number" class="form-input size-adj-input" data-size="' + s + '" placeholder="0" style="text-align:center;font-weight:600">' +
+              '</div>';
+          }).join('');
+        }
+      }
+      
       document.getElementById('stockModal').classList.add('open');
     }
     function closeStockModal() { document.getElementById('stockModal').classList.remove('open'); }
@@ -3692,14 +3812,32 @@
     function doStockAdjust() {
       var id = document.getElementById('stockProductId').value;
       var adj = Number(document.getElementById('stockAdjust').value);
-      if (!adj) { showToast('กรุณากรอกจำนวน', 'warning'); return; }
+      
+      var isBulk = document.getElementById('sizeStockContainer').style.display !== 'none';
+      var adjustments = null;
+
+      if (isBulk) {
+        adjustments = {};
+        var inputs = document.querySelectorAll('.size-adj-input');
+        var hasAny = false;
+        inputs.forEach(function(inp) {
+          var val = Number(inp.value);
+          if (val !== 0) {
+            adjustments[inp.dataset.size] = val;
+            hasAny = true;
+          }
+        });
+        if (!hasAny) { showToast('กรุณากรอกจำนวนในอย่างน้อยหนึ่งไซส์', 'warning'); return; }
+      } else {
+        if (!adj) { showToast('กรุณากรอกจำนวน', 'warning'); return; }
+      }
 
       var btn = document.getElementById('doStockAdjustBtn');
       var oldHtml = btn.innerHTML;
       btn.innerHTML = '<div class="spinner" style="width:16px;height:16px"></div> กำลังบันทึก...';
       btn.disabled = true;
 
-      API.updateStock(id, adj, currentUser ? currentUser.employeeId : 'SYSTEM').then(function (res) {
+      API.updateStock(id, adj, (currentUser ? currentUser.employeeId : 'SYSTEM'), null, adjustments).then(function (res) {
         showToast(res.message || res.error, res.success ? 'success' : 'error');
         if (res.success) {
           closeStockModal();
@@ -3907,6 +4045,7 @@
       setTimeout(function () { t.remove(); }, 4000);
     }
 
+
     /**
      * getImageUrl - แปลงลิงก์ Google Drive ให้เป็น Direct Link
      */
@@ -3985,6 +4124,13 @@
     function setScanMode(mode) {
       currentScanMode = mode;
 
+      // Sync with Quick Scan Tag
+      var tag = document.getElementById('qsModeTag');
+      if (tag) {
+        var label = { 'deduct': 'จ่ายออก', 'receive': 'รับเข้า', 'sub': 'คลังย่อย' }[mode] || mode;
+        tag.textContent = label;
+      }
+
       // Update UI Buttons (Lucide Icons)
       document.querySelectorAll('.scanner-mode-btn').forEach(function (btn) {
         var btnMode = btn.id.replace('scanMode', '').toLowerCase();
@@ -3992,6 +4138,26 @@
       });
 
       showToast('สลับโหมดเป็น: ' + mode, 'info');
+    }
+
+    function toggleScanModeDropdown(e) {
+      if (e) e.stopPropagation();
+      var dropdown = document.getElementById('scanModeDropdown');
+      if (!dropdown) return;
+      var isOpen = dropdown.style.display !== 'none';
+      
+      // Close other menus if any
+      var moreMenu = document.getElementById('adminMoreMenu');
+      if (moreMenu) moreMenu.style.display = 'none';
+
+      dropdown.style.display = isOpen ? 'none' : 'block';
+      refreshIcons();
+    }
+
+    function updateScanMode(mode, label, e) {
+      if (e) e.stopPropagation();
+      setScanMode(mode);
+      document.getElementById('scanModeDropdown').style.display = 'none';
     }
 
     function openScanner(mode) {
@@ -4359,7 +4525,6 @@
 
 
     // --- BRANCH MANAGEMENT LOGIC ---
-    var allBranches = [];
     function loadBranches() {
       var body = document.getElementById('branchesBody');
       body.innerHTML = '<tr><td colspan="4" class="text-center" style="padding:2rem"><div class="spinner"></div></td></tr>';
@@ -4376,8 +4541,8 @@
             '<td style="font-weight:500">' + escapeHTML(b.name) + '</td>' +
             '<td><span class="badge ' + (b.status === 'active' ? 'badge-approved' : 'badge-rejected') + '">' + (b.status === 'active' ? 'ปกติ' : 'ปิด') + '</span></td>' +
             '<td class="flex flex-wrap gap-1">' +
-            '<button class="btn btn-xs btn-outline" onclick="editBranch(\'' + escapeHTML(b.branchId) + '\')"><i data-lucide="edit-2"></i></button>' +
-            '<button class="btn btn-xs btn-ghost" style="color:var(--danger)" onclick="delBranch(\'' + escapeHTML(b.branchId) + '\')"><i data-lucide="trash"></i></button>' +
+            '<button class="btn btn-xs btn-outline" onclick="editBranch(\'' + escapeHTML(b.branchId) + '\')"><i data-lucide="edit-2" style="pointer-events:none"></i></button>' +
+            '<button class="btn btn-xs btn-ghost" style="color:var(--danger)" onclick="delBranch(\'' + escapeHTML(b.branchId) + '\')"><i data-lucide="trash" style="pointer-events:none"></i></button>' +
             '</td>' +
             '</tr>';
         }).join('');
@@ -4397,7 +4562,7 @@
     }
     function closeBranchModal() { document.getElementById('branchModal').classList.remove('open'); }
     function editBranch(id) {
-      var b = allBranches.find(function (x) { return x.branchId === id; });
+      var b = allBranches.find(function (x) { return String(x.branchId) === String(id); });
       if (b) openBranchModal(b);
     }
 
