@@ -128,8 +128,9 @@ var API = (function () {
       var payload = {
         action: action,
         data: data || {},
-        user: user, // [แก้ไข BUG-7] อ่าน localStorage ครั้งเดียวและส่ง Object ที่ Parse แล้ว
-        token: localStorage.getItem('_tok') // ส่ง Token ไปกับทุก Request
+        user: user,
+        token: localStorage.getItem('_tok'),
+        _origin: window.location.hostname // [CRIT-5] ส่ง Origin ให้ Backend ตรวจสอบ
       };
 
       self.isPending = true;

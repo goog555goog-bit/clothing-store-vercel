@@ -222,12 +222,13 @@ function updateUserUI() {
 }
 
 function logout() {
+  if (!confirm('ยืนยันการออกจากระบบ?')) return;
   localStorage.removeItem('_user');
   localStorage.removeItem('_tok');
   currentUser = null;
   updateUserUI();
   showToast('ออกจากระบบแล้ว', 'success');
-  switchView('store');
+  navigateTo('login.html');
 }
 
 function initMouseGlow() {

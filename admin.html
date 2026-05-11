@@ -38,6 +38,7 @@
         .replace(/'/g, "&#039;");
     }
     function adminLogout() {
+      if (!confirm('ยืนยันการออกจากระบบแอดมิน?')) return;
       localStorage.removeItem('_user');
       navigateTo('login.html');
     }
@@ -4913,31 +4914,7 @@
       });
     }
 
-    // ─── SCANNER INTEGRATION ──────────────────────────────
-    function openScanner() {
-      // Open separate scanner window
-      window.open('scanner.html?mode=receive', 'QRScanner', 'width=450,height=700');
-    }
 
-    window.addEventListener('message', function(event) {
-      if (event.data && event.data.type === 'QR_SCAN_RESULT') {
-        var code = event.data.text;
-        showToast('สแกนสำเร็จ: ' + code, 'success');
-        
-        // Logic: Search for product in inventory or auto-populate receive field
-        // For now, let's just search it
-        var searchInput = document.querySelector('.search-box input');
-        if (searchInput) {
-          searchInput.value = code;
-          // Trigger search logic
-          var allRows = masterAdminProducts || [];
-          allAdminProducts = allRows.filter(function(p) {
-            return String(p.productId).toLowerCase().includes(code.toLowerCase());
-          });
-          renderAdminProducts(1);
-        }
-      }
-    });
   </script>
 </body>
 

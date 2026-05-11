@@ -211,6 +211,7 @@
     }
 
     function mgrLogout() {
+      if (!confirm('ยืนยันการออกจากระบบผู้อนุมัติ?')) return;
       localStorage.removeItem('_user');
       localStorage.removeItem('_tok');
       navigateTo('login.html');
