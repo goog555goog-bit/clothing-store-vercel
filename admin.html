@@ -48,7 +48,9 @@
   <style>
     /* ซ่อน Desktop Tabs บนมือถือ — ใช้ Bottom Nav แทน */
     @media (max-width: 767px) {
-      .tabs-scroll-wrap { display: none !important; }
+      .tabs-scroll-wrap {
+        display: none !important;
+      }
     }
 
     /* สไตล์ปุ่มในเมนูเพิ่มเติม */
@@ -59,8 +61,8 @@
       justify-content: center;
       gap: 0.4rem;
       padding: 0.85rem 0.5rem;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
       border-radius: 14px;
       color: var(--text2);
       font-size: 0.68rem;
@@ -70,17 +72,26 @@
       transition: all 0.2s ease;
       min-height: 70px;
     }
-    .admin-more-item:hover, .admin-more-item:active {
-      background: rgba(251,191,36,0.08);
-      border-color: rgba(251,191,36,0.2);
+
+    .admin-more-item:hover,
+    .admin-more-item:active {
+      background: rgba(251, 191, 36, 0.08);
+      border-color: rgba(251, 191, 36, 0.2);
       color: var(--primary);
       transform: scale(0.96);
     }
 
     /* Animation สำหรับ More Menu */
     @keyframes slideUpMore {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .menu-item-btn {
@@ -100,8 +111,9 @@
       transition: all 0.2s ease;
       font-family: inherit;
     }
+
     .menu-item-btn:hover {
-      background: rgba(255,255,255,0.06);
+      background: rgba(255, 255, 255, 0.06);
       color: var(--primary);
     }
   </style>
@@ -112,18 +124,18 @@
       var menu = document.getElementById('adminMoreMenu');
       var btn = document.getElementById('adminMoreBtn');
       if (!menu) return;
-      
+
       var isOpen = menu.style.display !== 'none';
       menu.style.display = isOpen ? 'none' : 'block';
-      
+
       // เปลี่ยนสีปุ่ม "เพิ่มเติม" เมื่อเปิด
       if (btn) {
         btn.style.color = isOpen ? '' : 'var(--primary)';
       }
-      
+
       refreshIcons();
     }
-    
+
     // ปิด More Menu เมื่อกดที่อื่น
     document.addEventListener('click', function (e) {
       var menu = document.getElementById('adminMoreMenu');
@@ -134,7 +146,7 @@
           if (btn) btn.style.color = '';
         }
       }
-      
+
       var scanMenu = document.getElementById('scanModeDropdown');
       if (scanMenu && scanMenu.style.display !== 'none') {
         if (!scanMenu.contains(e.target)) {
@@ -159,13 +171,14 @@
           style="color:var(--text2); font-weight: 500; font-size: 0.9rem; background: var(--surface); padding: 0.4rem 1rem; border-radius: 99px; border: 1px solid var(--border);">
         </div>
         <!-- [แก้ไข A11y] เพิ่ม aria-label ให้ปุ่ม header ทุกตัว -->
-        <button class="btn btn-ghost btn-sm" onclick="openPasswordModal()" title="เปลี่ยนรหัสผ่าน" aria-label="เปลี่ยนรหัสผ่าน">
+        <button class="btn btn-ghost btn-sm" onclick="openPasswordModal()" title="เปลี่ยนรหัสผ่าน"
+          aria-label="เปลี่ยนรหัสผ่าน">
           <i data-lucide="key"></i>
         </button>
-        <button class="btn btn-ghost btn-sm" onclick="navigateTo(scriptUrl)" aria-label="ไปหน้าร้าน"><i data-lucide="shopping-bag"></i> <span
-            class="hide-mobile">หน้าร้าน</span></button>
-        <button id="mgrPaneBtn" class="btn btn-warning btn-sm hidden hide-mobile"
-          onclick="navigateTo('manager.html')" aria-label="ไปหน้าผู้อนุมัติ"><i data-lucide="scale"></i> ผู้อนุมัติ</button>
+        <button class="btn btn-ghost btn-sm" onclick="navigateTo(scriptUrl)" aria-label="ไปหน้าร้าน"><i
+            data-lucide="shopping-bag"></i> <span class="hide-mobile">หน้าร้าน</span></button>
+        <button id="mgrPaneBtn" class="btn btn-warning btn-sm hidden hide-mobile" onclick="navigateTo('manager.html')"
+          aria-label="ไปหน้าผู้อนุมัติ"><i data-lucide="scale"></i> ผู้อนุมัติ</button>
         <button class="btn btn-outline btn-sm" onclick="adminLogout()" aria-label="ออกจากระบบ"
           style="color: var(--danger); border-color: rgba(239, 68, 68, 0.2);"><i data-lucide="log-out"></i></button>
       </div>
@@ -226,21 +239,25 @@
         <p id="currentPageDesc" class="hide-mobile" style="font-size: 0.85rem; color: var(--text3);">
           ข้อมูลสรุปและสถานะระบบแบบเรียลไทม์</p>
       </div>
-      <div style="position:relative; display:inline-flex; align-items:stretch; border-radius:12px; overflow:visible; box-shadow: 0 4px 15px rgba(251,191,36,0.15);">
-        <button class="btn btn-accent" onclick="openScanner(currentScanMode)" id="quickScanBtn" 
+      <div
+        style="position:relative; display:inline-flex; align-items:stretch; border-radius:12px; overflow:visible; box-shadow: 0 4px 15px rgba(251,191,36,0.15);">
+        <button class="btn btn-accent" onclick="openScanner(currentScanMode)" id="quickScanBtn"
           style="border-radius:12px 0 0 12px; border-right: 1px solid rgba(0,0,0,0.1); padding-right:0.75rem; margin:0; height:42px">
-          <i data-lucide="qr-code"></i> <span class="hide-mobile">สแกนด่วน</span> 
-          <span id="qsModeTag" style="font-size:0.6rem; opacity:0.8; margin-left:0.3rem; border:1px solid rgba(255,255,255,0.3); padding:1px 5px; border-radius:4px; font-weight:700; white-space:nowrap">จ่ายออก</span>
+          <i data-lucide="qr-code"></i> <span class="hide-mobile">สแกนด่วน</span>
+          <span id="qsModeTag"
+            style="font-size:0.6rem; opacity:0.8; margin-left:0.3rem; border:1px solid rgba(255,255,255,0.3); padding:1px 5px; border-radius:4px; font-weight:700; white-space:nowrap">จ่ายออก</span>
         </button>
-        <button class="btn btn-accent" onclick="toggleScanModeDropdown(event)" 
+        <button class="btn btn-accent" onclick="toggleScanModeDropdown(event)"
           style="border-radius:0 12px 12px 0; padding-inline:0.5rem; min-width:auto; margin:0; height:42px">
           <i data-lucide="chevron-down" style="width:16px;height:16px"></i>
         </button>
-        
+
         <!-- Scan Mode Dropdown Menu -->
-        <div id="scanModeDropdown" class="glass card" 
+        <div id="scanModeDropdown" class="glass card"
           style="display:none; position:absolute; top:110%; right:0; z-index:1000; min-width:200px; padding:0.5rem; box-shadow: 0 10px 40px rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); animation: slideUpMore 0.2s ease;">
-          <div style="font-size:0.65rem; color:var(--text3); font-weight:700; margin-bottom:0.4rem; padding-inline:0.85rem; text-transform:uppercase; letter-spacing:0.05em">เลือกโหมดสแกน</div>
+          <div
+            style="font-size:0.65rem; color:var(--text3); font-weight:700; margin-bottom:0.4rem; padding-inline:0.85rem; text-transform:uppercase; letter-spacing:0.05em">
+            เลือกโหมดสแกน</div>
           <button class="menu-item-btn" onclick="updateScanMode('deduct', 'จ่ายออก', event)">📤 จ่ายออก (Main)</button>
           <button class="menu-item-btn" onclick="updateScanMode('receive', 'รับเข้า', event)">📥 รับเข้า (Main)</button>
           <button class="menu-item-btn" onclick="updateScanMode('sub', 'คลังย่อย', event)">📦 รับเข้าคลังย่อย</button>
@@ -641,34 +658,41 @@
       </div>
 
     </section>
-    
+
     <!-- INVENTORY USAGE HISTORY -->
     <section id="p-usage" class="admin-page" style="display:none">
-      <div style="margin-bottom:1rem; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem">
-        <h3 style="color:var(--primary); margin:0"><i data-lucide="package-search"></i> ประวัติการเบิกใช้พัสดุ (Inventory Usage History)</h3>
+      <div
+        style="margin-bottom:1rem; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem">
+        <h3 style="color:var(--primary); margin:0"><i data-lucide="package-search"></i> ประวัติการเบิกใช้พัสดุ
+          (Inventory Usage History)</h3>
         <button class="btn btn-outline btn-sm" onclick="downloadCSV('InventoryLogs')">📥 Export CSV</button>
       </div>
 
       <!-- Filters Row -->
-      <div class="card glass" style="margin-bottom: 1rem; padding: 1rem; border: 1px solid var(--primary-light); background: rgba(99, 102, 241, 0.03);">
+      <div class="card glass"
+        style="margin-bottom: 1rem; padding: 1rem; border: 1px solid var(--primary-light); background: rgba(99, 102, 241, 0.03);">
         <div class="grid grid-3-tablet gap-2">
           <div>
             <label class="form-label" style="font-size:0.8rem; color:var(--text2)">กรองตามทีม</label>
-            <select id="logFilterTeam" class="input w-full" onchange="onLogTeamChange()" style="background:var(--surface)">
+            <select id="logFilterTeam" class="input w-full" onchange="onLogTeamChange()"
+              style="background:var(--surface)">
               <option value="all">ทุกทีม (All Teams)</option>
             </select>
           </div>
           <div>
             <label class="form-label" style="font-size:0.8rem; color:var(--text2)">กรองตามพนักงาน</label>
-            <select id="logFilterUser" class="input w-full" onchange="loadInventoryAudit()" style="background:var(--surface)">
+            <select id="logFilterUser" class="input w-full" onchange="loadInventoryAudit()"
+              style="background:var(--surface)">
               <option value="all">ทุกคน (All Employees)</option>
             </select>
           </div>
           <div>
             <label class="form-label" style="font-size:0.8rem; color:var(--text2)">ค้นหาสินค้า</label>
             <div style="position:relative">
-              <i data-lucide="search" style="position:absolute; left:0.75rem; top:50%; transform:translateY(-50%); width:14px; height:14px; color:var(--text3)"></i>
-              <input type="text" id="logFilterProduct" class="input w-full" placeholder="รหัสหรือชื่อสินค้า..." oninput="loadInventoryAudit()" style="padding-left:2.25rem; background:var(--surface)">
+              <i data-lucide="search"
+                style="position:absolute; left:0.75rem; top:50%; transform:translateY(-50%); width:14px; height:14px; color:var(--text3)"></i>
+              <input type="text" id="logFilterProduct" class="input w-full" placeholder="รหัสหรือชื่อสินค้า..."
+                oninput="loadInventoryAudit()" style="padding-left:2.25rem; background:var(--surface)">
             </div>
           </div>
         </div>
@@ -689,7 +713,8 @@
             </thead>
             <tbody id="inventoryAuditBody">
               <tr>
-                <td colspan="6" class="text-center" style="padding:2rem; color:var(--text3)">กำลังโหลดข้อมูลประวัติการใช้งาน...</td>
+                <td colspan="6" class="text-center" style="padding:2rem; color:var(--text3)">
+                  กำลังโหลดข้อมูลประวัติการใช้งาน...</td>
               </tr>
             </tbody>
           </table>
@@ -735,11 +760,16 @@
           <table class="admin-table permission-table">
             <thead>
               <tr class="perm-cat-header">
-                <th rowspan="2" style="width:180px; vertical-align:middle; background:rgba(255,255,255,0.02)">บทบาท (Role)</th>
-                <th colspan="6" style="text-align:center; background:rgba(99,102,241,0.1); color:#818cf8">คลังสินค้า (Inventory)</th>
-                <th colspan="3" style="text-align:center; background:rgba(245,158,11,0.1); color:#fbbf24">การเบิกจ่าย (Orders)</th>
-                <th colspan="3" style="text-align:center; background:rgba(16,185,129,0.1); color:#34d399">รายงาน (Reports)</th>
-                <th colspan="3" style="text-align:center; background:rgba(236,72,153,0.1); color:#f472b6">ระบบ (System)</th>
+                <th rowspan="2" style="width:180px; vertical-align:middle; background:rgba(255,255,255,0.02)">บทบาท
+                  (Role)</th>
+                <th colspan="6" style="text-align:center; background:rgba(99,102,241,0.1); color:#818cf8">คลังสินค้า
+                  (Inventory)</th>
+                <th colspan="3" style="text-align:center; background:rgba(245,158,11,0.1); color:#fbbf24">การเบิกจ่าย
+                  (Orders)</th>
+                <th colspan="3" style="text-align:center; background:rgba(16,185,129,0.1); color:#34d399">รายงาน
+                  (Reports)</th>
+                <th colspan="3" style="text-align:center; background:rgba(236,72,153,0.1); color:#f472b6">ระบบ (System)
+                </th>
               </tr>
               <tr class="perm-key-header">
                 <!-- Inventory -->
@@ -1144,7 +1174,9 @@
             style="font-size:1.5rem; text-align:center; font-weight:700">
         </div>
         <div id="sizeStockContainer" style="display:none">
-          <div style="font-size:0.85rem; color:var(--text3); margin-bottom:1rem; border-bottom:1px solid var(--border); padding-bottom:0.5rem">ระบุจำนวนที่ต้องการปรับปรุงในแต่ละไซส์:</div>
+          <div
+            style="font-size:0.85rem; color:var(--text3); margin-bottom:1rem; border-bottom:1px solid var(--border); padding-bottom:0.5rem">
+            ระบุจำนวนที่ต้องการปรับปรุงในแต่ละไซส์:</div>
           <div id="sizeStockInputs" style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem"></div>
         </div>
       </div>
@@ -1366,9 +1398,12 @@
         <div id="scanActionProduct"
           style="margin-bottom:1.5rem; padding:1.5rem; background:linear-gradient(135deg, rgba(251,191,36,0.1) 0%, rgba(0,0,0,0) 100%); border-radius:16px; border:1px solid rgba(251,191,36,0.2); text-align:center;">
           <div id="sa-img-container" style="margin-bottom:1rem; display:none">
-            <img id="sa-img" style="width:120px; height:120px; object-fit:cover; border-radius:12px; margin:0 auto; border:2px solid var(--primary); box-shadow:0 8px 20px rgba(0,0,0,0.3)">
+            <img id="sa-img"
+              style="width:120px; height:120px; object-fit:cover; border-radius:12px; margin:0 auto; border:2px solid var(--primary); box-shadow:0 8px 20px rgba(0,0,0,0.3)">
           </div>
-          <div id="sa-name" style="font-weight:800; font-size:1.4rem; color:var(--primary); line-height:1.2; margin-bottom:0.5rem"></div>
+          <div id="sa-name"
+            style="font-weight:800; font-size:1.4rem; color:var(--primary); line-height:1.2; margin-bottom:0.5rem">
+          </div>
           <div id="sa-id" style="font-size:0.9rem; color:var(--text3); font-family:monospace; opacity:0.8"></div>
         </div>
 
@@ -1433,12 +1468,12 @@
     background: rgba(10,10,20,0.98); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
     border-top:1px solid rgba(251,191,36,0.2); padding:1rem 1.25rem 1.5rem;
     animation: slideUpMore 0.25s cubic-bezier(0.16,1,0.3,1);">
-    
+
     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem;">
       <span style="font-weight:700; font-size:0.9rem; color:var(--text2);">เมนูทั้งหมด</span>
       <button class="btn btn-ghost btn-xs" onclick="toggleAdminMoreMenu()">✕</button>
     </div>
-    
+
     <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:0.75rem;">
       <button class="admin-more-item" onclick="adminNav('categories'); toggleAdminMoreMenu()">
         <i data-lucide="layers" style="width:20px;height:20px;color:var(--primary)"></i>
@@ -1624,16 +1659,16 @@
       // Compatibility for admin check
       if (key === 'manage_inventory') return API.hasPermission(API.PERMS.MANAGE_INVENTORY);
       if (key === 'manage_categories') return API.hasPermission(API.PERMS.MANAGE_CATEGORIES);
-      
+
       return API.hasPermission(key);
     }
 
     function checkAuth() {
       var stored = localStorage.getItem('_user');
       if (stored) try { currentUser = JSON.parse(stored); } catch (e) { }
-      
+
       if (!currentUser) {
-        var loginUrl = window.location.hostname.indexOf('script.google.com') !== -1 
+        var loginUrl = window.location.hostname.indexOf('script.google.com') !== -1
           ? (typeof scriptUrl !== 'undefined' ? scriptUrl + '?page=login' : '?page=login')
           : 'login.html';
         window.location.href = loginUrl;
@@ -1643,12 +1678,12 @@
       // [NEW] ตรวจสอบสิทธิ์แบบยืดหยุ่น (Role + Permissions + Team Context)
       var hasTeam = currentUser && currentUser.teamId;
       var hasAnyAdminPerm = API.hasRole('superadmin') ||
-                            API.hasPermission(API.PERMS.MANAGE_PRODUCTS) || 
-                            API.hasPermission(API.PERMS.APPROVE_REQUEST) || 
-                            API.hasPermission(API.PERMS.MANAGE_INVENTORY) ||
-                            API.hasPermission(API.PERMS.MANAGE_EMPLOYEES) ||
-                            hasTeam; // [NEW] คนมีทีมสามารถเข้าหน้าแอดมินเพื่อดูใบเบิกทีมตนเองได้
-                            
+        API.hasPermission(API.PERMS.MANAGE_PRODUCTS) ||
+        API.hasPermission(API.PERMS.APPROVE_REQUEST) ||
+        API.hasPermission(API.PERMS.MANAGE_INVENTORY) ||
+        API.hasPermission(API.PERMS.MANAGE_EMPLOYEES) ||
+        hasTeam; // [NEW] คนมีทีมสามารถเข้าหน้าแอดมินเพื่อดูใบเบิกทีมตนเองได้
+
       if (!hasAnyAdminPerm) {
         document.querySelector('.container').innerHTML = '<div class="card text-center" style="padding:3rem;margin-top:2rem">'
           + '<p style="color:var(--danger);font-size:1.1rem">⛔ คุณไม่มีสิทธิ์เข้าถึงส่วนงานแอดมิน</p>'
@@ -1676,18 +1711,18 @@
       for (var id in tabPermissions) {
         var el = document.getElementById(id);
         if (!el) continue;
-        
+
         var isAllowed = false;
         var p = tabPermissions[id];
-        
+
         if (p === 'VIEW_ORDERS_OR_TEAM') {
-          isAllowed = API.hasPermission(API.PERMS.APPROVE_REQUEST) || 
-                      API.hasPermission(API.PERMS.VIEW_ALL_REQUESTS) || 
-                      hasTeam;
+          isAllowed = API.hasPermission(API.PERMS.APPROVE_REQUEST) ||
+            API.hasPermission(API.PERMS.VIEW_ALL_REQUESTS) ||
+            hasTeam;
         } else {
           isAllowed = API.hasPermission(p);
         }
-        
+
         el.style.display = isAllowed ? 'flex' : 'none';
       }
 
@@ -1702,7 +1737,7 @@
       var mgrMob = document.getElementById('mgrMobileBtn');
       var mgrMob2 = document.getElementById('mgrMobileBtn2');
       var canManage = API.hasPermission(API.PERMS.APPROVE_REQUEST) || hasTeam;
-      
+
       if (canManage) {
         if (mgrBtn) mgrBtn.classList.remove('hidden');
         if (mgrMob) mgrMob.classList.remove('hidden');
@@ -1724,9 +1759,9 @@
         if (results[2].success && results[2].data) {
           allAdminDepartments = results[2].data;
         }
-        
+
         // [NEW] บันทึกสินค้าลง LocalStorage สำหรับหน้าสแกนในโหมด Admin
-        API.getProducts().then(function(res) {
+        API.getProducts().then(function (res) {
           if (res.success) localStorage.setItem('_all_products_cache', JSON.stringify(res.data));
         });
 
@@ -1800,7 +1835,7 @@
         'departments': loadAdminDepartments,
         'branches': loadBranches,
         'audit': loadAuditLogs,
-        'usage': function() {
+        'usage': function () {
           loadInventoryAudit();
           initLogFilters();
         }
@@ -2133,7 +2168,7 @@
             try {
               var vs = typeof itm.variantStock === 'string' ? JSON.parse(itm.variantStock) : itm.variantStock;
               for (var k in vs) { if (Number(vs[k]) <= 2) lowSizes.push(k); }
-            } catch(e) {}
+            } catch (e) { }
           }
 
           var detail = '';
@@ -2216,7 +2251,7 @@
       API.getProducts().then(function (res) {
         if (!res.data) res.data = [];
         allAdminProducts = res.data;
-        
+
         // Sync products to cache for scanner
         localStorage.setItem('_all_products_cache', JSON.stringify(res.data));
 
@@ -2418,12 +2453,12 @@
       document.getElementById('cf-old-id').value = cat ? cat.id : '';
       document.getElementById('cf-id').value = cat ? cat.id : '';
       document.getElementById('cf-name').value = cat ? cat.name : '';
-      
+
       // Populate Branches
       var branchSelect = document.getElementById('cf-branch');
       if (branchSelect && typeof allBranches !== 'undefined') {
-        branchSelect.innerHTML = '<option value="">ทุกสาขา / ส่วนกลาง</option>' + 
-          allBranches.map(function(b) { return '<option value="' + b.branchId + '">' + b.name + ' (' + b.branchId + ')</option>'; }).join('');
+        branchSelect.innerHTML = '<option value="">ทุกสาขา / ส่วนกลาง</option>' +
+          allBranches.map(function (b) { return '<option value="' + b.branchId + '">' + b.name + ' (' + b.branchId + ')</option>'; }).join('');
         branchSelect.value = cat ? (cat.branchId || '') : '';
       }
 
@@ -2757,7 +2792,7 @@
         var actions = '';
         var user = JSON.parse(localStorage.getItem('_user') || '{}');
         var userTeamId = user.teamId || '';
-        
+
         var isSameTeam = userTeamId && o.teamId && String(userTeamId) === String(o.teamId);
         var canApprove = hasPermission('approve_orders') || isSameTeam;
         var canDispatch = hasPermission('dispatch_orders') || isSameTeam;
@@ -3689,7 +3724,7 @@
         } else {
           showToast(res.message || 'เกิดข้อผิดพลาด', 'error');
         }
-      }).catch(function(err) {
+      }).catch(function (err) {
         showToast('ผิดพลาด: ' + err, 'error');
       });
     }
@@ -3778,11 +3813,11 @@
             try {
               vs = typeof p.variantStock === 'string' ? JSON.parse(p.variantStock) : p.variantStock;
             } catch (e) { }
-            for (var k in vs) { 
+            for (var k in vs) {
               if (Number(vs[k]) <= 2) {
-                isAnySizeLow = true; 
+                isAnySizeLow = true;
                 lowSizes.push(k);
-              } 
+              }
             }
           }
           var isLow = isTotalLow || isAnySizeLow;
@@ -3813,32 +3848,32 @@
       document.getElementById('stockProductId').value = id;
       document.getElementById('stockProductName').textContent = '📦 ' + name;
       document.getElementById('stockAdjust').value = '';
-      
+
       var sizeContainer = document.getElementById('sizeStockContainer');
       var sizeInputs = document.getElementById('sizeStockInputs');
       var adjustWrap = document.getElementById('stockAdjustWrap');
-      
+
       sizeInputs.innerHTML = '';
       sizeContainer.style.display = 'none';
       adjustWrap.style.display = 'block';
 
       // ค้นหาสินค้าเพื่อดูว่ามีไซส์ไหม
-      var p = allAdminProducts.find(function(x) { return String(x.productId) === String(id); });
+      var p = allAdminProducts.find(function (x) { return String(x.productId) === String(id); });
       if (p && (p.sizes || p.variantStock)) {
         var sizes = [];
         if (p.sizes) {
-          sizes = p.sizes.split(',').map(function(s) { return s.trim(); }).filter(function(s) { return s !== ''; });
+          sizes = p.sizes.split(',').map(function (s) { return s.trim(); }).filter(function (s) { return s !== ''; });
         } else if (p.variantStock) {
           try {
             var vs = typeof p.variantStock === 'string' ? JSON.parse(p.variantStock) : p.variantStock;
             sizes = Object.keys(vs);
-          } catch(e) {}
+          } catch (e) { }
         }
 
         if (sizes.length > 0) {
           adjustWrap.style.display = 'none';
           sizeContainer.style.display = 'block';
-          sizeInputs.innerHTML = sizes.map(function(s) {
+          sizeInputs.innerHTML = sizes.map(function (s) {
             return '<div class="form-group" style="margin:0">' +
               '<label class="form-label" style="font-size:0.75rem;margin-bottom:0.25rem">ไซส์ ' + s + '</label>' +
               '<input type="number" class="form-input size-adj-input" data-size="' + s + '" placeholder="0" style="text-align:center;font-weight:600">' +
@@ -3846,7 +3881,7 @@
           }).join('');
         }
       }
-      
+
       document.getElementById('stockModal').classList.add('open');
     }
     function closeStockModal() { document.getElementById('stockModal').classList.remove('open'); }
@@ -3854,7 +3889,7 @@
     function doStockAdjust() {
       var id = document.getElementById('stockProductId').value;
       var adj = Number(document.getElementById('stockAdjust').value);
-      
+
       var isBulk = document.getElementById('sizeStockContainer').style.display !== 'none';
       var adjustments = null;
 
@@ -3862,7 +3897,7 @@
         adjustments = {};
         var inputs = document.querySelectorAll('.size-adj-input');
         var hasAny = false;
-        inputs.forEach(function(inp) {
+        inputs.forEach(function (inp) {
           var val = Number(inp.value);
           if (val !== 0) {
             adjustments[inp.dataset.size] = val;
@@ -3930,7 +3965,7 @@
     function loadInventoryAudit() {
       var body = document.getElementById('inventoryAuditBody');
       if (!body) return;
-      
+
       // ดึงค่าจากตัวกรอง
       var teamId = document.getElementById('logFilterTeam') ? document.getElementById('logFilterTeam').value : 'all';
       var userId = document.getElementById('logFilterUser') ? document.getElementById('logFilterUser').value : 'all';
@@ -3939,11 +3974,11 @@
       body.innerHTML = '<tr><td colspan="6" class="text-center" style="padding:2rem"><div class="spinner"></div></td></tr>';
 
       // ส่ง Parameter ไปยัง Backend
-      API.getInventoryLogs({ 
-        userFilter: userId, 
-        productIdFilter: productQuery, 
+      API.getInventoryLogs({
+        userFilter: userId,
+        productIdFilter: productQuery,
         limit: 100,
-        teamFilter: teamId 
+        teamFilter: teamId
       }).then(function (res) {
         var logs = res.data || [];
         if (logs.length === 0) {
@@ -3971,17 +4006,17 @@
     function onLogTeamChange() {
       var teamId = document.getElementById('logFilterTeam').value;
       var userSelect = document.getElementById('logFilterUser');
-      
+
       // กรองพนักงานในทีม
-      var filteredEmps = allEmployees.filter(function(e) {
+      var filteredEmps = allEmployees.filter(function (e) {
         return teamId === 'all' || String(e.teamId) === String(teamId);
       });
 
-      userSelect.innerHTML = '<option value="all">ทุกคน (All Employees)</option>' + 
-        filteredEmps.map(function(e) {
+      userSelect.innerHTML = '<option value="all">ทุกคน (All Employees)</option>' +
+        filteredEmps.map(function (e) {
           return '<option value="' + e.employeeId + '">' + e.name + ' (' + e.employeeId + ')</option>';
         }).join('');
-      
+
       loadInventoryAudit();
     }
 
@@ -3991,10 +4026,10 @@
       if (!teamSelect) return;
 
       // เติมรายชื่อทีม
-      API.getTeams().then(function(res) {
+      API.getTeams().then(function (res) {
         var teams = res.data || [];
-        teamSelect.innerHTML = '<option value="all">ทุกทีม (All Teams)</option>' + 
-          teams.map(function(t) {
+        teamSelect.innerHTML = '<option value="all">ทุกทีม (All Teams)</option>' +
+          teams.map(function (t) {
             return '<option value="' + t.teamId + '">' + t.name + '</option>';
           }).join('');
         refreshIcons();
@@ -4002,7 +4037,7 @@
 
       // ดึงรายชื่อพนักงานทั้งหมดไว้รอ (ถ้ายังไม่มี)
       if (!allEmployees || allEmployees.length === 0) {
-        API.getEmployees().then(function(res) {
+        API.getEmployees().then(function (res) {
           allEmployees = res.data || [];
           onLogTeamChange(); // Init user list
         });
@@ -4187,7 +4222,7 @@
       var dropdown = document.getElementById('scanModeDropdown');
       if (!dropdown) return;
       var isOpen = dropdown.style.display !== 'none';
-      
+
       // Close other menus if any
       var moreMenu = document.getElementById('adminMoreMenu');
       if (moreMenu) moreMenu.style.display = 'none';
@@ -4430,8 +4465,8 @@
       API.getStorefrontData().then(function (res) {
         var products = res.products || [];
         var scannedCode = String(text || '').trim();
-        var prod = products.find(function (p) { 
-          return String(p.productId || p.id).toLowerCase() === scannedCode.toLowerCase(); 
+        var prod = products.find(function (p) {
+          return String(p.productId || p.id).toLowerCase() === scannedCode.toLowerCase();
         });
 
         if (!prod) {
