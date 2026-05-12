@@ -2,7 +2,7 @@
 //  api.js — Frontend REST Adapter (Refactored & Optimized)
 // ============================================================
 
-const GAS_URL = "https://script.google.com/macros/s/AKfycbygZ9roG6OfeitNNCX-T8EwK-mCz1RGnfNasdOyubYKpUqbHEo-1GPjqp4v6404Sj3xfw/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbxySQ44o-qsQJ1T0wFv5jOUxhPqCEYtOiULal7sitGlDnjZFsVEr80JamA5jQaP5a7Spg/exec";
 
 var API = (function () {
   var CACHE_KEY = '_api_cache_v1';
@@ -261,12 +261,12 @@ var API = (function () {
       return this._call('manageCategory', { op: op, data: data }, false, ['getCategories', 'getProducts', 'getStorefrontData']);
     },
     updateStock: function (productId, qty, adminId, size, adjustments) {
-      return this._call('updateStock', { 
-        productId: productId, 
-        qty: qty, 
-        adminId: adminId, 
-        size: size, 
-        adjustments: adjustments 
+      return this._call('updateStock', {
+        productId: productId,
+        qty: qty,
+        adminId: adminId,
+        size: size,
+        adjustments: adjustments
       }, false, ['getProducts', 'getDashboardStats', 'getAdvancedDashboardData', 'getInventoryForecast']);
     },
     receiveStock: function (productId, qty) {
