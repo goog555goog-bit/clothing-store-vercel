@@ -192,21 +192,30 @@ function updateUserUI() {
         }
       }
 
+    // [RBAC] ตรวจสอบสิทธิ์สำหรับการแสดงปุ่มนำทาง
+    var canAdmin = API.hasPermission(API.PERMS.MANAGE_PRODUCTS) || 
+                   API.hasPermission(API.PERMS.MANAGE_EMPLOYEES) || 
+                   API.hasPermission(API.PERMS.MANAGE_SETTINGS);
+                   
+    var hasTeam = currentUser && currentUser.teamId;
+    var canManage = API.hasPermission(API.PERMS.APPROVE_REQUEST) || 
+                    API.hasPermission(API.PERMS.DISPATCH_ORDERS) ||
+                    hasTeam; // [NEW] คนมีทีมสามารถเข้าหน้าผู้อนุมัติเพื่อจัดการทีมตนเองได้
+
     // ปุ่ม Admin
     var adminBtn = document.getElementById('adminPaneBtn');
     var adMob = document.getElementById('adminMobileBtn');
-    var canAdmin = API.hasPermission(API.PERMS.MANAGE_PRODUCTS); // หรือเช็คสิทธิ์อื่นๆ ที่เกี่ยวข้องกับ Admin
     if (adminBtn) adminBtn.classList.toggle('hidden', !canAdmin);
     if (adMob) adMob.classList.toggle('hidden', !canAdmin);
 
-    // ปุ่ม Manager
+    // ปุ่ม Manager (ผู้อนุมัติ)
     var mgrBtn = document.getElementById('mgrPaneBtn');
     var mgrMob = document.getElementById('mgrMobileBtn');
-    if (mgrBtn || mgrMob) {
-      var canManage = API.hasPermission(API.PERMS.APPROVE_REQUEST);
-      if (mgrBtn) mgrBtn.classList.toggle('hidden', !canManage);
-      if (mgrMob) mgrMob.classList.toggle('hidden', !canManage);
-    }
+    if (mgrBtn) mgrBtn.classList.toggle('hidden', !canManage);
+    if (mgrMob) mgrMob.classList.toggle('hidden', !canManage);
+
+    // ปุ่มรายการเบิกของฉัน (แสดงเสมอถ้า Login)
+    if (ordersBtn) ordersBtn.classList.remove('hidden');
   } else {
     if (nameEl) nameEl.textContent = 'เข้าสู่ระบบ';
     if (loginBtn) loginBtn.classList.remove('hidden');

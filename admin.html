@@ -323,7 +323,7 @@
                 <tr>
                   <th>เวลา</th>
                   <th>กิจกรรม</th>
-                  <th>โดย</th>
+                  <th>ชื่อผู้ใช้</th>
                 </tr>
               </thead>
               <tbody id="dashboardActivitiesBody">
@@ -412,6 +412,7 @@
               <tr>
                 <th>รหัสหมวดหมู่</th>
                 <th>ชื่อหมวดหมู่</th>
+                <th>สาขา</th>
                 <th>จัดการ</th>
               </tr>
             </thead>
@@ -971,6 +972,12 @@
         <div class="form-group">
           <label class="form-label">ชื่อหมวดหมู่ *</label>
           <input id="cf-name" class="form-input" placeholder="ระบุชื่อหมวดหมู่">
+        </div>
+        <div class="form-group">
+          <label class="form-label">สาขา (Branch Code)</label>
+          <select id="cf-branch" class="form-input">
+            <option value="">ทุกสาขา / ส่วนกลาง</option>
+          </select>
         </div>
       </div>
       <div class="modal-footer flex-wrap">
@@ -1633,11 +1640,14 @@
         return;
       }
 
-      // [แก้ไข BUG-10] ตรวจสอบ Role Superadmin ก่อนเช็ค Permission ย่อย
+      // [NEW] ตรวจสอบสิทธิ์แบบยืดหยุ่น (Role + Permissions + Team Context)
+      var hasTeam = currentUser && currentUser.teamId;
       var hasAnyAdminPerm = API.hasRole('superadmin') ||
                             API.hasPermission(API.PERMS.MANAGE_PRODUCTS) || 
                             API.hasPermission(API.PERMS.APPROVE_REQUEST) || 
-                            API.hasPermission(API.PERMS.MANAGE_INVENTORY);
+                            API.hasPermission(API.PERMS.MANAGE_INVENTORY) ||
+                            API.hasPermission(API.PERMS.MANAGE_EMPLOYEES) ||
+                            hasTeam; // [NEW] คนมีทีมสามารถเข้าหน้าแอดมินเพื่อดูใบเบิกทีมตนเองได้
                             
       if (!hasAnyAdminPerm) {
         document.querySelector('.container').innerHTML = '<div class="card text-center" style="padding:3rem;margin-top:2rem">'
@@ -1659,13 +1669,26 @@
         'tab-usage': API.PERMS.VIEW_REPORTS,
         'tab-settings': API.PERMS.MANAGE_SETTINGS,
         'tab-branches': API.PERMS.MANAGE_STRUCTURE,
-        'tab-permissions': API.PERMS.MANAGE_EMPLOYEES
+        'tab-permissions': API.PERMS.MANAGE_EMPLOYEES,
+        'tab-orders': 'VIEW_ORDERS_OR_TEAM' // [Special Key]
       };
 
       for (var id in tabPermissions) {
         var el = document.getElementById(id);
         if (!el) continue;
-        el.style.display = API.hasPermission(tabPermissions[id]) ? 'flex' : 'none';
+        
+        var isAllowed = false;
+        var p = tabPermissions[id];
+        
+        if (p === 'VIEW_ORDERS_OR_TEAM') {
+          isAllowed = API.hasPermission(API.PERMS.APPROVE_REQUEST) || 
+                      API.hasPermission(API.PERMS.VIEW_ALL_REQUESTS) || 
+                      hasTeam;
+        } else {
+          isAllowed = API.hasPermission(p);
+        }
+        
+        el.style.display = isAllowed ? 'flex' : 'none';
       }
 
       // Hide Inventory/Products management buttons if no permission
@@ -1674,11 +1697,13 @@
         b.style.display = canEditInventory ? 'inline-flex' : 'none';
       });
 
-      // ปุ่มไปหน้า Manager (ถ้ามีสิทธิ์อนุมัติ)
+      // ปุ่มไปหน้า Manager (ถ้ามีสิทธิ์อนุมัติ หรือ มีทีม)
       var mgrBtn = document.getElementById('mgrPaneBtn');
       var mgrMob = document.getElementById('mgrMobileBtn');
       var mgrMob2 = document.getElementById('mgrMobileBtn2');
-      if (API.hasPermission(API.PERMS.APPROVE_REQUEST)) {
+      var canManage = API.hasPermission(API.PERMS.APPROVE_REQUEST) || hasTeam;
+      
+      if (canManage) {
         if (mgrBtn) mgrBtn.classList.remove('hidden');
         if (mgrMob) mgrMob.classList.remove('hidden');
         if (mgrMob2) mgrMob2.style.display = 'flex';
@@ -1948,7 +1973,7 @@
           return '<tr>'
             + '<td style="color:var(--text3);font-size:0.75rem">' + time + '</td>'
             + '<td style="font-weight:500;"><div class="flex items-center gap-2"><span class="' + markerClass + '"></span>' + l.action + '</div></td>'
-            + '<td style="font-size:0.8rem">' + (l.user || 'SYSTEM') + '</td>'
+            + '<td style="font-size:0.8rem">' + (l.userName || 'SYSTEM') + '</td>'
             + '</tr>';
         }).join('');
 
@@ -2369,17 +2394,19 @@
     // ─── CATEGORIES ───────────────────────────────────────
     function loadAdminCategories() {
       var body = document.getElementById('categoriesBody');
-      if (body) body.innerHTML = '<tr><td colspan="3" class="text-center" style="padding:2rem"><div class="spinner"></div></td></tr>';
+      if (body) body.innerHTML = '<tr><td colspan="4" class="text-center" style="padding:2rem"><div class="spinner"></div></td></tr>';
 
       API.getCategories().then(function (res) {
         var body = document.getElementById('categoriesBody');
-        if (!res.data || res.data.length === 0) { body.innerHTML = '<tr><td colspan="3" class="text-center" style="padding:2rem;color:var(--text3)">ยังไม่มีหมวดหมู่</td></tr>'; return; }
+        if (!res.data || res.data.length === 0) { body.innerHTML = '<tr><td colspan="4" class="text-center" style="padding:2rem;color:var(--text3)">ยังไม่มีหมวดหมู่</td></tr>'; return; }
         body.innerHTML = res.data.map(function (c) {
           var catId = c.id || c.categoryId || c.ID || c.CategoryID || c.CategoryCode || c.name;
+          var branchId = c.branchId || '-';
           return '<tr>'
             + '<td>' + escapeHTML(catId) + '</td>'
             + '<td style="font-weight:600">' + escapeHTML(c.name) + '</td>'
-            + '<td><button class="btn btn-sm btn-ghost" onclick="editCategory(\'' + escapeHTML(catId) + '\', \'' + String(c.name || "").replace(/'/g, "\\'") + '\')"><i data-lucide="edit" style="width:14px;height:14px"></i> แก้ไข</button>'
+            + '<td><span class="badge badge-outline">' + escapeHTML(branchId) + '</span></td>'
+            + '<td><button class="btn btn-sm btn-ghost" onclick="editCategory(\'' + escapeHTML(catId) + '\', \'' + String(c.name || "").replace(/'/g, "\\'") + '\', \'' + escapeHTML(c.branchId || "") + '\')"><i data-lucide="edit" style="width:14px;height:14px"></i> แก้ไข</button>'
             + '<button class="btn btn-sm btn-ghost" style="color:var(--danger)" onclick="delCategory(\'' + escapeHTML(catId) + '\')"><i data-lucide="trash-2" style="width:14px;height:14px"></i> ลบ</button></td>'
             + '</tr>';
         }).join('');
@@ -2391,6 +2418,15 @@
       document.getElementById('cf-old-id').value = cat ? cat.id : '';
       document.getElementById('cf-id').value = cat ? cat.id : '';
       document.getElementById('cf-name').value = cat ? cat.name : '';
+      
+      // Populate Branches
+      var branchSelect = document.getElementById('cf-branch');
+      if (branchSelect && typeof allBranches !== 'undefined') {
+        branchSelect.innerHTML = '<option value="">ทุกสาขา / ส่วนกลาง</option>' + 
+          allBranches.map(function(b) { return '<option value="' + b.branchId + '">' + b.name + ' (' + b.branchId + ')</option>'; }).join('');
+        branchSelect.value = cat ? (cat.branchId || '') : '';
+      }
+
       document.getElementById('categoryModalTitle').textContent = cat ? 'แก้ไขหมวดหมู่' : 'เพิ่มหมวดหมู่ใหม่';
       document.getElementById('categoryModal').classList.add('open');
     }
@@ -2400,11 +2436,12 @@
       var oldId = document.getElementById('cf-old-id').value.trim();
       var newId = document.getElementById('cf-id').value.trim();
       var name = document.getElementById('cf-name').value.trim();
+      var branchId = document.getElementById('cf-branch').value;
 
       if (!newId || !name) { showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warning'); return; }
 
       var op = oldId ? 'update' : 'add';
-      var data = { oldCategoryId: oldId, categoryId: newId, name: name };
+      var data = { oldCategoryId: oldId, categoryId: newId, name: name, branchId: branchId };
 
       showToast('กำลังบันทึก...', 'info');
       API.manageCategory(op, data).then(function (res) {
@@ -2418,7 +2455,7 @@
       }).catch(function (err) { showToast(err, 'error'); });
     }
 
-    function editCategory(id, name) { openCategoryModal({ id: id, name: name }); }
+    function editCategory(id, name, branchId) { openCategoryModal({ id: id, name: name, branchId: branchId }); }
 
     function delCategory(id) {
       if (!confirm('ยืนยันการลบหมวดหมู่ ' + id + '? (เฉพาะหมวดที่ไม่มีสินค้าเท่านั้น)')) return;
@@ -2718,8 +2755,12 @@
         if (o.status === 'Rejected') bc = 'badge-rejected';
 
         var actions = '';
-        var canApprove = hasPermission('approve_orders');
-        var canDispatch = hasPermission('dispatch_orders');
+        var user = JSON.parse(localStorage.getItem('_user') || '{}');
+        var userTeamId = user.teamId || '';
+        
+        var isSameTeam = userTeamId && o.teamId && String(userTeamId) === String(o.teamId);
+        var canApprove = hasPermission('approve_orders') || isSameTeam;
+        var canDispatch = hasPermission('dispatch_orders') || isSameTeam;
 
         if (o.status === 'Pending' && canApprove) {
           actions = '<button class="btn btn-sm btn-accent" onclick="doApprove(\'' + o.orderId + '\', \'' + (o.employeeName || o.employeeId) + '\')"><i data-lucide="check" style="width:14px;height:14px"></i> อนุมัติ</button>';

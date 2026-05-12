@@ -173,7 +173,7 @@ PERMS.MANAGE_SETTINGS, PERMS.EXPORT_DATA
 | `OrderItems` | `orderItemId` | รายละเอียดสินค้าในใบเบิก |
 | `Approvals` | `approvalId` | ประวัติการอนุมัติ/ปฏิเสธ |
 | `INVENTORY_LOGS` | `logId` | ประวัติการเคลื่อนไหวสต็อก |
-| `SUB_STOCK` | `id` | คลังย่อย (รายบุคคล/รายทีม) |
+| `SUB_STOCK` | `id` | คลังย่อย (แชร์รายทีมถ้ามีทีม / รายบุคคลถ้าไม่มี) |
 | `Teams` | `teamId` | ทีมช่าง |
 | `Branches` | `branchId` | สาขา |
 | `Departments` | `departmentId` | แผนก + งบประมาณ |
