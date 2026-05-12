@@ -1410,7 +1410,7 @@ function loadUsageHistory() {
 
       return '<tr>'
         + '<td><div style="font-weight:500">' + dateStr + '</div><div style="font-size:0.7rem; color:var(--text3)">' + timeStr + '</div></td>'
-        + '<td>' + pId + (l.action.includes('ทีม') ? ' <span class="badge badge-pending" style="font-size:0.65rem">ทีม</span>' : '') + '</td>'
+        + '<td>' + pId + '</td>'
         + '<td style="color:var(--primary); font-weight:500">' + displayName + '</td>'
         + '<td style="font-weight:600; color:' + (Number(l.quantity) < 0 ? 'var(--danger)' : 'var(--accent)') + '">' + (Number(l.quantity) > 0 ? '+' : '') + l.quantity + '</td>'
         + '<td>' + userName + '</td>'
