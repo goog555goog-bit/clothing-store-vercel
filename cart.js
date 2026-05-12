@@ -101,7 +101,9 @@ var Cart = {
     var itemTotalEl = document.getElementById('item-total-' + productId + '-' + safeSize);
     
     if (qtyValEl && itemTotalEl && currentItem) {
-      qtyValEl.textContent = currentItem.qty;
+      if (qtyValEl.tagName === 'INPUT') qtyValEl.value = currentItem.qty;
+      else qtyValEl.textContent = currentItem.qty;
+      
       var canViewPrice = (typeof hasPermission === 'function') ? hasPermission('view_prices') : true;
       itemTotalEl.textContent = !canViewPrice ? '***' : '฿' + (currentItem.price * currentItem.qty).toLocaleString();
       
@@ -111,6 +113,26 @@ var Cart = {
     } else {
       this.render();
     }
+  },
+
+  setQty: function(productId, newQty, size) {
+    var items = this.getItems();
+    var targetSize = size || '';
+    var val = parseInt(newQty);
+    
+    for (var i = 0; i < items.length; i++) {
+      if (String(items[i].productId) === String(productId) && (items[i].size || '') === targetSize) {
+        if (isNaN(val) || val < 1) val = 1;
+        if (val > items[i].maxStock) {
+          val = items[i].maxStock;
+          showToast('ขออภัย พัสดุในคลังมีเพียง ' + items[i].maxStock + ' ชิ้น', 'warning');
+        }
+        items[i].qty = val;
+        break;
+      }
+    }
+    this.save(items);
+    this.render();
   },
 
   remove: function(productId, size) {
@@ -185,7 +207,7 @@ var Cart = {
         +   '<div class="flex flex-wrap items-center justify-between gap-2" style="margin-top:0.5rem">'
         +     '<div class="qty-ctrl">'
         +       '<button class="qty-btn" onclick="Cart.updateQty(\'' + item.productId + '\', -1, \'' + (item.size || '') + '\')" aria-label="ลดจำนวน"><i data-lucide="minus" style="width:12px;height:12px"></i></button>'
-        +       '<div class="qty-val" id="qty-val-' + item.productId + '-' + (item.size || '') + '">' + item.qty + '</div>'
+        +       '<input type="number" class="qty-val" id="qty-val-' + item.productId + '-' + (item.size || '') + '" value="' + item.qty + '" min="1" max="' + item.maxStock + '" onchange="Cart.setQty(\'' + item.productId + '\', this.value, \'' + (item.size || '') + '\')" onfocus="this.select()">'
         +       '<button class="qty-btn" onclick="Cart.updateQty(\'' + item.productId + '\', 1, \'' + (item.size || '') + '\')" aria-label="เพิ่มจำนวน"><i data-lucide="plus" style="width:12px;height:12px"></i></button>'
         +     '</div>'
         +     '<div style="font-weight:700" id="item-total-' + item.productId + '-' + (item.size || '') + '">' + (typeof hasPermission === 'function' && !hasPermission('view_prices') ? '***' : '฿' + (item.price * item.qty).toLocaleString()) + '</div>'

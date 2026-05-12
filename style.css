@@ -728,10 +728,27 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 .qty-btn:active { transform: translateY(0); }
 .qty-val { 
   font-weight: 700; 
-  width: 36px;
+  width: 44px;
   text-align: center; 
   font-variant-numeric: tabular-nums;
-  user-select: none;
+  background: transparent;
+  border: none;
+  color: var(--primary);
+  font-family: inherit;
+  font-size: 1rem;
+  padding: 0;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+.qty-val::-webkit-inner-spin-button,
+.qty-val::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.qty-val:focus {
+  outline: none;
+  background: rgba(251,191,36,0.05);
+  border-radius: 4px;
 }
 
 /* ─── Badges ───────────────────────────────────────── */
