@@ -416,37 +416,30 @@ function loadStorefrontData() {
     }
   }
 
-  // 2. Fetch fresh data from network (Bypass cache for revalidation)
-  API.getStorefrontData(true).then(function (res) {
-    if (res.success) {
-      allProducts = res.products || [];
-      allCategories = res.categories || [];
+  // 2. Fetch fresh data from network (Batched for Speed)
+  API.getStorefrontBatchData().then(function (batch) {
+    if (batch.success) {
+      var res = batch.storefront;
+      if (res.success) {
+        allProducts = res.products || [];
+        allCategories = res.categories || [];
+        localStorage.setItem('_all_products_cache', JSON.stringify(allProducts));
+        renderCategories();
+        renderProductGrid();
+      }
 
-      // [NEW] บันทึกสินค้าลง LocalStorage เพื่อให้หน้าสแกนดึงไปใช้งานได้
-      localStorage.setItem('_all_products_cache', JSON.stringify(allProducts));
+      if (batch.settings && batch.settings.success) {
+        globalSystemSettings = batch.settings.data || {};
+        updateUserUI();
+      }
 
-      renderCategories();
-      renderProductGrid();
+      if (batch.branches && Array.isArray(batch.branches)) {
+        allBranches = batch.branches;
+      }
 
-      // Initialize Searchable selects
       initSearchableSelect('searchType');
       initSearchableSelect('headerCategoryFilter');
       initSearchableSelect('stockFilter');
-
-      // Fetch fresh Branches (usually public or low-privilege)
-      API.getBranches().then(function (r) {
-        if (r.success) allBranches = r.data || [];
-      }).catch(function (e) { console.warn('Branches fetch skipped:', e); });
-
-      // Sync system settings for all users to ensure UI permissions are up-to-date
-      if (currentUser) {
-        API.getSystemSettings().then(function (sRes) {
-          globalSystemSettings = sRes.data || {};
-          updateUserUI(); // Refresh UI with fresh settings
-        }).catch(function (e) {
-          console.warn('System settings sync skipped:', e);
-        });
-      }
     }
   }).catch(function (err) {
     // Only show error toast if we don't even have cached data

@@ -228,13 +228,14 @@
         + '</div>').join('');
 
 
-      API.getPendingApprovals().then(function(res) {
+      API.getManagerBatchData().then(function(batch) {
         var list = document.getElementById('pendingList');
-        if (!res.success || res.data.length === 0) {
+        if (!batch.success || !batch.pending || batch.pending.data.length === 0) {
           list.innerHTML = '<div class="card text-center" style="padding:3rem;color:var(--text3);display:flex;align-items:center;justify-content:center;gap:0.5rem"><i data-lucide="check-circle"></i> ไม่มีใบเบิกรออนุมัติ</div>';
           return;
         }
 
+        var res = batch.pending;
         list.innerHTML = res.data.map(function(o) {
           return '<div class="card" style="margin-bottom:1rem">'
             + '<div class="flex flex-wrap items-center justify-between gap-2" style="margin-bottom:0.75rem">'
