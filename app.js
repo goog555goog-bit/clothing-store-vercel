@@ -1401,16 +1401,19 @@ function loadUsageHistory() {
       var dateStr = String(l.date || '').split(' ')[0];
       var timeStr = String(l.date || '').split(' ')[1] || '';
       
-      // [แก้ไข] ดึงชื่อสินค้ามาแสดงแยกคอลัมน์
       var pId = String(l.productId || '').trim();
       var p = allProducts.filter(function(x) { return String(x.productId).trim() === pId; })[0];
       var displayName = p ? p.name : (l.productName || pId);
+
+      // ดึงชื่อผู้ทำรายการ
+      var userName = l.userName || l.user || 'SYSTEM';
 
       return '<tr>'
         + '<td><div style="font-weight:500">' + dateStr + '</div><div style="font-size:0.7rem; color:var(--text3)">' + timeStr + '</div></td>'
         + '<td>' + pId + (l.action.includes('ทีม') ? ' <span class="badge badge-pending" style="font-size:0.65rem">ทีม</span>' : '') + '</td>'
         + '<td style="color:var(--primary); font-weight:500">' + displayName + '</td>'
-        + '<td style="font-weight:600; color:' + (Number(l.quantity) < 0 ? 'var(--danger)' : 'var(--accent)') + '">' + l.quantity + '</td>'
+        + '<td style="font-weight:600; color:' + (Number(l.quantity) < 0 ? 'var(--danger)' : 'var(--accent)') + '">' + (Number(l.quantity) > 0 ? '+' : '') + l.quantity + '</td>'
+        + '<td>' + userName + '</td>'
         + '<td>' + (l.branchName || '-') + '</td>'
         + '</tr>';
     }).join('');
