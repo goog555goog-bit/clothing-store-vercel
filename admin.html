@@ -1769,8 +1769,33 @@
       }).catch(function (err) {
         console.warn('Initial Data Load Failed:', err);
         loadDashboard();
+      }).finally(function() {
+        startAppPolling();
       });
     };
+
+    // ─── SMART POLLING ────────────────────────────────────────
+    function startAppPolling() {
+      if (typeof API !== 'undefined' && API.startSmartPolling) {
+        API.startSmartPolling(5000, function(newVersion) {
+          console.log('Admin data version changed to ' + newVersion + ', silently refreshing...');
+          var loaders = {
+            'dashboard': loadDashboard,
+            'products': loadProducts,
+            'categories': loadAdminCategories,
+            'orders': loadAdminOrders,
+            'inventory': loadInventory,
+            'reports': loadReports,
+            'employees': loadAdminEmployees,
+            'teams': loadTeams,
+            'branches': loadBranches,
+            'audit': loadAuditLogs,
+            'settings': loadSystemSettings
+          };
+          if (loaders[currentAdminPage]) loaders[currentAdminPage]();
+        });
+      }
+    }
 
 
     function adminNav(page, el, options) {

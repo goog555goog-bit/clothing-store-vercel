@@ -222,7 +222,18 @@
         }
       }
       loadPending();
+      startAppPolling();
       refreshIcons();
+    }
+
+    // ─── SMART POLLING ────────────────────────────────────────
+    function startAppPolling() {
+      if (typeof API !== 'undefined' && API.startSmartPolling) {
+        API.startSmartPolling(5000, function(newVersion) {
+          console.log('Manager data version changed to ' + newVersion + ', silently refreshing...');
+          loadPending();
+        });
+      }
     }
 
     function mgrLogout() {

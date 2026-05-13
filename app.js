@@ -118,6 +118,7 @@ function checkAuth() {
   function startApp() {
     if (typeof API !== 'undefined' && API.getProducts) {
       loadStorefrontData();
+      startAppPolling();
     } else {
       var retryCount = 0;
       var retryTimer = setInterval(function () {
@@ -125,6 +126,7 @@ function checkAuth() {
         if (typeof API !== 'undefined' && API.getProducts) {
           clearInterval(retryTimer);
           loadStorefrontData();
+          startAppPolling();
         } else if (retryCount > 60) { // 6 seconds timeout
           clearInterval(retryTimer);
           showToast('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณารีเฟรชหน้าเว็บ', 'error');
@@ -145,6 +147,49 @@ function checkAuth() {
       if (typeof Onboarding !== 'undefined') Onboarding.start();
     }
   }, 1500);
+}
+
+// ─── SMART POLLING ────────────────────────────────────────
+
+function startAppPolling() {
+  if (typeof API !== 'undefined' && API.startSmartPolling) {
+    API.startSmartPolling(5000, function(newVersion) {
+      console.log('Data version changed to ' + newVersion + ', silently refreshing...');
+      // Silent refresh
+      API.getStorefrontBatchData().then(function(batch) {
+        if (batch.success) {
+          var res = batch.storefront;
+          if (res && res.success) {
+            allProducts = res.products || [];
+            allCategories = res.categories || [];
+            localStorage.setItem('_all_products_cache', JSON.stringify(allProducts));
+            renderCategories();
+            renderProductGrid(currentProductPage);
+          }
+          if (batch.settings && batch.settings.success) {
+            globalSystemSettings = batch.settings.data || {};
+            updateUserUI();
+          }
+          if (batch.branches && Array.isArray(batch.branches)) {
+            allBranches = batch.branches;
+          }
+          
+          if (currentView === 'orders' && currentUser) {
+            API.getMyRequests().then(function(ores) {
+              if (ores.success) {
+                myOrdersCache = ores.data;
+                renderOrderList(ores.data);
+              }
+            }).catch(function(e){});
+          }
+          
+          if (currentView === 'substock' && currentUser) {
+             loadSubStock();
+          }
+        }
+      }).catch(function(e){});
+    });
+  }
 }
 
 function updateUserUI() {
