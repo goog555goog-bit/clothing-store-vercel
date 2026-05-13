@@ -1353,23 +1353,31 @@ function initSignaturePad() {
   signatureCanvas = document.getElementById('signatureCanvas');
   if (!signatureCanvas) return;
 
-  signatureCtx = signatureCanvas.getContext('2d');
-  signatureCanvas.width = signatureCanvas.offsetWidth;
-  signatureCanvas.height = 200;
+  var wrap = signatureCanvas.parentElement;
+  
+  // Wait for modal transition so offsetWidth is correct
+  setTimeout(function() {
+    signatureCtx = signatureCanvas.getContext('2d');
+    signatureCanvas.width = signatureCanvas.offsetWidth || (wrap ? wrap.offsetWidth : 300) || 300;
+    signatureCanvas.height = 200;
 
-  signatureCtx.strokeStyle = '#000';
-  signatureCtx.lineWidth = 2;
-  signatureCtx.lineJoin = 'round';
-  signatureCtx.lineCap = 'round';
+    signatureCtx.fillStyle = '#ffffff';
+    signatureCtx.fillRect(0, 0, signatureCanvas.width, signatureCanvas.height);
 
-  signatureCanvas.addEventListener('mousedown', startDrawing);
-  signatureCanvas.addEventListener('mousemove', draw);
-  signatureCanvas.addEventListener('mouseup', stopDrawing);
-  signatureCanvas.addEventListener('mouseleave', stopDrawing);
+    signatureCtx.strokeStyle = '#000';
+    signatureCtx.lineWidth = 2;
+    signatureCtx.lineJoin = 'round';
+    signatureCtx.lineCap = 'round';
 
-  signatureCanvas.addEventListener('touchstart', function (e) { e.preventDefault(); startDrawing(e.touches[0]); });
-  signatureCanvas.addEventListener('touchmove', function (e) { e.preventDefault(); draw(e.touches[0]); });
-  signatureCanvas.addEventListener('touchend', stopDrawing);
+    signatureCanvas.onmousedown = startDrawing;
+    signatureCanvas.onmousemove = draw;
+    signatureCanvas.onmouseup = stopDrawing;
+    signatureCanvas.onmouseleave = stopDrawing;
+
+    signatureCanvas.ontouchstart = function (e) { e.preventDefault(); startDrawing(e.touches[0]); };
+    signatureCanvas.ontouchmove = function (e) { e.preventDefault(); draw(e.touches[0]); };
+    signatureCanvas.ontouchend = stopDrawing;
+  }, 100);
 }
 
 function startDrawing(e) {
@@ -1389,23 +1397,31 @@ function draw(e) {
 function stopDrawing() { isDrawing = false; }
 
 function getMousePos(e) {
+  if (!signatureCanvas) return { x: 0, y: 0 };
   var rect = signatureCanvas.getBoundingClientRect();
-  return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+  return { x: (e.clientX || e.pageX) - rect.left, y: (e.clientY || e.pageY) - rect.top };
 }
 
 function clearSignature() {
-  if (signatureCtx) signatureCtx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+  if (signatureCtx) {
+    signatureCtx.fillStyle = '#ffffff';
+    signatureCtx.fillRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+  }
 }
 
 function submitReceipt(btn) {
   if (!currentSigningRequestId) return;
   var signature = signatureCanvas.toDataURL('image/png');
 
-  // ตรวจสอบว่าเซ็นหรือยัง (เช็คว่า Canvas ขาวไหมแบบง่าย)
+  // ตรวจสอบว่าเซ็นหรือยัง (เปรียบเทียบกับพื้นขาว)
   var blank = document.createElement('canvas');
   blank.width = signatureCanvas.width;
   blank.height = signatureCanvas.height;
-  if (signature === blank.toDataURL()) {
+  var blankCtx = blank.getContext('2d');
+  blankCtx.fillStyle = '#ffffff';
+  blankCtx.fillRect(0, 0, blank.width, blank.height);
+
+  if (signature === blank.toDataURL('image/png')) {
     showToast('กรุณาเซ็นชื่อก่อนยืนยัน', 'warning');
     return;
   }
