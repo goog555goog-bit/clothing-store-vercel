@@ -238,9 +238,7 @@ function updateUserUI() {
     }
 
     // [RBAC] ตรวจสอบสิทธิ์สำหรับการแสดงปุ่มนำทาง
-    var canAdmin = API.hasPermission(API.PERMS.MANAGE_PRODUCTS) ||
-      API.hasPermission(API.PERMS.MANAGE_EMPLOYEES) ||
-      API.hasPermission(API.PERMS.MANAGE_SETTINGS);
+    var canAdmin = API.hasRole('superadmin') || API.hasRole('admin');
 
     var hasTeam = currentUser && currentUser.teamId;
     var canManage = API.hasPermission(API.PERMS.APPROVE_REQUEST) ||
@@ -1372,7 +1370,7 @@ function clearSignature() {
   if (signatureCtx) signatureCtx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
 }
 
-function submitReceipt() {
+function submitReceipt(btn) {
   if (!currentSigningRequestId) return;
   var signature = signatureCanvas.toDataURL('image/png');
 
@@ -1386,12 +1384,24 @@ function submitReceipt() {
   }
 
   showToast('กำลังบันทึก...', 'info');
+  var originalHtml = '';
+  if (btn) {
+    originalHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner" style="width:14px;height:14px;border-width:2px;margin-right:0.5rem;display:inline-block;vertical-align:middle;"></div> กำลังบันทึก...';
+  }
+
   API.signForReceipt(currentSigningRequestId, signature).then(function (res) {
     showToast('ขอบคุณ! บันทึกการรับของเรียบร้อย', 'success');
     closeModal('orderDetailModal');
     loadMyOrders();
   }).catch(function (err) {
     showToast('เกิดข้อผิดพลาด: ' + err, 'error');
+  }).finally(function() {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = originalHtml;
+    }
   });
 }
 

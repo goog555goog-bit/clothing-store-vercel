@@ -1310,7 +1310,7 @@
         </div>
         <div class="flex flex-wrap gap-2">
           <button class="btn btn-outline btn-sm" onclick="clearSignature()">ล้าง</button>
-          <button class="btn btn-accent btn-sm flex-1" onclick="submitReceipt()">ยืนยันการรับของ</button>
+          <button class="btn btn-accent btn-sm flex-1" id="adminSubmitReceiptBtn" onclick="submitReceipt(this)">ยืนยันการรับของ</button>
         </div>
       </div>
       <div class="modal-footer flex-wrap">
@@ -2755,6 +2755,8 @@
       });
     }
 
+
+
     function delProduct(id) {
       if (!confirm('ลบสินค้า ' + id + ' ?')) return;
       API.manageProduct('delete', { productId: id }).then(function (res) {
@@ -3014,7 +3016,7 @@
       return { x: (e.clientX || e.pageX) - rect.left, y: (e.clientY || e.pageY) - rect.top };
     }
     function clearSignature() { if (signatureCtx) signatureCtx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height); }
-    function submitReceipt() {
+    function submitReceipt(btn) {
       if (!currentSigningRequestId) return;
       var blank = document.createElement('canvas');
       blank.width = signatureCanvas.width;
@@ -3022,12 +3024,24 @@
       if (signatureCanvas.toDataURL() === blank.toDataURL()) { showToast('กรุณาเซ็นชื่อก่อนยืนยัน', 'warning'); return; }
 
       showToast('กำลังบันทึก...', 'info');
+      var originalHtml = '';
+      if (btn) {
+        originalHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<div class="spinner" style="width:14px;height:14px;border-width:2px;margin-right:0.5rem;display:inline-block;vertical-align:middle;"></div> กำลังบันทึก...';
+      }
+
       API.signForReceipt(currentSigningRequestId, signatureCanvas.toDataURL('image/png')).then(function (res) {
         showToast('✅ บันทึกการรับของเรียบร้อย', 'success');
         if (typeof triggerConfetti === 'function') triggerConfetti();
         closeModal('orderDetailModal');
         loadAdminOrders();
-      }).catch(function (err) { showToast('ข้อผิดพลาด: ' + err, 'error'); });
+      }).catch(function (err) { showToast('ข้อผิดพลาด: ' + err, 'error'); }).finally(function() {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = originalHtml;
+        }
+      });
     }
 
 
