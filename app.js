@@ -1172,12 +1172,15 @@ function animateFlyToCart(e, imgUrl) {
 }
 
 // ─── MY ORDERS ────────────────────────────────────────────
-function loadMyOrders() {
+function loadMyOrders(forceRefresh, btn) {
   var list = document.getElementById('myOrdersList');
   if (!list) return;
 
-  // 1. Render from Cache first for instant response
-  if (myOrdersCache) {
+  var icon = btn ? btn.querySelector('i') : null;
+  if (icon) icon.classList.add('spin-anim');
+
+  // 1. Render from Cache first for instant response (unless forced)
+  if (myOrdersCache && !forceRefresh) {
     renderOrderList(myOrdersCache);
   } else {
     list.innerHTML = Array(3).fill('<div class="order-card" style="display:flex; flex-direction:column; gap:0.75rem">'
@@ -1187,9 +1190,10 @@ function loadMyOrders() {
   }
 
   // 2. Fetch fresh data in background
-  API.getMyRequests().then(function (res) {
+  API.getMyRequests(forceRefresh).then(function (res) {
     myOrdersCache = res.data;
     renderOrderList(res.data);
+    if (forceRefresh) showToast('อัปเดตข้อมูลล่าสุดแล้ว', 'success');
   }).catch(function (err) {
     if (!myOrdersCache) {
       list.innerHTML = '<div class="empty-state"> '
@@ -1197,34 +1201,13 @@ function loadMyOrders() {
         + '<p style="font-size:0.8rem;margin-top:0.5rem;color:var(--text3)">' + err + '</p>'
         + '</div>';
     }
+  }).finally(function() {
+    if (icon) icon.classList.remove('spin-anim');
   });
 }
 
 function forceRefreshOrders(btn) {
-  if (btn) {
-    var icon = btn.querySelector('i');
-    if (icon) icon.classList.add('spin-anim');
-  }
-  myOrdersCache = null; // Invalidate memory cache
-  var list = document.getElementById('myOrdersList');
-  if (list) {
-    list.innerHTML = Array(3).fill('<div class="order-card" style="display:flex; flex-direction:column; gap:0.75rem"><div class="flex flex-wrap items-center justify-between gap-2"><div class="skeleton skeleton-text" style="width:120px; margin:0"></div><div class="skeleton" style="width:80px; height:24px; border-radius:12px"></div></div><div class="flex flex-wrap items-center justify-between gap-2" style="margin-top:0.5rem"><div class="skeleton skeleton-text" style="width:150px; margin:0"></div><div class="skeleton skeleton-text" style="width:80px; margin:0"></div></div></div>').join('');
-  }
-
-  API.getMyRequests().then(function (res) {
-    if (res.success) {
-      myOrdersCache = res.data;
-      renderOrderList(res.data);
-      showToast('อัปเดตข้อมูลล่าสุดแล้ว', 'success');
-    }
-  }).catch(function (e) {
-    showToast('รีเฟรชล้มเหลว: ' + e, 'error');
-  }).finally(function () {
-    if (btn) {
-      var icon = btn.querySelector('i');
-      if (icon) icon.classList.remove('spin-anim');
-    }
-  });
+  loadMyOrders(true, btn);
 }
 
 function renderOrderList(data) {

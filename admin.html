@@ -477,7 +477,7 @@
             <option value="Received">รับของแล้ว</option>
             <option value="Rejected">ไม่อนุมัติ</option>
           </select>
-          <button class="btn btn-outline btn-sm" onclick="loadAdminOrders()">🔄 Refresh</button>
+          <button class="btn btn-outline btn-sm" onclick="loadAdminOrders(true)">🔄 Refresh</button>
           <button class="btn btn-outline btn-sm" onclick="downloadCSV('Orders')">📥 Export CSV</button>
         </div>
       </div>
@@ -2826,13 +2826,13 @@
       var adminOrdersPageSize = 25;
     var currentAdminOrdersPage = 1;
 
-    function loadAdminOrders() {
+    function loadAdminOrders(forceRefresh) {
       var body = document.getElementById('ordersBody');
       if (body) {
         body.innerHTML = '<tr><td colspan="7" class="text-center" style="padding:2rem"><div class="spinner"></div></td></tr>';
       }
 
-      API.getAllOrders().then(function (res) {
+      API.getAllOrders(forceRefresh).then(function (res) {
         masterAdminOrders = res.data || [];
 
         // Apply current filter if any
