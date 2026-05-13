@@ -477,6 +477,7 @@
             <option value="Received">รับของแล้ว</option>
             <option value="Rejected">ไม่อนุมัติ</option>
           </select>
+          <button class="btn btn-outline btn-sm" onclick="loadAdminOrders()">🔄 Refresh</button>
           <button class="btn btn-outline btn-sm" onclick="downloadCSV('Orders')">📥 Export CSV</button>
         </div>
       </div>
@@ -2822,12 +2823,14 @@
     // ─── ORDERS ───────────────────────────────────────────
     var allAdminOrders = [];
     var masterAdminOrders = []; // Full list for filtering
-    var adminOrdersPageSize = 25;
+      var adminOrdersPageSize = 25;
     var currentAdminOrdersPage = 1;
 
     function loadAdminOrders() {
       var body = document.getElementById('ordersBody');
-      if (body) body.innerHTML = '<tr><td colspan="7" class="text-center" style="padding:2rem"><div class="spinner"></div></td></tr>';
+      if (body) {
+        body.innerHTML = '<tr><td colspan="7" class="text-center" style="padding:2rem"><div class="spinner"></div></td></tr>';
+      }
 
       API.getAllOrders().then(function (res) {
         masterAdminOrders = res.data || [];
