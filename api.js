@@ -2,7 +2,7 @@
 //  api.js — Frontend REST Adapter (Refactored & Optimized)
 // ============================================================
 
-const GAS_URL = "https://script.google.com/macros/s/AKfycbxySQ44o-qsQJ1T0wFv5jOUxhPqCEYtOiULal7sitGlDnjZFsVEr80JamA5jQaP5a7Spg/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbyQlV4PqbbHqrdZjDt-Qj5XhEtNuHZLoBgYa9bzWC27NynElREiu0_GY1UCkoOU3VjmoQ/exec";
 
 var API = (function () {
   var CACHE_KEY = '_api_cache_v1';
@@ -356,23 +356,23 @@ var API = (function () {
     // Compatibility wrappers
     approveOrder: function (id, _, comment) { return this.approveRequest(id, comment); },
     rejectOrder: function (id, _, comment) { return this.rejectRequest(id, comment); },
-    
+
     checkDataVersion: function () { return this._call('checkDataVersion', {}, false); },
-    
+
     startSmartPolling: function (intervalMs, onVersionChange) {
       if (this._pollingTimer) clearInterval(this._pollingTimer);
       var self = this;
       this._currentVersion = null;
-      
-      this.checkDataVersion().then(function(res) {
+
+      this.checkDataVersion().then(function (res) {
         if (res && res.success) self._currentVersion = res.version;
-      }).catch(function(e){});
-      
-      this._pollingTimer = setInterval(function() {
+      }).catch(function (e) { });
+
+      this._pollingTimer = setInterval(function () {
         if (self._isPolling) return;
         self._isPolling = true;
         self.checkDataVersion()
-          .then(function(res) {
+          .then(function (res) {
             if (res && res.success) {
               if (self._currentVersion !== null && self._currentVersion !== res.version) {
                 self._currentVersion = res.version;
@@ -382,12 +382,12 @@ var API = (function () {
               }
             }
           })
-          .catch(function(e) { console.warn('Polling error:', e); })
-          .finally(function() { self._isPolling = false; });
+          .catch(function (e) { console.warn('Polling error:', e); })
+          .finally(function () { self._isPolling = false; });
       }, intervalMs || 5000);
     },
-    
-    stopSmartPolling: function() {
+
+    stopSmartPolling: function () {
       if (this._pollingTimer) {
         clearInterval(this._pollingTimer);
         this._pollingTimer = null;
