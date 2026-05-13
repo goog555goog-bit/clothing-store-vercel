@@ -153,10 +153,10 @@ function checkAuth() {
 
 function startAppPolling() {
   if (typeof API !== 'undefined' && API.startSmartPolling) {
-    API.startSmartPolling(5000, function(newVersion) {
+    API.startSmartPolling(5000, function (newVersion) {
       console.log('Data version changed to ' + newVersion + ', silently refreshing...');
       // Silent refresh
-      API.getStorefrontBatchData().then(function(batch) {
+      API.getStorefrontBatchData().then(function (batch) {
         if (batch.success) {
           var res = batch.storefront;
           if (res && res.success) {
@@ -173,21 +173,21 @@ function startAppPolling() {
           if (batch.branches && Array.isArray(batch.branches)) {
             allBranches = batch.branches;
           }
-          
+
           if (currentView === 'orders' && currentUser) {
-            API.getMyRequests().then(function(ores) {
+            API.getMyRequests().then(function (ores) {
               if (ores.success) {
                 myOrdersCache = ores.data;
                 renderOrderList(ores.data);
               }
-            }).catch(function(e){});
+            }).catch(function (e) { });
           }
-          
+
           if (currentView === 'substock' && currentUser) {
-             loadSubStock();
+            loadSubStock();
           }
         }
-      }).catch(function(e){});
+      }).catch(function (e) { });
     });
   }
 }
@@ -1210,16 +1210,16 @@ function forceRefreshOrders(btn) {
   if (list) {
     list.innerHTML = Array(3).fill('<div class="order-card" style="display:flex; flex-direction:column; gap:0.75rem"><div class="flex flex-wrap items-center justify-between gap-2"><div class="skeleton skeleton-text" style="width:120px; margin:0"></div><div class="skeleton" style="width:80px; height:24px; border-radius:12px"></div></div><div class="flex flex-wrap items-center justify-between gap-2" style="margin-top:0.5rem"><div class="skeleton skeleton-text" style="width:150px; margin:0"></div><div class="skeleton skeleton-text" style="width:80px; margin:0"></div></div></div>').join('');
   }
-  
-  API.getMyRequests().then(function(res) {
+
+  API.getMyRequests().then(function (res) {
     if (res.success) {
       myOrdersCache = res.data;
       renderOrderList(res.data);
       showToast('อัปเดตข้อมูลล่าสุดแล้ว', 'success');
     }
-  }).catch(function(e) {
+  }).catch(function (e) {
     showToast('รีเฟรชล้มเหลว: ' + e, 'error');
-  }).finally(function() {
+  }).finally(function () {
     if (btn) {
       var icon = btn.querySelector('i');
       if (icon) icon.classList.remove('spin-anim');
@@ -1353,31 +1353,23 @@ function initSignaturePad() {
   signatureCanvas = document.getElementById('signatureCanvas');
   if (!signatureCanvas) return;
 
-  var wrap = signatureCanvas.parentElement;
-  
-  // Wait for modal transition so offsetWidth is correct
-  setTimeout(function() {
-    signatureCtx = signatureCanvas.getContext('2d');
-    signatureCanvas.width = signatureCanvas.offsetWidth || (wrap ? wrap.offsetWidth : 300) || 300;
-    signatureCanvas.height = 200;
+  signatureCtx = signatureCanvas.getContext('2d');
+  signatureCanvas.width = signatureCanvas.offsetWidth;
+  signatureCanvas.height = 200;
 
-    signatureCtx.fillStyle = '#ffffff';
-    signatureCtx.fillRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+  signatureCtx.strokeStyle = '#000';
+  signatureCtx.lineWidth = 2;
+  signatureCtx.lineJoin = 'round';
+  signatureCtx.lineCap = 'round';
 
-    signatureCtx.strokeStyle = '#000';
-    signatureCtx.lineWidth = 2;
-    signatureCtx.lineJoin = 'round';
-    signatureCtx.lineCap = 'round';
+  signatureCanvas.addEventListener('mousedown', startDrawing);
+  signatureCanvas.addEventListener('mousemove', draw);
+  signatureCanvas.addEventListener('mouseup', stopDrawing);
+  signatureCanvas.addEventListener('mouseleave', stopDrawing);
 
-    signatureCanvas.onmousedown = startDrawing;
-    signatureCanvas.onmousemove = draw;
-    signatureCanvas.onmouseup = stopDrawing;
-    signatureCanvas.onmouseleave = stopDrawing;
-
-    signatureCanvas.ontouchstart = function (e) { e.preventDefault(); startDrawing(e.touches[0]); };
-    signatureCanvas.ontouchmove = function (e) { e.preventDefault(); draw(e.touches[0]); };
-    signatureCanvas.ontouchend = stopDrawing;
-  }, 100);
+  signatureCanvas.addEventListener('touchstart', function (e) { e.preventDefault(); startDrawing(e.touches[0]); });
+  signatureCanvas.addEventListener('touchmove', function (e) { e.preventDefault(); draw(e.touches[0]); });
+  signatureCanvas.addEventListener('touchend', stopDrawing);
 }
 
 function startDrawing(e) {
@@ -1397,31 +1389,23 @@ function draw(e) {
 function stopDrawing() { isDrawing = false; }
 
 function getMousePos(e) {
-  if (!signatureCanvas) return { x: 0, y: 0 };
   var rect = signatureCanvas.getBoundingClientRect();
-  return { x: (e.clientX || e.pageX) - rect.left, y: (e.clientY || e.pageY) - rect.top };
+  return { x: e.clientX - rect.left, y: e.clientY - rect.top };
 }
 
 function clearSignature() {
-  if (signatureCtx) {
-    signatureCtx.fillStyle = '#ffffff';
-    signatureCtx.fillRect(0, 0, signatureCanvas.width, signatureCanvas.height);
-  }
+  if (signatureCtx) signatureCtx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
 }
 
 function submitReceipt(btn) {
   if (!currentSigningRequestId) return;
   var signature = signatureCanvas.toDataURL('image/png');
 
-  // ตรวจสอบว่าเซ็นหรือยัง (เปรียบเทียบกับพื้นขาว)
+  // ตรวจสอบว่าเซ็นหรือยัง (เช็คว่า Canvas ขาวไหมแบบง่าย)
   var blank = document.createElement('canvas');
   blank.width = signatureCanvas.width;
   blank.height = signatureCanvas.height;
-  var blankCtx = blank.getContext('2d');
-  blankCtx.fillStyle = '#ffffff';
-  blankCtx.fillRect(0, 0, blank.width, blank.height);
-
-  if (signature === blank.toDataURL('image/png')) {
+  if (signature === blank.toDataURL()) {
     showToast('กรุณาเซ็นชื่อก่อนยืนยัน', 'warning');
     return;
   }
@@ -1440,7 +1424,7 @@ function submitReceipt(btn) {
     loadMyOrders();
   }).catch(function (err) {
     showToast('เกิดข้อผิดพลาด: ' + err, 'error');
-  }).finally(function() {
+  }).finally(function () {
     if (btn) {
       btn.disabled = false;
       btn.innerHTML = originalHtml;

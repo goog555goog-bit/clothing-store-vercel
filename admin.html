@@ -1693,6 +1693,7 @@
 
       // จัดการการมองเห็น Tab ตามสิทธิ์จริง
       var tabPermissions = {
+        'tab-dashboard': API.PERMS.VIEW_DASHBOARD,
         'tab-products': API.PERMS.MANAGE_PRODUCTS,
         'tab-categories': API.PERMS.MANAGE_CATEGORIES,
         'tab-inventory': API.PERMS.MANAGE_INVENTORY,
@@ -1724,6 +1725,11 @@
         }
 
         el.style.display = isAllowed ? 'flex' : 'none';
+      }
+
+      // ถ้าไม่มีสิทธิ์ดู Dashboard ให้สลับไปหน้า Orders อัตโนมัติ
+      if (!API.hasPermission(API.PERMS.VIEW_DASHBOARD)) {
+        switchAdminTab('orders');
       }
 
       // Hide Inventory/Products management buttons if no permission
@@ -1885,6 +1891,7 @@
     }
 
     function loadDashboard() {
+      if (!API.hasPermission(API.PERMS.VIEW_DASHBOARD)) return; // ข้ามการโหลดถ้าไม่มีสิทธิ์
       if (typeof API === 'undefined' || !API.getAdvancedDashboardData) return;
 
       // 0. Setup Filters
