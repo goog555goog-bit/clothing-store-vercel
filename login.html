@@ -1,15 +1,19 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>เข้าสู่ระบบ — EMETIX STORE</title>
   <link rel="icon" type="image/png" href="favicon.png">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <script src="api.js"></script>
   <script src="https://unpkg.com/lucide@latest" defer></script>
 </head>
+
 <body>
   <style>
     body {
@@ -19,6 +23,7 @@
       justify-content: center;
       overflow: hidden;
     }
+
     /* [เพิ่ม] Ambient Background Orbs เพื่อความรู้สึก Premium */
     .login-bg-orb {
       position: fixed;
@@ -28,22 +33,37 @@
       pointer-events: none;
       z-index: 0;
     }
+
     .login-bg-orb-1 {
-      width: 400px; height: 400px;
+      width: 400px;
+      height: 400px;
       background: var(--primary);
-      top: -100px; right: -100px;
+      top: -100px;
+      right: -100px;
       animation: orbFloat 8s ease-in-out infinite;
     }
+
     .login-bg-orb-2 {
-      width: 300px; height: 300px;
+      width: 300px;
+      height: 300px;
       background: #6366f1;
-      bottom: -50px; left: -50px;
+      bottom: -50px;
+      left: -50px;
       animation: orbFloat 10s ease-in-out infinite reverse;
     }
+
     @keyframes orbFloat {
-      0%, 100% { transform: translate(0, 0) scale(1); }
-      50% { transform: translate(20px, -30px) scale(1.1); }
+
+      0%,
+      100% {
+        transform: translate(0, 0) scale(1);
+      }
+
+      50% {
+        transform: translate(20px, -30px) scale(1.1);
+      }
     }
+
     .login-container {
       width: 100%;
       padding: 1rem;
@@ -51,6 +71,7 @@
       justify-content: center;
       perspective: 1000px;
     }
+
     .login-card {
       background: rgba(18, 18, 30, 0.6);
       backdrop-filter: blur(24px);
@@ -64,45 +85,75 @@
       text-align: center;
       animation: cardEnter 1s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
+
     @keyframes cardEnter {
-      from { opacity: 0; transform: translateY(50px) rotateX(-15deg); }
-      to { opacity: 1; transform: translateY(0) rotateX(0); }
+      from {
+        opacity: 0;
+        transform: translateY(50px) rotateX(-15deg);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) rotateX(0);
+      }
     }
+
     @media (max-width: 480px) {
       .login-card {
         padding: 2.5rem 1.75rem !important;
       }
-      h1 { font-size: 1.75rem !important; }
+
+      h1 {
+        font-size: 1.75rem !important;
+      }
     }
-    h1 { font-size: 2.2rem; font-weight: 900; letter-spacing: -1.5px; margin-bottom: 0.5rem; background: linear-gradient(to bottom, #fff, #fbbf24); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
-    p { color: #94a3b8; margin-bottom: 2.5rem; font-size: 1rem; font-weight: 500; }
-    
+
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 900;
+      letter-spacing: -1.5px;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(to bottom, #fff, #fbbf24);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    p {
+      color: #94a3b8;
+      margin-bottom: 2.5rem;
+      font-size: 1rem;
+      font-weight: 500;
+    }
+
     .form-input {
       text-align: center;
       font-size: 1.25rem !important;
       padding: 1rem !important;
-      background: rgba(0,0,0,0.4) !important;
+      background: rgba(0, 0, 0, 0.4) !important;
       border-radius: 16px !important;
       border: 1px solid rgba(251, 191, 36, 0.2) !important;
       color: #ffffff !important;
       transition: all 0.3s !important;
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.5) !important;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5) !important;
     }
+
     .form-input:focus {
       border-color: #fbbf24 !important;
       background: rgba(251, 191, 36, 0.05) !important;
       box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.1) !important;
       outline: none;
     }
-    
+
     .logo-icon {
-      width: 80px; height: 80px; 
-      font-size: 2.2rem; 
-      margin: 0 auto 2rem; 
-      border-radius: 20px; 
-      background: linear-gradient(135deg, #fbbf24, #d97706); 
-      display: flex; 
-      align-items: center; 
+      width: 80px;
+      height: 80px;
+      font-size: 2.2rem;
+      margin: 0 auto 2rem;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #fbbf24, #d97706);
+      display: flex;
+      align-items: center;
       justify-content: center;
       box-shadow: 0 15px 30px -5px rgba(251, 191, 36, 0.4);
       color: #000;
@@ -115,19 +166,26 @@
 
   <div class="login-container" style="position:relative; z-index:1;">
     <div class="login-card">
-      <div class="logo-icon" style="width:72px;height:72px;font-size:2rem;margin:0 auto 2rem; border-radius: 20px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); display: flex; align-items: center; justify-content: center; box-shadow: 0 15px 30px -5px rgba(251, 191, 36, 0.4);"><i data-lucide="package" style="width:36px;height:36px;color:#000"></i></div>
-      <h1 style="color:#fff">EMETIX <span style="color:var(--primary)">PREMIUM</span></h1>
+      <div class="logo-icon"
+        style="width:72px;height:72px;font-size:2rem;margin:0 auto 2rem; border-radius: 20px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); display: flex; align-items: center; justify-content: center; box-shadow: 0 15px 30px -5px rgba(251, 191, 36, 0.4);">
+        <i data-lucide="package" style="width:36px;height:36px;color:#000"></i>
+      </div>
+      <h1 style="color:#fff"> YY <span style="color:var(--primary)">STOCK-SYSTEM</span></h1>
       <p>ระบบเบิกพัสดุพนักงานดิจิทัล</p>
 
       <div class="form-group" style="margin-bottom: 0.75rem;">
-        <input type="text" id="empIdInput" class="form-input" placeholder="รหัสพนักงานของคุณ" aria-label="กรอกรหัสพนักงาน" autocomplete="off">
+        <input type="text" id="empIdInput" class="form-input" placeholder="รหัสพนักงานของคุณ"
+          aria-label="กรอกรหัสพนักงาน" autocomplete="off">
       </div>
-      <div id="namePreview" style="min-height:1.2rem;color:var(--primary-light);font-weight:600;margin-bottom:0.75rem; font-size:0.85rem; filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.3));"></div>
+      <div id="namePreview"
+        style="min-height:1.2rem;color:var(--primary-light);font-weight:600;margin-bottom:0.75rem; font-size:0.85rem; filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.3));">
+      </div>
 
       <div class="form-group" style="margin-bottom: 1.5rem; position: relative;">
         <input type="password" id="passwordInput" class="form-input" placeholder="รหัสผ่าน" aria-label="กรอกรหัสผ่าน"
           onkeydown="if(event.key==='Enter') doLogin()" style="padding-right: 3rem !important;">
-        <button type="button" onclick="togglePassword()" style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text3); cursor: pointer; display: flex; align-items: center; justify-content: center;">
+        <button type="button" onclick="togglePassword()"
+          style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text3); cursor: pointer; display: flex; align-items: center; justify-content: center;">
           <i id="toggleIcon" data-lucide="eye" style="width: 20px; height: 20px;"></i>
         </button>
       </div>
@@ -137,10 +195,12 @@
       </button>
 
       <!-- [แก้ไข A11y] เพิ่ม role="alert" และ aria-live เพื่อ Screen Reader อ่านข้อผิดพลาดได้ -->
-      <div id="loginError" role="alert" aria-live="assertive" style="color:var(--danger);margin-top:1.25rem;font-size:0.9rem; font-weight: 500;"></div>
-      
+      <div id="loginError" role="alert" aria-live="assertive"
+        style="color:var(--danger);margin-top:1.25rem;font-size:0.9rem; font-weight: 500;"></div>
+
       <div style="margin-top:2rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 1.5rem;">
-        <button class="btn btn-ghost btn-sm w-full" style="justify-content:center; color: var(--text3);" onclick="navigateTo('index.html')">
+        <button class="btn btn-ghost btn-sm w-full" style="justify-content:center; color: var(--text3);"
+          onclick="navigateTo('index.html')">
           <i data-lucide="home"></i> กลับไปเลือกชมสินค้า
         </button>
       </div>
@@ -164,23 +224,23 @@
 
     // Preview ชื่อพนักงานขณะพิมพ์
     var previewTimer;
-    document.getElementById('empIdInput').addEventListener('input', function() {
+    document.getElementById('empIdInput').addEventListener('input', function () {
       clearTimeout(previewTimer);
       var val = this.value.trim();
       if (!val) { document.getElementById('namePreview').textContent = ''; return; }
-      previewTimer = setTimeout(function() {
+      previewTimer = setTimeout(function () {
         API.checkEmployee(val)
-          .then(function(res) {
+          .then(function (res) {
             document.getElementById('namePreview').innerHTML = (res && res.success) ? '<i data-lucide="user" style="width:14px;height:14px;display:inline-block;vertical-align:middle;margin-right:4px"></i> ' + res.name : '';
             if (res && res.success && typeof lucide !== 'undefined') lucide.createIcons();
           })
-          .catch(function(err) {});
+          .catch(function (err) { });
       }, 400);
     });
-    
-    window.onload = function() {
+
+    window.onload = function () {
       if (typeof lucide !== 'undefined') lucide.createIcons();
-      
+
       // [ENFORCE AUTH] ถ้า Login แล้วให้ข้ามไปหน้า Index ทันที
       var stored = localStorage.getItem('_user');
       if (stored) {
@@ -203,7 +263,7 @@
       document.getElementById('loginError').textContent = '';
 
       API.login(empId, password)
-        .then(function(res) {
+        .then(function (res) {
           if (res && res.success) {
             // เก็บ session
             localStorage.setItem('_user', JSON.stringify(res.data));
@@ -217,7 +277,7 @@
             document.getElementById('loginError').textContent = (res && res.message) || 'ไม่สามารถเข้าสู่ระบบได้';
           }
         })
-        .catch(function(err) {
+        .catch(function (err) {
           btn.disabled = false;
           btn.textContent = 'เข้าสู่ระบบ';
           document.getElementById('loginError').textContent = typeof err === 'string' ? err : (err && err.message ? err.message : 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้');
@@ -237,4 +297,5 @@
     }
   </script>
 </body>
+
 </html>
