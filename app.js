@@ -1200,6 +1200,33 @@ function loadMyOrders() {
   });
 }
 
+function forceRefreshOrders(btn) {
+  if (btn) {
+    var icon = btn.querySelector('i');
+    if (icon) icon.classList.add('spin-anim');
+  }
+  myOrdersCache = null; // Invalidate memory cache
+  var list = document.getElementById('myOrdersList');
+  if (list) {
+    list.innerHTML = Array(3).fill('<div class="order-card" style="display:flex; flex-direction:column; gap:0.75rem"><div class="flex flex-wrap items-center justify-between gap-2"><div class="skeleton skeleton-text" style="width:120px; margin:0"></div><div class="skeleton" style="width:80px; height:24px; border-radius:12px"></div></div><div class="flex flex-wrap items-center justify-between gap-2" style="margin-top:0.5rem"><div class="skeleton skeleton-text" style="width:150px; margin:0"></div><div class="skeleton skeleton-text" style="width:80px; margin:0"></div></div></div>').join('');
+  }
+  
+  API.getMyRequests().then(function(res) {
+    if (res.success) {
+      myOrdersCache = res.data;
+      renderOrderList(res.data);
+      showToast('อัปเดตข้อมูลล่าสุดแล้ว', 'success');
+    }
+  }).catch(function(e) {
+    showToast('รีเฟรชล้มเหลว: ' + e, 'error');
+  }).finally(function() {
+    if (btn) {
+      var icon = btn.querySelector('i');
+      if (icon) icon.classList.remove('spin-anim');
+    }
+  });
+}
+
 function renderOrderList(data) {
   var list = document.getElementById('myOrdersList');
   if (!list) return;

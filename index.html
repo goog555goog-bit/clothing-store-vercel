@@ -144,6 +144,9 @@
         style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem;">
         <h2 style="font-size:1.25rem;font-weight:700;display:flex;align-items:center;gap:0.5rem;">
           <i data-lucide="clipboard-list" style="width:20px;height:20px;color:var(--primary);"></i> ประวัติการเบิก
+          <button class="btn btn-ghost btn-sm" onclick="forceRefreshOrders(this)" style="padding:0.25rem;margin-left:0.5rem" title="รีเฟรชข้อมูลล่าสุด">
+            <i data-lucide="refresh-cw" style="width:16px;height:16px"></i>
+          </button>
         </h2>
         <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
           <button class="orders-filter-btn active" data-filter="all" onclick="filterOrders('all')">ทั้งหมด</button>
