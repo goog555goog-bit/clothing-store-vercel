@@ -316,6 +316,10 @@ var API = (function () {
     signForReceipt: function (requestId, signature) {
       return this._call('signForReceipt', { requestId: requestId, signature: signature }, false, ['getAllOrders', 'getAdvancedDashboardData', 'getMyRequests', 'getProducts', 'getSubStock']);
     },
+    cancelRequest: function (data) {
+      // data: { requestId, reason }
+      return this._call('cancelRequest', data, false, ['getMyRequests', 'getAllOrders', 'getDashboardStats', 'getAdvancedDashboardData', 'getProducts']);
+    },
 
     manageEmployee: function (op, data, oldEmployeeId) {
       return this._call('manageEmployee', { op: op, data: data, oldEmployeeId: oldEmployeeId }, false, ['getEmployees']);

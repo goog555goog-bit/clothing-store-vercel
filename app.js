@@ -240,22 +240,17 @@ function updateUserUI() {
     // [RBAC] ตรวจสอบสิทธิ์สำหรับการแสดงปุ่มนำทาง
     var canAdmin = API.hasRole('superadmin') || API.hasRole('admin');
 
-    var hasTeam = currentUser && currentUser.teamId;
-    var canManage = API.hasPermission(API.PERMS.APPROVE_REQUEST) ||
-      API.hasPermission(API.PERMS.DISPATCH_ORDERS) ||
-      hasTeam; // [NEW] คนมีทีมสามารถเข้าหน้าผู้อนุมัติเพื่อจัดการทีมตนเองได้
-
     // ปุ่ม Admin
     var adminBtn = document.getElementById('adminPaneBtn');
     var adMob = document.getElementById('adminMobileBtn');
     if (adminBtn) adminBtn.classList.toggle('hidden', !canAdmin);
     if (adMob) adMob.classList.toggle('hidden', !canAdmin);
 
-    // ปุ่ม Manager (ผู้อนุมัติ)
+    // ปุ่ม Manager (ผู้อนุมัติ) - แสดงเฉพาะ Admin/Superadmin ตามโจทย์
     var mgrBtn = document.getElementById('mgrPaneBtn');
     var mgrMob = document.getElementById('mgrMobileBtn');
-    if (mgrBtn) mgrBtn.classList.toggle('hidden', !canManage);
-    if (mgrMob) mgrMob.classList.toggle('hidden', !canManage);
+    if (mgrBtn) mgrBtn.classList.toggle('hidden', !canAdmin);
+    if (mgrMob) mgrMob.classList.toggle('hidden', !canAdmin);
 
     // ปุ่มรายการเบิกของฉัน (แสดงเสมอถ้า Login)
     if (ordersBtn) ordersBtn.classList.remove('hidden');
