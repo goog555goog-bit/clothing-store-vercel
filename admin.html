@@ -1597,7 +1597,7 @@
   </div>
 
   <script>
-    var currentAdminPage = 'dashboard';
+    var currentAdminPage = sessionStorage.getItem('currentAdminPage') || 'dashboard';
     var allEmployees = [];
     var allAdminCategories = [];
     var allAdminDepartments = [];
@@ -1772,34 +1772,24 @@
           if (res.success) localStorage.setItem('_all_products_cache', JSON.stringify(res.data));
         });
 
-        loadDashboard();
+        var initialPage = sessionStorage.getItem('currentAdminPage') || 'dashboard';
+        currentAdminPage = '';
+        adminNav(initialPage);
       }).catch(function (err) {
         console.warn('Initial Data Load Failed:', err);
-        loadDashboard();
+        var initialPage = sessionStorage.getItem('currentAdminPage') || 'dashboard';
+        currentAdminPage = '';
+        adminNav(initialPage);
       }).finally(function() {
         startAppPolling();
       });
     };
 
-    // ─── SMART POLLING ────────────────────────────────────────
     function startAppPolling() {
       if (typeof API !== 'undefined' && API.startSmartPolling) {
         API.startSmartPolling(5000, function(newVersion) {
-          console.log('Admin data version changed to ' + newVersion + ', silently refreshing...');
-          var loaders = {
-            'dashboard': loadDashboard,
-            'products': loadProducts,
-            'categories': loadAdminCategories,
-            'orders': loadAdminOrders,
-            'inventory': loadInventory,
-            'reports': loadReports,
-            'employees': loadAdminEmployees,
-            'teams': loadTeams,
-            'branches': loadBranches,
-            'audit': loadAuditLogs,
-            'settings': loadSystemSettings
-          };
-          if (loaders[currentAdminPage]) loaders[currentAdminPage]();
+          console.log('Admin data version changed to ' + newVersion + ', reloading page...');
+          window.location.reload();
         });
       }
     }
@@ -1808,6 +1798,9 @@
     function adminNav(page, el, options) {
       if (currentAdminPage === page && !el && !options) return;
       currentAdminPage = page;
+      try {
+        sessionStorage.setItem('currentAdminPage', page);
+      } catch (e) {}
 
       // Close open elements
       document.querySelectorAll('.modal-overlay').forEach(function (m) { m.classList.remove('open'); });

@@ -71,7 +71,7 @@ var allCategories = [];
 var allBranches = [];
 var myOrdersCache = null;
 var currentCategory = 'all';
-var currentView = 'store';  // store | orders | substock
+var currentView = sessionStorage.getItem('currentView') || 'store';  // store | orders | substock
 
 // ─── UTILS ────────────────────────────────────────────────
 function escapeHTML(str) {
@@ -119,6 +119,7 @@ function checkAuth() {
     if (typeof API !== 'undefined' && API.getProducts) {
       loadStorefrontData();
       startAppPolling();
+      switchView(currentView);
     } else {
       var retryCount = 0;
       var retryTimer = setInterval(function () {
@@ -127,6 +128,7 @@ function checkAuth() {
           clearInterval(retryTimer);
           loadStorefrontData();
           startAppPolling();
+          switchView(currentView);
         } else if (retryCount > 60) { // 6 seconds timeout
           clearInterval(retryTimer);
           showToast('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณารีเฟรชหน้าเว็บ', 'error');
@@ -154,40 +156,8 @@ function checkAuth() {
 function startAppPolling() {
   if (typeof API !== 'undefined' && API.startSmartPolling) {
     API.startSmartPolling(5000, function (newVersion) {
-      console.log('Data version changed to ' + newVersion + ', silently refreshing...');
-      // Silent refresh
-      API.getStorefrontBatchData().then(function (batch) {
-        if (batch.success) {
-          var res = batch.storefront;
-          if (res && res.success) {
-            allProducts = res.products || [];
-            allCategories = res.categories || [];
-            localStorage.setItem('_all_products_cache', JSON.stringify(allProducts));
-            renderCategories();
-            renderProductGrid(currentProductPage);
-          }
-          if (batch.settings && batch.settings.success) {
-            globalSystemSettings = batch.settings.data || {};
-            updateUserUI();
-          }
-          if (batch.branches && Array.isArray(batch.branches)) {
-            allBranches = batch.branches;
-          }
-
-          if (currentView === 'orders' && currentUser) {
-            API.getMyRequests().then(function (ores) {
-              if (ores.success) {
-                myOrdersCache = ores.data;
-                renderOrderList(ores.data);
-              }
-            }).catch(function (e) { });
-          }
-
-          if (currentView === 'substock' && currentUser) {
-            loadSubStock();
-          }
-        }
-      }).catch(function (e) { });
+      console.log('Data version changed to ' + newVersion + ', reloading page...');
+      window.location.reload();
     });
   }
 }
@@ -619,6 +589,9 @@ document.addEventListener('click', function (e) {
 
 function switchView(view) {
   currentView = view;
+  try {
+    sessionStorage.setItem('currentView', view);
+  } catch (e) { }
 
   // 1. Sync tab active states (header + mobile nav)
   document.querySelectorAll('.main-tab').forEach(function (t) {
