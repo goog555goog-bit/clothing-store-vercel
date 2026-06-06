@@ -2,6 +2,8 @@
 //  api.js — Frontend REST Adapter (Refactored & Optimized)
 // ============================================================
 
+// ⚠️ [SECURITY] GAS_URL ควรย้ายไปเป็น Environment Variable ในอนาคต
+// ต้อง Deploy ใหม่เป็น "New Version" ทุกครั้งที่แก้ไข Backend
 const GAS_URL = "https://script.google.com/macros/s/AKfycbyQlV4PqbbHqrdZjDt-Qj5XhEtNuHZLoBgYa9bzWC27NynElREiu0_GY1UCkoOU3VjmoQ/exec";
 
 var API = (function () {
@@ -249,7 +251,6 @@ var API = (function () {
     getManagerBatchData: function () { return this._call('getManagerBatchData', {}, true); },
     getReportData: function (type) { return this._call('getReportData', { type: type }, true); },
     getMonthlyTrends: function () { return this._call('getMonthlyTrends', {}, true); },
-    getDashboardBatchData: function (filters) { return this._call('getDashboardBatchData', { filters: filters }, true); },
     getTopRequestedItems: function (month) { return this._call('getTopRequestedItems', { month: month }, true); },
     getDepartmentSpending: function (month) { return this._call('getDepartmentSpending', { month: month }, true); },
     getInventoryForecast: function () { return this._call('getInventoryForecast', {}, true); },

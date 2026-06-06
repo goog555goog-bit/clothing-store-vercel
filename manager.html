@@ -16,12 +16,6 @@
     function refreshIcons() { if (typeof lucide !== 'undefined') lucide.createIcons(); }
     function loadAuditLogs() { console.info('Audit Logs not available in Manager view'); }
 
-    function initDarkMode() {
-      var isDark = localStorage.getItem('darkMode') === 'true';
-      if (isDark) document.body.classList.add('dark-mode');
-      refreshIcons();
-    }
-
     function escapeHTML(str) {
       if (!str) return "";
       return String(str)
@@ -30,12 +24,6 @@
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
-    }
-
-    function toggleDarkMode() {
-      var isDark = document.body.classList.toggle('dark-mode');
-      localStorage.setItem('darkMode', isDark);
-      refreshIcons();
     }
   </script>
 </head>
@@ -230,8 +218,11 @@
     function startAppPolling() {
       if (typeof API !== 'undefined' && API.startSmartPolling) {
         API.startSmartPolling(5000, function(newVersion) {
-          console.log('Manager data version changed to ' + newVersion + ', reloading page...');
-          window.location.reload();
+          console.log('Manager data version changed to ' + newVersion + ', refreshing data...');
+          // [FIX] Soft reload: refresh pending list without destroying user state
+          API.invalidateCache();
+          loadPending();
+          showToast('ข้อมูลมีการอัปเดตจากระบบ', 'info');
         });
       }
     }
@@ -353,7 +344,7 @@
         closeMgrModal();
         loadPending();
       }).catch(function (err) {
-        showToast('เกิดข้อผิดพลาด: ' + err.message, 'error');
+        showToast('เกิดข้อผิดพลาด: ' + (typeof err === 'string' ? err : (err.message || err)), 'error');
         btn.disabled = false;
         btn.textContent = 'ลองใหม่';
       });
@@ -369,7 +360,7 @@
       if (type === 'warning') icon = 'alert-triangle';
 
       t.innerHTML = '<i data-lucide="' + icon + '" style="width:18px;height:18px"></i>'
-        + '<span>' + msg + '</span>';
+        + '<span>' + escapeHTML(msg) + '</span>';
 
       container.appendChild(t);
       refreshIcons();

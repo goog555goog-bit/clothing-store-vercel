@@ -40,6 +40,7 @@
     function adminLogout() {
       if (!confirm('ยืนยันการออกจากระบบแอดมิน?')) return;
       localStorage.removeItem('_user');
+      localStorage.removeItem('_tok');
       navigateTo('login.html');
     }
   </script>

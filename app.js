@@ -156,8 +156,13 @@ function checkAuth() {
 function startAppPolling() {
   if (typeof API !== 'undefined' && API.startSmartPolling) {
     API.startSmartPolling(5000, function (newVersion) {
-      console.log('Data version changed to ' + newVersion + ', reloading page...');
-      window.location.reload();
+      console.log('Data version changed to ' + newVersion + ', refreshing data...');
+      // [FIX] Soft reload: invalidate caches + reload data without destroying user state
+      API.invalidateCache();
+      loadStorefrontData();
+      if (currentView === 'orders') loadMyOrders();
+      if (currentView === 'substock') { subStockCache = null; loadSubStock(); }
+      showToast('ข้อมูลมีการอัปเดตจากระบบ', 'info');
     });
   }
 }
@@ -574,16 +579,7 @@ function selectSuggestion(pid) {
 }
 
 /* Removed handleBranchSearch and selectBranch in favor of searchable select component */
-
-// Close suggestions on outside click
-document.addEventListener('click', function (e) {
-  var dropdown = document.getElementById('searchSuggestions');
-  var input = document.getElementById('searchInput');
-  // Only hide if the click was outside both the input AND the dropdown
-  if (dropdown && input && !dropdown.contains(e.target) && e.target !== input) {
-    dropdown.classList.remove('active');
-  }
-});
+/* Note: Search suggestions close-on-click handler is in window.onload */
 
 // ─── VIEW SWITCHING ───────────────────────────────────────
 
@@ -970,7 +966,6 @@ function openProductDetail(id) {
   refreshIcons();
 }
 
-var isUpdatingSize = false;
 function selectProductSize(el, size, productId) {
   if (isUpdatingSize) return;
   isUpdatingSize = true;
@@ -1420,7 +1415,7 @@ function loadUsageHistory() {
   API.getInventoryLogs({ userFilter: currentUser.employeeId, limit: 20 }).then(function (res) {
     var logs = res.data || [];
     if (logs.length === 0) {
-      body.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:2rem; color:var(--text3)">ยังไม่มีประวัติการใช้งาน</td></tr>';
+      body.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:2rem; color:var(--text3)">ยังไม่มีประวัติการใช้งาน</td></tr>';
       return;
     }
     body.innerHTML = logs.map(function (l) {
@@ -1444,7 +1439,7 @@ function loadUsageHistory() {
         + '</tr>';
     }).join('');
   }).catch(function (err) {
-    body.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:1rem; color:var(--danger)">โหลดประวัติไม่สำเร็จ</td></tr>';
+    body.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:1rem; color:var(--danger)">โหลดประวัติไม่สำเร็จ</td></tr>';
   });
 }
 
@@ -1630,7 +1625,7 @@ function showToast(msg, type) {
 
   t.innerHTML = '<div style="display:flex;align-items:center;gap:0.75rem">'
     + '<i data-lucide="' + icon + '" style="width:18px;height:18px"></i>'
-    + '<span>' + msg + '</span>'
+    + '<span>' + escapeHTML(msg) + '</span>'
     + '</div>';
 
   container.appendChild(t);

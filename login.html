@@ -11,7 +11,7 @@
     rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <script src="api.js"></script>
-  <script src="https://unpkg.com/lucide@latest" defer></script>
+  <script src="https://unpkg.com/lucide@0.263.1" defer></script>
 </head>
 
 <body>
@@ -220,6 +220,22 @@
         document.getElementById('globalLoader').classList.add('active');
       }
       window.top.location.href = url;
+    }
+
+    function showToast(msg, type) {
+      var container = document.getElementById('toastContainer');
+      if (!container) return;
+      var t = document.createElement('div');
+      t.className = 'toast ' + (type || 'success');
+      var iconMap = { 'success': 'check-circle', 'error': 'alert-circle', 'warning': 'alert-triangle', 'info': 'info' };
+      var icon = iconMap[type] || 'info';
+      var safe = String(msg).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+      t.innerHTML = '<div style="display:flex;align-items:center;gap:0.75rem">'
+        + '<i data-lucide="' + icon + '" style="width:18px;height:18px"></i>'
+        + '<span>' + safe + '</span></div>';
+      container.appendChild(t);
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+      setTimeout(function () { t.remove(); }, 4000);
     }
 
     // Preview ชื่อพนักงานขณะพิมพ์
