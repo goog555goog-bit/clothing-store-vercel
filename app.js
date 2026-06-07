@@ -1764,6 +1764,7 @@ function initSearchableSelect(selectId) {
   }
 
   // Create new wrapper
+  var wrapper = document.createElement('div');
   wrapper.className = 'search-select-wrapper minimal'; // Added minimal class for storefront
   select.style.display = 'none';
   select.parentNode.insertBefore(wrapper, select);
