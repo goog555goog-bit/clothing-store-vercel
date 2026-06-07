@@ -368,40 +368,7 @@ var API = (function () {
 
     checkDataVersion: function () { return this._call('checkDataVersion', {}, false); },
 
-    startSmartPolling: function (intervalMs, onVersionChange) {
-      if (this._pollingTimer) clearInterval(this._pollingTimer);
-      var self = this;
-      this._currentVersion = null;
-
-      this.checkDataVersion().then(function (res) {
-        if (res && res.success) self._currentVersion = res.version;
-      }).catch(function (e) { });
-
-      this._pollingTimer = setInterval(function () {
-        if (self._isPolling) return;
-        self._isPolling = true;
-        self.checkDataVersion()
-          .then(function (res) {
-            if (res && res.success) {
-              if (self._currentVersion !== null && self._currentVersion !== res.version) {
-                self._currentVersion = res.version;
-                if (typeof onVersionChange === 'function') onVersionChange(res.version);
-              } else {
-                self._currentVersion = res.version;
-              }
-            }
-          })
-          .catch(function (e) { console.warn('Polling error:', e); })
-          .finally(function () { self._isPolling = false; });
-      }, intervalMs || 5000);
-    },
-
-    stopSmartPolling: function () {
-      if (this._pollingTimer) {
-        clearInterval(this._pollingTimer);
-        this._pollingTimer = null;
-      }
-    }
+    // Smart Polling feature completely removed as per user request
   };
 
   return apiObj;

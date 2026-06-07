@@ -14,8 +14,9 @@
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="style.css">
-  <script src="https://unpkg.com/lucide@0.263.1" defer></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://unpkg.com/html5-qrcode@2.3.8" defer></script>
+  <script src="api.js"></script>
 </head>
 
 <body>
@@ -44,7 +45,7 @@
             onkeydown="handleSearchInput(this.value, event)" oninput="handleSearchInput(this.value, event)"
             style="padding-left:0.5rem;background:transparent;border:none;height:100%;color:var(--text);min-width:80px;">
         </div>
-        <div class="search-options hide-mobile">
+        <div class="search-options" style="display:flex; flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; -ms-overflow-style:none; gap:0.5rem; max-width:100%; align-items:center;">
           <!-- [แก้ไข A11y] เพิ่ม aria-label ให้ตัวกรองทุกตัว -->
           <select id="searchType" class="search-select-minimal glass" aria-label="ประเภทการค้นหา">
             <option value="all">ทั้งหมด</option>
@@ -83,11 +84,11 @@
           <i data-lucide="clipboard-list"></i> <span class="hide-mobile">รายการเบิก</span>
         </button>
         <button id="substockBtn" class="btn btn-primary btn-sm hidden" onclick="switchView('substock')"
-          aria-label="จัดการคลังย่อย">
+          aria-label="จัดการคลังย่อย" title="จัดการคลังย่อย">
           <i data-lucide="package-search"></i> <span class="hide-mobile">คลังย่อย</span>
         </button>
         <button id="teamStockBtn" class="btn btn-accent btn-sm hidden" onclick="switchView('substock')"
-          aria-label="จัดการคลังทีม">
+          aria-label="จัดการคลังทีม" title="จัดการคลังทีม">
           <i data-lucide="users"></i> <span class="hide-mobile">สต๊อกทีม</span>
         </button>
         <button id="loginBtn" class="btn btn-outline btn-sm" onclick="navigateTo('login.html')">

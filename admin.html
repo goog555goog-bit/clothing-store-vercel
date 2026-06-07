@@ -8,7 +8,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap"
     rel="stylesheet">
-  <script src="https://unpkg.com/lucide@0.263.1" defer></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/bwip-js@3.0.4/dist/bwip-js-min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
@@ -1782,18 +1782,11 @@
         currentAdminPage = '';
         adminNav(initialPage);
       }).finally(function() {
-        startAppPolling();
+        // Polling removed per user request
       });
     };
 
-    function startAppPolling() {
-      if (typeof API !== 'undefined' && API.startSmartPolling) {
-        API.startSmartPolling(5000, function(newVersion) {
-          console.log('Admin data version changed to ' + newVersion + ', reloading page...');
-          window.location.reload();
-        });
-      }
-    }
+    // startAppPolling function completely removed
 
 
     function adminNav(page, el, options) {

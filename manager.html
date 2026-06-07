@@ -9,7 +9,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap"
     rel="stylesheet">
-  <script src="https://unpkg.com/lucide@0.263.1" defer></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
   <link rel="stylesheet" href="style.css">
   <script src="api.js"></script>
   <script>
@@ -210,21 +210,7 @@
         }
       }
       loadPending();
-      startAppPolling();
       refreshIcons();
-    }
-
-    // ─── SMART POLLING ────────────────────────────────────────
-    function startAppPolling() {
-      if (typeof API !== 'undefined' && API.startSmartPolling) {
-        API.startSmartPolling(5000, function(newVersion) {
-          console.log('Manager data version changed to ' + newVersion + ', refreshing data...');
-          // [FIX] Soft reload: refresh pending list without destroying user state
-          API.invalidateCache();
-          loadPending();
-          showToast('ข้อมูลมีการอัปเดตจากระบบ', 'info');
-        });
-      }
     }
 
     function mgrLogout() {

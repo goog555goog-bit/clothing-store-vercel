@@ -118,7 +118,6 @@ function checkAuth() {
   function startApp() {
     if (typeof API !== 'undefined' && API.getProducts) {
       loadStorefrontData();
-      startAppPolling();
       switchView(currentView);
     } else {
       var retryCount = 0;
@@ -127,7 +126,6 @@ function checkAuth() {
         if (typeof API !== 'undefined' && API.getProducts) {
           clearInterval(retryTimer);
           loadStorefrontData();
-          startAppPolling();
           switchView(currentView);
         } else if (retryCount > 60) { // 6 seconds timeout
           clearInterval(retryTimer);
@@ -151,21 +149,8 @@ function checkAuth() {
   }, 1500);
 }
 
-// ─── SMART POLLING ────────────────────────────────────────
 
-function startAppPolling() {
-  if (typeof API !== 'undefined' && API.startSmartPolling) {
-    API.startSmartPolling(5000, function (newVersion) {
-      console.log('Data version changed to ' + newVersion + ', refreshing data...');
-      // [FIX] Soft reload: invalidate caches + reload data without destroying user state
-      API.invalidateCache();
-      loadStorefrontData();
-      if (currentView === 'orders') loadMyOrders();
-      if (currentView === 'substock') { subStockCache = null; loadSubStock(); }
-      showToast('ข้อมูลมีการอัปเดตจากระบบ', 'info');
-    });
-  }
-}
+// Polling completely removed based on user request
 
 function updateUserUI() {
   var nameEl = document.getElementById('navUserName');
@@ -509,7 +494,14 @@ function handleSearchInput(val, e) {
   var q = (val || '').toLowerCase().trim();
   currentSuggestionIdx = -1;
 
-  // Wait 400ms after typing before searching (or fast if empty)
+  // [Fix UI-2] Hide dropdown when search is empty (prevents dummy data from showing)
+  if (!q) {
+    dropdown.classList.remove('active');
+    renderProductGrid();
+    return;
+  }
+
+  // Wait 400ms after typing before searching
   searchDebounceTimer = setTimeout(function () {
     var matches = allProducts;
 
@@ -1707,6 +1699,17 @@ function confirmCheckout() {
     .catch(function (err) {
       console.error('Checkout Error:', err);
       showToast('เกิดข้อผิดพลาดในการส่งคำขอ: ' + err, 'error');
+      
+      // [Fix Logic-1] Auto-refresh storefront and reset cart if stock ran out during checkout
+      var errStr = String(err).toLowerCase();
+      if (errStr.indexOf('สต๊อก') !== -1 || errStr.indexOf('พัสดุในคลัง') !== -1 || errStr.indexOf('ไม่พอ') !== -1 || errStr.indexOf('stock') !== -1) {
+        showToast('กำลังอัปเดตข้อมูลสต๊อกล่าสุด...', 'info');
+        API.invalidateCache('getStorefrontBatchData');
+        if (typeof loadStorefrontData === 'function') loadStorefrontData();
+        // Remove invalid items or clear cart (we clear it for safety to force them to re-add)
+        Cart.clear();
+        toggleDrawer('cartDrawer');
+      }
     })
     .finally(function () {
       if (btn) {
@@ -1753,10 +1756,14 @@ function initSearchableSelect(selectId) {
   var select = document.getElementById(selectId);
   if (!select) return;
 
-  var oldWrapper = select.parentElement.querySelector('.search-select-wrapper');
-  if (oldWrapper) oldWrapper.remove();
+  // [Fix UI-3] Properly unwrap and remove old wrapper if it already exists
+  if (select.parentElement && select.parentElement.classList.contains('search-select-wrapper')) {
+    var oldWrapper = select.parentElement;
+    oldWrapper.parentNode.insertBefore(select, oldWrapper);
+    oldWrapper.remove();
+  }
 
-  var wrapper = document.createElement('div');
+  // Create new wrapper
   wrapper.className = 'search-select-wrapper minimal'; // Added minimal class for storefront
   select.style.display = 'none';
   select.parentNode.insertBefore(wrapper, select);
