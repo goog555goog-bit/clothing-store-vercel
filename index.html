@@ -45,7 +45,7 @@
             onkeydown="handleSearchInput(this.value, event)" oninput="handleSearchInput(this.value, event)"
             style="padding-left:0.5rem;background:transparent;border:none;height:100%;color:var(--text);min-width:80px;">
         </div>
-        <div class="search-options" style="display:flex; flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; -ms-overflow-style:none; gap:0.5rem; max-width:100%; align-items:center;">
+        <div class="search-options" style="display:flex; flex-wrap:wrap; gap:0.5rem; max-width:100%; align-items:center; overflow:visible;">
           <!-- [แก้ไข A11y] เพิ่ม aria-label ให้ตัวกรองทุกตัว -->
           <select id="searchType" class="search-select-minimal glass" aria-label="ประเภทการค้นหา">
             <option value="all">ทั้งหมด</option>

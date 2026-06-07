@@ -851,6 +851,9 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   position: relative;
   width: 100%;
 }
+.search-select-wrapper:focus-within {
+  z-index: 6000;
+}
 .search-select-input {
   cursor: pointer;
   padding-right: 2.5rem !important;
