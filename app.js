@@ -1397,8 +1397,9 @@ function handleEmployeeSearch(val) {
     dropdown.innerHTML = '<div class="suggestion-item"><span style="color:var(--text3)">ไม่พบพนักงาน...</span></div>';
   } else {
     dropdown.innerHTML = matches.map(function (e) {
+      var infoStr = (e.department && e.department !== '-') ? ' <small style="opacity:0.6">(' + e.department + ' - ' + (e.role || '') + ')</small>' : '';
       return '<div class="suggestion-item" onclick="selectEmployee(\'' + e.employeeId + '\', \'' + e.name.replace(/'/g, "\\'") + '\')">' +
-        '<span>' + e.name + '</span> <span class="sku-pill">' + e.employeeId + '</span></div>';
+        '<span>' + e.name + infoStr + '</span> <span class="sku-pill">' + e.employeeId + '</span></div>';
     }).join('');
   }
   dropdown.classList.add('active');
