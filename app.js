@@ -2116,7 +2116,8 @@ function openProfileModal() {
   if (!currentUser) return;
   var input = document.getElementById('profileEmailInput');
   if (input) input.value = currentUser.email || '';
-  document.getElementById('profileModal').classList.add('open');
+  var modal = document.getElementById('profileModal');
+  if (modal) modal.classList.add('open');
 }
 
 function saveProfileEmail() {
