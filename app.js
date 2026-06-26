@@ -161,7 +161,10 @@ function updateUserUI() {
   var changePwdBtn = document.getElementById('changePwdBtn');
 
   if (currentUser) {
-    if (nameEl) nameEl.textContent = currentUser.name;
+    if (nameEl) {
+      nameEl.textContent = currentUser.name;
+      nameEl.classList.remove('hidden');
+    }
     if (loginBtn) loginBtn.classList.add('hidden');
     if (logoutBtn) logoutBtn.classList.remove('hidden');
     if (ordersBtn) ordersBtn.classList.remove('hidden');
@@ -216,7 +219,10 @@ function updateUserUI() {
     // ปุ่มรายการเบิกของฉัน (แสดงเสมอถ้า Login)
     if (ordersBtn) ordersBtn.classList.remove('hidden');
   } else {
-    if (nameEl) nameEl.textContent = 'เข้าสู่ระบบ';
+    if (nameEl) {
+      nameEl.textContent = 'เข้าสู่ระบบ';
+      nameEl.classList.add('hidden');
+    }
     if (loginBtn) loginBtn.classList.remove('hidden');
     if (logoutBtn) logoutBtn.classList.add('hidden');
     if (ordersBtn) ordersBtn.classList.add('hidden');
@@ -2105,4 +2111,34 @@ window.addEventListener('message', function (event) {
     }
   }
 });
+
+function openProfileModal() {
+  if (!currentUser) return;
+  var input = document.getElementById('profileEmailInput');
+  if (input) input.value = currentUser.email || '';
+  document.getElementById('profileModal').classList.add('open');
+}
+
+function saveProfileEmail() {
+  var input = document.getElementById('profileEmailInput');
+  if (!input) return;
+  var email = input.value.trim();
+  if (email && email.indexOf('@') === -1) {
+    showToast('รูปแบบอีเมลไม่ถูกต้อง', 'warning');
+    return;
+  }
+  
+  API.updateProfileEmail(email).then(function(res) {
+    if (res.success) {
+      showToast('บันทึกอีเมลเรียบร้อย', 'success');
+      currentUser.email = email;
+      localStorage.setItem('_user', JSON.stringify(currentUser));
+      closeModal('profileModal');
+    } else {
+      showToast(res.message, 'error');
+    }
+  }).catch(function(err) {
+    showToast('เกิดข้อผิดพลาด: ' + err, 'error');
+  });
+}
 
