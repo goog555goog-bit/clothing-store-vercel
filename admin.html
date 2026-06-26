@@ -3468,6 +3468,15 @@
         allAdminTeams = resTeams.data || [];
         allAdminEmployees = resEmp.data || [];
 
+        // ponytail: dynamically map members to teams since backend cache or return formats might miss them
+        allAdminTeams.forEach(function (t) {
+          var members = allAdminEmployees.filter(function (e) {
+            return e.teamId && String(e.teamId) === String(t.teamId);
+          });
+          t.members = members;
+          t.memberCount = members.length;
+        });
+
         if (!grid) return;
         if (allAdminTeams.length === 0) {
           grid.innerHTML = '<div class="card text-center" style="grid-column:1/-1; padding:3rem; color:var(--text3)">ยังไม่มีทีมช่างในระบบ</div>';
