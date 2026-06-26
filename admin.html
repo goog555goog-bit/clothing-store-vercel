@@ -999,7 +999,8 @@
         <input type="hidden" id="cf-old-id">
         <div class="form-group" id="cf-id-wrap">
           <label class="form-label">รหัสหมวดหมู่ (Category ID)</label>
-          <input type="text" id="cf-id" class="form-input" placeholder="ระบุรหัส (เช่น CAT-01) หรือเว้นว่างเพื่อสร้างอัตโนมัติ">
+          <input type="text" id="cf-id" class="form-input"
+            placeholder="ระบุรหัส (เช่น CAT-01) หรือเว้นว่างเพื่อสร้างอัตโนมัติ">
         </div>
         <div class="form-group">
           <label class="form-label">ชื่อหมวดหมู่ *</label>
@@ -1312,7 +1313,8 @@
         </div>
         <div class="flex flex-wrap gap-2">
           <button class="btn btn-outline btn-sm" onclick="clearSignature()">ล้าง</button>
-          <button class="btn btn-accent btn-sm flex-1" id="adminSubmitReceiptBtn" onclick="submitReceipt(this)">ยืนยันการรับของ</button>
+          <button class="btn btn-accent btn-sm flex-1" id="adminSubmitReceiptBtn"
+            onclick="submitReceipt(this)">ยืนยันการรับของ</button>
         </div>
       </div>
       <div class="modal-footer flex-wrap">
@@ -1781,7 +1783,7 @@
         var initialPage = sessionStorage.getItem('currentAdminPage') || 'dashboard';
         currentAdminPage = '';
         adminNav(initialPage);
-      }).finally(function() {
+      }).finally(function () {
         // Polling removed per user request
       });
     };
@@ -1789,12 +1791,12 @@
     // startAppPolling function completely removed
 
 
-    window.adminNav = function(page, el, options) {
+    window.adminNav = function (page, el, options) {
       if (currentAdminPage === page && !el && !options) return;
       currentAdminPage = page;
       try {
         sessionStorage.setItem('currentAdminPage', page);
-      } catch (e) {}
+      } catch (e) { }
 
       // Close open elements
       document.querySelectorAll('.modal-overlay').forEach(function (m) { m.classList.remove('open'); });
@@ -2540,7 +2542,7 @@
       var branchId = document.getElementById('cf-branch').value;
 
       var op = oldId ? 'update' : 'add';
-      
+
       if (!name) { showToast('กรุณาระบุชื่อหมวดหมู่', 'warning'); return; }
       if (op === 'update' && !newId) { showToast('กรุณาระบุรหัสหมวดหมู่ใหม่', 'warning'); return; }
       var data = { oldCategoryId: oldId, categoryId: newId, name: name, branchId: branchId };
@@ -2810,7 +2812,7 @@
     // ─── ORDERS ───────────────────────────────────────────
     var allAdminOrders = [];
     var masterAdminOrders = []; // Full list for filtering
-      var adminOrdersPageSize = 25;
+    var adminOrdersPageSize = 25;
     var currentAdminOrdersPage = 1;
 
     function loadAdminOrders(forceRefresh) {
@@ -3052,7 +3054,7 @@
         if (typeof triggerConfetti === 'function') triggerConfetti();
         closeModal('orderDetailModal');
         loadAdminOrders();
-      }).catch(function (err) { showToast('ข้อผิดพลาด: ' + err, 'error'); }).finally(function() {
+      }).catch(function (err) { showToast('ข้อผิดพลาด: ' + err, 'error'); }).finally(function () {
         if (btn) {
           btn.disabled = false;
           btn.innerHTML = originalHtml;

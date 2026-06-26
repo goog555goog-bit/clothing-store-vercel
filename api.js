@@ -235,11 +235,11 @@ var API = (function () {
     getTeams: function () { return this._call('getTeams', {}, true); },
     getBranches: function () { return this._call('getBranches', {}, true); },
     getStorefrontData: function (bypassCache) { return this._call('getStorefrontData', {}, !bypassCache); },
-    getMyRequests: function (forceRefresh) { 
-      return this._call('getMyRequests', { forceRefresh: !!forceRefresh }, !forceRefresh); 
+    getMyRequests: function (forceRefresh) {
+      return this._call('getMyRequests', { forceRefresh: !!forceRefresh }, !forceRefresh);
     },
-    getAllOrders: function (forceRefresh) { 
-      return this._call('getAllOrders', { forceRefresh: !!forceRefresh }, !forceRefresh); 
+    getAllOrders: function (forceRefresh) {
+      return this._call('getAllOrders', { forceRefresh: !!forceRefresh }, !forceRefresh);
     },
     getFilteredOrders: function (filters) { return this._call('getFilteredOrders', { filters: filters }, true); },
     getOrderItems: function (orderId) { return this._call('getOrderItems', { orderId: orderId }, true); },

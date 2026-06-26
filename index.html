@@ -20,32 +20,30 @@
 </head>
 
 <body>
-
   <!-- ══════════════════════════════════════════
        HEADER — Logo | Search | User Actions
   ══════════════════════════════════════════ -->
   <header class="app-header">
     <div class="container header-container">
-
       <!-- Logo -->
       <div class="logo" onclick="switchView('store')">
         <div class="logo-icon"><i data-lucide="package"></i></div>
         <span style="font-size:1.35rem;font-weight:800;letter-spacing:-1px;color:#fff;">YY <span
             style="font-weight:300;opacity:0.6;color:var(--primary);">STOCK-SYSTEM</span></span>
       </div>
-
       <!-- Search Bar -->
       <div class="search-wrapper">
         <div class="search-box glass">
           <i data-lucide="search" style="width:18px;height:18px;color:var(--text3);margin-left:1rem;"></i>
           <!-- [แก้ไข A11y] เพิ่ม aria-label สำหรับช่องค้นหา -->
           <input id="searchInput" type="text" placeholder="ค้นหาสินค้า..." autocomplete="off"
-            aria-label="ค้นหาสินค้าด้วยชื่อหรือรหัส"
-            onfocus="handleSearchInput(this.value, event)" onclick="handleSearchInput(this.value, event)"
-            onkeydown="handleSearchInput(this.value, event)" oninput="handleSearchInput(this.value, event)"
+            aria-label="ค้นหาสินค้าด้วยชื่อหรือรหัส" onfocus="handleSearchInput(this.value, event)"
+            onclick="handleSearchInput(this.value, event)" onkeydown="handleSearchInput(this.value, event)"
+            oninput="handleSearchInput(this.value, event)"
             style="padding-left:0.5rem;background:transparent;border:none;height:100%;color:var(--text);min-width:80px;">
         </div>
-        <div class="search-options" style="display:flex; flex-wrap:wrap; gap:0.5rem; max-width:100%; align-items:center; overflow:visible;">
+        <div class="search-options"
+          style="display:flex; flex-wrap:wrap; gap:0.5rem; max-width:100%; align-items:center; overflow:visible;">
           <!-- [แก้ไข A11y] เพิ่ม aria-label ให้ตัวกรองทุกตัว -->
           <select id="searchType" class="search-select-minimal glass" aria-label="ประเภทการค้นหา">
             <option value="all">ทั้งหมด</option>
@@ -53,12 +51,12 @@
             <option value="productId">รหัสสินค้า</option>
             <option value="description">รายละเอียด</option>
           </select>
-          <select id="headerCategoryFilter" class="search-select-minimal glass"
-            aria-label="กรองตามหมวดหมู่"
+          <select id="headerCategoryFilter" class="search-select-minimal glass" aria-label="กรองตามหมวดหมู่"
             onchange="onStoreCategoryChange(this.value)">
             <option value="all">ทุกหมวดหมู่</option>
           </select>
-          <select id="stockFilter" class="search-select-minimal glass" aria-label="กรองตามสถานะสต็อก" onchange="renderProductGrid()">
+          <select id="stockFilter" class="search-select-minimal glass" aria-label="กรองตามสถานะสต็อก"
+            onchange="renderProductGrid()">
             <option value="all">ทุกสถานะ</option>
             <option value="instock">มีในคลัง</option>
           </select>
@@ -68,7 +66,6 @@
         </div>
         <div id="searchSuggestions" class="search-suggestions-dropdown"></div>
       </div>
-
       <!-- User Actions (compact — nav tabs live in mobile nav) -->
       <div class="nav-actions">
         <button id="adminPaneBtn" class="btn btn-accent btn-sm hidden" onclick="navigateTo('admin.html')"
@@ -94,7 +91,9 @@
         <button id="loginBtn" class="btn btn-outline btn-sm" onclick="navigateTo('login.html')">
           <i data-lucide="log-in" style="width:15px;height:15px;"></i> <span>เข้าสู่ระบบ</span>
         </button>
-        <span id="navUserName" class="hidden" onclick="openProfileModal()" style="cursor:pointer; text-decoration:underline; font-weight:600; padding: 0.25rem 0.5rem; border-radius: var(--radius-sm); font-size:0.85rem;" title="แก้ไขโปรไฟล์"></span>
+        <span id="navUserName" class="hidden" onclick="openProfileModal()"
+          style="cursor:pointer; text-decoration:underline; font-weight:600; padding: 0.25rem 0.5rem; border-radius: var(--radius-sm); font-size:0.85rem;"
+          title="แก้ไขโปรไฟล์"></span>
         <button id="logoutBtn" class="btn btn-ghost btn-sm hidden" onclick="logout()" aria-label="ออกจากระบบ">
           <i data-lucide="log-out"></i>
         </button>
@@ -111,17 +110,13 @@
           <span id="darkModeIcon" class="force-show"><i data-lucide="moon"></i></span>
         </button>
       </div>
-
     </div>
   </header>
-
   <!-- Hero Banner Removed -->
-
   <!-- ══════════════════════════════════════════
        STORE VIEW
   ══════════════════════════════════════════ -->
   <main id="view-store" class="view-section" style="display:block;">
-
     <div class="container" style="padding-top:2rem;">
       <!-- Product Grid -->
       <div id="productGrid" class="product-grid">
@@ -134,19 +129,18 @@
       <div id="productPagination" style="padding-bottom:6rem;text-align:center;margin-top:1rem;"></div>
     </div>
   </main>
-
   <!-- ══════════════════════════════════════════
        ORDERS VIEW — with Filter Bar
   ══════════════════════════════════════════ -->
   <main id="view-orders" class="view-section" style="display:none;">
-
     <div class="container" style="padding-top:2rem;">
       <!-- [แก้ไข UX] ลบ CSS ซ้ำซ้อน: flex-wrap และ gap ถูกประกาศ 2 ครั้ง -->
       <div
         style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem;">
         <h2 style="font-size:1.25rem;font-weight:700;display:flex;align-items:center;gap:0.5rem;">
           <i data-lucide="clipboard-list" style="width:20px;height:20px;color:var(--primary);"></i> ประวัติการเบิก
-          <button class="btn btn-ghost btn-sm" onclick="forceRefreshOrders(this)" style="padding:0.25rem;margin-left:0.5rem" title="รีเฟรชข้อมูลล่าสุด">
+          <button class="btn btn-ghost btn-sm" onclick="forceRefreshOrders(this)"
+            style="padding:0.25rem;margin-left:0.5rem" title="รีเฟรชข้อมูลล่าสุด">
             <i data-lucide="refresh-cw" style="width:16px;height:16px"></i>
           </button>
         </h2>
@@ -171,12 +165,10 @@
       </div>
     </div>
   </main>
-
   <!-- ══════════════════════════════════════════
        SUB-STOCK VIEW
   ══════════════════════════════════════════ -->
   <main id="view-substock" class="view-section" style="display:none;">
-
     <div class="container" style="padding-top:2rem;">
       <div
         style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem">
@@ -195,7 +187,6 @@
           <small>กรุณารอสักครู่...</small>
         </div>
       </div>
-
       <!-- [NEW] Usage History Section -->
       <div id="usageHistorySection" style="margin-top:2rem; padding-bottom:5rem;">
         <h3
@@ -228,7 +219,6 @@
       </div>
     </div>
   </main>
-
   <!-- ══════════════════════════════════════════
        CART DRAWER — with swipe handle
   ══════════════════════════════════════════ -->
@@ -261,7 +251,6 @@
       </button>
     </div>
   </aside>
-
   <!-- ══════════════════════════════════════════
        PRODUCT DETAIL MODAL
   ══════════════════════════════════════════ -->
@@ -278,7 +267,6 @@
       </div>
     </div>
   </div>
-
   <!-- ══════════════════════════════════════════
        ORDER DETAIL MODAL
   ══════════════════════════════════════════ -->
@@ -299,7 +287,8 @@
         </div>
         <div class="flex flex-wrap gap-2">
           <button class="btn btn-outline btn-sm" onclick="clearSignature()">ล้าง</button>
-          <button class="btn btn-accent btn-sm flex-1" id="submitReceiptBtn" onclick="submitReceipt(this)">ยืนยันการรับของ</button>
+          <button class="btn btn-accent btn-sm flex-1" id="submitReceiptBtn"
+            onclick="submitReceipt(this)">ยืนยันการรับของ</button>
         </div>
       </div>
       <div class="modal-footer flex-wrap">
@@ -307,13 +296,11 @@
       </div>
     </div>
   </div>
-
   <!-- ══════════════════════════════════════════
        LOGIN GATE MODAL (#4 — login-gate UX)
   ══════════════════════════════════════════ -->
   <div id="loginGateModal" class="modal-overlay" onclick="if(event.target===this) closeModal('loginGateModal')">
     <div class="modal mouse-glow-card" style="max-width:420px;text-align:center;">
-
       <div class="modal-body" style="padding:2.5rem 2rem;">
         <div
           style="width:64px;height:64px;background:var(--glass-gold);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;border:1px solid rgba(251,191,36,0.3);">
@@ -332,13 +319,11 @@
       </div>
     </div>
   </div>
-
   <!-- ══════════════════════════════════════════
        CHECKOUT CONFIRM MODAL (#4 — replace confirm())
   ══════════════════════════════════════════ -->
   <div id="checkoutModal" class="modal-overlay" onclick="if(event.target===this) closeModal('checkoutModal')">
     <div class="modal mouse-glow-card" style="max-width:500px;">
-
       <div class="modal-header">
         <div style="font-weight:700;display:flex;align-items:center;gap:0.5rem;">
           <i data-lucide="check-circle-2" style="width:18px;height:18px;color:var(--primary);"></i>
@@ -356,7 +341,6 @@
       </div>
     </div>
   </div>
-
   <!-- ══════════════════════════════════════════
        ACTION MODAL (SubStock Prompt Replacement)
   ══════════════════════════════════════════ -->
@@ -370,21 +354,18 @@
       </div>
       <div class="modal-body">
         <p id="actionModalDesc" style="color:var(--text2);font-size:0.9rem;margin-bottom:1rem;"></p>
-
         <div id="actionModalInputWrap" class="form-group hidden">
           <label class="form-label" id="actionModalInputLabel">ใส่ข้อมูล</label>
           <div style="position:relative">
-            <input type="text" id="actionModalInput" class="form-input" autocomplete="off" oninput="handleEmployeeSearch(this.value)">
+            <input type="text" id="actionModalInput" class="form-input" autocomplete="off"
+              oninput="handleEmployeeSearch(this.value)">
             <div id="empSuggestions" class="search-suggestions-dropdown" style="top:100%; width:100%"></div>
           </div>
         </div>
-
         <div id="actionModalBranchWrap" class="form-group hidden" style="position:relative;">
           <label class="form-label">สาขา/หน่วยงาน (ระบุสาขาที่นำไปใช้งาน)</label>
           <select id="actionModalBranch" class="form-input"></select>
         </div>
-
-
         <div class="form-group">
           <label class="form-label">จำนวน</label>
           <div class="qty-control"
@@ -408,7 +389,6 @@
       </div>
     </div>
   </div>
-
   <!-- ══════════════════════════════════════════
        SCANNER MODAL
   ══════════════════════════════════════════ -->
@@ -441,16 +421,13 @@
       </div>
     </div>
   </div>
-
   <!-- Global Loader -->
   <div id="globalLoader" class="global-loader">
     <div class="spinner"></div>
     <p style="margin-top:1rem;color:var(--text2);font-size:0.9rem;">กำลังเตรียมข้อมูล...</p>
   </div>
-
   <!-- Toast -->
   <div class="toast-container" id="toastContainer" aria-live="polite"></div>
-
   <!-- ══════════════════════════════════════════
        MOBILE BOTTOM NAV
   ══════════════════════════════════════════ -->
@@ -481,7 +458,6 @@
       </div>
     </div>
   </div>
-
   <nav class="mobile-nav">
     <button class="mobile-nav-item active main-tab" data-view="store" onclick="switchView('store')">
       <i data-lucide="shopping-bag"></i>
@@ -512,7 +488,6 @@
       <span>ตะกร้า</span>
     </button>
   </nav>
-
   <script src="cart.js"></script>
   <script src="app.js"></script>
   <!-- Back to Top Button -->
@@ -527,74 +502,58 @@
     function initSearchSelect(selectId, showAllOnEmpty) {
       var select = document.getElementById(selectId);
       if (!select) return;
-
       var oldWrapper = select.parentElement.querySelector('.search-select-wrapper');
       if (oldWrapper) oldWrapper.remove();
-
       var wrapper = document.createElement('div');
       wrapper.className = 'search-select-wrapper';
       select.style.display = 'none';
       select.parentElement.insertBefore(wrapper, select);
-
       var input = document.createElement('input');
       input.type = 'text';
       input.className = 'form-input search-select-input';
-
       // Fix Placeholder Logic: Only set value if it's NOT the placeholder option
       var initialOpt = select.options[select.selectedIndex];
       var placeholderText = select.options[0] ? select.options[0].text : 'พิมพ์เพื่อค้นหา...';
       input.placeholder = placeholderText;
-
       if (select.value && select.selectedIndex > 0) {
         input.value = initialOpt.text;
       } else {
         input.value = ''; // Ensure placeholder shows
       }
-
       // Safety: ensure select is hidden if we re-init
       select.style.display = 'none';
-
       input.autocomplete = 'off';
-
       var chevron = document.createElement('div');
       chevron.className = 'search-select-chevron';
       chevron.innerHTML = '<i data-lucide="chevron-down" style="width:16px;height:16px;color:var(--text3)"></i>';
-
       var dropdown = document.createElement('div');
       dropdown.className = 'search-select-dropdown';
-
       wrapper.appendChild(input);
       wrapper.appendChild(chevron);
       wrapper.appendChild(dropdown);
       if (typeof lucide !== 'undefined') lucide.createIcons();
-
       function updateDropdown(filter) {
         var options = Array.from(select.options);
         var filterLower = (filter || '').toLowerCase().trim();
-
         var filtered = options.filter(function (o, i) {
           if (i === 0 && !o.value && !showAllOnEmpty) return false; // skip placeholder if not showing all
           if (!filterLower) return true;
           return o.text.toLowerCase().includes(filterLower);
         });
-
         // Optimization: limit visible items to prevent flickering from huge DOM updates
         var displayLimit = 20;
         var shown = filtered.slice(0, displayLimit);
-
         if (filtered.length === 0) {
           dropdown.innerHTML = '<div class="search-select-empty">ไม่พบตัวเลือกที่ตรงกัน</div>';
         } else {
           var html = shown.map(function (o) {
             return '<div class="search-select-item ' + (o.value === select.value ? 'selected' : '') + '" data-value="' + o.value + '">' + o.text + '</div>';
           }).join('');
-
           if (filtered.length > displayLimit) {
             html += '<div class="search-select-empty" style="font-size:0.75rem; border-top:1px solid var(--border)">... และอีก ' + (filtered.length - displayLimit) + ' รายการ (โปรดพิมพ์เพื่อกรองเพิ่มเติม)</div>';
           }
           dropdown.innerHTML = html;
         }
-
         dropdown.querySelectorAll('.search-select-item').forEach(function (item) {
           item.onclick = function (e) {
             e.stopPropagation();
@@ -605,7 +564,6 @@
           };
         });
       }
-
       input.onfocus = function () {
         if (!dropdown.classList.contains('active')) {
           // If current value is placeholder-ish, clear it to show placeholder
@@ -614,7 +572,6 @@
           dropdown.classList.add('active');
         }
       };
-
       input.onclick = function (e) {
         e.stopPropagation();
         if (dropdown.classList.contains('active')) {
@@ -626,7 +583,6 @@
           dropdown.classList.add('active');
         }
       };
-
       function restoreValue() {
         if (select.selectedIndex > 0) {
           input.value = select.options[select.selectedIndex].text;
@@ -634,7 +590,6 @@
           input.value = '';
         }
       }
-
       input.oninput = function () {
         var val = this.value;
         if (_ssDebounceTimer) clearTimeout(_ssDebounceTimer);
@@ -643,7 +598,6 @@
           dropdown.classList.add('active');
         }, 250); // 250ms Debounce
       };
-
       document.addEventListener('click', function (e) {
         if (!wrapper.contains(e.target)) {
           if (dropdown.classList.contains('active')) {
@@ -653,7 +607,6 @@
         }
       }, true);
     }
-
     window.addEventListener('scroll', function () {
       var btn = document.getElementById('backToTopBtn');
       if (btn) {
@@ -666,7 +619,6 @@
         }
       }
     });
-
     function openPasswordModal() {
       document.getElementById('oldPwd').value = '';
       document.getElementById('newPwd').value = '';
@@ -677,7 +629,6 @@
       var oldP = document.getElementById('oldPwd').value;
       var newP = document.getElementById('newPwd').value;
       var confP = document.getElementById('confirmNewPwd').value;
-
       if (!oldP || !newP) {
         showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'error');
         return;
@@ -690,12 +641,10 @@
         showToast('รหัสผ่านต้องมีความยาวอย่างน้อย 4 ตัวอักษร', 'error');
         return;
       }
-
       var btn = document.getElementById('savePwdBtn');
       var oldHtml = btn.innerHTML;
       btn.disabled = true;
       btn.innerHTML = '<div class="spinner"></div> กำลังบันทึก...';
-
       API.changePassword(oldP, newP).then(function (res) {
         if (res.success) {
           showToast('เปลี่ยนรหัสผ่านเรียบร้อยแล้ว', 'success');
@@ -733,7 +682,6 @@
       </div>
     </div>
   </div>
-
 </body>
 
 </html>

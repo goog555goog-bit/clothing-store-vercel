@@ -1164,7 +1164,7 @@ function loadMyOrders(forceRefresh, btn) {
         + '<p style="font-size:0.8rem;margin-top:0.5rem;color:var(--text3)">' + err + '</p>'
         + '</div>';
     }
-  }).finally(function() {
+  }).finally(function () {
     if (icon) icon.classList.remove('spin-anim');
   });
 }
@@ -1747,7 +1747,7 @@ function confirmCheckout() {
     .catch(function (err) {
       console.error('Checkout Error:', err);
       showToast('เกิดข้อผิดพลาดในการส่งคำขอ: ' + err, 'error');
-      
+
       // [Fix Logic-1] Auto-refresh storefront and reset cart if stock ran out during checkout
       var errStr = String(err).toLowerCase();
       if (errStr.indexOf('สต๊อก') !== -1 || errStr.indexOf('พัสดุในคลัง') !== -1 || errStr.indexOf('ไม่พอ') !== -1 || errStr.indexOf('stock') !== -1) {
@@ -2128,8 +2128,8 @@ function saveProfileEmail() {
     showToast('รูปแบบอีเมลไม่ถูกต้อง', 'warning');
     return;
   }
-  
-  API.updateProfileEmail(email).then(function(res) {
+
+  API.updateProfileEmail(email).then(function (res) {
     if (res.success) {
       showToast('บันทึกอีเมลเรียบร้อย', 'success');
       currentUser.email = email;
@@ -2138,7 +2138,7 @@ function saveProfileEmail() {
     } else {
       showToast(res.message, 'error');
     }
-  }).catch(function(err) {
+  }).catch(function (err) {
     showToast('เกิดข้อผิดพลาด: ' + err, 'error');
   });
 }
