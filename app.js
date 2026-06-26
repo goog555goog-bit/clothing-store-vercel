@@ -69,6 +69,7 @@ function hasPermission(key, value) {
 var allProducts = [];
 var allCategories = [];
 var allBranches = [];
+var allEmployees = [];
 var myOrdersCache = null;
 var currentCategory = 'all';
 var currentView = sessionStorage.getItem('currentView') || 'store';  // store | orders | substock
@@ -446,6 +447,7 @@ function loadStorefrontData() {
     }
     console.error('Storefront fetch error:', err);
   });
+  loadEmployees();
 }
 
 // Global state for suggestion index and debounce
@@ -1372,6 +1374,41 @@ function submitReceipt(btn) {
 
 // ─── SUB-STOCK LOGIC ──────────────────────────────────────
 
+function loadEmployees() {
+  API.getEmployees().then(function (res) {
+    if (res.success) allEmployees = res.data || [];
+  }).catch(function (err) { console.error('Load Employees Error:', err); });
+}
+
+function handleEmployeeSearch(val) {
+  var dropdown = document.getElementById('empSuggestions');
+  var q = (val || '').toLowerCase().trim();
+  if (q.length < 2) { dropdown.classList.remove('active'); return; }
+
+  var myEmpId = currentUser ? String(currentUser.employeeId).toLowerCase() : '';
+
+  var matches = allEmployees.filter(function (e) {
+    var empIdStr = String(e.employeeId).toLowerCase();
+    if (empIdStr === myEmpId) return false;
+    return empIdStr.indexOf(q) !== -1 || (e.name || '').toLowerCase().indexOf(q) !== -1;
+  }).slice(0, 5);
+
+  if (matches.length === 0) {
+    dropdown.innerHTML = '<div class="suggestion-item"><span style="color:var(--text3)">ไม่พบพนักงาน...</span></div>';
+  } else {
+    dropdown.innerHTML = matches.map(function (e) {
+      return '<div class="suggestion-item" onclick="selectEmployee(\'' + e.employeeId + '\', \'' + e.name.replace(/'/g, "\\'") + '\')">' +
+        '<span>' + e.name + '</span> <span class="sku-pill">' + e.employeeId + '</span></div>';
+    }).join('');
+  }
+  dropdown.classList.add('active');
+}
+
+function selectEmployee(id, name) {
+  document.getElementById('actionModalInput').value = id;
+  document.getElementById('empSuggestions').classList.remove('active');
+}
+
 var subStockCache = null;
 function loadSubStock() {
   var grid = document.getElementById('subStockGrid');
@@ -1599,6 +1636,10 @@ function toggleDrawer(id) {
 function closeModal(id) {
   var el = document.getElementById(id);
   if (el) el.classList.remove('open');
+  if (id === 'actionModal') {
+    var empSug = document.getElementById('empSuggestions');
+    if (empSug) empSug.classList.remove('active');
+  }
 }
 
 function showToast(msg, type) {

@@ -372,7 +372,10 @@
 
         <div id="actionModalInputWrap" class="form-group hidden">
           <label class="form-label" id="actionModalInputLabel">ใส่ข้อมูล</label>
-          <input type="text" id="actionModalInput" class="form-input" autocomplete="off">
+          <div style="position:relative">
+            <input type="text" id="actionModalInput" class="form-input" autocomplete="off" oninput="handleEmployeeSearch(this.value)">
+            <div id="empSuggestions" class="search-suggestions-dropdown" style="top:100%; width:100%"></div>
+          </div>
         </div>
 
         <div id="actionModalBranchWrap" class="form-group hidden" style="position:relative;">
