@@ -298,6 +298,7 @@ var API = (function () {
       return this._call('returnToMainStock', data, false, ['getSubStock', 'getProducts']);
     },
 
+    debugUser: function () { return this._call('debugUser', {}, false); },
     createRequest: function (data) {
       // data: { items, teamId, ... }
       return this._call('createRequest', data, false, ['getMyRequests', 'getAllOrders', 'getDashboardStats', 'getAdvancedDashboardData']);
