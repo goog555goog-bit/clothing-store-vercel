@@ -2144,68 +2144,6 @@
       });
     }
 
-    function initTrendsChart() {
-      var canvas = document.getElementById('trendsChart');
-      if (!canvas || typeof Chart === 'undefined') return;
-
-      API.getMonthlyTrends().then(function (res) {
-        if (!res.success || !res.labels || !res.data) return;
-        renderTrendsChart(res.labels, res.data, 'trendsChart');
-      }).catch(function (err) {
-        console.error('Trends Chart Error:', err);
-      });
-    }
-
-    var trendsInstances = {};
-    function renderTrendsChart(labels, data, canvasId) {
-      var canvas = document.getElementById(canvasId);
-      if (!canvas || typeof Chart === 'undefined') return;
-      if (trendsInstances[canvasId]) trendsInstances[canvasId].destroy();
-
-      trendsInstances[canvasId] = new Chart(canvas.getContext('2d'), {
-        type: 'line',
-        data: {
-          labels: labels,
-          datasets: [{
-            label: hasPermission('view_prices') ? 'ยอดการเบิก (บาท)' : 'ยอดการเบิก (🔒)',
-            data: data.map(function (v) { return hasPermission('view_prices') ? v : 0; }),
-            borderColor: '#8b5cf6',
-            backgroundColor: 'rgba(139, 92, 246, 0.1)',
-            fill: true,
-            tension: 0.4,
-            borderWidth: 3,
-            pointRadius: 4,
-            pointBackgroundColor: '#8b5cf6',
-            pointBorderColor: '#fff',
-            pointBorderWidth: 2
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10 } } },
-            y: {
-              beginAtZero: true,
-              grid: { color: 'rgba(255, 255, 255, 0.05)', drawBorder: false },
-              ticks: { color: '#94a3b8', font: { size: 10 }, callback: function (v) { return '฿' + v.toLocaleString(); } }
-            }
-          },
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              backgroundColor: '#1e293b',
-              titleColor: '#fff',
-              bodyColor: '#fff',
-              borderColor: 'rgba(255,255,255,0.1)',
-              borderWidth: 1,
-              padding: 10,
-              displayColors: false
-            }
-          }
-        }
-      });
-    }
 
     function statCard(iconName, label, value, color) {
       var colorStyle = color ? 'style="color:var(--' + color + ')"' : '';
