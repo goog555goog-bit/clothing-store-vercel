@@ -3763,18 +3763,69 @@
 
       API.getSubStock({ employeeId: isTeam ? null : targetId, teamId: isTeam ? targetId : null }).then(function (res) {
         var items = res.data || [];
-        if (items.length === 0) {
-          body.innerHTML = '<div class="empty-state"><i>📦</i><p>ไม่พบพัสดุในคลังย่อยของ ' + title + '</p></div>';
-          return;
-        }
-        body.innerHTML = '<div class="flex justify-between items-center mb-4"><h4>📦 คลังย่อย: ' + title + '</h4>' +
-          '<button class="btn btn-accent btn-sm" onclick="openScannerForSubStock(\'' + targetId + '\', \'' + (isTeam ? 'team' : 'personal') + '\')"><i data-lucide="scan"></i> สแกนใช้งาน</button></div>' +
-          '<div class="table-wrap"><table><thead><tr><th>สินค้า</th><th>ไซส์</th><th>จำนวน</th></tr></thead><tbody>' +
-          items.map(function (i) {
-            return '<tr><td>' + (i.productName || i.productId) + '</td><td>' + (i.size || '-') + '</td><td style="font-weight:700">' + i.quantity + '</td></tr>';
-          }).join('') + '</tbody></table></div>';
-        refreshIcons();
+        
+        var histPromise = !isTeam ? API.getTransferHistory({ employeeId: targetId }) : Promise.resolve({success:true, data:[]});
+        
+        histPromise.then(function(histRes) {
+          var html = '<div class="flex justify-between items-center mb-4" style="gap:0.5rem; flex-wrap:wrap"><h4>📦 คลังย่อย: ' + title + '</h4>' +
+            '<div style="display:flex; gap:0.5rem">' +
+            '<button class="btn btn-outline btn-sm" onclick="exportAdminSubStockExcel(\'' + title + '\')"><i data-lucide="download"></i> Export Excel</button>' +
+            '<button class="btn btn-accent btn-sm" onclick="openScannerForSubStock(\'' + targetId + '\', \'' + (isTeam ? 'team' : 'personal') + '\')"><i data-lucide="scan"></i> สแกนใช้งาน</button>' +
+            '</div></div>';
+
+          window._tempSubStockExportData = items;
+
+          if (items.length === 0) {
+            html += '<div class="empty-state" style="margin-bottom:1.5rem"><i>📦</i><p>ไม่พบพัสดุในคลังย่อย</p></div>';
+          } else {
+            html += '<div class="table-wrap mb-4" style="margin-bottom:1.5rem"><table><thead><tr><th>สินค้า</th><th>ไซส์</th><th>จำนวน</th></tr></thead><tbody>' +
+              items.map(function (i) {
+                return '<tr><td>' + (i.productName || i.productId) + '</td><td>' + (i.size || '-') + '</td><td style="font-weight:700">' + i.quantity + '</td></tr>';
+              }).join('') + '</tbody></table></div>';
+          }
+
+          if (!isTeam) {
+            var hist = histRes.data || [];
+            html += '<h4 style="margin-bottom:0.5rem">🔄 ประวัติการโอน</h4>';
+            if (hist.length === 0) {
+               html += '<div class="empty-state" style="padding:1rem; border:1px dashed var(--border)">ไม่มีประวัติการโอน</div>';
+            } else {
+               html += '<div class="table-wrap"><table><thead><tr><th>วันที่</th><th>รายการ</th><th>จำนวน</th><th>โอน/รับจาก</th></tr></thead><tbody>' +
+                 hist.map(function(h) {
+                   var isOut = h.quantity < 0;
+                   return '<tr><td style="font-size:0.8rem">' + (h.date||'-') + '</td><td>' + (h.productName||h.productId) + ' <span class="badge" style="font-size:0.7rem">' + (h.action||'') + '</span></td><td style="' + (isOut?'color:var(--danger)':'color:var(--success)') + ';font-weight:700">' + (isOut?'':'+') + h.quantity + '</td><td>' + (h.relatedUser||'-') + '</td></tr>';
+                 }).join('') + '</tbody></table></div>';
+            }
+          }
+          
+          body.innerHTML = html;
+          refreshIcons();
+        });
+      }).catch(function(err) {
+        body.innerHTML = '<div class="empty-state"><p style="color:var(--danger)">เกิดข้อผิดพลาด: ' + err + '</p></div>';
       });
+    }
+
+    function exportAdminSubStockExcel(title) {
+      var items = window._tempSubStockExportData || [];
+      if (items.length === 0) {
+        showToast('ไม่มีข้อมูล', 'warning');
+        return;
+      }
+      var ws_data = [["รหัสสินค้า", "ชื่อสินค้า", "ไซส์", "จำนวน", "อัปเดตล่าสุด"]];
+      items.forEach(function(i) {
+        ws_data.push([
+          i.productId || '',
+          i.productName || i.productId || '',
+          i.size || '',
+          i.quantity || 0,
+          i.lastUpdate || ''
+        ]);
+      });
+      var ws = XLSX.utils.aoa_to_sheet(ws_data);
+      var wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "SubStock");
+      XLSX.writeFile(wb, "SubStock_" + title + ".xlsx");
     }
 
 

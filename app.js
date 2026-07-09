@@ -1436,6 +1436,7 @@ function loadSubStock() {
 
   API.getSubStock().then(function (res) {
     subStockCache = res.data;
+    renderSubStockSummary(res.data);
     renderSubStock(res.data, res.teamName);
   }).catch(function (err) {
     showToast('โหลดสต๊อกย่อยไม่สำเร็จ: ' + err, 'error');
@@ -1444,14 +1445,38 @@ function loadSubStock() {
   loadUsageHistory();
 }
 
+var _currentLogFilter = 'all';
+
+function setLogFilter(filter) {
+  _currentLogFilter = filter;
+  var btnAll = document.getElementById('logFilterAll');
+  var btnUse = document.getElementById('logFilterUse');
+  var btnTransfer = document.getElementById('logFilterTransfer');
+  if(btnAll) btnAll.className = filter === 'all' ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-outline';
+  if(btnUse) btnUse.className = filter === 'use' ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-outline';
+  if(btnTransfer) btnTransfer.className = filter === 'transfer' ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-outline';
+  loadUsageHistory();
+}
+
 function loadUsageHistory() {
   var body = document.getElementById('usageHistoryBody');
   if (!body) return;
+  
+  var limit = _currentLogFilter === 'all' ? 20 : 50;
+  var apiCall = _currentLogFilter === 'transfer' 
+    ? API.getTransferHistory({ limit: limit })
+    : API.getInventoryLogs({ userFilter: currentUser.employeeId, limit: limit });
 
-  API.getInventoryLogs({ userFilter: currentUser.employeeId, limit: 20 }).then(function (res) {
+  apiCall.then(function (res) {
     var logs = res.data || [];
-    if (logs.length === 0) {
-      body.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:2rem; color:var(--text3)">ยังไม่มีประวัติการใช้งาน</td></tr>';
+    
+    // Client-side filter for 'use'
+    if (_currentLogFilter === 'use') {
+      logs = logs.filter(function(l) { return (l.action || '').indexOf('ใช้งาน') !== -1; });
+    }
+
+    if (!res.success || logs.length === 0) {
+      body.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:2rem; color:var(--text3)">ยังไม่มีประวัติทำรายการ</td></tr>';
       return;
     }
     body.innerHTML = logs.map(function (l) {
@@ -1464,11 +1489,16 @@ function loadUsageHistory() {
 
       // ดึงชื่อผู้ทำรายการ
       var userName = l.userName || l.user || 'SYSTEM';
+      
+      var relatedText = '';
+      if (l.relatedUser && (l.action || '').indexOf('โอน') !== -1) {
+        relatedText = '<div style="font-size:0.75rem; color:var(--text2); margin-top:2px;">' + (Number(l.quantity) < 0 ? 'โอนให้: ' : 'รับจาก: ') + l.relatedUser + '</div>';
+      }
 
       return '<tr>'
         + '<td><div style="font-weight:500">' + dateStr + '</div><div style="font-size:0.7rem; color:var(--text3)">' + timeStr + '</div></td>'
         + '<td>' + pId + '</td>'
-        + '<td style="color:var(--primary); font-weight:500">' + displayName + '</td>'
+        + '<td style="color:var(--primary); font-weight:500">' + displayName + ' <span class="badge" style="font-size:0.6rem">' + (l.action||'') + '</span>' + relatedText + '</td>'
         + '<td style="font-weight:600; color:' + (Number(l.quantity) < 0 ? 'var(--danger)' : 'var(--accent)') + '">' + (Number(l.quantity) > 0 ? '+' : '') + l.quantity + '</td>'
         + '<td>' + userName + '</td>'
         + '<td>' + (l.branchName || '-') + '</td>'
@@ -1514,19 +1544,124 @@ function renderSubStock(data, teamName) {
     var pNameSafe = String(item.productName || 'ไม่ทราบชื่อ').replace(/'/g, "\\'");
 
     return '<div class="product-card">'
+      + '<div onclick="openProductDetail(\'' + item.productId + '\')" style="cursor:pointer;">'
       + imgHtml
       + '<div class="product-info">'
       + '<div class="product-name">' + (item.productName || 'ไม่ทราบชื่อ') + (item.size ? ' <span class="badge" style="font-size:0.7rem; padding:2px 6px">' + item.size + '</span>' : '') + '</div>'
       + '<div class="product-stock">คงเหลือ: <span id="ss-qty-' + item.productId + '-' + (item.size || 'default') + '">' + item.quantity + '</span></div>'
-      + '<div style="margin-top:1rem; display:flex; gap:0.5rem; flex-wrap:wrap">'
+      + '</div>'
+      + '</div>'
+      + '<div class="product-info" style="padding-top:0;">'
+      + '<div style="display:flex; gap:0.5rem; flex-wrap:wrap">'
       + '<button class="btn btn-primary btn-sm flex-1" onclick="openActionModal(\'use\', \'' + item.productId + '\', \'' + pNameSafe + '\', ' + item.quantity + ', \'' + (item.size || '') + '\')"><i data-lucide="sparkles" style="width:14px;height:14px"></i> เบิกใช้งาน</button>'
       + '<button class="btn btn-outline btn-sm" title="โอนให้เพื่อน" onclick="openActionModal(\'transfer\', \'' + item.productId + '\', \'' + pNameSafe + '\', ' + item.quantity + ', \'' + (item.size || '') + '\')"><i data-lucide="repeat" style="width:14px;height:14px"></i> โอน</button>'
       + '<button class="btn btn-ghost btn-sm" title="คืนคลังหลัก" onclick="openActionModal(\'return\', \'' + item.productId + '\', \'' + pNameSafe + '\', ' + item.quantity + ', \'' + (item.size || '') + '\')"><i data-lucide="archive" style="width:14px;height:14px"></i> คืน</button>'
       + '</div>'
       + '</div>'
+      + '</div>'
       + '</div>';
   }).join('');
   refreshIcons();
+}
+
+function exportSubStockCSV() {
+  if (!subStockCache || subStockCache.length === 0) {
+    showToast('ไม่มีข้อมูลสำหรับ Export', 'warning');
+    return;
+  }
+  
+  var csvContent = "รหัสสินค้า,ชื่อสินค้า,ไซส์,ราคาต่อชิ้น,จำนวนคงเหลือ,มูลค่ารวม,วันที่อัปเดตล่าสุด\n";
+  subStockCache.forEach(function(item) {
+    var prod = allProducts.filter(function(p) { return String(p.productId) === String(item.productId); })[0];
+    var price = prod ? Number(prod.price) : 0;
+    var totalValue = price * Number(item.quantity);
+    var row = [
+      '"' + (item.productId || '') + '"',
+      '"' + (item.productName || '') + '"',
+      '"' + (item.size || '') + '"',
+      price,
+      item.quantity,
+      totalValue,
+      '"' + (item.lastUpdate || '') + '"'
+    ];
+    csvContent += row.join(',') + "\n";
+  });
+  
+  var blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvContent], { type: "text/csv;charset=utf-8;" });
+  var link = document.createElement("a");
+  var url = URL.createObjectURL(blob);
+  link.setAttribute("href", url);
+  link.setAttribute("download", "sub_stock_export.csv");
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+function exportSubStockExcel() {
+  if (!subStockCache || subStockCache.length === 0) {
+    showToast('ไม่มีข้อมูลสำหรับ Export', 'warning');
+    return;
+  }
+  if (typeof XLSX === 'undefined') {
+    showToast('กำลังโหลดไลบรารี กรุณารอสักครู่', 'warning');
+    return;
+  }
+  
+  var ws_data = [["รหัสสินค้า", "ชื่อสินค้า", "ไซส์", "ราคาต่อชิ้น", "จำนวนคงเหลือ", "มูลค่ารวม", "วันที่อัปเดตล่าสุด"]];
+  subStockCache.forEach(function(item) {
+    var prod = allProducts.filter(function(p) { return String(p.productId) === String(item.productId); })[0];
+    var price = prod ? Number(prod.price) : 0;
+    var totalValue = price * Number(item.quantity);
+    
+    ws_data.push([
+      item.productId || '',
+      item.productName || '',
+      item.size || '',
+      price,
+      item.quantity || 0,
+      totalValue,
+      item.lastUpdate || ''
+    ]);
+  });
+  
+  var ws = XLSX.utils.aoa_to_sheet(ws_data);
+  var wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "SubStock");
+  var fileName = "SubStock_" + (currentUser ? currentUser.employeeId : "Export") + ".xlsx";
+  XLSX.writeFile(wb, fileName);
+}
+
+function renderSubStockSummary(data) {
+  var summaryDiv = document.getElementById('subStockSummary');
+  if (!summaryDiv) return;
+  
+  if (!data || data.length === 0) {
+    summaryDiv.innerHTML = '';
+    return;
+  }
+
+  var totalItems = 0;
+  var totalValue = 0;
+  
+  data.forEach(function(item) {
+    totalItems += Number(item.quantity) || 0;
+    var prod = allProducts.filter(function(p) { return String(p.productId) === String(item.productId); })[0];
+    var price = prod ? Number(prod.price) : 0;
+    totalValue += price * (Number(item.quantity) || 0);
+  });
+
+  var formatter = new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' });
+  
+  summaryDiv.innerHTML = 
+    '<div class="card" style="flex:1; min-width:140px; padding:1rem; border-left:4px solid var(--primary);">' +
+      '<div style="font-size:0.8rem; color:var(--text2)">จำนวนพัสดุรวม</div>' +
+      '<div style="font-size:1.5rem; font-weight:700;">' + totalItems.toLocaleString() + ' <span style="font-size:0.9rem; font-weight:400">ชิ้น</span></div>' +
+    '</div>' +
+    '<div class="card" style="flex:1; min-width:140px; padding:1rem; border-left:4px solid var(--success);">' +
+      '<div style="font-size:0.8rem; color:var(--text2)">มูลค่ารวม</div>' +
+      '<div style="font-size:1.5rem; font-weight:700; color:var(--success)">' + formatter.format(totalValue) + '</div>' +
+    '</div>';
 }
 
 var _activeAction = null;

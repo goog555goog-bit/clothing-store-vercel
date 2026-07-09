@@ -1,10 +1,10 @@
 
-/* ═══════════════════════════════════════════════════════
-   EMETIX PREMIUM STORE — Master Stylesheet
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   EMETIX PREMIUM STORE â€” Master Stylesheet
    Midnight Gold Design System
-═══════════════════════════════════════════════════════ */
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
-/* ─── CSS Variables ────────────────────────────────── */
+/* â”€â”€â”€ CSS Variables â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 :root {
   --primary:       #fbbf24;
   --primary-light: #fcd34d;
@@ -47,7 +47,7 @@
   --surface: #0a0a0f;
   --glass: rgba(0,0,0,0.8);
 }
-/* [เพิ่ม UX] Smooth transition เมื่อสลับ Dark Mode ป้องกันการกระพริบ */
+/* [à¹€à¸žà¸´à¹ˆà¸¡ UX] Smooth transition à¹€à¸¡à¸·à¹ˆà¸­à¸ªà¸¥à¸±à¸š Dark Mode à¸›à¹‰à¸­à¸‡à¸à¸±à¸™à¸à¸²à¸£à¸à¸£à¸°à¸žà¸£à¸´à¸š */
 body, .app-header, .card, .modal, .cart-drawer, .mobile-nav {
   transition: background-color 0.4s ease, border-color 0.3s ease;
 }
@@ -63,7 +63,7 @@ body, .app-header, .card, .modal, .cart-drawer, .mobile-nav {
 }
 
 
-/* ─── Reset & Base ─────────────────────────────────── */
+/* â”€â”€â”€ Reset & Base â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 html { scroll-behavior: smooth; }
 body {
@@ -78,7 +78,7 @@ body {
 }
 @keyframes bodyFadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-/* ─── Layout Helpers ───────────────────────────────── */
+/* â”€â”€â”€ Layout Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .container { width: 100%; max-width: var(--container); margin: 0 auto; padding: 0 1.5rem; }
 @media (max-width: 640px) { .container { padding: 0 1rem; } }
 
@@ -105,16 +105,16 @@ h1,h2,h3,h4 { letter-spacing: -0.025em; font-weight: 700; }
 @media (max-width: 768px)  { .grid-3 { grid-template-columns: 1fr; } }
 @media (max-width: 640px)  { .grid-2, .grid-4 { grid-template-columns: 1fr; } }
 
-/* ─── Forms ────────────────────────────────────────── */
+/* â”€â”€â”€ Forms â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .form-group { margin-bottom: 1.25rem; }
 .form-label { display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--text2); }
 .form-input, .input {
   width: 100%; padding: 0.75rem 1rem; border-radius: var(--radius-sm);
   border: 1px solid var(--border); background: var(--surface);
   color: var(--text); font-size: 0.95rem; transition: all 0.2s; font-family: inherit;
-  /* [แก้ไข UX] ลบ background-image ออกจาก input ทั่วไป — ลูกศรควรแสดงเฉพาะ dropdown เท่านั้น */
+  /* [à¹à¸à¹‰à¹„à¸‚ UX] à¸¥à¸š background-image à¸­à¸­à¸à¸ˆà¸²à¸ input à¸—à¸±à¹ˆà¸§à¹„à¸› â€” à¸¥à¸¹à¸à¸¨à¸£à¸„à¸§à¸£à¹à¸ªà¸”à¸‡à¹€à¸‰à¸žà¸²à¸° dropdown à¹€à¸—à¹ˆà¸²à¸™à¸±à¹‰à¸™ */
 }
-/* [แก้ไข UX] ลูกศร Dropdown แสดงเฉพาะ <select> เท่านั้น ป้องกันความสับสนบน text/password input */
+/* [à¹à¸à¹‰à¹„à¸‚ UX] à¸¥à¸¹à¸à¸¨à¸£ Dropdown à¹à¸ªà¸”à¸‡à¹€à¸‰à¸žà¸²à¸° <select> à¹€à¸—à¹ˆà¸²à¸™à¸±à¹‰à¸™ à¸›à¹‰à¸­à¸‡à¸à¸±à¸™à¸„à¸§à¸²à¸¡à¸ªà¸±à¸šà¸ªà¸™à¸šà¸™ text/password input */
 select.form-input, select.input {
   appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23fbbf24' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
@@ -138,7 +138,7 @@ button:focus:not(:focus-visible) {
   outline: none;
 }
 
-/* ─── Tables ───────────────────────────────────────── */
+/* â”€â”€â”€ Tables â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .table-wrap {
   width: 100%;
   overflow-x: auto;
@@ -155,7 +155,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 .table-compact td, .table-compact th { padding: 0.6rem 0.75rem; font-size: 0.85rem; }
 .table-compact table { min-width: 400px; }
 
-/* ─── Buttons ──────────────────────────────────────── */
+/* â”€â”€â”€ Buttons â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .btn {
   position: relative;
   display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
@@ -203,7 +203,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 .btn-sm  { padding: 0.45rem 1rem;   font-size: 0.82rem; height: 38px; border-radius: 8px; letter-spacing: 0; }
 .btn-lg  { padding: 0.9rem 2rem;    font-size: 1.1rem;  height: 56px; border-radius: var(--radius-sm); border-width: 2px; }
 
-/* ─── Choice Chips & Filter Chips ──────────────────── */
+/* â”€â”€â”€ Choice Chips & Filter Chips â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .choice-chips {
   display: flex;
   flex-wrap: wrap;
@@ -272,7 +272,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   box-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
-/* ─── Cards ────────────────────────────────────────── */
+/* â”€â”€â”€ Cards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .card {
   background: var(--surface); border-radius: var(--radius);
   padding: 1.5rem; border: 1px solid var(--border); box-shadow: var(--shadow-sm);
@@ -282,7 +282,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   -webkit-backdrop-filter: blur(12px); border: 1px solid var(--glass-border);
 }
 
-/* ─── Header ───────────────────────────────────────── */
+/* â”€â”€â”€ Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .app-header {
   position: sticky; top: 0; z-index: 1000;
   background: rgba(8,8,20,0.97);
@@ -301,7 +301,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 @media (min-width: 1601px) {
   .search-wrapper { justify-self: center; width: 100%; position: relative; }
 }
-/* ≤1600px: search bar drops to second row (to accommodate many buttons) */
+/* â‰¤1600px: search bar drops to second row (to accommodate many buttons) */
 @media (max-width: 1600px) {
   .app-header { padding-bottom: 0.625rem; }
   .app-header .header-container { display: flex; flex-wrap: wrap; row-gap: 0.5rem; justify-content: space-between; }
@@ -311,7 +311,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   .app-header .header-container { padding: 0 0.75rem; gap: 0.25rem; }
 }
 
-/* ─── Logo ─────────────────────────────────────────── */
+/* â”€â”€â”€ Logo â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .logo { display: flex; align-items: center; gap: 0.6rem; cursor: pointer; flex-shrink: 0; }
 .logo-icon {
   width: 40px; height: 40px;
@@ -322,7 +322,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 }
 @media (max-width: 480px) { .logo span { font-size: 1.1rem !important; } }
 
-/* ─── Nav Actions ──────────────────────────────────── */
+/* â”€â”€â”€ Nav Actions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .nav-actions {
   display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;
   justify-self: end; overflow: visible;
@@ -352,7 +352,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   /* Disable shine effect for buttons in this group to prevent overflow artifacts */
   .nav-actions .btn::after { display: none !important; }
 
-  /* Premium Tooltip — Positioned BELOW the button as requested */
+  /* Premium Tooltip â€” Positioned BELOW the button as requested */
   .nav-actions button[aria-label]:hover::before {
     content: attr(aria-label);
     display: block !important;
@@ -399,7 +399,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ─── Search Bar ───────────────────────────────────── */
+/* â”€â”€â”€ Search Bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .search-wrapper {
   display: flex; align-items: center;
   background: rgba(10,10,22,0.5);
@@ -415,7 +415,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   box-shadow: 0 0 22px rgba(251,191,36,0.28);
   background: rgba(10,10,22,0.75);
 }
-/* Tablet → full-width second row */
+/* Tablet â†’ full-width second row */
 @media (max-width: 1600px) {
   .search-wrapper {
     order: 3;
@@ -474,7 +474,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 .search-btn svg, .search-btn i { width: 16px; height: 16px; }
 .search-btn:hover { background: var(--primary-light); transform: scale(1.04); box-shadow: 0 0 16px rgba(251,191,36,0.4); }
 
-/* ─── Search Suggestions Dropdown ─────────────────── */
+/* â”€â”€â”€ Search Suggestions Dropdown â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .search-suggestions-dropdown {
   position: absolute; top: calc(100% + 10px); left: 0; width: 100%; min-width: 300px;
   background: rgba(10,10,28,0.98); border: 1px solid var(--primary); border-radius: 16px;
@@ -540,7 +540,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   padding: 2px 7px; border-radius: 4px; font-family: monospace; align-self: flex-start;
 }
 
-/* ─── Category Filters ─────────────────────────────── */
+/* â”€â”€â”€ Category Filters â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .cat-filter {
   display: flex; gap: 0.6rem; overflow-x: auto; padding: 0.5rem 0;
   scrollbar-width: none;
@@ -570,7 +570,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   transform: translateY(-2px);
 }
 
-/* ─── Product Grid ─────────────────────────────────── */
+/* â”€â”€â”€ Product Grid â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .product-grid {
   display: grid; grid-template-columns: repeat(1,1fr); gap: 1.25rem;
 }
@@ -578,7 +578,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 @media (min-width: 1024px) { .product-grid { grid-template-columns: repeat(3,1fr); } }
 @media (min-width: 1280px) { .product-grid { grid-template-columns: repeat(4,1fr); } }
 
-/* ─── Product Card ─────────────────────────────────── */
+/* â”€â”€â”€ Product Card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .product-card {
   background: var(--surface); border-radius: var(--radius); overflow: hidden;
   border: 1px solid var(--border);
@@ -631,7 +631,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 }
 .product-price { font-size: 1.2rem; font-weight: 900; color: var(--primary); text-shadow: 0 0 16px rgba(251,191,36,0.25); letter-spacing: -0.5px; margin-top: auto; }
 
-/* ─── Admin Stats ──────────────────────────────────── */
+/* â”€â”€â”€ Admin Stats â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .stat-grid { display: grid; grid-template-columns: repeat(1,1fr); gap: 1rem; margin-bottom: 2rem; }
 @media (min-width: 640px)  { .stat-grid { grid-template-columns: repeat(2,1fr); } }
 @media (min-width: 1024px) { .stat-grid { grid-template-columns: repeat(4,1fr); } }
@@ -662,7 +662,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 .stat-value { font-size: 2.25rem; font-weight: 900; color: var(--text); letter-spacing: -1px; }
 @media (max-width: 480px) { .stat-value { font-size: 1.75rem; } }
 
-/* ─── Tabs ─────────────────────────────────────────── */
+/* â”€â”€â”€ Tabs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .tabs {
   display: flex; gap: 1rem; padding: 0.25rem;
   overflow-x: auto;
@@ -684,7 +684,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 .tab:hover { color: var(--primary); background: rgba(251,191,36,0.04); border-radius: 8px 8px 0 0; }
 .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
 
-/* ─── Cart Drawer ──────────────────────────────────── */
+/* â”€â”€â”€ Cart Drawer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .drawer-overlay {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
   background: rgba(5,5,5,0.8); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
@@ -717,7 +717,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 @keyframes glow { from { box-shadow: 0 0 8px rgba(251,191,36,0.15); } to { box-shadow: 0 0 24px rgba(251,191,36,0.5); } }
 #checkoutBtn { width: 100%; }
 
-/* ─── Qty Controls ─────────────────────────────────── */
+/* â”€â”€â”€ Qty Controls â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .qty-control, .qty-ctrl { display: flex; align-items: center; gap: 0.5rem; }
 .qty-btn {
   width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--border);
@@ -751,7 +751,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   border-radius: 4px;
 }
 
-/* ─── Badges ───────────────────────────────────────── */
+/* â”€â”€â”€ Badges â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .badge { padding: 0.25rem 0.75rem; border-radius: 99px; font-size: 0.78rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; flex-shrink: 0; }
 .badge-pending  { background: rgba(251,191,36,0.15); color: var(--primary); border: 1px solid rgba(251,191,36,0.3); }
 .badge-approved { background: rgba(16,185,129,0.2); color: #34d399;  border: 1px solid rgba(16,185,129,0.4); }
@@ -759,7 +759,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 .badge-ready    { background: rgba(251,191,36,0.15); color: var(--primary); border: 1px solid rgba(251,191,36,0.3); white-space: nowrap; }
 .badge-rejected { background: rgba(239,68,68,0.2);  color: #f87171;  border: 1px solid rgba(239,68,68,0.4);  }
 
-/* ─── Order Card ───────────────────────────────────── */
+/* â”€â”€â”€ Order Card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .order-card {
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius); padding: 1.2rem 1.35rem;
@@ -768,19 +768,19 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 }
 .order-card:hover { border-color: rgba(251,191,36,0.28); box-shadow: 0 6px 24px rgba(0,0,0,0.25); }
 
-/* ─── View Sections ────────────────────────────────── */
+/* â”€â”€â”€ View Sections â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .view-section { display: none; }
 .view-section.active { display: block; animation: sectionIn 0.35s cubic-bezier(0.23,1,0.32,1) both; }
 #hero-banner.active { display: block; }
 @keyframes sectionIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-/* ─── Hero Banner Extras ───────────────────────────── */
+/* â”€â”€â”€ Hero Banner Extras â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 @media (max-width: 767px) {
   .hero-image-wrap { display: none !important; }
   .hero-content { padding: clamp(1.5rem, 6vw, 4rem) !important; }
 }
 
-/* ─── Mobile Bottom Nav ────────────────────────────── */
+/* â”€â”€â”€ Mobile Bottom Nav â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 @media (min-width: 768px) { .mobile-nav { display: none !important; } }
 .mobile-nav {
   position: fixed; bottom: 0; left: 0; right: 0; height: 60px;
@@ -815,7 +815,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   body { padding-bottom: 60px; }
 }
 
-/* ─── Global Loader ────────────────────────────────── */
+/* â”€â”€â”€ Global Loader â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .global-loader {
   position: fixed; top: 0; left: 0; width: 100%;  height: 100%;
   background: rgba(8, 8, 20, 0.95);
@@ -826,7 +826,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 .spinner { width: 46px; height: 46px; border: 4px solid rgba(251,191,36,0.1); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ─── Toasts ───────────────────────────────────────── */
+/* â”€â”€â”€ Toasts â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .toast-container { position: fixed; bottom: 2rem; right: 2rem; z-index: 9100; display: flex; flex-direction: column; gap: 0.75rem; pointer-events: none; }
 .toast {
   background: var(--surface); color: var(--text); padding: 1rem 1.5rem;
@@ -846,7 +846,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   .toast { width: 100%; max-width: 420px; font-size: 0.9rem; padding: 0.875rem 1.25rem; }
 }
 
-/* ─── Searchable Select (Custom) ─────────────────── */
+/* â”€â”€â”€ Searchable Select (Custom) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .search-select-wrapper {
   position: relative;
   width: 100%;
@@ -961,7 +961,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   font-size: 0.85rem;
 }
 
-/* ─── Skeleton Loaders (Premium Shimmer) ───────────── */
+/* â”€â”€â”€ Skeleton Loaders (Premium Shimmer) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .skeleton {
   background: linear-gradient(105deg, 
     rgba(18,18,30,0.8) 0%,
@@ -1038,7 +1038,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   100% { background-position: -300% 0; } 
 }
 
-/* ─── Onboarding ───────────────────────────────────── */
+/* â”€â”€â”€ Onboarding â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .onboarding-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.7); z-index: 5000; opacity: 0; pointer-events: none; transition: opacity 0.4s; }
 .onboarding-overlay.active { opacity: 1; pointer-events: auto; }
 .onboarding-tooltip { position: fixed; z-index: 5100; width: 300px; background: var(--surface); color: var(--text); padding: 1.5rem; border-radius: var(--radius); box-shadow: var(--shadow-lg); animation: slideUp 0.3s ease-out; }
@@ -1047,10 +1047,10 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 .onboarding-highlight { position: relative; z-index: 5200 !important; box-shadow: 0 0 0 10px rgba(251,191,36,0.25); border-radius: 8px; }
 @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-/* ─── Flying Item Animation ────────────────────────── */
+/* â”€â”€â”€ Flying Item Animation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .flying-item { position: fixed; width: 50px; height: 50px; background-size: cover; background-position: center; border-radius: 50%; z-index: 9999; transition: all 0.8s cubic-bezier(0.175,0.885,0.32,1.275); box-shadow: var(--shadow-lg); border: 2px solid white; }
 
-/* ─── Empty States (Premium) ───────────────────────── */
+/* â”€â”€â”€ Empty States (Premium) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .empty-state {
   padding: 4rem 2rem; text-align: center; color: var(--text3); border-radius: var(--radius);
   background: radial-gradient(ellipse at center, rgba(251,191,36,0.02) 0%, rgba(255,255,255,0.01) 50%, transparent 100%);
@@ -1067,7 +1067,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 .empty-state p { font-size: 1.05rem; font-weight: 600; color: var(--text2); }
 .empty-state small { font-size: 0.85rem; color: var(--text3); max-width: 280px; line-height: 1.5; }
 
-/* ─── Modals ───────────────────────────────────────── */
+/* â”€â”€â”€ Modals â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .modal-overlay {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
   background: rgba(0,0,0,0.87); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
@@ -1111,7 +1111,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 .detail-img { width: 100%; height: 100%; object-fit: contain; background: #000; }
 .product-img-placeholder i, .product-img-placeholder svg { opacity: 0.2; }
 
-/* ─── Signature Pad ────────────────────────────────── */
+/* â”€â”€â”€ Signature Pad â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .signature-pad-wrap { 
   background: white; 
   border: 1px solid var(--border); 
@@ -1129,26 +1129,26 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   touch-action: none; 
 }
 
-/* ─── Section Page Transitions (Admin) ────────────── */
+/* â”€â”€â”€ Section Page Transitions (Admin) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .admin-page { display: none; width: 100%; animation: fadePage 0.4s ease-out; }
 .admin-page.active-page { display: block; }
 @keyframes fadePage { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-/* ─── Button Group ─────────────────────────────────── */
+/* â”€â”€â”€ Button Group â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .btn-group { display: flex; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); background: var(--bg); width: 100%; }
 .btn-group .btn { flex: 1; border-radius: 0; border: none; border-right: 1px solid var(--border); margin: 0; height: 42px; padding: 0 0.5rem; font-size: 0.8rem; background: transparent; }
 .btn-group .btn:last-child { border-right: none; }
 .btn-group .btn.btn-active { background: var(--primary) !important; color: #000 !important; font-weight: 700; }
 
-/* ─── Responsive — Mobile-first global ────────────── */
+/* â”€â”€â”€ Responsive â€” Mobile-first global â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 @media (max-width: 767px) {
   #view-store, #view-orders, #view-substock { padding-bottom: 5.5rem; }
 }
 
-/* ─── Pagination ───────────────────────────────────── */
+/* â”€â”€â”€ Pagination â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .pagination-container { padding-top: 2rem; }
 
-/* ─── Premium Scanner Styles ───────────────────────── */
+/* â”€â”€â”€ Premium Scanner Styles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .scanner-modal {
   max-width: 500px !important;
   background: rgba(10, 10, 20, 0.95) !important;
@@ -1245,7 +1245,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   animation: blink 1s infinite;
 }
 
-/* ─── Premium UX Enhancements ─────────────────────── */
+/* â”€â”€â”€ Premium UX Enhancements â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .mouse-glow-card {
   position: relative;
   overflow: hidden;
@@ -1355,7 +1355,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   to { transform: scaleX(0); }
 }
 
-/* ─── Empty State Illustrations (Upgraded) ──────────── */
+/* â”€â”€â”€ Empty State Illustrations (Upgraded) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .empty-state i, .empty-state svg {
   width: 72px;
   height: 72px;
@@ -1382,7 +1382,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   line-height: 1.5;
 }
 
-/* ─── Orders Filter Buttons ───────────────────── */
+/* â”€â”€â”€ Orders Filter Buttons â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .orders-filter-btn {
   padding: 0.35rem 0.9rem; border-radius: 99px; font-size: 0.8rem;
   font-weight: 600; background: transparent; border: 1px solid var(--border);
@@ -1392,7 +1392,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 .orders-filter-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--glass-gold); }
 .orders-filter-btn.active { background: var(--primary); color: #000; border-color: var(--primary); }
 
-/* ─── Global Table & Scroll UX ─────────────────────── */
+/* â”€â”€â”€ Global Table & Scroll UX â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .table-wrap {
   width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;
   border-radius: var(--radius); border: 1px solid var(--border);
@@ -1418,7 +1418,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   background: rgba(251,191,36,0.03); color: var(--text);
 }
 
-/* ─── CATEGORY PILLS (Horizontal Scroll UX) ───────── */
+/* â”€â”€â”€ CATEGORY PILLS (Horizontal Scroll UX) â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .categories-container {
   display: flex;
   gap: 0.75rem;
@@ -1458,7 +1458,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   box-shadow: 0 4px 15px rgba(251, 191, 36, 0.25);
 }
 
-/* ─── BUTTON MICRO-INTERACTIONS (Haptic Feel) ──────── */
+/* â”€â”€â”€ BUTTON MICRO-INTERACTIONS (Haptic Feel) â”€â”€â”€â”€â”€â”€â”€â”€ */
 button, .btn, .nav-item, .category-pill, .cart-item-btn, .mobile-nav-item {
   transition: transform 0.1s ease, background 0.2s ease, box-shadow 0.2s ease;
 }
@@ -1466,7 +1466,7 @@ button:active, .btn:active, .nav-item:active, .category-pill:active, .cart-item-
   transform: scale(0.95);
 }
 
-/* [เพิ่ม UX] Pulse Animation สำหรับปุ่มที่อยู่ระหว่างโหลด — ช่วยบอกผู้ใช้ว่าระบบยังทำงานอยู่ */
+/* [à¹€à¸žà¸´à¹ˆà¸¡ UX] Pulse Animation à¸ªà¸³à¸«à¸£à¸±à¸šà¸›à¸¸à¹ˆà¸¡à¸—à¸µà¹ˆà¸­à¸¢à¸¹à¹ˆà¸£à¸°à¸«à¸§à¹ˆà¸²à¸‡à¹‚à¸«à¸¥à¸” â€” à¸Šà¹ˆà¸§à¸¢à¸šà¸­à¸à¸œà¸¹à¹‰à¹ƒà¸Šà¹‰à¸§à¹ˆà¸²à¸£à¸°à¸šà¸šà¸¢à¸±à¸‡à¸—à¸³à¸‡à¸²à¸™à¸­à¸¢à¸¹à¹ˆ */
 .btn:disabled .spinner,
 .btn[disabled] .spinner {
   width: 18px; height: 18px;
@@ -1481,7 +1481,7 @@ button:active, .btn:active, .nav-item:active, .category-pill:active, .cart-item-
   50% { opacity: 1; box-shadow: 0 0 0 8px rgba(251,191,36,0); }
 }
 
-/* ─── INVENTORY HEATMAP (Visual Cues) ─────────────── */
+/* â”€â”€â”€ INVENTORY HEATMAP (Visual Cues) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .stock-safe { color: #10b981; }
 .stock-warning { color: #f59e0b; font-weight: 700; }
 .stock-danger { color: #ef4444; font-weight: 800; animation: pulse-slow 2s infinite; }
@@ -1495,7 +1495,7 @@ button:active, .btn:active, .nav-item:active, .category-pill:active, .cart-item-
 tr.row-stock-danger { background: rgba(239, 68, 68, 0.04) !important; }
 tr.row-stock-warning { background: rgba(245, 158, 11, 0.02) !important; }
 
-/* ─── STATUS TIMELINE (Visual Order Track) ────────── */
+/* â”€â”€â”€ STATUS TIMELINE (Visual Order Track) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .status-timeline {
   display: flex;
   justify-content: space-between;
@@ -1550,7 +1550,7 @@ tr.row-stock-warning { background: rgba(245, 158, 11, 0.02) !important; }
   letter-spacing: 0.05em;
 }
 
-/* ─── Forecast & Premium Cards ─────────────────────── */
+/* â”€â”€â”€ Forecast & Premium Cards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .forecast-card {
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
@@ -1578,8 +1578,8 @@ tr.row-stock-warning { background: rgba(245, 158, 11, 0.02) !important; }
   padding: 0.75rem 0.5rem;
 }
 
-/* [แก้ไข UX] ลบ CSS ซ้ำซ้อน: .skeleton และ @keyframes shimmer ถูกรวมไว้ที่บรรทัด ~932 แล้ว */
-/* Skeleton Utilities (ไม่ซ้ำซ้อน — เก็บไว้) */
+/* [à¹à¸à¹‰à¹„à¸‚ UX] à¸¥à¸š CSS à¸‹à¹‰à¸³à¸‹à¹‰à¸­à¸™: .skeleton à¹à¸¥à¸° @keyframes shimmer à¸–à¸¹à¸à¸£à¸§à¸¡à¹„à¸§à¹‰à¸—à¸µà¹ˆà¸šà¸£à¸£à¸—à¸±à¸” ~932 à¹à¸¥à¹‰à¸§ */
+/* Skeleton Utilities (à¹„à¸¡à¹ˆà¸‹à¹‰à¸³à¸‹à¹‰à¸­à¸™ â€” à¹€à¸à¹‡à¸šà¹„à¸§à¹‰) */
 .sk-line { height: 16px; margin-bottom: 8px; width: 100%; border-radius: 4px; }
 .sk-line-short { width: 60%; }
 .sk-avatar { width: 40px; height: 40px; border-radius: 50%; }
@@ -1686,7 +1686,7 @@ tr.row-stock-warning { background: rgba(245, 158, 11, 0.02) !important; }
   }
 }
 
-/* ─── PERMISSIONS GRID ──────────────────────────────── */
+/* â”€â”€â”€ PERMISSIONS GRID â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .permissions-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -1724,10 +1724,55 @@ tr.row-stock-warning { background: rgba(245, 158, 11, 0.02) !important; }
   flex: 1;
 }
 
+}
+
 @media (max-width: 640px) {
   .permissions-grid {
     padding: 0.75rem;
   }
-}. s p i n - a n i m  
-   a n i m a t i o n :   s p i n   1 s   l i n e a r   i n f i n i t e ;    
- 
+}
+
+/* â”€â”€â”€ Responsive Fixes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+
+/* Fix 1: Nav actions icon-only on small screens */
+@media (max-width: 480px) {
+  .nav-actions { gap: 0.15rem; }
+  .nav-actions .btn { padding: 0.35rem; min-width: 36px; justify-content: center; }
+  .nav-actions .btn span:not(.cart-badge) { display: none; }
+}
+
+/* Fix 2: Utility â€” stack flex to column on mobile */
+@media (max-width: 640px) {
+  .flex-col-mobile { flex-direction: column !important; align-items: stretch !important; }
+}
+
+/* Fix 3: Smaller btn-sm on very small screens */
+@media (max-width: 480px) {
+  .btn-sm { font-size: 0.75rem; padding: 0.3rem 0.6rem; }
+}
+
+/* Fix 4: Modal scroll on mobile */
+@media (max-width: 640px) {
+  .modal-content { max-height: 85vh; overflow-y: auto; }
+  .modal-body { max-height: calc(85vh - 120px); overflow-y: auto; }
+}
+
+/* Fix 5: Sub-stock action buttons wrap */
+@media (max-width: 380px) {
+  #subStockSummary { flex-direction: column; }
+  #subStockSummary > div { min-width: unset; }
+}
+
+/* Fix A: Table ไม่ล้นบนมือถือ */
+@media (max-width: 640px) {
+  table, .premium-table { min-width: unset; }
+}
+
+/* Fix B: Modal body scroll */
+.modal-body { overflow-y: auto; flex: 1; }
+
+/* Ultimate Overflow Lock */
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+}

@@ -257,6 +257,7 @@ var API = (function () {
     getSubStock: function (params) { return this._call('getSubStock', params, true); },
     getSystemSettings: function () { return this._call('getSystemSettings', {}, false); }, // Always fresh for permissions
     getInventoryLogs: function (filters) { return this._call('getInventoryLogs', filters || {}, true); },
+    getTransferHistory: function (filters) { return this._call('getTransferHistory', filters || {}, true); },
 
     // ─── WRITE ACTIONS (Invalidate relevant caches) ───────────
     manageProduct: function (op, data) {
