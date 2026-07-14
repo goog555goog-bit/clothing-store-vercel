@@ -397,7 +397,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   display: flex; align-items: center;
   background: rgba(10,10,22,0.5);
   border: 1px solid rgba(251,191,36,0.3);
-  border-radius: 100px; padding: 4px; gap: 0;
+  border-radius: 16px; padding: 4px; gap: 0;
   transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
   box-shadow: 0 4px 20px rgba(0,0,0,0.3);
   flex: 1; max-width: 580px; min-width: 180px; margin: 0 0.5rem;
@@ -1790,9 +1790,9 @@ tr.row-stock-warning { background: rgba(245, 158, 11, 0.02) !important; }
 .menu-item-btn { display: flex; align-items: center; gap: 0.75rem; width: 100%; padding: 0.7rem 0.85rem; background: transparent; border: none; border-radius: 10px; color: var(--text2); font-size: 0.82rem; font-weight: 500; text-align: left; cursor: pointer; transition: all 0.2s ease; font-family: inherit; }
 .menu-item-btn:hover { background: rgba(255, 255, 255, 0.06); color: var(--primary); }
 
-/* --- Consolidated Responsive Fixes --- */
 @media (max-width: 767px) {
   .tabs-scroll-wrap { display: none !important; }
+  .back-to-top { bottom: 85px !important; }
 }
 @media (max-width: 640px) {
   .flex-col-mobile { flex-direction: column !important; align-items: stretch !important; }
@@ -1811,6 +1811,10 @@ tr.row-stock-warning { background: rgba(245, 158, 11, 0.02) !important; }
   .nav-actions .btn { padding: 0.35rem; min-width: 36px; justify-content: center; }
   .nav-actions .btn span:not(.cart-badge) { display: none; }
   .btn-sm { font-size: 0.75rem; padding: 0.3rem 0.6rem; }
+  .hide-text-mobile span { display: none; }
+  .hide-text-mobile { padding: 0.35rem; min-width: 36px; justify-content: center; }
 }
+
+
 
 
