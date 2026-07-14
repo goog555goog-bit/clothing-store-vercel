@@ -139,14 +139,7 @@ button:focus:not(:focus-visible) {
 }
 
 /* â”€â”€â”€ Tables â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
-.table-wrap {
-  width: 100%;
-  overflow-x: auto;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  -webkit-overflow-scrolling: touch; /* Smooth scrolling for iOS */
-  scrollbar-width: thin;
-}
+
 table { width: 100%; border-collapse: collapse; background: var(--surface); text-align: left; min-width: 600px; }
 th { background: var(--bg); padding: 1rem; font-weight: 600; font-size: 0.85rem; color: var(--text3); border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.05em; }
 td { padding: 1rem; border-bottom: 1px solid var(--border); font-size: 0.95rem; }
@@ -482,34 +475,6 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   z-index: 5500; display: none; max-height: 340px; overflow-y: auto;
   backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
   animation: slideDownIn 0.22s cubic-bezier(0.16,1,0.3,1);
-}
-.suggestion-item {
-  padding: 0.75rem 1.25rem;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  border-bottom: 1px solid rgba(255,255,255,0.03);
-}
-.suggestion-item:hover {
-  background: rgba(251, 191, 36, 0.08);
-}
-.suggestion-item span {
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 0.9rem;
-  color: var(--text);
-}
-.suggestion-item small {
-  flex-shrink: 0;
-  margin-left: auto;
-  opacity: 0.5;
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  color: var(--primary);
 }
 .search-suggestions-dropdown.active { display: block; }
 @keyframes slideDownIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
@@ -1051,21 +1016,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 .flying-item { position: fixed; width: 50px; height: 50px; background-size: cover; background-position: center; border-radius: 50%; z-index: 9999; transition: all 0.8s cubic-bezier(0.175,0.885,0.32,1.275); box-shadow: var(--shadow-lg); border: 2px solid white; }
 
 /* â”€â”€â”€ Empty States (Premium) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
-.empty-state {
-  padding: 4rem 2rem; text-align: center; color: var(--text3); border-radius: var(--radius);
-  background: radial-gradient(ellipse at center, rgba(251,191,36,0.02) 0%, rgba(255,255,255,0.01) 50%, transparent 100%);
-  border: 1px dashed rgba(251,191,36,0.12);
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.75rem;
-  position: relative; overflow: hidden;
-}
-.empty-state::before {
-  content: ''; position: absolute; top: 50%; left: 50%; width: 200px; height: 200px;
-  background: radial-gradient(circle, rgba(251,191,36,0.04) 0%, transparent 70%);
-  transform: translate(-50%, -50%); pointer-events: none;
-}
-.empty-state i, .empty-state svg { opacity: 0.2; margin-bottom: 0.5rem; filter: drop-shadow(0 0 12px rgba(251,191,36,0.15)); }
-.empty-state p { font-size: 1.05rem; font-weight: 600; color: var(--text2); }
-.empty-state small { font-size: 0.85rem; color: var(--text3); max-width: 280px; line-height: 1.5; }
+
 
 /* â”€â”€â”€ Modals â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .modal-overlay {
@@ -1458,7 +1409,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   box-shadow: 0 4px 15px rgba(251, 191, 36, 0.25);
 }
 
-/* â”€â”€â”€ BUTTON MICRO-INTERACTIONS (Haptic Feel) â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ——— BUTTON MICRO-INTERACTIONS (Haptic Feel) ———————— */
 button, .btn, .nav-item, .category-pill, .cart-item-btn, .mobile-nav-item {
   transition: transform 0.1s ease, background 0.2s ease, box-shadow 0.2s ease;
 }
@@ -1466,7 +1417,38 @@ button:active, .btn:active, .nav-item:active, .category-pill:active, .cart-item-
   transform: scale(0.95);
 }
 
-/* [à¹€à¸žà¸´à¹ˆà¸¡ UX] Pulse Animation à¸ªà¸³à¸«à¸£à¸±à¸šà¸›à¸¸à¹ˆà¸¡à¸—à¸µà¹ˆà¸­à¸¢à¸¹à¹ˆà¸£à¸°à¸«à¸§à¹ˆà¸²à¸‡à¹‚à¸«à¸¥à¸” â€” à¸Šà¹ˆà¸§à¸¢à¸šà¸­à¸à¸œà¸¹à¹‰à¹ƒà¸Šà¹‰à¸§à¹ˆà¸²à¸£à¸°à¸šà¸šà¸¢à¸±à¸‡à¸—à¸³à¸‡à¸²à¸™à¸­à¸¢à¸¹à¹ˆ */
+/* ─── Admin Styles ─── */
+.admin-more-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.4rem; padding: 0.85rem 0.5rem; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 14px; color: var(--text2); font-size: 0.68rem; font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.2s ease; min-height: 70px; }
+.admin-more-item:hover, .admin-more-item:active { background: rgba(251, 191, 36, 0.08); border-color: rgba(251, 191, 36, 0.2); color: var(--primary); transform: scale(0.96); }
+@keyframes slideUpMore { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.menu-item-btn { display: flex; align-items: center; gap: 0.75rem; width: 100%; padding: 0.7rem 0.85rem; background: transparent; border: none; border-radius: 10px; color: var(--text2); font-size: 0.82rem; font-weight: 500; text-align: left; cursor: pointer; transition: all 0.2s ease; font-family: inherit; }
+.menu-item-btn:hover { background: rgba(255, 255, 255, 0.06); color: var(--primary); }
+
+/* ─── Consolidated Responsive Fixes ─── */
+@media (max-width: 767px) {
+  .tabs-scroll-wrap { display: none !important; }
+}
+
+@media (max-width: 640px) {
+  .flex-col-mobile { flex-direction: column !important; align-items: stretch !important; }
+  .modal-content { max-height: 85vh; overflow-y: auto; }
+  .modal-body { max-height: calc(85vh - 120px); overflow-y: auto; flex: 1; }
+  table, .premium-table { min-width: unset; }
+}
+
+@media (max-width: 480px) {
+  .nav-actions { gap: 0.15rem; }
+  .nav-actions .btn { padding: 0.35rem; min-width: 36px; justify-content: center; }
+  .nav-actions .btn span:not(.cart-badge) { display: none; }
+  .btn-sm { font-size: 0.75rem; padding: 0.3rem 0.6rem; }
+}
+
+@media (max-width: 380px) {
+  #subStockSummary { flex-direction: column; }
+  #subStockSummary > div { min-width: unset; }
+}
+
+/* [เพิ่ม UX] Pulse Animation สำหรับปุ่มที่อยู่ระหว่างโหลด — ช่วยบอกผู้ใช้ว่าระบบยังทำงานอยู่ */
 .btn:disabled .spinner,
 .btn[disabled] .spinner {
   width: 18px; height: 18px;
@@ -1481,7 +1463,7 @@ button:active, .btn:active, .nav-item:active, .category-pill:active, .cart-item-
   50% { opacity: 1; box-shadow: 0 0 0 8px rgba(251,191,36,0); }
 }
 
-/* â”€â”€â”€ INVENTORY HEATMAP (Visual Cues) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ——— INVENTORY HEATMAP (Visual Cues) ———————————————— */
 .stock-safe { color: #10b981; }
 .stock-warning { color: #f59e0b; font-weight: 700; }
 .stock-danger { color: #ef4444; font-weight: 800; animation: pulse-slow 2s infinite; }
@@ -1732,47 +1714,111 @@ tr.row-stock-warning { background: rgba(245, 158, 11, 0.02) !important; }
   }
 }
 
-/* â”€â”€â”€ Responsive Fixes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─── Admin Page Styles (moved from admin.html) ───── */
 
-/* Fix 1: Nav actions icon-only on small screens */
+/* Hide Desktop Tabs on mobile — use Bottom Nav instead */
+@media (max-width: 767px) {
+  .tabs-scroll-wrap {
+    display: none !important;
+  }
+}
+
+.admin-more-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.85rem 0.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  color: var(--text2);
+  font-size: 0.68rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 70px;
+}
+
+.admin-more-item:hover,
+.admin-more-item:active {
+  background: rgba(251, 191, 36, 0.08);
+  border-color: rgba(251, 191, 36, 0.2);
+  color: var(--primary);
+  transform: scale(0.96);
+}
+
+@keyframes slideUpMore {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.menu-item-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.7rem 0.85rem;
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  color: var(--text2);
+  font-size: 0.82rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.menu-item-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--primary);
+}
+
+/* ─── Back to Top Button ──────────────────────────── */
+
+.back-to-top {
+  position: fixed; bottom: 2rem; right: 2rem;
+  border-radius: 50%; width: 44px; height: 44px;
+  display: none; align-items: center; justify-content: center;
+  box-shadow: var(--shadow-lg); z-index: 1200;
+  padding: 0; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* --- Admin Styles --- */
+.admin-more-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.4rem; padding: 0.85rem 0.5rem; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 14px; color: var(--text2); font-size: 0.68rem; font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.2s ease; min-height: 70px; }
+.admin-more-item:hover, .admin-more-item:active { background: rgba(251, 191, 36, 0.08); border-color: rgba(251, 191, 36, 0.2); color: var(--primary); transform: scale(0.96); }
+@keyframes slideUpMore { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.menu-item-btn { display: flex; align-items: center; gap: 0.75rem; width: 100%; padding: 0.7rem 0.85rem; background: transparent; border: none; border-radius: 10px; color: var(--text2); font-size: 0.82rem; font-weight: 500; text-align: left; cursor: pointer; transition: all 0.2s ease; font-family: inherit; }
+.menu-item-btn:hover { background: rgba(255, 255, 255, 0.06); color: var(--primary); }
+
+/* --- Consolidated Responsive Fixes --- */
+@media (max-width: 767px) {
+  .tabs-scroll-wrap { display: none !important; }
+}
+@media (max-width: 640px) {
+  .flex-col-mobile { flex-direction: column !important; align-items: stretch !important; }
+  .modal-content { max-height: 85vh; overflow-y: auto; }
+  .modal-body { max-height: calc(85vh - 120px); overflow-y: auto; flex: 1; }
+  table, .premium-table { min-width: unset; }
+}
 @media (max-width: 480px) {
   .nav-actions { gap: 0.15rem; }
   .nav-actions .btn { padding: 0.35rem; min-width: 36px; justify-content: center; }
   .nav-actions .btn span:not(.cart-badge) { display: none; }
-}
-
-/* Fix 2: Utility â€” stack flex to column on mobile */
-@media (max-width: 640px) {
-  .flex-col-mobile { flex-direction: column !important; align-items: stretch !important; }
-}
-
-/* Fix 3: Smaller btn-sm on very small screens */
-@media (max-width: 480px) {
   .btn-sm { font-size: 0.75rem; padding: 0.3rem 0.6rem; }
 }
-
-/* Fix 4: Modal scroll on mobile */
-@media (max-width: 640px) {
-  .modal-content { max-height: 85vh; overflow-y: auto; }
-  .modal-body { max-height: calc(85vh - 120px); overflow-y: auto; }
-}
-
-/* Fix 5: Sub-stock action buttons wrap */
 @media (max-width: 380px) {
   #subStockSummary { flex-direction: column; }
   #subStockSummary > div { min-width: unset; }
 }
 
-/* Fix A: Table ไม่ล้นบนมือถือ */
-@media (max-width: 640px) {
-  table, .premium-table { min-width: unset; }
-}
-
-/* Fix B: Modal body scroll */
-.modal-body { overflow-y: auto; flex: 1; }
-
-/* Ultimate Overflow Lock */
-html, body {
-  max-width: 100%;
-  overflow-x: hidden;
-}
