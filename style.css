@@ -1793,6 +1793,8 @@ tr.row-stock-warning { background: rgba(245, 158, 11, 0.02) !important; }
 @media (max-width: 767px) {
   .tabs-scroll-wrap { display: none !important; }
   .back-to-top { bottom: 85px !important; }
+  .hide-text-mobile span { display: none; }
+  .hide-text-mobile { padding: 0.35rem; min-width: 36px; justify-content: center; }
 }
 @media (max-width: 640px) {
   .flex-col-mobile { flex-direction: column !important; align-items: stretch !important; }
@@ -1811,8 +1813,6 @@ tr.row-stock-warning { background: rgba(245, 158, 11, 0.02) !important; }
   .nav-actions .btn { padding: 0.35rem; min-width: 36px; justify-content: center; }
   .nav-actions .btn span:not(.cart-badge) { display: none; }
   .btn-sm { font-size: 0.75rem; padding: 0.3rem 0.6rem; }
-  .hide-text-mobile span { display: none; }
-  .hide-text-mobile { padding: 0.35rem; min-width: 36px; justify-content: center; }
 }
 
 
