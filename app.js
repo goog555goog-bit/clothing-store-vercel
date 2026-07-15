@@ -1544,19 +1544,18 @@ function renderSubStock(data, teamName) {
     var pNameSafe = String(item.productName || 'ไม่ทราบชื่อ').replace(/'/g, "\\'");
 
     return '<div class="product-card">'
-      + '<div onclick="openProductDetail(\'' + item.productId + '\')" style="cursor:pointer;">'
+      + '<div class="product-img-wrap" onclick="openProductDetail(\'' + item.productId + '\')" style="cursor:pointer;">'
       + imgHtml
-      + '<div class="product-info">'
+      + '</div>'
+      + '<div class="product-info" onclick="openProductDetail(\'' + item.productId + '\')" style="cursor:pointer; flex: 1;">'
       + '<div class="product-name">' + (item.productName || 'ไม่ทราบชื่อ') + (item.size ? ' <span class="badge" style="font-size:0.7rem; padding:2px 6px">' + item.size + '</span>' : '') + '</div>'
       + '<div class="product-stock">คงเหลือ: <span id="ss-qty-' + item.productId + '-' + (item.size || 'default') + '">' + item.quantity + '</span></div>'
-      + '</div>'
       + '</div>'
       + '<div class="product-info" style="padding-top:0;">'
       + '<div style="display:flex; gap:0.5rem; flex-wrap:wrap">'
       + '<button class="btn btn-primary btn-sm flex-1" onclick="openActionModal(\'use\', \'' + item.productId + '\', \'' + pNameSafe + '\', ' + item.quantity + ', \'' + (item.size || '') + '\')"><i data-lucide="sparkles" style="width:14px;height:14px"></i> เบิกใช้งาน</button>'
       + '<button class="btn btn-outline btn-sm hide-text-mobile" title="โอนให้เพื่อน" onclick="openActionModal(\'transfer\', \'' + item.productId + '\', \'' + pNameSafe + '\', ' + item.quantity + ', \'' + (item.size || '') + '\')"><i data-lucide="repeat" style="width:14px;height:14px"></i> <span>โอน</span></button>'
       + '<button class="btn btn-ghost btn-sm hide-text-mobile" title="คืนคลังหลัก" onclick="openActionModal(\'return\', \'' + item.productId + '\', \'' + pNameSafe + '\', ' + item.quantity + ', \'' + (item.size || '') + '\')"><i data-lucide="archive" style="width:14px;height:14px"></i> <span>คืน</span></button>'
-      + '</div>'
       + '</div>'
       + '</div>'
       + '</div>';
