@@ -1475,10 +1475,37 @@ function loadUsageHistory() {
       logs = logs.filter(function(l) { return (l.action || '').indexOf('ใช้งาน') !== -1; });
     }
 
+    // PONYTAIL: Filter transfer history for A -> B logic
+    if (_currentLogFilter === 'transfer') {
+      logs = logs.filter(function(l) {
+        var actionName = l.action || '';
+        var isOut = actionName.indexOf('โอนออก') !== -1;
+        var isIn = actionName.indexOf('รับโอน') !== -1;
+        var logUser = l.userName || l.user || 'SYSTEM';
+        var related = l.relatedUser || '';
+        var currentName = currentUser.name || '';
+
+        // ถ้าไม่ใช่รายการโอน ให้ผ่านไปปกติ
+        if (!isOut && !isIn) return true;
+
+        // กรณี โอนออก (-1): ดูได้เฉพาะคนที่เป็นผู้โอน (logUser)
+        if (isOut) {
+          return logUser === currentName;
+        }
+        // กรณี รับโอน (+1): ดูได้เฉพาะคนที่เป็นผู้รับ (related)
+        // (เผื่อระบบหลังบ้านส่ง logUser เป็นคนรับ ให้เช็คทั้งคู่)
+        if (isIn) {
+          return related === currentName || logUser === currentName;
+        }
+        return true;
+      });
+    }
+
     if (!res.success || logs.length === 0) {
       body.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:2rem; color:var(--text3)">ยังไม่มีประวัติทำรายการ</td></tr>';
       return;
     }
+
     body.innerHTML = logs.map(function (l) {
       var dateStr = String(l.date || '').split(' ')[0];
       var timeStr = String(l.date || '').split(' ')[1] || '';
@@ -1487,12 +1514,14 @@ function loadUsageHistory() {
       var p = allProducts.filter(function (x) { return String(x.productId).trim() === pId; })[0];
       var displayName = p ? p.name : (l.productName || pId);
 
-      // ดึงชื่อผู้ทำรายการ
+      // ผู้ทำรายการ
       var userName = l.userName || l.user || 'SYSTEM';
       
+      // ข้อความอธิบาย A โอนให้ B / B รับโอนจาก A
       var relatedText = '';
-      if (l.relatedUser && (l.action || '').indexOf('โอน') !== -1) {
-        relatedText = '<div style="font-size:0.75rem; color:var(--text2); margin-top:2px;">' + (Number(l.quantity) < 0 ? 'โอนให้: ' : 'รับจาก: ') + l.relatedUser + '</div>';
+      if ((l.action || '').indexOf('โอน') !== -1) {
+        var targetName = l.relatedUser || 'ไม่ระบุ';
+        relatedText = '<div style="font-size:0.75rem; color:var(--text2); margin-top:2px;">' + (Number(l.quantity) < 0 ? 'โอนให้: ' : 'รับจาก: ') + targetName + '</div>';
       }
 
       return '<tr>'
