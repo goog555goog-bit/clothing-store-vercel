@@ -1493,9 +1493,14 @@ function loadUsageHistory() {
           return logUser === currentName;
         }
         // กรณี รับโอน (+1): ดูได้เฉพาะคนที่เป็นผู้รับ (related)
-        // (เผื่อระบบหลังบ้านส่ง logUser เป็นคนรับ ให้เช็คทั้งคู่)
+        // (แต่ถ้าหลังบ้านยังไม่แก้ แล้ว logUser ยังเป็นคนโอนอยู่ เราจะไม่ให้คนโอนเห็น +1 เพื่อลดความซ้ำซ้อน)
         if (isIn) {
-          return related === currentName || logUser === currentName;
+          if (related) {
+             return related === currentName || logUser === currentName;
+          } else {
+             // ถ้ายังไม่มี related แปลว่าหลังบ้านยังไม่แก้ ให้ซ่อน +1 ไปก่อนถ้าเราเป็นคนโอน
+             return logUser !== currentName; 
+          }
         }
         return true;
       });
@@ -1520,7 +1525,7 @@ function loadUsageHistory() {
       // ข้อความอธิบาย A โอนให้ B / B รับโอนจาก A
       var relatedText = '';
       if ((l.action || '').indexOf('โอน') !== -1) {
-        var targetName = l.relatedUser || 'ไม่ระบุ';
+        var targetName = l.relatedUserName || l.relatedUser || 'ไม่ระบุ';
         relatedText = '<div style="font-size:0.75rem; color:var(--text2); margin-top:2px;">' + (Number(l.quantity) < 0 ? 'โอนให้: ' : 'รับจาก: ') + targetName + '</div>';
       }
 
