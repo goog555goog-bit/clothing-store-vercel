@@ -1463,9 +1463,15 @@ function loadUsageHistory() {
   if (!body) return;
   
   var limit = _currentLogFilter === 'all' ? 20 : 50;
+  var hasTeam = currentUser && currentUser.teamId;
+  
   var apiCall = _currentLogFilter === 'transfer' 
     ? API.getTransferHistory({ limit: limit })
-    : API.getInventoryLogs({ userFilter: currentUser.employeeId, limit: limit });
+    : API.getInventoryLogs({ 
+        userFilter: hasTeam ? 'all' : currentUser.employeeId, 
+        teamFilter: hasTeam ? currentUser.teamId : 'all',
+        limit: limit 
+      });
 
   apiCall.then(function (res) {
     var logs = res.data || [];

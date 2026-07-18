@@ -288,15 +288,15 @@ var API = (function () {
       return this._call('deductSubStock', { productId: productId, qty: qty, branchId: branchId, size: size }, false, ['getSubStock', 'getInventoryLogs']);
     },
     receiveSubStock: function (productId, qty, size) {
-      return this._call('receiveSubStock', { productId: productId, qty: qty, size: size }, false, ['getSubStock']);
+      return this._call('receiveSubStock', { productId: productId, qty: qty, size: size }, false, ['getSubStock', 'getInventoryLogs', 'getTransferHistory']);
     },
     transferSubStock: function (data) {
       // data: { toEmployeeId, productId, qty, size }
-      return this._call('transferSubStock', data, false, ['getSubStock']);
+      return this._call('transferSubStock', data, false, ['getSubStock', 'getInventoryLogs', 'getTransferHistory']);
     },
     returnToMainStock: function (data) {
       // data: { productId, qty, size }
-      return this._call('returnToMainStock', data, false, ['getSubStock', 'getProducts']);
+      return this._call('returnToMainStock', data, false, ['getSubStock', 'getProducts', 'getInventoryLogs', 'getTransferHistory']);
     },
 
     debugUser: function () { return this._call('debugUser', {}, false); },
