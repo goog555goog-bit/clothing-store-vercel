@@ -1517,7 +1517,13 @@ function loadUsageHistory() {
       return;
     }
 
-    body.innerHTML = logs.map(function (l) {
+    var debugHTML = '';
+    var transferLog = logs.filter(function(x) { return (x.action || '').indexOf('โอน') !== -1; })[0];
+    if (transferLog) {
+      debugHTML = '<tr><td colspan="6"><div style="padding:8px; background:#111; color:#0f0; font-family:monospace; font-size:10px; word-break:break-all; border:1px solid #0f0; margin-bottom:10px;">DEBUG (Ponytail):<br/>' + JSON.stringify(transferLog).replace(/</g, '&lt;') + '</div></td></tr>';
+    }
+
+    body.innerHTML = debugHTML + logs.map(function (l) {
       var dateStr = String(l.date || '').split(' ')[0];
       var timeStr = String(l.date || '').split(' ')[1] || '';
 
