@@ -4,7 +4,7 @@
 
 // ⚠️ [SECURITY] GAS_URL ควรย้ายไปเป็น Environment Variable ในอนาคต
 // ต้อง Deploy ใหม่เป็น "New Version" ทุกครั้งที่แก้ไข Backend
-const GAS_URL = "https://script.google.com/macros/s/AKfycbyQlV4PqbbHqrdZjDt-Qj5XhEtNuHZLoBgYa9bzWC27NynElREiu0_GY1UCkoOU3VjmoQ/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbyRKl_lO_1AgqXZg6f1969dIPteT5-WCu0hEt_6VLx-YqbmO_HEVWQiJFU0wo6FROInlQ/exec";
 
 var API = (function () {
   var CACHE_KEY = '_api_cache_v1';
