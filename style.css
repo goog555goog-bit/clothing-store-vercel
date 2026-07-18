@@ -394,7 +394,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 
 /* â”€â”€â”€ Search Bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .search-wrapper {
-  display: flex; align-items: center;
+  display: flex; align-items: center; flex-wrap: wrap;
   background: rgba(10,10,22,0.5);
   border: 1px solid rgba(251,191,36,0.3);
   border-radius: 16px; padding: 4px; gap: 0;

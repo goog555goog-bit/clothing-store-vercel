@@ -370,6 +370,11 @@ var API = (function () {
 
     checkDataVersion: function () { return this._call('checkDataVersion', {}, false); },
 
+    clearCache: function () {
+      _cache = {};
+      try { localStorage.removeItem(CACHE_KEY); } catch (e) {}
+    },
+
     // Smart Polling feature completely removed as per user request
   };
 

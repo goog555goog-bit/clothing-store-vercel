@@ -239,6 +239,9 @@ function logout() {
   if (!confirm('ยืนยันการออกจากระบบ?')) return;
   localStorage.removeItem('_user');
   localStorage.removeItem('_tok');
+  if (window.API && typeof window.API.clearCache === 'function') {
+    window.API.clearCache();
+  }
   currentUser = null;
   updateUserUI();
   showToast('ออกจากระบบแล้ว', 'success');
@@ -1741,17 +1744,16 @@ function openActionModal(action, productId, productName, maxQty, size) {
 
   if (action === 'use') {
     mTitle.innerHTML = '<i data-lucide="sparkles" style="width:18px;height:18px;color:var(--primary);"></i> นำไปใช้งานจริง';
-    mDesc.innerHTML = 'คุณกำลังจะตัดยอด <b>' + productName + '</b> ออกจากคลังย่อยเพื่อนำไปใช้งาน';
+    mDesc.innerHTML = 'คุณกำลังจะตัดยอด <b>' + productName + '</b> ออกจากคลังย่อยเพื่อนำไปใช้งาน <br><span style="color:var(--warning);font-size:0.85rem;">(มีให้เบิกสูงสุด: ' + maxQty + ')</span>';
     document.getElementById('actionModalBranchWrap').classList.remove('hidden');
   } else if (action === 'transfer') {
-
     mTitle.innerHTML = '<i data-lucide="repeat" style="width:18px;height:18px;color:var(--primary);"></i> โอนให้เพื่อนร่วมงาน';
-    mDesc.innerHTML = 'โอน <b>' + productName + '</b> ให้พนักงานท่านอื่น';
+    mDesc.innerHTML = 'โอน <b>' + productName + '</b> ให้พนักงานท่านอื่น <br><span style="color:var(--warning);font-size:0.85rem;">(มีให้โอนสูงสุด: ' + maxQty + ')</span>';
     inputWrap.classList.remove('hidden');
     document.getElementById('actionModalInputLabel').innerText = 'รหัสพนักงานผู้รับ';
   } else if (action === 'return') {
     mTitle.innerHTML = '<i data-lucide="archive" style="width:18px;height:18px;color:var(--primary);"></i> คืนเข้าคลังหลัก';
-    mDesc.innerHTML = 'ส่งคืน <b>' + productName + '</b> กลับไปยังคลังพัสดุหลัก';
+    mDesc.innerHTML = 'ส่งคืน <b>' + productName + '</b> กลับไปยังคลังพัสดุหลัก <br><span style="color:var(--warning);font-size:0.85rem;">(มีให้คืนสูงสุด: ' + maxQty + ')</span>';
   }
 
   var btn = document.getElementById('actionModalBtn');

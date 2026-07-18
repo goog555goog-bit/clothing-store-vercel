@@ -44,7 +44,7 @@
             style="padding-left:0.5rem;background:transparent;border:none;height:100%;color:var(--text);min-width:80px;">
         </div>
         <div class="search-options"
-          style="display:flex; flex-wrap:wrap; gap:0.5rem; max-width:100%; align-items:center; overflow:visible;">
+          style="display:flex; gap:0.5rem; max-width:100%; align-items:center; overflow:visible;">
           <!-- [แก้ไข A11y] เพิ่ม aria-label ให้ตัวกรองทุกตัว -->
           <select id="searchType" class="search-select-minimal glass" aria-label="ประเภทการค้นหา">
             <option value="all">ทั้งหมด</option>
@@ -393,7 +393,7 @@
             <input type="number" id="actionModalQty" value="1" min="1" class="form-input"
               style="flex:2;text-align:center;border:none;background:transparent;padding:0.25rem;font-weight:700">
             <button class="qty-btn" style="flex:1"
-              onclick="var i=document.getElementById('actionModalQty'); i.value=(Number(i.value)||1)+1"><i
+              onclick="var i=document.getElementById('actionModalQty'); var m=Number(i.max)||Infinity; var v=(Number(i.value)||1)+1; i.value=Math.min(v, m);"><i
                 data-lucide="plus"></i></button>
           </div>
         </div>
