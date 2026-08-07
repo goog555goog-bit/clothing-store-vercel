@@ -89,6 +89,24 @@
           aria-label="จัดการคลังทีม" title="จัดการคลังทีม">
           <i data-lucide="users"></i> <span class="hide-mobile">สต๊อกทีม</span>
         </button>
+        
+        <!-- [NEW] Notification Bell (Admin Only) -->
+        <div id="adminNotificationBtn" class="notification-container hidden">
+          <div class="notification-bell" onclick="toggleNotificationDropdown()" aria-label="แจ้งเตือนสต๊อก">
+            <i data-lucide="bell" style="width:16px;height:16px;"></i>
+            <span id="notificationBadge" class="notification-badge">0</span>
+          </div>
+          <div id="notificationDropdown" class="notification-dropdown">
+            <div class="notification-header">
+              <i data-lucide="alert-triangle" style="width:16px;height:16px;color:var(--warning)"></i>
+              สินค้าใกล้หมด (คลังใหญ่)
+            </div>
+            <div id="notificationList" class="notification-list">
+              <!-- JS จะมาใส่ข้อมูลตรงนี้ -->
+              <div class="notification-empty">ไม่มีแจ้งเตือน</div>
+            </div>
+          </div>
+        </div>
         <button id="loginBtn" class="btn btn-outline btn-sm" onclick="navigateTo('login.html')">
           <i data-lucide="log-in" style="width:15px;height:15px;"></i> <span>เข้าสู่ระบบ</span>
         </button>

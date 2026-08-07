@@ -170,6 +170,12 @@ function updateUserUI() {
     if (ordersBtn) ordersBtn.classList.remove('hidden');
     if (changePwdBtn) changePwdBtn.classList.remove('hidden');
 
+    // แสดงปุ่มแจ้งเตือนสต๊อก (Admin Only)
+    var adminNotifBtn = document.getElementById('adminNotificationBtn');
+    if (adminNotifBtn) {
+      adminNotifBtn.classList.toggle('hidden', !(currentUser.role === 'admin' || currentUser.role === 'superadmin'));
+    }
+
     // แสดงปุ่มคลังย่อยสำหรับผู้ที่มีสิทธิ์จัดการคลังย่อย (Technicians, Admins, FC หรือผู้ที่ถูกติ๊กสิทธิ์เพิ่ม)
     var substockBtn = document.getElementById('substockBtn');
     var teamStockBtn = document.getElementById('teamStockBtn');
@@ -406,6 +412,7 @@ function loadStorefrontData() {
     allCategories = cached.categories || [];
     renderCategories();
     renderProductGrid();
+    checkLowStockAlerts();
 
     // Quick load branches from cache too if available
     var cachedBranches = API.getCached('getBranches');
@@ -434,6 +441,7 @@ function loadStorefrontData() {
         localStorage.setItem('_all_products_cache', JSON.stringify(allProducts));
         renderCategories();
         renderProductGrid();
+        checkLowStockAlerts();
       }
 
       if (batch.settings && batch.settings.success) {
@@ -2328,3 +2336,54 @@ function saveProfileEmail() {
   });
 }
 
+// --- LOW STOCK NOTIFICATION (Admin Only) ---
+function checkLowStockAlerts() {
+  if (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'superadmin')) return;
+  var lowStockItems = allProducts.filter(function(p) {
+    return Number(p.stock) <= Number(p.minStock);
+  });
+  
+  var badge = document.getElementById('notificationBadge');
+  var list = document.getElementById('notificationList');
+  
+  if (badge) {
+    if (lowStockItems.length > 0) {
+      badge.textContent = lowStockItems.length;
+      badge.style.display = 'block';
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+  
+  if (list) {
+    if (lowStockItems.length === 0) {
+      list.innerHTML = '<div class="notification-empty">???????????????????????</div>';
+    } else {
+      list.innerHTML = lowStockItems.map(function(p) {
+        return '<div class="notification-item">' +
+               '<div class="notification-item-icon"><i data-lucide="alert-circle" style="width:16px;height:16px;"></i></div>' +
+               '<div class="notification-item-content">' +
+               '<div class="notification-item-title">' + (p.name || p.productId) + '</div>' +
+               '<div class="notification-item-desc">???????: <span style="color:var(--danger);font-weight:bold;">' + (p.stock || 0) + '</span> / ???????: ' + (p.minStock || 0) + '</div>' +
+               '</div></div>';
+      }).join('');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+  }
+}
+
+function toggleNotificationDropdown() {
+  var dropdown = document.getElementById('notificationDropdown');
+  if (dropdown) {
+    dropdown.classList.toggle('active');
+  }
+}
+
+// ??? dropdown ????????????????
+document.addEventListener('click', function(e) {
+  var container = document.getElementById('adminNotificationBtn');
+  var dropdown = document.getElementById('notificationDropdown');
+  if (container && dropdown && !container.contains(e.target)) {
+    dropdown.classList.remove('active');
+  }
+});

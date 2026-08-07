@@ -1821,3 +1821,108 @@ tr.row-stock-warning { background: rgba(245, 158, 11, 0.02) !important; }
 
 
 
+/* NOTIFICATION BELL */
+.notification-container {
+  position: relative;
+  display: inline-block;
+}
+.notification-bell {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.5rem;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text2);
+  transition: all 0.2s ease;
+}
+.notification-bell:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text1);
+}
+.notification-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background: var(--danger);
+  color: white;
+  font-size: 0.65rem;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 10px;
+  border: 2px solid var(--bg);
+  display: none;
+}
+.notification-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 10px;
+  width: 320px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  z-index: 1000;
+  display: none;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+.notification-dropdown.active {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
+.notification-header {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.notification-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+.notification-item {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  transition: background 0.2s;
+}
+.notification-item:hover {
+  background: rgba(255,255,255,0.03);
+}
+.notification-item:last-child {
+  border-bottom: none;
+}
+.notification-item-icon {
+  color: var(--warning);
+  margin-top: 2px;
+}
+.notification-item-content {
+  flex: 1;
+}
+.notification-item-title {
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-bottom: 2px;
+  color: var(--text1);
+}
+.notification-item-desc {
+  font-size: 0.75rem;
+  color: var(--text2);
+}
+.notification-empty {
+  padding: 2rem;
+  text-align: center;
+  color: var(--text3);
+  font-size: 0.85rem;
+}
