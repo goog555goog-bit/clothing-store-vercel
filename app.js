@@ -2342,8 +2342,11 @@ function checkLowStockAlerts() {
   var lowStockItems = allProducts.filter(function(p) {
     var stock = Number(p.stock);
     if (isNaN(stock)) stock = 0;
-    var min = Number(p.minStock);
-    if (isNaN(min)) min = 0;
+    
+    // Default to 5 if minStock is missing or 0 (same logic as report.gs)
+    var min = p.minStock ? Number(p.minStock) : 5;
+    if (isNaN(min) || min === 0) min = 5;
+    
     // Check main stock
     var isTotalLow = stock <= min && stock !== null;
     
@@ -2376,11 +2379,12 @@ function checkLowStockAlerts() {
       list.innerHTML = '<div class="notification-empty">คลังใหญ่มีสินค้าเพียงพอ</div>';
     } else {
       list.innerHTML = lowStockItems.map(function(p) {
+        var minDisplay = p.minStock ? p.minStock : 5;
         return '<div class="notification-item">' +
                '<div class="notification-item-icon"><i data-lucide="alert-circle" style="width:16px;height:16px;"></i></div>' +
                '<div class="notification-item-content">' +
                '<div class="notification-item-title">' + (p.name || p.productId) + '</div>' +
-               '<div class="notification-item-desc">คงเหลือ: <span style="color:var(--danger);font-weight:bold;">' + (p.stock || 0) + '</span> / ขั้นต่ำ: ' + (p.minStock || 0) + '</div>' +
+               '<div class="notification-item-desc">คงเหลือ: <span style="color:var(--danger);font-weight:bold;">' + (p.stock || 0) + '</span> / ขั้นต่ำ: ' + minDisplay + '</div>' +
                '</div></div>';
       }).join('');
       if (typeof lucide !== 'undefined') lucide.createIcons();
