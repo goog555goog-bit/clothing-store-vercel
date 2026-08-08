@@ -2340,7 +2340,23 @@ function saveProfileEmail() {
 function checkLowStockAlerts() {
   if (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'superadmin')) return;
   var lowStockItems = allProducts.filter(function(p) {
-    return Number(p.stock) <= Number(p.minStock);
+    var stock = Number(p.stock);
+    if (isNaN(stock)) stock = 0;
+    var min = Number(p.minStock);
+    if (isNaN(min)) min = 0;
+    // Check main stock
+    var isTotalLow = stock <= min && stock !== null;
+    
+    // Check variant sizes if min is explicitly set or if stock is critically low
+    var isAnySizeLow = false;
+    if (p.variantStock) {
+      try {
+        var vs = typeof p.variantStock === 'string' ? JSON.parse(p.variantStock) : p.variantStock;
+        for (var k in vs) { if (Number(vs[k]) <= 2) isAnySizeLow = true; } // Alert if any size is <= 2
+      } catch(e) {}
+    }
+    
+    return isTotalLow || isAnySizeLow;
   });
   
   var badge = document.getElementById('notificationBadge');
@@ -2349,7 +2365,7 @@ function checkLowStockAlerts() {
   if (badge) {
     if (lowStockItems.length > 0) {
       badge.textContent = lowStockItems.length;
-      badge.style.display = 'block';
+      badge.style.display = 'flex'; // changed from block to flex for centering
     } else {
       badge.style.display = 'none';
     }
@@ -2357,14 +2373,14 @@ function checkLowStockAlerts() {
   
   if (list) {
     if (lowStockItems.length === 0) {
-      list.innerHTML = '<div class="notification-empty">???????????????????????</div>';
+      list.innerHTML = '<div class="notification-empty">คลังใหญ่มีสินค้าเพียงพอ</div>';
     } else {
       list.innerHTML = lowStockItems.map(function(p) {
         return '<div class="notification-item">' +
                '<div class="notification-item-icon"><i data-lucide="alert-circle" style="width:16px;height:16px;"></i></div>' +
                '<div class="notification-item-content">' +
                '<div class="notification-item-title">' + (p.name || p.productId) + '</div>' +
-               '<div class="notification-item-desc">???????: <span style="color:var(--danger);font-weight:bold;">' + (p.stock || 0) + '</span> / ???????: ' + (p.minStock || 0) + '</div>' +
+               '<div class="notification-item-desc">คงเหลือ: <span style="color:var(--danger);font-weight:bold;">' + (p.stock || 0) + '</span> / ขั้นต่ำ: ' + (p.minStock || 0) + '</div>' +
                '</div></div>';
       }).join('');
       if (typeof lucide !== 'undefined') lucide.createIcons();
@@ -2379,7 +2395,7 @@ function toggleNotificationDropdown() {
   }
 }
 
-// ??? dropdown ????????????????
+// ปิด dropdown เมื่อคลิกที่อื่น
 document.addEventListener('click', function(e) {
   var container = document.getElementById('adminNotificationBtn');
   var dropdown = document.getElementById('notificationDropdown');
