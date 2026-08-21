@@ -66,6 +66,12 @@
         <p style="margin-top:1rem;color:var(--text3)">กำลังโหลด...</p>
       </div>
     </div>
+    
+    <h2 style="font-size:1.3rem;font-weight:700;margin:2.5rem 0 1.5rem;display:flex;align-items:center;gap:0.5rem"><i
+        data-lucide="history"></i> ประวัติการอนุมัติ (ล่าสุด)</h2>
+    <div id="historyList">
+      <div class="text-center" style="padding:2rem;color:var(--text3);font-size:0.9rem">กำลังโหลด...</div>
+    </div>
   </div>
 
   <!-- Mobile Bottom Nav (Manager) -->
@@ -239,6 +245,22 @@
 
         var res = batch.pending;
         list.innerHTML = res.data.map(function (o) {
+          var reasonHtml = '';
+          if ((o.status === 'Rejected' || o.status === 'Cancelled') && o.comment) {
+            reasonHtml = '<div style="margin-bottom:1rem; padding:0.75rem; background:rgba(239,68,68,0.1); border-radius:6px; color:var(--danger); font-size:0.85rem;">'
+                       + '<strong>เหตุผล:</strong> ' + escapeHTML(o.comment)
+                       + '</div>';
+          }
+          var itemsHtml = '';
+          if (o.items && o.items.length > 0) {
+            itemsHtml = '<div style="margin-bottom:1rem; border:1px solid var(--border); border-radius:6px; padding:0.75rem;">'
+                      + '<div style="font-size:0.8rem; font-weight:600; color:var(--text2); margin-bottom:0.5rem">รายการสินค้า:</div>'
+                      + '<ul style="list-style:none; padding:0; margin:0; font-size:0.85rem; color:var(--text); display:flex; flex-direction:column; gap:0.25rem;">';
+            o.items.forEach(function(itm) {
+               itemsHtml += '<li>- ' + escapeHTML(itm.productName) + (itm.size ? ' (' + itm.size + ')' : '') + ' x' + itm.quantity + '</li>';
+            });
+            itemsHtml += '</ul></div>';
+          }
           return '<div class="card" style="margin-bottom:1rem">'
             + '<div class="flex flex-wrap items-center justify-between gap-2" style="margin-bottom:0.75rem">'
             + '<div><span style="font-weight:600">' + escapeHTML(o.orderId) + '</span>'
@@ -248,13 +270,59 @@
             + '<div style="font-size:0.9rem;margin-bottom:0.5rem;display:flex;align-items:center;gap:0.4rem"><i data-lucide="user" style="width:14px;height:14px"></i> ผู้เบิก: <strong>' + escapeHTML(o.employeeName || o.employeeId) + '</strong></div>'
             + '<div style="font-size:0.9rem;margin-bottom:0.5rem;display:flex;align-items:center;gap:0.4rem"><i data-lucide="building" style="width:14px;height:14px"></i> แผนก: ' + escapeHTML(o.department) + '</div>'
             + '<div style="font-size:1.1rem;font-weight:700;color:var(--accent);margin-bottom:1rem;display:flex;align-items:center;gap:0.4rem"><i data-lucide="banknote" style="width:18px;height:18px"></i> ฿' + Number(o.totalAmount).toLocaleString() + '</div>'
+            + itemsHtml
+            + reasonHtml
             + '<div class="flex flex-wrap gap-1">'
             + '<button class="btn btn-accent btn-sm" onclick="openDecision(\'' + escapeHTML(o.orderId) + '\', \'approve\')"><i data-lucide="check-circle" style="width:14px;height:14px"></i> อนุมัติ</button>'
             + '<button class="btn btn-danger btn-sm" onclick="openDecision(\'' + escapeHTML(o.orderId) + '\', \'reject\')"><i data-lucide="x-circle" style="width:14px;height:14px"></i> ไม่อนุมัติ</button>'
-            + '<button class="btn btn-outline btn-sm" onclick="viewItems(\'' + escapeHTML(o.orderId) + '\')"><i data-lucide="eye" style="width:14px;height:14px"></i> ดูรายการ</button>'
+            + '<button class="btn btn-outline btn-sm" onclick="viewItems(\'' + escapeHTML(o.orderId) + '\')"><i data-lucide="eye" style="width:14px;height:14px"></i> ดูรายการแบบเต็ม</button>'
             + '</div>'
             + '</div>';
         }).join('');
+        
+        var histList = document.getElementById('historyList');
+        if (histList && res.history) {
+          if (res.history.length === 0) {
+            histList.innerHTML = '<div class="card text-center" style="padding:2rem;color:var(--text3);"><i data-lucide="inbox"></i> ไม่มีประวัติการอนุมัติ</div>';
+          } else {
+            histList.innerHTML = res.history.map(function(o) {
+              var bc = 'badge-pending';
+              if (o.status === 'Approved' || o.status === 'Dispatched') bc = 'badge-approved';
+              if (o.status === 'Received') bc = 'badge-complete';
+              if (o.status === 'Rejected') bc = 'badge-rejected';
+              
+              var reasonHtml = '';
+              if ((o.status === 'Rejected' || o.status === 'Cancelled') && o.comment) {
+                reasonHtml = '<div style="margin-bottom:1rem; padding:0.75rem; background:rgba(239,68,68,0.1); border-radius:6px; color:var(--danger); font-size:0.85rem;">'
+                           + '<strong>เหตุผล:</strong> ' + escapeHTML(o.comment)
+                           + '</div>';
+              }
+              var itemsHtml = '';
+              if (o.items && o.items.length > 0) {
+                itemsHtml = '<div style="margin-bottom:1rem; border:1px solid var(--border); border-radius:6px; padding:0.75rem;">'
+                          + '<ul style="list-style:none; padding:0; margin:0; font-size:0.8rem; color:var(--text2); display:flex; flex-direction:column; gap:0.25rem;">';
+                o.items.forEach(function(itm) {
+                   itemsHtml += '<li>- ' + escapeHTML(itm.productName) + (itm.size ? ' (' + itm.size + ')' : '') + ' x' + itm.quantity + '</li>';
+                });
+                itemsHtml += '</ul></div>';
+              }
+              
+              return '<div class="card" style="margin-bottom:1rem; opacity:0.9">'
+                + '<div class="flex flex-wrap items-center justify-between gap-2" style="margin-bottom:0.75rem">'
+                + '<div><span style="font-weight:600">#' + escapeHTML(o.orderId) + '</span>'
+                + ' <span class="badge ' + bc + '">' + escapeHTML(o.statusLabel || o.status) + '</span></div>'
+                + '<div style="color:var(--text3);font-size:0.8rem">' + escapeHTML(String(o.createdAt || '').split(' ')[0]) + '</div>'
+                + '</div>'
+                + '<div style="font-size:0.9rem;margin-bottom:0.5rem;display:flex;align-items:center;gap:0.4rem"><i data-lucide="user" style="width:14px;height:14px"></i> ผู้เบิก: <strong>' + escapeHTML(o.employeeName || o.employeeId) + '</strong></div>'
+                + '<div style="font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:1rem;display:flex;align-items:center;gap:0.4rem"><i data-lucide="banknote" style="width:18px;height:18px"></i> ฿' + Number(o.totalAmount).toLocaleString() + '</div>'
+                + itemsHtml
+                + reasonHtml
+                + '<button class="btn btn-outline btn-sm w-full" onclick="viewItems(\'' + escapeHTML(o.orderId) + '\')"><i data-lucide="eye" style="width:14px;height:14px"></i> ดูรายการแบบเต็ม</button>'
+                + '</div>';
+            }).join('');
+          }
+        }
+        
         refreshIcons();
       }).catch(function (err) {
         showToast('ไม่สามารถโหลดข้อมูลใบเบิกได้: ' + err, 'error');

@@ -1214,6 +1214,23 @@ function renderOrderList(data) {
       actions = '<button class="btn btn-primary btn-sm w-full" style="margin-top:0.5rem" onclick="openSignatureModal(\'' + o.orderId + '\')"><i data-lucide="signature" style="width:14px;height:14px"></i> เซ็นรับของ</button>';
     }
 
+    var reasonHtml = '';
+    if ((o.status === 'Rejected' || o.status === 'Cancelled') && o.comment) {
+      reasonHtml = '<div style="margin-top:0.75rem; padding:0.75rem; background:rgba(239,68,68,0.1); border-radius:6px; color:var(--danger); font-size:0.85rem;">'
+                 + '<strong>หมายเหตุ:</strong> ' + escapeHTML(o.comment)
+                 + '</div>';
+    }
+
+    var itemsHtml = '';
+    if (o.items && o.items.length > 0) {
+      itemsHtml = '<div style="margin-top:0.75rem; border-top:1px dashed var(--border); padding-top:0.75rem;">'
+                + '<ul style="list-style:none; padding:0; margin:0; font-size:0.85rem; color:var(--text2); display:flex; flex-direction:column; gap:0.25rem;">';
+      o.items.forEach(function(itm) {
+         itemsHtml += '<li>- ' + escapeHTML(itm.productName) + (itm.size ? ' (' + itm.size + ')' : '') + ' x' + itm.quantity + '</li>';
+      });
+      itemsHtml += '</ul></div>';
+    }
+
     return '<div class="order-card">'
       + '<div class="flex flex-wrap items-center justify-between gap-2" style="margin-bottom:0.75rem">'
       + '<div style="font-weight:600">#' + o.orderId + '</div>'
@@ -1226,6 +1243,8 @@ function renderOrderList(data) {
       + '<button class="btn btn-outline btn-sm" onclick="viewOrderDetails(\'' + o.orderId + '\')">ดูรายละเอียด</button>'
       + '</div>'
       + '</div>'
+      + itemsHtml
+      + reasonHtml
       + actions
       + '</div>';
   }).join('');

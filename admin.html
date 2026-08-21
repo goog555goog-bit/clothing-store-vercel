@@ -2750,6 +2750,9 @@
           actions += ' <button class="btn btn-sm btn-ghost" style="color:var(--danger)" onclick="doCancel(\'' + o.orderId + '\')"><i data-lucide="trash-2" style="width:14px;height:14px"></i> ยกเลิก</button>';
         }
 
+        // Always allow viewing details
+        actions += ' <button class="btn btn-sm btn-outline" style="margin-left:0.25rem" onclick="openSignatureModal(\'' + o.orderId + '\')"><i data-lucide="eye" style="width:14px;height:14px"></i> ดูรายละเอียด</button>';
+
         return '<tr>'
           + '<td style="font-weight:500">' + o.orderId + '</td>'
           + '<td>' + (o.employeeName || o.employeeId) + '</td>'
@@ -2820,6 +2823,14 @@
             + '<img src="' + order.signature + '" style="max-width:200px;background:#fff;border-radius:4px;margin-top:0.5rem;border:1px solid var(--border)">'
             + '<p style="font-size:0.7rem;color:var(--text3);margin-top:0.25rem">รับเมื่อ: ' + order.receivedAt + '</p>'
             + '</div>';
+        }
+
+        // --- Show Reject/Cancel Reason if applicable ---
+        if (order && (order.status === 'Rejected' || order.status === 'Cancelled') && order.comment) {
+           html += '<div style="margin-top:1rem; padding:1rem; background:rgba(239,68,68,0.1); border-radius:8px; border:1px solid rgba(239,68,68,0.2);">'
+                 + '<p style="color:var(--danger); font-size:0.9rem; margin-bottom:0.25rem; display:flex; align-items:center; gap:0.4rem;"><i data-lucide="info" style="width:16px;height:16px;"></i> <strong>เหตุผล:</strong></p>'
+                 + '<p style="color:var(--text2); font-size:0.85rem; margin-left:1.5rem;">' + escapeHTML(order.comment) + '</p>'
+                 + '</div>';
         }
 
         // Add history section for this employee
@@ -4178,7 +4189,7 @@
     }
 
     // ─── CSV EXPORT ─────────────────────────────────────────
-    function downloadCSV(sheetName) {
+    function _downloadCSVGeneric(sheetName) {
       showToast('⏳ กำลังเตรียมข้อมูล ' + sheetName + '...', 'info');
       API.exportToCSV(sheetName).then(function (res) {
         if (!res.success) { showToast('ไม่สามารถดึงข้อมูลได้', 'error'); return; }
@@ -4955,7 +4966,8 @@
           return (res.data && res.data.logs) ? res.data.logs : [];
         });
       } else {
-        showToast('ไม่รองรับการ Export ประเภทนี้ในขณะนี้', 'warning');
+        // Fallback to generic backend export
+        _downloadCSVGeneric(type);
         return;
       }
 
