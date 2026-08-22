@@ -223,6 +223,7 @@
       if (!confirm('ยืนยันการออกจากระบบผู้อนุมัติ?')) return;
       localStorage.removeItem('_user');
       localStorage.removeItem('_tok');
+      localStorage.removeItem('_sessionLastActive');
       navigateTo('login.html');
     }
 

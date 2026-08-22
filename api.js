@@ -380,3 +380,52 @@ var API = (function () {
 
   return apiObj;
 })();
+
+// ─── SESSION IDLE MONITOR ───────────────────────────────────────
+(function() {
+  if (window.location.pathname.indexOf('login.html') !== -1) return;
+  
+  var IDLE_TIMEOUT = 60 * 60 * 1000; // 1 ชั่วโมง (1 hour)
+  var WARNING_TIME = 55 * 60 * 1000; // เตือนที่ 55 นาที
+  
+  function resetIdleTime() {
+    localStorage.setItem('_sessionLastActive', Date.now());
+  }
+
+  // ตรวจจับการขยับเมาส์/กดคีย์บอร์ด/แตะจอ เพื่อต่ออายุเซสชันอัตโนมัติ
+  window.addEventListener('mousemove', resetIdleTime, {passive: true});
+  window.addEventListener('keydown', resetIdleTime, {passive: true});
+  window.addEventListener('click', resetIdleTime, {passive: true});
+  window.addEventListener('touchstart', resetIdleTime, {passive: true});
+
+  if (!localStorage.getItem('_sessionLastActive')) {
+    resetIdleTime();
+  }
+
+  var warned = false;
+
+  setInterval(function() {
+    var lastActive = localStorage.getItem('_sessionLastActive');
+    if (!lastActive || !localStorage.getItem('_user')) return;
+    
+    var idleTime = Date.now() - parseInt(lastActive, 10);
+    
+    if (idleTime >= IDLE_TIMEOUT) {
+      localStorage.removeItem('_user');
+      localStorage.removeItem('_tok');
+      localStorage.removeItem('_sessionLastActive');
+      alert('เซสชันหมดอายุเนื่องจากไม่มีการใช้งาน กรุณาเข้าสู่ระบบใหม่');
+      window.location.href = 'login.html';
+    } else if (idleTime >= WARNING_TIME && !warned) {
+      warned = true;
+      if (typeof showToast === 'function') {
+        showToast('เซสชันจะหมดอายุใน 5 นาที (ขยับเมาส์/แตะจอเพื่อต่ออายุ)', 'warning');
+      } else {
+        alert('เซสชันจะหมดอายุใน 5 นาทีเนื่องจากไม่มีการใช้งาน (คลิกตกลงเพื่อต่ออายุ)');
+        resetIdleTime(); // ถ้ากด alert ถือว่าขยับตัวแล้ว
+      }
+    } else if (idleTime < WARNING_TIME) {
+      warned = false; // รีเซ็ตการเตือนถ้าผู้ใช้กลับมาใช้งาน
+    }
+  }, 30000); // Check every 30 seconds
+})();

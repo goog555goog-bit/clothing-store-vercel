@@ -284,6 +284,7 @@
             // เก็บ session
             localStorage.setItem('_user', JSON.stringify(res.data));
             localStorage.setItem('_tok', res.data.token);
+            localStorage.setItem('_sessionLastActive', Date.now());
 
             // ทุก Role ให้เริ่มต้นที่หน้า index.html ตามความต้องการ
             navigateTo('index.html');

@@ -41,6 +41,7 @@
       if (!confirm('ยืนยันการออกจากระบบแอดมิน?')) return;
       localStorage.removeItem('_user');
       localStorage.removeItem('_tok');
+      localStorage.removeItem('_sessionLastActive');
       navigateTo('login.html');
     }
   </script>

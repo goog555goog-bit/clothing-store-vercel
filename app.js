@@ -245,6 +245,7 @@ function logout() {
   if (!confirm('ยืนยันการออกจากระบบ?')) return;
   localStorage.removeItem('_user');
   localStorage.removeItem('_tok');
+  localStorage.removeItem('_sessionLastActive');
   if (window.API && typeof window.API.clearCache === 'function') {
     window.API.clearCache();
   }
@@ -959,16 +960,15 @@ function openProductDetail(id) {
   } else {
     btn.disabled = outOfStock;
     btn.style.opacity = outOfStock ? '0.5' : '1';
-    btn.onclick = function () {
+    btn.onclick = function (e) {
       var size = document.getElementById('selected-product-size') ? document.getElementById('selected-product-size').value : null;
       var hasSizes = !!document.getElementById('size-selector-container');
       if (hasSizes && !size) {
         showToast('กรุณาเลือกไซส์ก่อนเพิ่มลงตะกร้า', 'warning');
         return;
       }
-      addToCart(p.productId, null, size);
+      addToCart(p.productId, e, size);
       closeModal('productDetailModal');
-      toggleDrawer('cartDrawer');
     };
     btn.innerHTML = outOfStock ? 'สินค้าหมด' : '<i data-lucide="shopping-cart" style="width:18px;height:18px"></i> เพิ่มลงตะกร้า';
   }
