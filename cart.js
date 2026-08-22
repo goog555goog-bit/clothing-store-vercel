@@ -32,7 +32,18 @@ var Cart = {
     var currentStoreStock = Number(product.stock);
     if (typeof allProducts !== 'undefined' && allProducts) {
       var freshP = allProducts.find(function (p) { return String(p.productId) === String(product.productId); });
-      if (freshP) currentStoreStock = Number(freshP.stock);
+      if (freshP) {
+        currentStoreStock = Number(freshP.stock);
+        if (size && freshP.variantStock) {
+          var vStock = {};
+          try { vStock = (typeof freshP.variantStock === 'string' && freshP.variantStock.startsWith('{')) ? JSON.parse(freshP.variantStock) : freshP.variantStock; } catch(e) {}
+          if (vStock[size] !== undefined) currentStoreStock = Number(vStock[size]);
+        }
+      }
+    } else if (size && product.variantStock) {
+      var vStock = {};
+      try { vStock = (typeof product.variantStock === 'string' && product.variantStock.startsWith('{')) ? JSON.parse(product.variantStock) : product.variantStock; } catch(e) {}
+      if (vStock[size] !== undefined) currentStoreStock = Number(vStock[size]);
     }
 
     if (existing) {
@@ -70,7 +81,14 @@ var Cart = {
     var targetSize = size || '';
     if (typeof allProducts !== 'undefined' && allProducts) {
       var p = allProducts.find(function (x) { return String(x.productId) === String(productId); });
-      if (p) currentStock = Number(p.stock);
+      if (p) {
+        currentStock = Number(p.stock);
+        if (targetSize && p.variantStock) {
+          var vStock = {};
+          try { vStock = (typeof p.variantStock === 'string' && p.variantStock.startsWith('{')) ? JSON.parse(p.variantStock) : p.variantStock; } catch(e) {}
+          if (vStock[targetSize] !== undefined) currentStock = Number(vStock[targetSize]);
+        }
+      }
     }
 
     for (var i = 0; i < items.length; i++) {
@@ -122,6 +140,21 @@ var Cart = {
 
     for (var i = 0; i < items.length; i++) {
       if (String(items[i].productId) === String(productId) && (items[i].size || '') === targetSize) {
+        
+        // Refresh maxStock from allProducts if available
+        if (typeof allProducts !== 'undefined' && allProducts) {
+          var p = allProducts.find(function (x) { return String(x.productId) === String(productId); });
+          if (p) {
+            var currentStock = Number(p.stock);
+            if (targetSize && p.variantStock) {
+              var vStock = {};
+              try { vStock = (typeof p.variantStock === 'string' && p.variantStock.startsWith('{')) ? JSON.parse(p.variantStock) : p.variantStock; } catch(e) {}
+              if (vStock[targetSize] !== undefined) currentStock = Number(vStock[targetSize]);
+            }
+            items[i].maxStock = currentStock;
+          }
+        }
+
         if (isNaN(val) || val < 1) val = 1;
         if (val > items[i].maxStock) {
           val = items[i].maxStock;
@@ -183,6 +216,32 @@ var Cart = {
     if (!container) return;
 
     var items = this.getItems();
+    var hasChanges = false;
+
+    // Auto-refresh maxStock from allProducts if available (fixes stale cart data)
+    if (typeof allProducts !== 'undefined' && allProducts && allProducts.length > 0) {
+      for (var i = 0; i < items.length; i++) {
+        var p = allProducts.find(function (x) { return String(x.productId) === String(items[i].productId); });
+        if (p) {
+          var currentStock = Number(p.stock);
+          var size = items[i].size || '';
+          if (size && p.variantStock) {
+            var vStock = {};
+            try { vStock = (typeof p.variantStock === 'string' && p.variantStock.startsWith('{')) ? JSON.parse(p.variantStock) : p.variantStock; } catch(e) {}
+            if (vStock[size] !== undefined) currentStock = Number(vStock[size]);
+          }
+          if (items[i].maxStock !== currentStock) {
+            items[i].maxStock = currentStock;
+            if (items[i].qty > currentStock) items[i].qty = Math.max(1, currentStock); // adjust qty if it exceeds new max
+            hasChanges = true;
+          }
+        }
+      }
+      if (hasChanges) {
+        localStorage.setItem(this.KEY, JSON.stringify(items)); // Silently save without triggering re-render to avoid loop
+      }
+    }
+
     this.renderBadge();
 
     if (totalEl) totalEl.textContent = (typeof hasPermission === 'function' && !hasPermission('view_prices')) ? '***' : '฿' + this.getTotal().toLocaleString();
