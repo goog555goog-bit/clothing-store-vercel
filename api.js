@@ -176,6 +176,17 @@ var API = (function () {
                 }
                 resolve(res);
               } else {
+                if (res && res.errorType === 'SESSION_INVALID') {
+                  console.error('Session Invalidated - Forcing Logout');
+                  if (typeof showToast === 'function') showToast('เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่', 'error');
+                  setTimeout(function() {
+                    localStorage.removeItem('invUser');
+                    localStorage.removeItem('_sessionLastActive');
+                    window.location.href = 'login.html';
+                  }, 1500);
+                  reject('SESSION_INVALID');
+                  return;
+                }
                 var msg = res ? (res.message || res.error || 'เซิร์ฟเวอร์แจ้งข้อผิดพลาด') : 'ไม่ได้รับข้อมูลที่ถูกต้อง';
                 reject(msg);
               }
