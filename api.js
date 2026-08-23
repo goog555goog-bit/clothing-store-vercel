@@ -180,7 +180,8 @@ var API = (function () {
                   console.error('Session Invalidated - Forcing Logout');
                   if (typeof showToast === 'function') showToast('เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่', 'error');
                   setTimeout(function() {
-                    localStorage.removeItem('invUser');
+                    localStorage.removeItem('_user');
+                    localStorage.removeItem('_tok');
                     localStorage.removeItem('_sessionLastActive');
                     window.location.href = 'login.html';
                   }, 1500);
