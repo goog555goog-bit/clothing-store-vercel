@@ -370,6 +370,7 @@ var API = (function () {
     checkEmployee: function (employeeId) { return this._call('checkEmployee', { employeeId: employeeId }, true); },
     login: function (employeeId, password) { return this._call('login', { employeeId: employeeId, password: password }, false); },
     changePassword: function (oldPassword, newPassword) { return this._call('changePassword', { oldPassword: oldPassword, newPassword: newPassword }, false); },
+    updateProfileEmail: function (email) { return this._call('updateProfileEmail', { email: email }, false); },
 
     // ─── OTHERS ───────────────────────────────────────────────
     uploadToDrive: function (base64, fileName) { return this._call('uploadToDrive', { base64: base64, fileName: fileName }); },
