@@ -471,6 +471,7 @@ function loadStorefrontData() {
 // Global state for suggestion index and debounce
 var currentSuggestionIdx = -1;
 var searchDebounceTimer = null;
+var lastSearchQuery = null;
 
 function handleSearchInput(val, e) {
   var dropdown = document.getElementById('searchSuggestions');
@@ -494,6 +495,7 @@ function handleSearchInput(val, e) {
           items[currentSuggestionIdx].click();
         } else {
           dropdown.classList.remove('active');
+          lastSearchQuery = val;
           renderProductGrid();
         }
         e.preventDefault();
@@ -502,6 +504,7 @@ function handleSearchInput(val, e) {
     } else if (e.key === 'Enter') {
       // Normal enter search
       dropdown.classList.remove('active');
+      lastSearchQuery = val;
       renderProductGrid();
       e.preventDefault();
       return;
@@ -514,14 +517,17 @@ function handleSearchInput(val, e) {
   var q = (val || '').toLowerCase().trim();
   currentSuggestionIdx = -1;
 
-  // [Fix UI-2] Hide dropdown when search is empty (prevents dummy data from showing)
+  // Hide dropdown when search is empty (prevents dummy data from showing)
   if (!q) {
     dropdown.classList.remove('active');
-    renderProductGrid();
+    if (lastSearchQuery !== '') {
+      lastSearchQuery = '';
+      renderProductGrid();
+    }
     return;
   }
 
-  // Wait 400ms after typing before searching
+  // Wait 800ms after typing before searching
   searchDebounceTimer = setTimeout(function () {
     var matches = allProducts;
 
@@ -538,7 +544,6 @@ function handleSearchInput(val, e) {
     if (displayMatches.length === 0) {
       dropdown.innerHTML = '<div class="suggestion-item" style="opacity:0.5; padding:1rem; text-align:center; cursor:default">ไม่พบสินค้า</div>';
       dropdown.classList.add('active');
-      renderProductGrid();
       return;
     }
 
@@ -568,9 +573,8 @@ function handleSearchInput(val, e) {
     }).join('');
 
     dropdown.classList.add('active');
-    renderProductGrid();
     refreshIcons();
-  }, q ? 400 : 50);
+  }, q ? 800 : 50);
 }
 
 
@@ -585,6 +589,7 @@ function selectSuggestion(pid) {
   var p = allProducts.find(function (x) { return String(x.productId) === String(pid); });
   if (p) {
     document.getElementById('searchInput').value = p.name;
+    lastSearchQuery = p.name;
     document.getElementById('searchSuggestions').classList.remove('active');
     renderProductGrid();
   }

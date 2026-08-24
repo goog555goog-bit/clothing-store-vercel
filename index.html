@@ -38,8 +38,7 @@
           <i data-lucide="search" style="width:18px;height:18px;color:var(--text3);margin-left:1rem;"></i>
           <!-- [แก้ไข A11y] เพิ่ม aria-label สำหรับช่องค้นหา -->
           <input id="searchInput" type="text" placeholder="ค้นหาสินค้า..." autocomplete="off"
-            aria-label="ค้นหาสินค้าด้วยชื่อหรือรหัส" onfocus="handleSearchInput(this.value, event)"
-            onclick="handleSearchInput(this.value, event)" onkeydown="handleSearchInput(this.value, event)"
+            aria-label="ค้นหาสินค้าด้วยชื่อหรือรหัส" onkeydown="handleSearchInput(this.value, event)"
             oninput="handleSearchInput(this.value, event)"
             style="padding-left:0.5rem;background:transparent;border:none;height:100%;color:var(--text);min-width:80px;">
         </div>
