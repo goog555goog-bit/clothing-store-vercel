@@ -3333,6 +3333,9 @@
       }).then(function (res) {
         if (res.success) showToast('บันทึกสิทธิ์บทบาทเรียบร้อย', 'success');
         else showToast(res.message, 'error');
+      }).catch(function (err) {
+        console.error('Save permissions error:', err);
+        showToast('ไม่สามารถบันทึกสิทธิ์ได้ กรุณาตรวจสอบอินเทอร์เน็ต: ' + err, 'error');
       });
     }
 
