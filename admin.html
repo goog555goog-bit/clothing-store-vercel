@@ -815,15 +815,20 @@
           <label class="form-label">หมวดหมู่ *</label>
           <select id="pf-cat" class="input w-full"></select>
         </div>
-        <div class="form-group">
-          <label class="form-label">ไซส์ (ระบุคั่นด้วยคอมม่า เช่น S, M, L, XL)</label>
-          <input id="pf-sizes" class="form-input" placeholder="S, M, L, XL หรือ เว้นว่างถ้าไม่มีไซส์"
-            oninput="generateSizeStockInputs()">
+        <div class="form-group" style="margin-bottom: 0.5rem">
+          <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; width:max-content">
+            <input type="checkbox" id="pf-has-sizes" onchange="toggleSizeInput(this.checked)">
+            <span style="font-size:0.85rem; font-weight:500; color:var(--text2)">สินค้านี้มีหลายไซส์ (มีตัวเลือกย่อย)</span>
+          </label>
         </div>
-        <div id="size-stock-container" style="margin-bottom:1rem; display:none">
-          <label class="form-label" style="font-size:0.8rem; color:var(--text3)">กำหนดสต็อกแยกตามไซส์</label>
-          <div id="size-stock-list" class="flex flex-wrap gap-2"
-            style="padding:0.5rem; background:rgba(255,255,255,0.02); border-radius:8px"></div>
+        <div id="pf-size-input-wrapper" class="form-group" style="display:none; padding-left:1.5rem; border-left:2px solid rgba(255,255,255,0.1)">
+          <label class="form-label" style="font-size:0.8rem">พิมพ์ไซส์ (คั่นด้วยคอมม่า เช่น S, M, L, XL)</label>
+          <input id="pf-sizes" class="form-input" placeholder="S, M, L, XL" oninput="generateSizeStockInputs()">
+          <div id="size-stock-container" style="margin-top:1rem; display:none">
+            <label class="form-label" style="font-size:0.8rem; color:var(--text3)">กำหนดสต็อกแยกตามไซส์</label>
+            <div id="size-stock-list" class="flex flex-wrap gap-2"
+              style="padding:0.5rem; background:rgba(255,255,255,0.02); border-radius:8px"></div>
+          </div>
         </div>
         <div class="form-group">
           <label class="form-label">รูปภาพสินค้า</label>
@@ -2457,6 +2462,10 @@
       document.getElementById('pf-stock').value = product ? product.stock : '';
       document.getElementById('pf-min').value = product ? product.minStock || '5' : '5';
       document.getElementById('pf-sizes').value = product ? (product.sizes || '') : '';
+      
+      var hasSizes = product && product.sizes && product.sizes.trim() !== '';
+      document.getElementById('pf-has-sizes').checked = hasSizes;
+      toggleSizeInput(hasSizes);
 
       generateSizeStockInputs(product ? product.variantStock : null);
 
@@ -2478,6 +2487,19 @@
       }
     }
     function closeProductModal() { document.getElementById('productModal').classList.remove('open'); }
+
+    function toggleSizeInput(show) {
+      var wrapper = document.getElementById('pf-size-input-wrapper');
+      var sizeInput = document.getElementById('pf-sizes');
+      if (show) {
+        wrapper.style.display = 'block';
+        if (!sizeInput.value) sizeInput.value = 'S, M, L, XL';
+      } else {
+        wrapper.style.display = 'none';
+        sizeInput.value = '';
+      }
+      generateSizeStockInputs();
+    }
 
     function generateSizeStockInputs(variantStock) {
       var sizesStr = document.getElementById('pf-sizes').value;
