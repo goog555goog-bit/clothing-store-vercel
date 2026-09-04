@@ -2345,7 +2345,7 @@
           + '</td>'
           + '<td data-label="สถานะ"><span class="badge ' + (p.status === 'active' ? 'badge-approved' : 'badge-rejected') + '" style="cursor:pointer" onclick="event.stopPropagation(); toggleProductStatus(\'' + p.productId + '\', \'' + p.status + '\')">' + (p.status === 'active' ? 'เปิด' : 'ปิด') + '</span></td>'
           + '<td data-label="จัดการ" onclick="event.stopPropagation()">'
-          + '<button class="btn btn-sm btn-ghost" onclick="generateBarcode(\'' + escapeHTML(p.productId) + '\', \'' + String(p.name || "").replace(/'/g, "\\'") + '\')" title="ดูบาร์โค้ด"><i data-lucide="barcode" style="width:14px;height:14px"></i></button>'
+          + '<button class="btn btn-sm btn-ghost" onclick="generateBarcode(\'' + escapeHTML(p.productId) + '\')" title="ดูบาร์โค้ด"><i data-lucide="barcode" style="width:14px;height:14px"></i></button>'
           + '<button class="btn btn-sm btn-ghost btn-inventory-mgr" onclick="editProduct(\'' + escapeHTML(p.productId) + '\')"><i data-lucide="edit" style="width:14px;height:14px"></i></button>'
           + '<button class="btn btn-sm btn-ghost btn-inventory-mgr" style="color:var(--danger)" onclick="delProduct(\'' + escapeHTML(p.productId) + '\')"><i data-lucide="trash-2" style="width:14px;height:14px"></i></button></td>'
           + '</tr>';
@@ -3903,7 +3903,7 @@
             + '</td>'
             + '<td>' + p.minStock + '</td>'
             + '<td>' + statusBadge + '</td>'
-            + '<td><button class="btn btn-sm btn-outline" onclick="openStockModal(\'' + p.productId + '\',\'' + p.name + '\')">ปรับ</button></td>'
+            + '<td><button class="btn btn-sm btn-outline" onclick="openStockModal(\'' + escapeHTML(p.productId) + '\')">ปรับ</button></td>'
             + '</tr>';
         }).join('');
         refreshIcons();
@@ -3912,7 +3912,8 @@
 
     function openStockModal(id, name) {
       document.getElementById('stockProductId').value = id;
-      document.getElementById('stockProductName').textContent = '📦 ' + name;
+      var p = allAdminProducts.find(function (x) { return String(x.productId) === String(id); });
+      document.getElementById('stockProductName').textContent = '📦 ' + (name || (p ? p.name : id));
       document.getElementById('stockAdjust').value = '';
 
       var sizeContainer = document.getElementById('sizeStockContainer');
@@ -4743,7 +4744,8 @@
 
     // --- BARCODE LOGIC ---
     function generateBarcode(id, name) {
-      document.getElementById('barcodeLabel').textContent = name;
+      var p = typeof allAdminProducts !== 'undefined' ? allAdminProducts.find(function (x) { return String(x.productId) === String(id); }) : null;
+      document.getElementById('barcodeLabel').textContent = name || (p ? p.name : id);
       document.getElementById('barcodeModal').classList.add('open');
 
       setTimeout(function () {

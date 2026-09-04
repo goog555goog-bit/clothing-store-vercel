@@ -1593,6 +1593,20 @@ function loadUsageHistory() {
   });
 }
 
+var _subStockVisibleItems = [];
+
+function openActionModalByIndex(action, index) {
+  var item = _subStockVisibleItems[index];
+  if (!item) return;
+  openActionModal(action, item.productId, item.productName, item.quantity, item.size || '');
+}
+
+function openProductDetailByIndex(index) {
+  var item = _subStockVisibleItems[index];
+  if (!item) return;
+  openProductDetail(item.productId);
+}
+
 function renderSubStock(data, teamName) {
   var grid = document.getElementById('subStockGrid');
   if (!grid) return;
@@ -1617,7 +1631,9 @@ function renderSubStock(data, teamName) {
     return;
   }
 
-  grid.innerHTML = visibleData.map(function (item) {
+  _subStockVisibleItems = visibleData;
+
+  grid.innerHTML = visibleData.map(function (item, idx) {
     // ใช้ String() ป้องกัน type mismatch ของ productId
     var prod = allProducts.filter(function (p) { return String(p.productId) === String(item.productId); })[0];
     var imgUrl = getImageUrl(prod ? prod.imageUrl : '');
@@ -1625,21 +1641,19 @@ function renderSubStock(data, teamName) {
       ? '<img src="' + imgUrl + '" class="product-img" loading="lazy" onerror="this.src=\'\';this.parentElement.innerHTML=\'<div class=\\\'product-img\\\' style=\\\'display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:2rem\\\'>📦</div>\'">'
       : '<div class="product-img" style="display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:2rem">📦</div>';
 
-    var pNameSafe = String(item.productName || 'ไม่ทราบชื่อ').replace(/'/g, "\\'");
-
     return '<div class="product-card">'
-      + '<div class="product-img-wrap" onclick="openProductDetail(\'' + item.productId + '\')" style="cursor:pointer;">'
+      + '<div class="product-img-wrap" onclick="openProductDetailByIndex(' + idx + ')" style="cursor:pointer;">'
       + imgHtml
       + '</div>'
-      + '<div class="product-info" onclick="openProductDetail(\'' + item.productId + '\')" style="cursor:pointer; flex: 1;">'
-      + '<div class="product-name">' + (item.productName || 'ไม่ทราบชื่อ') + (item.size ? ' <span class="badge" style="font-size:0.7rem; padding:2px 6px">' + item.size + '</span>' : '') + '</div>'
-      + '<div class="product-stock">คงเหลือ: <span id="ss-qty-' + item.productId + '-' + (item.size || 'default') + '">' + item.quantity + '</span></div>'
+      + '<div class="product-info" onclick="openProductDetailByIndex(' + idx + ')" style="cursor:pointer; flex: 1;">'
+      + '<div class="product-name">' + escapeHTML(item.productName || 'ไม่ทราบชื่อ') + (item.size ? ' <span class="badge" style="font-size:0.7rem; padding:2px 6px">' + escapeHTML(item.size) + '</span>' : '') + '</div>'
+      + '<div class="product-stock">คงเหลือ: <span id="ss-qty-' + escapeHTML(item.productId) + '-' + escapeHTML(item.size || 'default') + '">' + item.quantity + '</span></div>'
       + '</div>'
       + '<div class="product-info" style="padding-top:0;">'
       + '<div style="display:flex; gap:0.5rem; flex-wrap:wrap">'
-      + '<button class="btn btn-primary btn-sm flex-1" onclick="openActionModal(\'use\', \'' + item.productId + '\', \'' + pNameSafe + '\', ' + item.quantity + ', \'' + (item.size || '') + '\')"><i data-lucide="sparkles" style="width:14px;height:14px"></i> เบิกใช้งาน</button>'
-      + '<button class="btn btn-outline btn-sm hide-text-mobile" title="โอนให้เพื่อน" onclick="openActionModal(\'transfer\', \'' + item.productId + '\', \'' + pNameSafe + '\', ' + item.quantity + ', \'' + (item.size || '') + '\')"><i data-lucide="repeat" style="width:14px;height:14px"></i> <span>โอน</span></button>'
-      + '<button class="btn btn-ghost btn-sm hide-text-mobile" title="คืนคลังหลัก" onclick="openActionModal(\'return\', \'' + item.productId + '\', \'' + pNameSafe + '\', ' + item.quantity + ', \'' + (item.size || '') + '\')"><i data-lucide="archive" style="width:14px;height:14px"></i> <span>คืน</span></button>'
+      + '<button class="btn btn-primary btn-sm flex-1" onclick="openActionModalByIndex(\'use\', ' + idx + ')"><i data-lucide="sparkles" style="width:14px;height:14px"></i> เบิกใช้งาน</button>'
+      + '<button class="btn btn-outline btn-sm hide-text-mobile" title="โอนให้เพื่อน" onclick="openActionModalByIndex(\'transfer\', ' + idx + ')"><i data-lucide="repeat" style="width:14px;height:14px"></i> <span>โอน</span></button>'
+      + '<button class="btn btn-ghost btn-sm hide-text-mobile" title="คืนคลังหลัก" onclick="openActionModalByIndex(\'return\', ' + idx + ')"><i data-lucide="archive" style="width:14px;height:14px"></i> <span>คืน</span></button>'
       + '</div>'
       + '</div>'
       + '</div>';
