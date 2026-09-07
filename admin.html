@@ -37,6 +37,7 @@
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
     }
+    var escapeHtml = escapeHTML;
     function adminLogout() {
       if (!confirm('ยืนยันการออกจากระบบแอดมิน?')) return;
       localStorage.removeItem('_user');
@@ -146,6 +147,9 @@
         <button class="tab" id="tab-teams" data-admin-page="teams" onclick="adminNav('teams', this)"><i
             data-lucide="users"></i>
           จัดการทีมช่าง</button>
+        <button class="tab" id="tab-tech-requests" data-admin-page="tech-requests" onclick="adminNav('tech-requests', this)"><i
+            data-lucide="wrench"></i>
+          เบิกของทีมช่าง</button>
         <button class="tab" id="tab-settings" data-admin-page="settings" onclick="adminNav('settings', this)"><i
             data-lucide="settings"></i>
           ตั้งค่าระบบ</button>
@@ -557,6 +561,96 @@
         <div class="card text-center" style="padding:3rem">
           <div class="spinner"></div>
         </div>
+      </div>
+    </section>
+
+    <!-- Technician Requests Section (เบิกของทีมช่าง) -->
+    <section id="p-tech-requests" class="admin-page" style="display:none">
+      <div class="flex flex-wrap items-center justify-between gap-2" style="margin-bottom:1.5rem">
+        <div>
+          <h2 style="margin:0"><i data-lucide="wrench"></i> เบิกของทีมช่าง (Technician Requests)</h2>
+          <p class="hide-mobile" style="font-size:0.85rem; color:var(--text3); margin:4px 0 0">ตรวจสอบรายการที่ช่างในทีมขอเบิก และจ่ายของเข้าคลังย่อยของช่าง</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button class="btn btn-outline btn-sm" onclick="loadTechRequests()"><i data-lucide="refresh-cw"></i> รีเฟรช</button>
+        </div>
+      </div>
+
+      <!-- Summary KPI Stat Cards for Coordinator -->
+      <div class="grid grid-3 gap-2" style="margin-bottom:1.25rem">
+        <div class="card glass" style="padding:1rem; border-left:4px solid var(--warning); display:flex; align-items:center; gap:1rem;">
+          <div style="width:42px; height:42px; border-radius:10px; background:rgba(234,179,8,0.12); display:flex; align-items:center; justify-content:center; color:var(--warning);">
+            <i data-lucide="clock" style="width:24px; height:24px;"></i>
+          </div>
+          <div>
+            <div style="font-size:0.8rem; color:var(--text3);">รอจ่ายของ (Pending)</div>
+            <div id="techKpiPending" style="font-size:1.6rem; font-weight:700; color:var(--warning); line-height:1.1;">0</div>
+          </div>
+        </div>
+
+        <div class="card glass" style="padding:1rem; border-left:4px solid var(--success); display:flex; align-items:center; gap:1rem;">
+          <div style="width:42px; height:42px; border-radius:10px; background:rgba(34,197,94,0.12); display:flex; align-items:center; justify-content:center; color:var(--success);">
+            <i data-lucide="check-circle" style="width:24px; height:24px;"></i>
+          </div>
+          <div>
+            <div style="font-size:0.8rem; color:var(--text3);">จ่ายแล้ว/เรียบร้อย</div>
+            <div id="techKpiReceived" style="font-size:1.6rem; font-weight:700; color:var(--success); line-height:1.1;">0</div>
+          </div>
+        </div>
+
+        <div class="card glass" style="padding:1rem; border-left:4px solid var(--primary); display:flex; align-items:center; gap:1rem;">
+          <div style="width:42px; height:42px; border-radius:10px; background:rgba(99,102,241,0.12); display:flex; align-items:center; justify-content:center; color:var(--primary);">
+            <i data-lucide="file-text" style="width:24px; height:24px;"></i>
+          </div>
+          <div>
+            <div style="font-size:0.8rem; color:var(--text3);">รายการเบิกทั้งหมด</div>
+            <div id="techKpiTotal" style="font-size:1.6rem; font-weight:700; color:var(--text1); line-height:1.1;">0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="card glass" style="margin-bottom:1.5rem; padding:1.25rem;">
+        <div class="grid grid-3 gap-2">
+          <div>
+            <label class="form-label" style="font-size:0.8rem; margin-bottom:0.25rem">เลือกทีมช่าง</label>
+            <select id="techReqFilterTeam" class="input w-full" onchange="loadTechRequests()">
+              <option value="all">ทุกทีมที่ดูแล</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label" style="font-size:0.8rem; margin-bottom:0.25rem">สถานะใบเบิก</label>
+            <select id="techReqFilterStatus" class="input w-full" onchange="loadTechRequests()">
+              <option value="Pending" selected>⚡ รอจ่ายของเท่านั้น (Pending)</option>
+              <option value="Received">✅ จ่ายแล้ว/รับของแล้ว (Received)</option>
+              <option value="all">📁 ทั้งหมด</option>
+            </select>
+          </div>
+          <div style="display:flex; align-items:flex-end">
+            <button class="btn btn-primary w-full" onclick="loadTechRequests()"><i data-lucide="filter"></i> กรองรายการ</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Table of Technician Requests -->
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>เลขที่ใบเบิก</th>
+              <th>ชื่อช่างผู้เบิก</th>
+              <th>ทีมช่าง</th>
+              <th>รายการพัสดุที่ขอเบิก</th>
+              <th>คลังปลายทาง</th>
+              <th>วันที่ขอเบิก</th>
+              <th>สถานะ</th>
+              <th style="text-align:center">จัดการ</th>
+            </tr>
+          </thead>
+          <tbody id="techRequestsBody">
+            <tr><td colspan="8" class="text-center" style="padding:2rem"><div class="spinner"></div></td></tr>
+          </tbody>
+        </table>
       </div>
     </section>
 
@@ -1000,25 +1094,33 @@
           </select>
         </div>
         <div class="form-group">
-          <label class="form-label">ทีมช่าง (ถ้ามี)</label>
-          <select id="ef-team" class="input w-full">
-            <option value="">-- ไม่สังกัดทีม --</option>
-          </select>
-        </div>
-        <div class="form-group">
           <label class="form-label">สิทธิ์การใช้งานหลัก (Role) *</label>
-          <select id="ef-role" class="input w-full">
+          <select id="ef-role" class="input w-full" onchange="onEmployeeRoleChanged()">
             <option value="employee">Employee (พนักงานทั่วไป)</option>
             <option value="fc">FC (คลังสินค้า/จ่ายของ)</option>
             <option value="technician">Technician (ช่างเทคนิค)</option>
+            <option value="coordinator">Coordinator (ธุรการ)</option>
             <option value="hr">HR (บุคคล)</option>
             <option value="manager">Manager (ผู้จัดการ)</option>
             <option value="admin">Admin (ผู้ดูแลระบบ)</option>
             <option value="superadmin">Superadmin (ผู้บริหารสูงสุด)</option>
           </select>
         </div>
-
-
+        <div class="form-group" id="ef-team-single-wrap">
+          <label class="form-label">ทีมช่างที่สังกัด</label>
+          <select id="ef-team" class="input w-full">
+            <option value="">-- ไม่สังกัดทีม --</option>
+          </select>
+        </div>
+        <div class="form-group" id="ef-team-multi-wrap" style="display:none">
+          <label class="form-label" style="display:flex; justify-content:between; align-items:center;">
+            <span>ทีมช่างที่ดูแล (เลือกได้มากกว่า 1 ทีม)</span>
+            <small style="color:var(--primary); font-weight:normal;">สำหรับธุรการ / แอดมินทีม</small>
+          </label>
+          <div id="ef-team-checkboxes" style="max-height:160px; overflow-y:auto; border:1px solid var(--border); border-radius:var(--radius-sm); padding:0.5rem; background:rgba(255,255,255,0.02); display:flex; flex-direction:column; gap:0.4rem;">
+            <!-- Checkboxes generated dynamically -->
+          </div>
+        </div>
       </div>
       <div class="modal-footer flex-wrap">
         <button class="btn btn-outline" onclick="closeEmployeeModal()">ยกเลิก</button>
@@ -1430,6 +1532,10 @@
         <i data-lucide="users" style="width:20px;height:20px;color:var(--accent)"></i>
         <span>ทีมช่าง</span>
       </button>
+      <button class="admin-more-item" onclick="adminNav('tech-requests'); toggleAdminMoreMenu()">
+        <i data-lucide="wrench" style="width:20px;height:20px;color:var(--accent)"></i>
+        <span>เบิกของช่าง</span>
+      </button>
       <button class="admin-more-item" onclick="adminNav('settings'); toggleAdminMoreMenu()">
         <i data-lucide="settings" style="width:20px;height:20px;color:var(--text3)"></i>
         <span>ตั้งค่า</span>
@@ -1645,7 +1751,8 @@
         'tab-settings': API.PERMS.MANAGE_SETTINGS,
         'tab-branches': API.PERMS.MANAGE_STRUCTURE,
         'tab-permissions': API.PERMS.MANAGE_EMPLOYEES,
-        'tab-orders': 'VIEW_ORDERS_OR_TEAM' // [Special Key]
+        'tab-orders': 'VIEW_ORDERS_OR_TEAM', // [Special Key]
+        'tab-tech-requests': 'VIEW_TECH_REQUESTS'
       };
 
       for (var id in tabPermissions) {
@@ -1659,6 +1766,11 @@
           isAllowed = API.hasPermission(API.PERMS.APPROVE_REQUEST) ||
             API.hasPermission(API.PERMS.VIEW_ALL_REQUESTS) ||
             hasTeam;
+        } else if (p === 'VIEW_TECH_REQUESTS') {
+          isAllowed = hasTeam ||
+            hasPermission('manage_team_substock') ||
+            hasPermission('supervise_substock') ||
+            API.hasPermission(API.PERMS.MANAGE_STRUCTURE);
         } else {
           isAllowed = API.hasPermission(p);
         }
@@ -1768,7 +1880,8 @@
         'departments': { t: 'แผนกงาน', d: 'จัดการรายชื่อแผนกในองค์กร' },
         'branches': { t: 'จัดการสาขา', d: 'ตั้งค่าข้อมูลสาขาและที่ตั้ง' },
         'audit': { t: 'ประวัติกิจกรรมระบบ', d: 'ตรวจสอบความเคลื่อนไหวและการทำงานของระบบ' },
-        'usage': { t: 'ประวัติการเบิกใช้', d: 'ตรวจสอบข้อมูลการเบิกใช้พัสดุรายทีมและรายบุคคล' }
+        'usage': { t: 'ประวัติการเบิกใช้', d: 'ตรวจสอบข้อมูลการเบิกใช้พัสดุรายทีมและรายบุคคล' },
+        'tech-requests': { t: 'เบิกของทีมช่าง', d: 'ตรวจสอบและจ่ายพัสดุเข้าคลังย่อยของช่างประจำทีม' }
       };
 
       if (titles[page]) {
@@ -1782,6 +1895,7 @@
         'products': function () { loadProducts(options); },
         'categories': loadAdminCategories,
         'orders': loadAdminOrders,
+        'tech-requests': loadTechRequests,
         'inventory': loadInventory,
         'reports': loadReports,
         'employees': loadAdminEmployees,
@@ -3078,28 +3192,54 @@
         }
         body.innerHTML = resEmp.data.map(function (e) {
           var isMe = currentUser && e.employeeId === currentUser.employeeId;
-          var roleSelect = '<select class="input input-sm" onchange="changeEmpRole(\'' + e.employeeId + '\', this)" ' + (isMe ? 'disabled' : '') + '>'
+          var roleSelect = '<select class="input input-sm" onchange="changeEmpRole(\'' + e.employeeId + '\', this)" ' + (isMe ? 'disabled' : '') + ' style="min-width:145px; font-size:0.85rem;">'
             + '<option value="employee" ' + (e.role === 'employee' ? 'selected' : '') + '>พนักงานทั่วไป</option>'
             + '<option value="fc" ' + (e.role === 'fc' ? 'selected' : '') + '>FC</option>'
             + '<option value="technician" ' + (e.role === 'technician' ? 'selected' : '') + '>ช่างเทคนิค</option>'
+            + '<option value="coordinator" ' + (e.role === 'coordinator' || e.role === 'ธุรการ' ? 'selected' : '') + '>ธุรการ</option>'
             + '<option value="hr" ' + (e.role === 'hr' ? 'selected' : '') + '>HR</option>'
             + '<option value="manager" ' + (e.role === 'manager' ? 'selected' : '') + '>ผู้จัดการ</option>'
             + '<option value="admin" ' + (e.role === 'admin' ? 'selected' : '') + '>แอดมิน</option>'
             + '<option value="superadmin" ' + (e.role === 'superadmin' ? 'selected' : '') + '>แอดมินสูงสุด</option>'
             + '</select>';
 
-          var teamName = '-';
-          if (e.teamId) {
-            var team = allAdminTeams.find(function (t) { return String(t.teamId) === String(e.teamId); });
-            if (team) teamName = team.name;
+          var isCoordinator = (e.role === 'coordinator' || e.role === 'ธุรการ');
+          
+          var teamCell = '';
+          if (isCoordinator) {
+            // Coordinator can oversee multiple teams - render neatly
+            var assignedTeams = String(e.teamId || '').split(',').map(function(s){ return s.trim(); }).filter(Boolean);
+            if (assignedTeams.length === 0) {
+              teamCell = '<div style="display:flex; align-items:center; gap:0.4rem;">'
+                + '<span style="color:var(--text3); font-size:0.8rem; font-style:italic;">ยังไม่ได้เลือกทีม</span>'
+                + '<button class="btn btn-xs btn-outline" onclick="editEmployee(\'' + escapeHTML(e.employeeId) + '\')" title="เลือกทีมที่ดูแล"><i data-lucide="settings-2" style="width:12px;height:12px"></i> ตั้งค่าทีม</button>'
+                + '</div>';
+            } else {
+              var badges = assignedTeams.map(function(tid) {
+                var t = allAdminTeams.find(function(x){ return String(x.teamId) === String(tid); });
+                var tName = t ? t.name : tid;
+                return '<span class="badge badge-primary" style="font-size:0.75rem; padding:0.15rem 0.45rem; white-space:nowrap;">' + escapeHTML(tName) + '</span>';
+              }).join('');
+
+              teamCell = '<div style="display:flex; flex-wrap:wrap; align-items:center; gap:0.3rem; max-width:320px;">'
+                + badges
+                + '<button class="btn btn-xs btn-ghost" onclick="editEmployee(\'' + escapeHTML(e.employeeId) + '\')" title="แก้ไขทีมที่ดูแล" style="padding:2px 5px; color:var(--primary);"><i data-lucide="edit" style="width:12px;height:12px"></i></button>'
+                + '</div>';
+            }
+          } else {
+            // Regular employee / technician has single team dropdown
+            var options = '<option value="">-- ไม่สังกัดทีม --</option>' + allAdminTeams.map(function (t) {
+              return '<option value="' + escapeHTML(t.teamId) + '" ' + (String(e.teamId || '').trim() === String(t.teamId) ? 'selected' : '') + '>' + escapeHTML(t.name) + '</option>';
+            }).join('');
+            teamCell = '<select class="input input-sm" onchange="changeEmpTeam(\'' + escapeHTML(e.employeeId) + '\', this)" ' + (isMe ? 'disabled' : '') + ' style="min-width:140px; max-width:180px;">' + options + '</select>';
           }
 
           return '<tr>'
-            + '<td class="hide-mobile">' + e.employeeId + '</td>'
-            + '<td style="font-weight:500">' + e.name + '</td>'
-            + '<td class="hide-mobile">' + (e.department || '-') + '</td>'
-            + '<td>' + teamName + '</td>'
-            + '<td>' + (isMe ? '<span class="badge badge-approved">คุณ (' + e.role + ')</span>' : roleSelect) + '</td>'
+            + '<td class="hide-mobile">' + escapeHTML(e.employeeId) + '</td>'
+            + '<td style="font-weight:500">' + escapeHTML(e.name) + '</td>'
+            + '<td class="hide-mobile">' + escapeHTML(e.department || '-') + '</td>'
+            + '<td>' + teamCell + '</td>'
+            + '<td>' + (isMe ? '<span class="badge badge-approved">คุณ (' + escapeHTML(e.role) + ')</span>' : roleSelect) + '</td>'
             + '<td class="hide-mobile"><span class="badge ' + (e.status === 'active' ? 'badge-approved' : 'badge-rejected') + '">' + (e.status === 'active' ? 'ปกติ' : 'ปิด') + '</span></td>'
             + '<td class="flex flex-wrap gap-1">'
             + '<button class="btn btn-xs btn-outline" onclick="showUserSubStock(\'' + escapeHTML(e.employeeId) + '\')" title="ดูคลังสินค้าส่วนตัว" ' + (hasPermission('supervise_substock') ? '' : 'style="display:none"') + '><i data-lucide="eye" style="width:12px;height:12px;pointer-events:none"></i></button>'
@@ -3114,12 +3254,37 @@
 
     function changeEmpRole(id, sel) {
       var newRole = sel.value;
+      var emp = allAdminEmployees.find(function(x) { return String(x.employeeId) === String(id); });
       if (!confirm('ยืนยันการเปลี่ยนบทบาทของ ' + id + ' เป็น ' + newRole + ' ?')) {
         loadAdminEmployees();
         return;
       }
-      API.updateEmployeeRole(id, newRole).then(function (res) {
-        if (res.success) showToast('เปลี่ยนบทบาทเรียบร้อย', 'success');
+      API.updateEmployeeRole(id, newRole, emp ? emp.teamId : undefined).then(function (res) {
+        if (res.success) {
+          showToast('เปลี่ยนบทบาทเรียบร้อย', 'success');
+          // If changed to coordinator, prompt or open modal to pick teams if empty
+          if ((newRole === 'coordinator' || newRole === 'ธุรการ') && (!emp || !emp.teamId)) {
+            showToast('โปรดเลือกทีมที่ธุรการคนนี้ดูแล', 'info');
+            editEmployee(id);
+            return;
+          }
+        } else {
+          showToast(res.message, 'error');
+        }
+        loadAdminEmployees();
+      });
+    }
+
+    function changeEmpTeam(id, sel) {
+      var newTeam = sel.value;
+      var emp = allAdminEmployees.find(function(x) { return String(x.employeeId) === String(id); });
+      var teamName = sel.options[sel.selectedIndex].text;
+      if (!confirm('ยืนยันการเปลี่ยนสังกัดทีมของ ' + id + ' เป็น "' + teamName + '" ?')) {
+        loadAdminEmployees();
+        return;
+      }
+      API.updateEmployeeRole(id, emp ? emp.role : undefined, newTeam).then(function (res) {
+        if (res.success) showToast('อัปเดตทีมเรียบร้อย', 'success');
         else showToast(res.message, 'error');
         loadAdminEmployees();
       });
@@ -3130,6 +3295,22 @@
         return String(e.employeeId) === String(id);
       });
       if (emp) openEmployeeModal(emp);
+    }
+
+    function onEmployeeRoleChanged() {
+      var role = document.getElementById('ef-role').value;
+      var isCoord = (role === 'coordinator' || role === 'ธุรการ');
+      var singleWrap = document.getElementById('ef-team-single-wrap');
+      var multiWrap = document.getElementById('ef-team-multi-wrap');
+      if (singleWrap && multiWrap) {
+        if (isCoord) {
+          singleWrap.style.display = 'none';
+          multiWrap.style.display = 'block';
+        } else {
+          singleWrap.style.display = 'block';
+          multiWrap.style.display = 'none';
+        }
+      }
     }
 
     function openEmployeeModal(emp) {
@@ -3146,19 +3327,36 @@
         initSearchableSelect('ef-dept');
       }
 
-      document.getElementById('ef-role').value = emp ? emp.role : 'employee';
+      var roleVal = emp ? emp.role : 'employee';
+      document.getElementById('ef-role').value = roleVal;
 
-      // Load teams into dropdown
+      // Load teams into single dropdown
       var teamSel = document.getElementById('ef-team');
       if (teamSel) {
         teamSel.innerHTML = '<option value="">-- ไม่สังกัดทีม --</option>' + allAdminTeams.map(function (t) {
-          return '<option value="' + t.teamId + '" ' + (emp && emp.teamId === t.teamId ? 'selected' : '') + '>' + t.name + '</option>';
+          return '<option value="' + t.teamId + '" ' + (emp && String(emp.teamId || '').trim() === String(t.teamId) ? 'selected' : '') + '>' + t.name + '</option>';
         }).join('');
         initSearchableSelect('ef-team');
       }
 
-      // Only superadmin can manage detailed permissions
-      // Permissions are now managed in a separate page, so we only handle basic roles here.
+      // Load teams into multi-checkboxes (for coordinator)
+      var cbContainer = document.getElementById('ef-team-checkboxes');
+      if (cbContainer) {
+        var userAssigned = emp && emp.teamId ? String(emp.teamId).split(',').map(function(s){ return s.trim(); }) : [];
+        if (allAdminTeams.length === 0) {
+          cbContainer.innerHTML = '<span style="color:var(--text3); font-size:0.85rem;">ยังไม่มีข้อมูลทีมในระบบ</span>';
+        } else {
+          cbContainer.innerHTML = allAdminTeams.map(function (t) {
+            var isChecked = userAssigned.indexOf(String(t.teamId)) !== -1;
+            return '<label style="display:flex; align-items:center; gap:0.5rem; font-size:0.85rem; cursor:pointer; padding:2px 0;">'
+              + '<input type="checkbox" name="ef_coord_teams" value="' + escapeHTML(t.teamId) + '" ' + (isChecked ? 'checked' : '') + ' style="cursor:pointer;">'
+              + '<span><b>' + escapeHTML(t.name) + '</b> <small style="color:var(--text3)">(' + escapeHTML(t.teamId) + ')</small></span>'
+              + '</label>';
+          }).join('');
+        }
+      }
+
+      onEmployeeRoleChanged();
 
       document.getElementById('employeeModalTitle').textContent = emp ? 'แก้ไขข้อมูลพนักงาน' : 'เพิ่มพนักงาน';
       document.getElementById('employeeModal').classList.add('open');
@@ -3167,12 +3365,25 @@
 
     function saveEmployee() {
       var oldId = document.getElementById('ef-old-id').value.trim();
+      var role = document.getElementById('ef-role').value;
+      var isCoord = (role === 'coordinator' || role === 'ธุรการ');
+      
+      var teamIdVal = '';
+      if (isCoord) {
+        var checkedBoxes = document.querySelectorAll('input[name="ef_coord_teams"]:checked');
+        var selectedTeams = [];
+        checkedBoxes.forEach(function(cb) { selectedTeams.push(cb.value); });
+        teamIdVal = selectedTeams.join(',');
+      } else {
+        teamIdVal = document.getElementById('ef-team').value;
+      }
+
       var data = {
         employeeId: document.getElementById('ef-id').value.trim(),
         name: document.getElementById('ef-name').value.trim(),
         department: document.getElementById('ef-dept').value.trim(),
-        role: document.getElementById('ef-role').value,
-        teamId: document.getElementById('ef-team').value
+        role: role,
+        teamId: teamIdVal
       };
       if (!data.employeeId || !data.name) { showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warning'); return; }
 
@@ -3205,6 +3416,7 @@
       { id: 'employee', name: 'Employee (พนักงานทั่วไป)' },
       { id: 'fc', name: 'FC (คลังสินค้า/จ่ายของ)' },
       { id: 'technician', name: 'Technician (ช่างเทคนิค)' },
+      { id: 'coordinator', name: 'Coordinator (ธุรการ)' },
       { id: 'hr', name: 'HR (บุคคล)' },
       { id: 'manager', name: 'Manager (ผู้จัดการ)' },
       { id: 'admin', name: 'Admin (ผู้ดูแลระบบ)' },
@@ -5067,6 +5279,180 @@
       });
     }
 
+    // ─── TECHNICIAN REQUESTS (เบิกของทีมช่าง) ──────────────────
+    var _allTechRequests = [];
+
+    function loadTechRequests() {
+      var tbody = document.getElementById('techRequestsBody');
+      if (!tbody) return;
+      tbody.innerHTML = '<tr><td colspan="7" class="text-center" style="padding:2rem"><div class="spinner"></div> กำลังโหลดรายการเบิกของทีมช่าง...</td></tr>';
+
+      // Load teams for filter dropdown if needed
+      var teamSelect = document.getElementById('techReqFilterTeam');
+      if (teamSelect && teamSelect.options.length <= 1) {
+        API.getTeams().then(function (res) {
+          if (res.success && res.teams) {
+            res.teams.forEach(function (t) {
+              var opt = document.createElement('option');
+              opt.value = t.id || t.name;
+              opt.textContent = (t.name || t.id) + (t.id ? ' (' + t.id + ')' : '');
+              teamSelect.appendChild(opt);
+            });
+          }
+        }).catch(function (e) {
+          console.warn('Failed to load teams for filter:', e);
+        });
+      }
+
+      var selectedTeam = teamSelect ? teamSelect.value : 'all';
+      var statusSelect = document.getElementById('techReqFilterStatus');
+      var selectedStatus = statusSelect ? statusSelect.value : 'all';
+
+      API.getTechRequests({
+        teamId: selectedTeam,
+        status: selectedStatus
+      }).then(function (res) {
+        if (!res.success) {
+          tbody.innerHTML = '<tr><td colspan="8" class="text-center text-danger" style="padding:2rem;">' + escapeHTML(res.message || 'ไม่สามารถโหลดข้อมูลได้') + '</td></tr>';
+          return;
+        }
+
+        var rawOrders = res.orders || res.data || [];
+        
+        // Calculate KPI Stats
+        var pendingCount = 0;
+        var receivedCount = 0;
+        rawOrders.forEach(function (o) {
+          var st = String(o.status || '').toLowerCase();
+          if (st === 'pending') pendingCount++;
+          else if (st === 'received' || st === 'dispatched') receivedCount++;
+        });
+
+        var kpiPend = document.getElementById('techKpiPending');
+        var kpiRecv = document.getElementById('techKpiReceived');
+        var kpiTot = document.getElementById('techKpiTotal');
+        if (kpiPend) kpiPend.textContent = pendingCount;
+        if (kpiRecv) kpiRecv.textContent = receivedCount;
+        if (kpiTot) kpiTot.textContent = rawOrders.length;
+
+        var orders = rawOrders;
+        // Client-side status filter fallback
+        if (selectedStatus && selectedStatus !== 'all') {
+          orders = orders.filter(function (o) {
+            var st = String(o.status || '').toLowerCase();
+            return st === selectedStatus.toLowerCase();
+          });
+        }
+
+        if (orders.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="8" class="text-center" style="padding:3rem 1rem; color:var(--text3);">' +
+            '<div style="font-size:2rem; margin-bottom:0.5rem;">🎉</div>' +
+            '<div style="font-size:1.1rem; font-weight:600; color:var(--text1); margin-bottom:0.25rem;">ไม่มีรายการที่ต้องจัดการ</div>' +
+            '<div style="font-size:0.85rem;">ไม่มีคำขอเบิกพัสดุในสถานะที่เลือกในขณะนี้</div>' +
+            '</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = orders.map(function (order) {
+          var itemsHtml = '';
+          if (Array.isArray(order.items)) {
+            itemsHtml = order.items.map(function (it) {
+              var label = escapeHTML(it.productName || it.name || it.sku || 'สินค้า');
+              var vText = it.variant ? ' <span class="badge badge-outline" style="font-size:0.75rem; padding:1px 5px;">' + escapeHTML(it.variant) + '</span>' : '';
+              return '<div style="margin-bottom:4px; line-height:1.3;">' +
+                '<span style="color:var(--text1); font-weight:500;">' + label + '</span>' + vText + 
+                ' <span style="display:inline-block; margin-left:4px; font-weight:700; color:var(--accent); background:rgba(234,179,8,0.12); padding:1px 6px; border-radius:4px; font-size:0.8rem;">× ' + (it.quantity || it.qty || 1) + '</span>' +
+                '</div>';
+            }).join('');
+          } else {
+            itemsHtml = '<span style="color:var(--text3);">-</span>';
+          }
+
+          var statusBadge = '';
+          var orderStatus = String(order.status || '').trim();
+          var isPending = (orderStatus.toLowerCase() === 'pending');
+          if (isPending) {
+            statusBadge = '<span class="badge badge-warning" style="font-weight:600; padding:0.3rem 0.6rem;">⚡ รอจ่ายของ</span>';
+          } else if (orderStatus.toLowerCase() === 'received' || orderStatus.toLowerCase() === 'dispatched') {
+            statusBadge = '<span class="badge badge-success" style="font-weight:500; padding:0.3rem 0.6rem;">✅ จ่ายของแล้ว</span>';
+          } else if (orderStatus.toLowerCase() === 'rejected' || orderStatus.toLowerCase() === 'cancelled') {
+            statusBadge = '<span class="badge badge-danger" style="padding:0.3rem 0.6rem;">❌ ปฏิเสธ/ยกเลิก</span>';
+          } else {
+            statusBadge = '<span class="badge badge-secondary">' + escapeHTML(order.statusLabel || orderStatus) + '</span>';
+          }
+
+          var oId = String(order.orderId || order.id || '-');
+          var actionBtn = '';
+          if (isPending) {
+            actionBtn = '<button class="btn btn-sm btn-accent" onclick="confirmDispatchTechRequest(\'' + escapeHTML(oId) + '\')" style="box-shadow:var(--shadow-sm); font-weight:600;">' +
+              '<i data-lucide="package-check"></i> จ่ายของเข้าคลังช่าง' +
+              '</button>';
+          } else {
+            actionBtn = '<span style="font-size:0.85rem; color:var(--success); font-weight:500; display:inline-flex; align-items:center; gap:0.25rem;"><i data-lucide="check-circle" style="width:16px;height:16px;"></i> จ่ายแล้ว</span>';
+          }
+
+          var dateStr = order.createdAt ? new Date(order.createdAt).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' }) : '-';
+          var techDisplayName = order.employeeName || order.userName || order.requesterName || order.employeeId || '-';
+          var targetEmpId = order.employeeId || order.requesterId || '';
+
+          // Destination Stock column
+          var destStockHtml = '';
+          if (targetEmpId) {
+            destStockHtml = '<button class="btn btn-ghost btn-sm" style="padding:0.25rem 0.6rem; text-align:left; font-size:0.85rem; border:1px solid rgba(255,255,255,0.08); border-radius:var(--radius-sm);" onclick="showUserSubStock(\'' + escapeHTML(targetEmpId) + '\', \'' + escapeHTML(techDisplayName) + '\', false)" title="คลิกเพื่อตรวจดูพัสดุในคลังย่อย">' +
+              '<i data-lucide="box" style="width:14px;height:14px;vertical-align:middle;color:var(--primary);margin-right:3px;"></i> ' + escapeHTML(techDisplayName) +
+              ' <i data-lucide="external-link" style="width:11px;height:11px;opacity:0.6;margin-left:2px;"></i>' +
+              '</button>';
+          } else if (order.teamId) {
+            destStockHtml = '<button class="btn btn-ghost btn-sm" style="padding:0.25rem 0.6rem; text-align:left; font-size:0.85rem; border:1px solid rgba(255,255,255,0.08); border-radius:var(--radius-sm);" onclick="showUserSubStock(\'' + escapeHTML(order.teamId) + '\', \'ทีม ' + escapeHTML(order.teamId) + '\', true)" title="คลิกเพื่อตรวจดูพัสดุในคลังย่อย">' +
+              '<i data-lucide="users" style="width:14px;height:14px;vertical-align:middle;color:var(--accent);margin-right:3px;"></i> คลังทีม: ' + escapeHTML(order.teamId) +
+              ' <i data-lucide="external-link" style="width:11px;height:11px;opacity:0.6;margin-left:2px;"></i>' +
+              '</button>';
+          } else {
+            destStockHtml = '<span style="font-size:0.8rem; color:var(--text3);">-</span>';
+          }
+
+          return '<tr style="' + (isPending ? 'background:rgba(234,179,8,0.03);' : '') + '">' +
+            '<td><code style="font-weight:700; font-size:0.85rem; color:var(--text2);">' + escapeHTML(oId) + '</code></td>' +
+            '<td><div style="font-weight:600; color:var(--text1);">' + escapeHTML(techDisplayName) + '</div>' +
+              (order.userEmail ? '<div style="font-size:0.75rem; color:var(--text3);">' + escapeHTML(order.userEmail) + '</div>' : '') +
+            '</td>' +
+            '<td><span class="badge badge-primary" style="font-size:0.75rem; font-weight:500;">' + escapeHTML(order.teamId || '-') + '</span></td>' +
+            '<td>' + itemsHtml + '</td>' +
+            '<td>' + destStockHtml + '</td>' +
+            '<td style="font-size:0.8rem; color:var(--text3); white-space:nowrap;">' + dateStr + '</td>' +
+            '<td>' + statusBadge + '</td>' +
+            '<td style="text-align:center; white-space:nowrap;">' + actionBtn + '</td>' +
+            '</tr>';
+        }).join('');
+
+        refreshIcons();
+      }).catch(function (err) {
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-danger" style="padding:2rem;">เกิดข้อผิดพลาด: ' + escapeHTML(err.message || err) + '</td></tr>';
+      });
+    }
+
+    function confirmDispatchTechRequest(orderId) {
+      if (!orderId) return;
+      var req = _allTechRequests.find(function (o) { return o.id === orderId; });
+      var techName = req ? (req.userName || req.requesterName || orderId) : orderId;
+
+      if (!confirm('ยืนยันการจ่ายพัสดุสำหรับใบเบิก ' + orderId + ' ให้แก่ "' + techName + '" ?\n\nระบบจะหักสต็อกคลังใหญ่ และโอนรายการเข้าคลังย่อยของช่างทันที')) {
+        return;
+      }
+
+      showToast('กำลังจ่ายของและบันทึกเข้าคลังย่อยช่าง...', 'info');
+
+      API.dispatchTechRequest({ orderId: orderId }).then(function (res) {
+        if (res.success) {
+          showToast(res.message || 'จ่ายของเข้าคลังย่อยช่างเรียบร้อยแล้ว', 'success');
+          loadTechRequests();
+        } else {
+          showToast(res.message || 'เกิดข้อผิดพลาดในการจ่ายของ', 'error');
+        }
+      }).catch(function (err) {
+        showToast('เกิดข้อผิดพลาด: ' + (err.message || err), 'error');
+      });
+    }
 
   </script>
 </body>

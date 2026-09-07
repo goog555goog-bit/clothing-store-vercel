@@ -268,8 +268,8 @@ var API = (function () {
     getInventoryForecast: function () { return this._call('getInventoryForecast', {}, true); },
     getSubStock: function (params) { return this._call('getSubStock', params, true); },
     getSystemSettings: function () { return this._call('getSystemSettings', {}, false); }, // Always fresh for permissions
-    getInventoryLogs: function (filters) { return this._call('getInventoryLogs', filters || {}, true); },
-    getTransferHistory: function (filters) { return this._call('getTransferHistory', filters || {}, true); },
+    getInventoryLogs: function (filters) { return this._call('getInventoryLogs', filters || {}, false); },
+    getTransferHistory: function (filters) { return this._call('getTransferHistory', filters || {}, false); },
 
     // ─── WRITE ACTIONS (Invalidate relevant caches) ───────────
     manageProduct: function (op, data) {
@@ -334,6 +334,14 @@ var API = (function () {
     cancelRequest: function (data) {
       // data: { requestId, reason }
       return this._call('cancelRequest', data, false, ['getMyRequests', 'getAllOrders', 'getDashboardStats', 'getAdvancedDashboardData', 'getProducts']);
+    },
+    getTechRequests: function (data) {
+      // data: { teamId }
+      return this._call('getTechRequests', data || {}, false, []);
+    },
+    dispatchTechRequest: function (data) {
+      // data: { requestId }
+      return this._call('dispatchTechRequest', data, false, ['getTechRequests', 'getAllOrders', 'getProducts', 'getSubStock', 'getInventoryLogs']);
     },
 
     manageEmployee: function (op, data, oldEmployeeId) {

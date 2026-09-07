@@ -189,10 +189,14 @@
   <main id="view-substock" class="view-section" style="display:none;">
     <div class="container" style="padding-top:2rem;">
       <div class="flex flex-col-mobile" style="align-items:flex-start; justify-content:space-between; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem">
-        <h2 id="substockTitle"
-          style="font-size:1.25rem;font-weight:700;margin:0;display:flex;align-items:center;gap:0.5rem;">
-          <i data-lucide="package-search" style="width:20px;height:20px;color:var(--primary);"></i> คลังย่อยของฉัน
-        </h2>
+        <div>
+          <h2 id="substockTitle"
+            style="font-size:1.25rem;font-weight:700;margin:0;display:flex;align-items:center;gap:0.5rem;">
+            <i data-lucide="package-search" style="width:20px;height:20px;color:var(--primary);"></i> คลังย่อยของฉัน
+          </h2>
+          <!-- Container for Team Badge / Team Select Dropdown -->
+          <div id="subStockTeamSelectorWrap" style="margin-top:0.4rem; display:none;"></div>
+        </div>
         <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
           <button class="btn btn-accent btn-sm" onclick="openSubStockScanner()">
             <i data-lucide="scan"></i> สแกนใช้งาน
@@ -206,6 +210,18 @@
         </div>
       </div>
       
+      <!-- Technician Sub-Stock View Toggle (Personal vs Team) -->
+      <div id="subStockViewToggleWrap" style="display:none; margin-bottom:1.25rem;">
+        <div style="display:inline-flex; background:rgba(255,255,255,0.05); padding:4px; border-radius:10px; border:1px solid var(--border); gap:4px;">
+          <button id="btnSubStockPersonal" class="btn btn-sm btn-primary" onclick="switchSubStockView('personal')" style="border-radius:8px; gap:0.4rem;">
+            <i data-lucide="user" style="width:14px;height:14px;"></i> คลังส่วนตัวของฉัน
+          </button>
+          <button id="btnSubStockTeam" class="btn btn-sm btn-ghost" onclick="switchSubStockView('team')" style="border-radius:8px; gap:0.4rem;">
+            <i data-lucide="users" style="width:14px;height:14px;"></i> คลังส่วนกลางของทีม
+          </button>
+        </div>
+      </div>
+
       <div id="subStockSummary" style="display:flex;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;"></div>
       <div id="subStockGrid" class="product-grid" style="padding-bottom:1.5rem;">
         <div class="empty-state" style="grid-column:1/-1;">
@@ -214,7 +230,7 @@
           <small>กรุณารอสักครู่...</small>
         </div>
       </div>
-      <!-- [NEW] Usage History Section -->
+      <!-- [NEW] Usage History Section - Mobile-First Cards -->
       <div id="usageHistorySection" style="margin-top:2rem; padding-bottom:5rem;">
         <h3
           style="font-size:1.1rem; font-weight:700; color:var(--text1); margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
@@ -228,27 +244,17 @@
             <button id="logFilterTransfer" class="btn btn-sm btn-outline" onclick="setLogFilter('transfer')">โอน</button>
           </span>
         </h3>
-        <div class="card table-responsive-premium"
-          style="padding:0; overflow:hidden; background:rgba(255,255,255,0.02); border:1px solid var(--border)">
-          <div class="table-wrap">
-            <table style="font-size:0.85rem">
-              <thead>
-                <tr>
-                  <th>วันที่</th>
-                  <th>รหัสสินค้า</th>
-                  <th>ชื่อสินค้า</th>
-                  <th>จำนวน</th>
-                  <th>ผู้ทำรายการ</th>
-                  <th>สาขา</th>
-                </tr>
-              </thead>
-              <tbody id="usageHistoryBody">
-                <tr>
-                  <td colspan="6" style="text-align:center; padding:2rem; color:var(--text3)">กำลังโหลดประวัติ...</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+        
+        <!-- Cards List Container -->
+        <div id="usageHistoryBody" class="log-cards-list">
+          <div class="card text-center" style="padding:2rem; color:var(--text3)">กำลังโหลดประวัติ...</div>
+        </div>
+
+        <!-- Show All Logs Button -->
+        <div id="usageHistoryShowAllWrap" style="display:none; text-align:center; margin-top:1rem;">
+          <button id="btnShowAllLogs" class="btn btn-outline btn-sm" onclick="toggleShowAllLogs()" style="border-radius:99px; padding:0.45rem 1.5rem;">
+            <i data-lucide="chevron-down" style="width:16px;height:16px;"></i> ดูประวัติทั้งหมด (<span id="totalLogsCount">0</span> รายการ)
+          </button>
         </div>
       </div>
     </div>
@@ -712,6 +718,25 @@
       <div class="modal-footer">
         <button class="btn btn-ghost" onclick="closeModal('profileModal')">ยกเลิก</button>
         <button class="btn btn-primary flex-1" onclick="saveProfileEmail()">บันทึก</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUBSTOCK LOG DETAIL MODAL -->
+  <div id="subStockLogDetailModal" class="modal-overlay" onclick="if(event.target===this) closeModal('subStockLogDetailModal')">
+    <div class="modal" style="max-width:400px;">
+      <div class="modal-header">
+        <div style="font-weight:700;display:flex;align-items:center;gap:0.5rem;">
+          <i data-lucide="file-text" style="width:18px;height:18px;color:var(--primary);"></i>
+          รายละเอียดรายการ
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="closeModal('subStockLogDetailModal')">✕</button>
+      </div>
+      <div class="modal-body" id="subStockLogDetailBody" style="font-size:0.88rem; line-height:1.6;">
+        <!-- JS renders detail content here -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline w-full" onclick="closeModal('subStockLogDetailModal')">ปิด</button>
       </div>
     </div>
   </div>

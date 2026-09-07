@@ -1926,3 +1926,82 @@ tr.row-stock-warning { background: rgba(245, 158, 11, 0.02) !important; }
   color: var(--text3);
   font-size: 0.85rem;
 }
+
+/* ─── Sub-Stock Mobile-First History Cards & Team Selector ─── */
+.team-select-pill {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text1);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.4rem 0.8rem;
+  border-radius: 99px;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.team-select-pill:hover, .team-select-pill:focus {
+  border-color: var(--primary);
+}
+
+.log-cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+.log-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.85rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+.log-card:hover {
+  border-color: rgba(255,255,255,0.18);
+}
+.log-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  color: var(--text3);
+}
+.log-card-body {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+.log-card-title {
+  font-weight: 600;
+  font-size: 0.92rem;
+  color: var(--text1);
+  word-break: break-word;
+  flex: 1;
+}
+.log-card-qty {
+  font-weight: 700;
+  font-size: 1.05rem;
+  white-space: nowrap;
+}
+.log-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.2rem;
+  padding-top: 0.4rem;
+  border-top: 1px dashed rgba(255,255,255,0.06);
+}
+.log-badge-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+}
+

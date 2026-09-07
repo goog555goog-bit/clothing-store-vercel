@@ -1452,38 +1452,153 @@ function selectEmployee(id, name) {
 }
 
 var subStockCache = null;
+var _currentSubStockMode = 'personal';
+var _allLoadedTeams = [];
+var _selectedSubStockTeamId = null;
+var _allUsageLogsRaw = [];
+var _showAllUsageLogs = false;
+
+function fetchTeamsForSubStock() {
+  if (_allLoadedTeams.length > 0) return Promise.resolve(_allLoadedTeams);
+  return API.getTeams().then(function (res) {
+    if (res.success && res.data) {
+      _allLoadedTeams = res.data;
+    }
+    return _allLoadedTeams;
+  }).catch(function () {
+    return _allLoadedTeams;
+  });
+}
+
+function getTeamDisplayNameById(tid) {
+  if (!tid) return '';
+  var found = _allLoadedTeams.find(function(t) { return String(t.teamId || t.id).trim().toLowerCase() === String(tid).trim().toLowerCase(); });
+  return found ? (found.name || found.teamName || tid) : tid;
+}
+
+function switchSubStockView(mode) {
+  _currentSubStockMode = mode;
+  var btnP = document.getElementById('btnSubStockPersonal');
+  var btnT = document.getElementById('btnSubStockTeam');
+  if (btnP && btnT) {
+    btnP.className = mode === 'personal' ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-ghost';
+    btnT.className = mode === 'team' ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-ghost';
+  }
+  subStockCache = null;
+  loadSubStock();
+}
+
+function onSubStockTeamChange(teamId) {
+  _selectedSubStockTeamId = teamId;
+  subStockCache = null;
+  loadSubStock();
+}
+
 function loadSubStock() {
   var grid = document.getElementById('subStockGrid');
   if (!grid) return;
 
-  if (subStockCache) {
-    renderSubStock(subStockCache);
-  } else {
-    grid.innerHTML = Array(4).fill('<div class="product-card">'
-      + '<div class="product-img-wrap"><div class="skeleton" style="width:100%; height:100%; border-radius:0"></div></div>'
-      + '<div class="product-info">'
-      + '<div class="skeleton skeleton-text" style="width:85%"></div>'
-      + '<div class="skeleton skeleton-text" style="width:50%"></div>'
-      + '<div style="margin-top:1rem; display:flex; gap:0.5rem"><div class="skeleton" style="height:32px; flex:1; border-radius:99px"></div>'
-      + '<div class="skeleton" style="height:32px; width:64px; border-radius:99px"></div></div>'
-      + '</div></div>').join('');
+  var toggleWrap = document.getElementById('subStockViewToggleWrap');
+  var teamSelectorWrap = document.getElementById('subStockTeamSelectorWrap');
+  var titleEl = document.getElementById('substockTitle');
+
+  var userTeamsRaw = currentUser && currentUser.teamId ? String(currentUser.teamId).split(',').map(function(s) { return s.trim(); }).filter(Boolean) : [];
+
+  if (toggleWrap) {
+    if (userTeamsRaw.length > 0) {
+      toggleWrap.style.display = 'block';
+    } else {
+      toggleWrap.style.display = 'none';
+      _currentSubStockMode = 'personal';
+    }
   }
 
-  API.getSubStock().then(function (res) {
-    subStockCache = res.data;
-    renderSubStockSummary(res.data);
-    renderSubStock(res.data, res.teamName);
-  }).catch(function (err) {
-    showToast('โหลดสต๊อกย่อยไม่สำเร็จ: ' + err, 'error');
-  });
+  // Preload team list to display clean names
+  fetchTeamsForSubStock().then(function() {
+    // Determine active teamId if in team mode (default to 'all' for multiple teams)
+    if (_currentSubStockMode === 'team' && userTeamsRaw.length > 0) {
+      if (!_selectedSubStockTeamId || (_selectedSubStockTeamId !== 'all' && userTeamsRaw.indexOf(_selectedSubStockTeamId) === -1)) {
+        _selectedSubStockTeamId = (userTeamsRaw.length > 1) ? 'all' : userTeamsRaw[0];
+      }
+    }
 
-  loadUsageHistory();
+    // Render team badge / dropdown selector in header
+    if (teamSelectorWrap) {
+      if (_currentSubStockMode === 'team' && userTeamsRaw.length > 0) {
+        teamSelectorWrap.style.display = 'block';
+        if (userTeamsRaw.length === 1) {
+          // Single team -> Clean Badge
+          var tName = getTeamDisplayNameById(userTeamsRaw[0]);
+          teamSelectorWrap.innerHTML = '<span class="badge badge-primary" style="font-size:0.85rem; padding:0.3rem 0.75rem; border-radius:99px; font-weight:600; display:inline-flex; align-items:center; gap:0.35rem;"><i data-lucide="users" style="width:14px;height:14px;"></i> ' + escapeHTML(tName) + '</span>';
+        } else {
+          // Multiple teams -> Clean Dropdown with 'all' option
+          var selectHtml = '<div style="display:inline-flex; align-items:center; gap:0.4rem;">' +
+            '<span style="font-size:0.8rem; color:var(--text3);">ทีม:</span>' +
+            '<select class="team-select-pill" onchange="onSubStockTeamChange(this.value)">' +
+            '<option value="all" ' + (_selectedSubStockTeamId === 'all' ? 'selected' : '') + '>🌐 ดูทุกทีมรวมกัน</option>' +
+            userTeamsRaw.map(function(tid) {
+              var tName = getTeamDisplayNameById(tid);
+              var isSel = (tid === _selectedSubStockTeamId) ? 'selected' : '';
+              return '<option value="' + escapeHTML(tid) + '" ' + isSel + '>' + escapeHTML(tName) + '</option>';
+            }).join('') +
+            '</select></div>';
+          teamSelectorWrap.innerHTML = selectHtml;
+        }
+      } else {
+        teamSelectorWrap.style.display = 'none';
+        teamSelectorWrap.innerHTML = '';
+      }
+      refreshIcons();
+    }
+
+    if (titleEl) {
+      if (_currentSubStockMode === 'team') {
+        titleEl.innerHTML = '<i data-lucide="users" style="width:20px;height:20px;color:var(--primary);"></i> คลังย่อยส่วนกลางของทีม';
+      } else {
+        titleEl.innerHTML = '<i data-lucide="package-search" style="width:20px;height:20px;color:var(--primary);"></i> คลังย่อยของฉัน';
+      }
+      refreshIcons();
+    }
+
+    if (subStockCache) {
+      renderSubStock(subStockCache);
+    } else {
+      grid.innerHTML = Array(4).fill('<div class="product-card">'
+        + '<div class="product-img-wrap"><div class="skeleton" style="width:100%; height:100%; border-radius:0"></div></div>'
+        + '<div class="product-info">'
+        + '<div class="skeleton skeleton-text" style="width:85%"></div>'
+        + '<div class="skeleton skeleton-text" style="width:50%"></div>'
+        + '<div style="margin-top:1rem; display:flex; gap:0.5rem"><div class="skeleton" style="height:32px; flex:1; border-radius:99px"></div>'
+        + '<div class="skeleton" style="height:32px; width:64px; border-radius:99px"></div></div>'
+        + '</div></div>').join('');
+    }
+
+    var params = { mode: _currentSubStockMode };
+    if (_currentSubStockMode === 'team') {
+      if (_selectedSubStockTeamId === 'all') {
+        params.teamId = userTeamsRaw.join(',');
+      } else {
+        params.teamId = _selectedSubStockTeamId || userTeamsRaw[0];
+      }
+    }
+
+    API.getSubStock(params).then(function (res) {
+      subStockCache = res.data;
+      renderSubStockSummary(res.data);
+      renderSubStock(res.data);
+    }).catch(function (err) {
+      showToast('โหลดสต๊อกย่อยไม่สำเร็จ: ' + err, 'error');
+    });
+
+    loadUsageHistory();
+  });
 }
 
 var _currentLogFilter = 'all';
 
 function setLogFilter(filter) {
   _currentLogFilter = filter;
+  _showAllUsageLogs = false; // Reset to truncated view on filter change
   var btnAll = document.getElementById('logFilterAll');
   var btnUse = document.getElementById('logFilterUse');
   var btnTransfer = document.getElementById('logFilterTransfer');
@@ -1493,19 +1608,26 @@ function setLogFilter(filter) {
   loadUsageHistory();
 }
 
+function toggleShowAllLogs() {
+  _showAllUsageLogs = !_showAllUsageLogs;
+  renderUsageLogsCards();
+}
+
 function loadUsageHistory() {
   var body = document.getElementById('usageHistoryBody');
   if (!body) return;
   
-  var limit = _currentLogFilter === 'all' ? 20 : 50;
-  var hasTeam = currentUser && currentUser.teamId;
-  
+  var userTeamsRaw = currentUser && currentUser.teamId ? String(currentUser.teamId).split(',').map(function(s) { return s.trim(); }).filter(Boolean) : [];
+  var activeTeam = (_currentSubStockMode === 'team') 
+    ? (_selectedSubStockTeamId === 'all' ? userTeamsRaw.join(',') : (_selectedSubStockTeamId || (userTeamsRaw[0] || null)))
+    : (currentUser && currentUser.teamId ? currentUser.teamId : null);
+
   var apiCall = _currentLogFilter === 'transfer' 
-    ? API.getTransferHistory({ limit: limit })
+    ? API.getTransferHistory({ limit: 50 })
     : API.getInventoryLogs({ 
-        userFilter: hasTeam ? 'all' : currentUser.employeeId, 
-        teamFilter: hasTeam ? currentUser.teamId : 'all',
-        limit: limit 
+        userFilter: (_currentSubStockMode === 'team') ? 'all' : currentUser.employeeId, 
+        teamFilter: activeTeam || 'all',
+        limit: 50 
       });
 
   apiCall.then(function (res) {
@@ -1516,7 +1638,7 @@ function loadUsageHistory() {
       logs = logs.filter(function(l) { return (l.action || '').indexOf('ใช้งาน') !== -1; });
     }
 
-    // PONYTAIL: Filter transfer history for A -> B logic
+    // Filter transfer history for A -> B logic
     if (_currentLogFilter === 'transfer') {
       logs = logs.filter(function(l) {
         var actionName = l.action || '';
@@ -1526,71 +1648,158 @@ function loadUsageHistory() {
         var related = l.relatedUser || '';
         var currentName = currentUser.name || '';
 
-        // ถ้าไม่ใช่รายการโอน ให้ผ่านไปปกติ
         if (!isOut && !isIn) return true;
-
-        // กรณี โอนออก (-1): ดูได้เฉพาะคนที่เป็นผู้โอน (logUser)
-        if (isOut) {
-          return logUser === currentName;
-        }
-        // กรณี รับโอน (+1): ดูได้เฉพาะคนที่เป็นผู้รับ (related)
-        // (แต่ถ้าหลังบ้านยังไม่แก้ แล้ว logUser ยังเป็นคนโอนอยู่ เราจะไม่ให้คนโอนเห็น +1 เพื่อลดความซ้ำซ้อน)
+        if (isOut) return logUser === currentName;
         if (isIn) {
           if (related) {
-             return related === currentName || logUser === currentName;
+            return related === currentName || logUser === currentName;
           } else {
-             // ถ้ายังไม่มี related แปลว่าหลังบ้านยังไม่แก้ ให้ซ่อน +1 ไปก่อนถ้าเราเป็นคนโอน
-             return logUser !== currentName; 
+            return logUser !== currentName; 
           }
         }
         return true;
       });
     }
 
-    if (!res.success || logs.length === 0) {
-      body.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:2rem; color:var(--text3)">ยังไม่มีประวัติทำรายการ</td></tr>';
-      return;
+    _allUsageLogsRaw = logs;
+    renderUsageLogsCards();
+  }).catch(function (err) {
+    body.innerHTML = '<div class="card text-center" style="padding:1.5rem; color:var(--danger)">โหลดประวัติไม่สำเร็จ</div>';
+  });
+}
+
+function renderUsageLogsCards() {
+  var body = document.getElementById('usageHistoryBody');
+  var showAllWrap = document.getElementById('usageHistoryShowAllWrap');
+  var totalCountEl = document.getElementById('totalLogsCount');
+  var btnShowAll = document.getElementById('btnShowAllLogs');
+  if (!body) return;
+
+  var logs = _allUsageLogsRaw || [];
+  if (logs.length === 0) {
+    body.innerHTML = '<div class="card text-center" style="padding:2rem; color:var(--text3); border:1px dashed var(--border)">ยังไม่มีประวัติทำรายการ</div>';
+    if (showAllWrap) showAllWrap.style.display = 'none';
+    return;
+  }
+
+  var INITIAL_LIMIT = 5;
+  var displayLogs = _showAllUsageLogs ? logs : logs.slice(0, INITIAL_LIMIT);
+
+  if (showAllWrap) {
+    if (logs.length > INITIAL_LIMIT) {
+      showAllWrap.style.display = 'block';
+      if (totalCountEl) totalCountEl.textContent = logs.length;
+      if (btnShowAll) {
+        btnShowAll.innerHTML = _showAllUsageLogs 
+          ? '<i data-lucide="chevron-up" style="width:16px;height:16px;"></i> ย่อประวัติ' 
+          : '<i data-lucide="chevron-down" style="width:16px;height:16px;"></i> ดูประวัติทั้งหมด (' + logs.length + ' รายการ)';
+      }
+    } else {
+      showAllWrap.style.display = 'none';
+    }
+  }
+
+  body.innerHTML = displayLogs.map(function (l, idx) {
+    var dateStr = String(l.date || '').split(' ')[0] || '-';
+    var timeStr = String(l.date || '').split(' ')[1] || '';
+
+    var pId = String(l.productId || '').trim();
+    var p = allProducts.filter(function (x) { return String(x.productId).trim() === pId; })[0];
+    var displayName = p ? p.name : (l.productName || pId);
+
+    var qtyNum = Number(l.quantity) || 0;
+    var qtyColor = qtyNum < 0 ? 'var(--danger)' : 'var(--accent)';
+    var qtySign = qtyNum > 0 ? '+' : '';
+
+    // Action Badge Styling
+    var actionText = escapeHTML(l.action || 'ทำรายการ');
+    var badgeStyle = 'background:rgba(255,255,255,0.06); color:var(--text2); border:1px solid rgba(255,255,255,0.1);';
+    if (actionText.indexOf('ใช้งาน') !== -1) {
+      badgeStyle = 'background:rgba(234,179,8,0.12); color:var(--warning); border:1px solid rgba(234,179,8,0.25);';
+    } else if (actionText.indexOf('โอน') !== -1) {
+      badgeStyle = 'background:rgba(99,102,241,0.12); color:var(--primary); border:1px solid rgba(99,102,241,0.25);';
+    } else if (actionText.indexOf('รับ') !== -1 || qtyNum > 0) {
+      badgeStyle = 'background:rgba(34,197,94,0.12); color:var(--success); border:1px solid rgba(34,197,94,0.25);';
     }
 
-    // PONYTAIL: Debug block
-    var debugHTML = '';
+    return '<div class="log-card">'
+      + '<div class="log-card-header">'
+      +   '<span><i data-lucide="calendar" style="width:12px;height:12px;vertical-align:middle;margin-right:3px;"></i> ' + dateStr + (timeStr ? ' ' + timeStr : '') + '</span>'
+      +   '<span class="log-badge-tag" style="' + badgeStyle + '">' + actionText + '</span>'
+      + '</div>'
+      + '<div class="log-card-body">'
+      +   '<div class="log-card-title">' + escapeHTML(displayName) + '</div>'
+      +   '<div class="log-card-qty" style="color:' + qtyColor + '">' + qtySign + qtyNum + '</div>'
+      + '</div>'
+      + '<div class="log-card-footer">'
+      +   '<span style="font-size:0.75rem; color:var(--text3);">' + escapeHTML(l.userName || l.user || 'SYSTEM') + '</span>'
+      +   '<button class="btn btn-ghost btn-xs" onclick="openSubStockLogDetail(' + idx + ')" style="gap:0.25rem; font-size:0.75rem; padding:0.2rem 0.5rem; height:28px;">'
+      +     '<i data-lucide="eye" style="width:13px;height:13px;"></i> <span>ดูรายละเอียด</span>'
+      +   '</button>'
+      + '</div>'
+      + '</div>';
+  }).join('');
 
-    body.innerHTML = debugHTML + logs.map(function (l) {
-      var dateStr = String(l.date || '').split(' ')[0];
-      var timeStr = String(l.date || '').split(' ')[1] || '';
+  refreshIcons();
+}
 
-      var pId = String(l.productId || '').trim();
-      var p = allProducts.filter(function (x) { return String(x.productId).trim() === pId; })[0];
-      var displayName = p ? p.name : (l.productName || pId);
+function openSubStockLogDetail(idx) {
+  var logs = _allUsageLogsRaw || [];
+  var l = logs[idx];
+  if (!l) return;
 
-      // ผู้ทำรายการ
-      var userName = l.userName || l.user || 'SYSTEM';
-      
-      // ข้อความอธิบาย A โอนให้ B / B รับโอนจาก A
-      var relatedText = '';
-      if ((l.action || '').indexOf('โอน') !== -1) {
-        var targetName = l.relatedUserName || l.relatedUser || 'ไม่ระบุ';
-        relatedText = '<div style="font-size:0.75rem; color:var(--text2); margin-top:2px;">' + (Number(l.quantity) < 0 ? 'โอนให้: ' : 'รับจาก: ') + targetName + '</div>';
-      }
+  var pId = String(l.productId || '').trim();
+  var p = allProducts.filter(function (x) { return String(x.productId).trim() === pId; })[0];
+  var displayName = p ? p.name : (l.productName || pId);
 
-      return '<tr>'
-        + '<td><div style="font-weight:500">' + dateStr + '</div><div style="font-size:0.7rem; color:var(--text3)">' + timeStr + '</div></td>'
-        + '<td>' + pId + '</td>'
-        + '<td style="color:var(--primary); font-weight:500">' 
-        +   '<div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px; text-align:right; width:100%;">'
-        +     '<div style="white-space:normal; line-height:1.3;">' + displayName + '</div>'
-        +     '<span class="badge" style="font-size:0.65rem; color:var(--warning); border:1px solid rgba(251,191,36,0.3); background:rgba(251,191,36,0.1); white-space:normal; text-align:right;">' + (l.action||'') + '</span>'
-        +     relatedText 
-        +   '</div>'
-        + '</td>'
-        + '<td style="font-weight:600; color:' + (Number(l.quantity) < 0 ? 'var(--danger)' : 'var(--accent)') + '">' + (Number(l.quantity) > 0 ? '+' : '') + l.quantity + '</td>'
-        + '<td>' + userName + '</td>'
-        + '<td>' + (l.branchName || '-') + '</td>'
-        + '</tr>';
-    }).join('');
-  }).catch(function (err) {
-    body.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:1rem; color:var(--danger)">โหลดประวัติไม่สำเร็จ</td></tr>';
-  });
+  var qtyNum = Number(l.quantity) || 0;
+  var qtyColor = qtyNum < 0 ? 'var(--danger)' : 'var(--accent)';
+  var qtySign = qtyNum > 0 ? '+' : '';
+
+  var modal = document.getElementById('subStockLogDetailModal');
+  var body = document.getElementById('subStockLogDetailBody');
+  if (!modal || !body) return;
+
+  var relatedInfo = '';
+  if ((l.action || '').indexOf('โอน') !== -1) {
+    var targetName = l.relatedUserName || l.relatedUser || '-';
+    relatedInfo = '<div style="display:flex; justify-content:space-between; padding:0.35rem 0; border-bottom:1px solid rgba(255,255,255,0.05);">'
+      + '<span style="color:var(--text3);">' + (qtyNum < 0 ? 'โอนให้:' : 'รับจาก:') + '</span>'
+      + '<span style="font-weight:600; color:var(--text1);">' + escapeHTML(targetName) + '</span>'
+      + '</div>';
+  }
+
+  body.innerHTML = '<div style="display:flex; flex-direction:column; gap:0.5rem;">'
+    + '<div style="padding:0.6rem; background:rgba(255,255,255,0.02); border-radius:8px; border:1px solid var(--border); margin-bottom:0.5rem;">'
+    +   '<div style="font-size:0.75rem; color:var(--text3); margin-bottom:2px;">สินค้า</div>'
+    +   '<div style="font-weight:700; font-size:1rem; color:var(--primary);">' + escapeHTML(displayName) + '</div>'
+    +   '<div style="font-size:0.75rem; color:var(--text3); margin-top:2px;">รหัส: ' + escapeHTML(pId) + '</div>'
+    + '</div>'
+    + '<div style="display:flex; justify-content:space-between; padding:0.35rem 0; border-bottom:1px solid rgba(255,255,255,0.05);">'
+    +   '<span style="color:var(--text3);">ประเภทรายการ:</span>'
+    +   '<span style="font-weight:600; color:var(--text1);">' + escapeHTML(l.action || '-') + '</span>'
+    + '</div>'
+    + '<div style="display:flex; justify-content:space-between; padding:0.35rem 0; border-bottom:1px solid rgba(255,255,255,0.05);">'
+    +   '<span style="color:var(--text3);">จำนวน:</span>'
+    +   '<span style="font-weight:700; font-size:1.1rem; color:' + qtyColor + ';">' + qtySign + qtyNum + '</span>'
+    + '</div>'
+    + '<div style="display:flex; justify-content:space-between; padding:0.35rem 0; border-bottom:1px solid rgba(255,255,255,0.05);">'
+    +   '<span style="color:var(--text3);">ผู้ทำรายการ:</span>'
+    +   '<span style="font-weight:600; color:var(--text1);">' + escapeHTML(l.userName || l.user || 'SYSTEM') + '</span>'
+    + '</div>'
+    + '<div style="display:flex; justify-content:space-between; padding:0.35rem 0; border-bottom:1px solid rgba(255,255,255,0.05);">'
+    +   '<span style="color:var(--text3);">สาขา/สถานที่:</span>'
+    +   '<span style="font-weight:600; color:var(--text1);">' + escapeHTML(l.branchName || '-') + '</span>'
+    + '</div>'
+    + relatedInfo
+    + '<div style="display:flex; justify-content:space-between; padding:0.35rem 0;">'
+    +   '<span style="color:var(--text3);">วันที่-เวลา:</span>'
+    +   '<span style="color:var(--text2);">' + escapeHTML(l.date || '-') + '</span>'
+    + '</div>'
+    + '</div>';
+
+  modal.classList.add('open');
+  refreshIcons();
 }
 
 var _subStockVisibleItems = [];
@@ -1607,27 +1816,17 @@ function openProductDetailByIndex(index) {
   openProductDetail(item.productId);
 }
 
-function renderSubStock(data, teamName) {
+function renderSubStock(data) {
   var grid = document.getElementById('subStockGrid');
   if (!grid) return;
 
-  var titleEl = document.querySelector('#view-substock h2');
-  if (titleEl) {
-    if (teamName) {
-      titleEl.innerHTML = '<i data-lucide="users" style="color:var(--primary)"></i> คลังย่อยทีม: ' + teamName;
-    } else {
-      titleEl.innerHTML = '<i data-lucide="package-search"></i> คลังย่อยของฉัน';
-    }
-    refreshIcons();
-  }
-
-  // [แก้ไข] กรองเอาเฉพาะสินค้าที่มีจำนวนมากกว่า 0 มาแสดง
+  // กรองเอาเฉพาะสินค้าที่มีจำนวนมากกว่า 0 มาแสดง
   var visibleData = (data || []).filter(function (item) {
     return Number(item.quantity) > 0;
   });
 
   if (visibleData.length === 0) {
-    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><p>ไม่มีสินค้าคงเหลือในคลังย่อย' + (teamName ? 'ของทีม' : '') + '</p></div>';
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><p>ไม่มีสินค้าคงเหลือในคลังย่อย' + (_currentSubStockMode === 'team' ? 'ของทีม' : '') + '</p></div>';
     return;
   }
 
@@ -1651,9 +1850,11 @@ function renderSubStock(data, teamName) {
       + '</div>'
       + '<div class="product-info" style="padding-top:0;">'
       + '<div style="display:flex; gap:0.5rem; flex-wrap:wrap">'
-      + '<button class="btn btn-primary btn-sm flex-1" onclick="openActionModalByIndex(\'use\', ' + idx + ')"><i data-lucide="sparkles" style="width:14px;height:14px"></i> เบิกใช้งาน</button>'
-      + '<button class="btn btn-outline btn-sm hide-text-mobile" title="โอนให้เพื่อน" onclick="openActionModalByIndex(\'transfer\', ' + idx + ')"><i data-lucide="repeat" style="width:14px;height:14px"></i> <span>โอน</span></button>'
-      + '<button class="btn btn-ghost btn-sm hide-text-mobile" title="คืนคลังหลัก" onclick="openActionModalByIndex(\'return\', ' + idx + ')"><i data-lucide="archive" style="width:14px;height:14px"></i> <span>คืน</span></button>'
+      + (_currentSubStockMode === 'team'
+          ? '<div class="badge badge-outline w-full text-center" style="padding:0.4rem; justify-content:center; font-size:0.75rem; color:var(--primary);"><i data-lucide="users" style="width:13px;height:13px;margin-right:4px;"></i> สต๊อกส่วนกลางทีม</div>'
+          : '<button class="btn btn-primary btn-sm flex-1" onclick="openActionModalByIndex(\'use\', ' + idx + ')"><i data-lucide="sparkles" style="width:14px;height:14px"></i> เบิกใช้งาน</button>'
+          + '<button class="btn btn-outline btn-sm hide-text-mobile" title="โอนให้เพื่อน" onclick="openActionModalByIndex(\'transfer\', ' + idx + ')"><i data-lucide="repeat" style="width:14px;height:14px"></i> <span>โอน</span></button>'
+          + '<button class="btn btn-ghost btn-sm hide-text-mobile" title="คืนคลังหลัก" onclick="openActionModalByIndex(\'return\', ' + idx + ')"><i data-lucide="archive" style="width:14px;height:14px"></i> <span>คืน</span></button>')
       + '</div>'
       + '</div>'
       + '</div>';
