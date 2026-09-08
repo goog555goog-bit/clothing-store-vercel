@@ -1849,12 +1849,10 @@ function renderSubStock(data) {
       + '<div class="product-stock">คงเหลือ: <span id="ss-qty-' + escapeHTML(item.productId) + '-' + escapeHTML(item.size || 'default') + '">' + item.quantity + '</span></div>'
       + '</div>'
       + '<div class="product-info" style="padding-top:0;">'
-      + '<div style="display:flex; gap:0.5rem; flex-wrap:wrap">'
-      + (_currentSubStockMode === 'team'
-          ? '<div class="badge badge-outline w-full text-center" style="padding:0.4rem; justify-content:center; font-size:0.75rem; color:var(--primary);"><i data-lucide="users" style="width:13px;height:13px;margin-right:4px;"></i> สต๊อกส่วนกลางทีม</div>'
-          : '<button class="btn btn-primary btn-sm flex-1" onclick="openActionModalByIndex(\'use\', ' + idx + ')"><i data-lucide="sparkles" style="width:14px;height:14px"></i> เบิกใช้งาน</button>'
-          + '<button class="btn btn-outline btn-sm hide-text-mobile" title="โอนให้เพื่อน" onclick="openActionModalByIndex(\'transfer\', ' + idx + ')"><i data-lucide="repeat" style="width:14px;height:14px"></i> <span>โอน</span></button>'
-          + '<button class="btn btn-ghost btn-sm hide-text-mobile" title="คืนคลังหลัก" onclick="openActionModalByIndex(\'return\', ' + idx + ')"><i data-lucide="archive" style="width:14px;height:14px"></i> <span>คืน</span></button>')
+      + '<div style="display:flex; gap:0.4rem; flex-wrap:wrap">'
+      + '<button class="btn btn-primary btn-sm flex-1" onclick="openActionModalByIndex(\'use\', ' + idx + ')"><i data-lucide="sparkles" style="width:14px;height:14px"></i> เบิกใช้งาน</button>'
+      + '<button class="btn btn-outline btn-sm" title="โอนให้เพื่อน" onclick="openActionModalByIndex(\'transfer\', ' + idx + ')"><i data-lucide="repeat" style="width:14px;height:14px"></i> <span>โอน</span></button>'
+      + '<button class="btn btn-ghost btn-sm" title="คืนคลังหลัก" onclick="openActionModalByIndex(\'return\', ' + idx + ')"><i data-lucide="archive" style="width:14px;height:14px"></i> <span>คืน</span></button>'
       + '</div>'
       + '</div>'
       + '</div>';
