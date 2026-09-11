@@ -2005,3 +2005,166 @@ tr.row-stock-warning { background: rgba(245, 158, 11, 0.02) !important; }
   border-radius: 6px;
 }
 
+/* Multi-Select Dropdown Styles */
+.multi-select-container {
+  position: relative;
+  width: 100%;
+}
+.ms-trigger {
+  width: 100%;
+  padding: 0.55rem 0.85rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.88rem;
+  text-align: left;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+.ms-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  max-height: 220px;
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-top: 4px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+  padding: 0.5rem;
+}
+.ms-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  border-radius: 4px;
+  color: var(--text);
+}
+.ms-option:hover {
+  background: rgba(255,255,255,0.06);
+}
+.ms-option input[type="checkbox"] {
+  cursor: pointer;
+  accent-color: var(--primary);
+}
+
+/* DateField & Calendar Trigger Styles */
+.date-field-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+.date-field-input {
+  padding-right: 2.4rem !important;
+  cursor: pointer;
+}
+.date-field-btn {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--text3);
+  padding: 0.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: color 0.2s ease;
+}
+.date-field-btn:hover {
+  color: var(--primary);
+}
+
+/* Searchable Multi-Select Dropdown Styles */
+.ms-search-box {
+  padding: 0.25rem 0.2rem 0.5rem;
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+  z-index: 5;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 0.35rem;
+}
+.ms-search-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.ms-search-input {
+  width: 100%;
+  padding: 0.4rem 0.6rem 0.4rem 2rem !important;
+  font-size: 0.82rem !important;
+  border-radius: 6px !important;
+  background: rgba(0, 0, 0, 0.25) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+}
+.ms-search-input:focus {
+  outline: none;
+  border-color: var(--primary) !important;
+}
+.ms-search-icon {
+  position: absolute;
+  left: 0.6rem;
+  width: 14px;
+  height: 14px;
+  color: var(--text3);
+  pointer-events: none;
+}
+.ms-no-results {
+  padding: 0.75rem;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--text3);
+}
+
+/* Flatpickr Dark Theme & Thai Typography Enhancements */
+.flatpickr-calendar {
+  font-family: inherit !important;
+}
+.flatpickr-calendar.dark {
+  background: #181926 !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6) !important;
+  border-radius: 12px !important;
+}
+.flatpickr-calendar .flatpickr-current-month {
+  font-size: 0.95rem !important;
+  font-weight: 600 !important;
+  padding: 0.5rem 0 0 !important;
+}
+.flatpickr-calendar .flatpickr-current-month .flatpickr-monthDropdown-months {
+  font-weight: 600 !important;
+}
+.flatpickr-calendar .flatpickr-weekday {
+  color: var(--primary) !important;
+  font-weight: 600 !important;
+  font-size: 0.8rem !important;
+}
+.flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange {
+  background: var(--primary) !important;
+  border-color: var(--primary) !important;
+  color: #000 !important;
+  font-weight: 700 !important;
+}
+.flatpickr-calendar.arrowTop:before, .flatpickr-calendar.arrowTop:after {
+  border-bottom-color: #181926 !important;
+}
+
+
+
+

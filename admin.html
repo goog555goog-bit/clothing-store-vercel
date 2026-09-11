@@ -13,6 +13,10 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
   <script src="https://unpkg.com/html5-qrcode@2.3.8" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
   <link rel="stylesheet" href="style.css">
   <link rel="icon" type="image/png" href="favicon.png">
   <script src="api.js"></script>
@@ -138,6 +142,8 @@
             data-lucide="archive"></i> คลังสินค้าหลัก</button>
         <button class="tab" id="tab-reports" data-admin-page="reports" onclick="adminNav('reports', this)"><i
             data-lucide="pie-chart"></i> รายงานสถิติ</button>
+        <button class="tab" id="tab-export" data-admin-page="export" onclick="adminNav('export', this)"><i
+            data-lucide="download"></i> Export ข้อมูล</button>
         <button class="tab" id="tab-employees" data-admin-page="employees" onclick="adminNav('employees', this)"><i
             data-lucide="users-2"></i>
           จัดการพนักงาน</button>
@@ -521,6 +527,138 @@
         </table>
       </div>
     </div>
+
+    <!-- DATA EXPORT HUB SECTION -->
+    <section id="p-export" class="admin-page" style="display:none">
+      <div class="card glass" style="max-width: 760px; margin: 0 auto 2rem; padding: 1.75rem;">
+        <div style="border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+          <h2 style="margin:0; display:flex; align-items:center; gap:0.5rem; font-weight:700;">
+            <i data-lucide="download" style="color:var(--primary);"></i> Data Export Hub
+          </h2>
+          <p style="font-size:0.85rem; color:var(--text3); margin:0.3rem 0 0;">
+            ศูนย์รวมการส่งออกข้อมูลระบบ กำหนดเงื่อนไข สถานะ ขอบเขตข้อมูล (ทีม/บุคคล) และรูปแบบไฟล์ได้ในที่เดียว
+          </p>
+        </div>
+
+        <form id="exportHubForm" onsubmit="handleExportSubmit(event)">
+          <!-- 1. Data Type Selector -->
+          <div style="margin-bottom: 1.25rem;">
+            <label class="form-label" style="font-weight:600; margin-bottom:0.4rem; display:flex; align-items:center; gap:0.4rem;">
+              <i data-lucide="layers" style="width:16px;height:16px;"></i> เลือกประเภทข้อมูลที่ต้องการ Export
+            </label>
+            <select id="exportDataType" class="input w-full" style="font-size:0.95rem; padding:0.65rem 0.9rem;" onchange="onExportDataTypeChange()">
+              <option value="orders" selected>ใบเบิกพัสดุ (Orders & Items)</option>
+              <option value="products_stock">รายการสินค้าและสต๊อกคงเหลือ (Products & Stock)</option>
+              <option value="inventory_logs">ประวัติการเคลื่อนไหวสต๊อก (Inventory Logs)</option>
+              <option value="audit_logs">ประวัติกิจกรรมระบบ (Audit Logs)</option>
+              <option value="employees">ข้อมูลพนักงาน (Employees List)</option>
+            </select>
+          </div>
+
+          <!-- 2. Date Picker & Quick Shortcuts -->
+          <div style="margin-bottom: 1.25rem; background: rgba(0,0,0,0.15); padding: 1rem; border-radius: 12px; border: 1px solid var(--border);">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.6rem; flex-wrap:wrap; gap:0.5rem;">
+              <label class="form-label" style="font-size:0.85rem; margin:0; font-weight:600; display:flex; align-items:center; gap:0.3rem;">
+                <i data-lucide="calendar" style="width:14px;height:14px;"></i> กำหนดช่วงเวลา (Date Range & Shortcuts)
+              </label>
+              <div style="display:flex; gap:0.35rem; flex-wrap:wrap;">
+                <button type="button" class="btn btn-xs btn-outline" onclick="setExportDateShortcut('today')">วันนี้</button>
+                <button type="button" class="btn btn-xs btn-outline" onclick="setExportDateShortcut('7days')">7 วันล่าสุด</button>
+                <button type="button" class="btn btn-xs btn-outline" onclick="setExportDateShortcut('month')">เดือนนี้</button>
+                <button type="button" class="btn btn-xs btn-outline" onclick="setExportDateShortcut('all')">ทั้งหมด</button>
+              </div>
+            </div>
+            <div class="grid grid-2-tablet gap-2">
+              <div>
+                <label class="form-label" style="font-size:0.75rem; color:var(--text3); margin-bottom:0.2rem;">วันที่เริ่มต้น (Start Date)</label>
+                <div class="date-field-wrap">
+                  <input type="text" id="exportStartDate" class="input w-full date-field-input" placeholder="DD-MM-YYYY" autocomplete="off">
+                  <button type="button" class="date-field-btn" onclick="openDatePicker('exportStartDate')">
+                    <i data-lucide="calendar" style="width:16px;height:16px;"></i>
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label class="form-label" style="font-size:0.75rem; color:var(--text3); margin-bottom:0.2rem;">วันที่สิ้นสุด (End Date)</label>
+                <div class="date-field-wrap">
+                  <input type="text" id="exportEndDate" class="input w-full date-field-input" placeholder="DD-MM-YYYY" autocomplete="off">
+                  <button type="button" class="date-field-btn" onclick="openDatePicker('exportEndDate')">
+                    <i data-lucide="calendar" style="width:16px;height:16px;"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Dynamic Multi-Select Filters -->
+          <div class="grid grid-2-tablet gap-2" style="margin-bottom: 1.25rem;">
+            <!-- Department Multi-Select -->
+            <div>
+              <label class="form-label" style="font-size:0.85rem; margin-bottom:0.25rem; font-weight:600; display:flex; align-items:center; gap:0.3rem;">
+                <i data-lucide="building" style="width:14px;height:14px;"></i> แผนก (Department)
+              </label>
+              <div id="ms-exportDept" class="multi-select-container"></div>
+            </div>
+
+            <!-- Status Multi-Select -->
+            <div>
+              <label class="form-label" style="font-size:0.85rem; margin-bottom:0.25rem; font-weight:600; display:flex; align-items:center; gap:0.3rem;">
+                <i data-lucide="filter" style="width:14px;height:14px;"></i> สถานะ (Status)
+              </label>
+              <div id="ms-exportStatus" class="multi-select-container"></div>
+            </div>
+          </div>
+
+          <!-- 4. Scope Filter (All / Team / Individual) -->
+          <div class="grid grid-2-tablet gap-2" style="margin-bottom: 1.25rem;">
+            <div>
+              <label class="form-label" style="font-size:0.85rem; margin-bottom:0.25rem; font-weight:600; display:flex; align-items:center; gap:0.3rem;">
+                <i data-lucide="users" style="width:14px;height:14px;"></i> ขอบเขตข้อมูล (Scope)
+              </label>
+              <select id="exportScopeType" class="input w-full" style="font-size:0.9rem;" onchange="onExportScopeTypeChange()">
+                <option value="ALL" selected>ทั้งหมด (ทุกทีม/ทุกคน)</option>
+                <option value="TEAM">รายทีมช่าง (Team Scope)</option>
+                <option value="INDIVIDUAL">รายบุคคล/พนักงาน (Individual Scope)</option>
+              </select>
+            </div>
+
+            <!-- Scope Target Multi-Select Container -->
+            <div id="exportScopeTargetWrap" style="display:none;">
+              <label id="exportScopeTargetLabel" class="form-label" style="font-size:0.85rem; margin-bottom:0.25rem; font-weight:600; display:flex; align-items:center; gap:0.3rem;">
+                <i data-lucide="user-check" style="width:14px;height:14px;"></i> เลือกทีม/พนักงาน
+              </label>
+              <div id="ms-exportScopeTarget" class="multi-select-container"></div>
+            </div>
+          </div>
+
+          <!-- 5. Export Format -->
+          <div style="margin-bottom: 1.75rem;">
+            <label class="form-label" style="font-weight:600; margin-bottom:0.5rem; display:flex; align-items:center; gap:0.4rem;">
+              <i data-lucide="file-text" style="width:16px;height:16px;"></i> รูปแบบไฟล์ (Format)
+            </label>
+            <div style="display:flex; gap:1.5rem; align-items:center; background:var(--surface); padding:0.75rem 1rem; border-radius:10px; border:1px solid var(--border);">
+              <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; font-size:0.9rem; font-weight:500;">
+                <input type="radio" name="exportFormat" value="xlsx" checked style="accent-color:var(--primary);">
+                <span>Excel (.xlsx)</span>
+              </label>
+              <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; font-size:0.9rem; font-weight:500;">
+                <input type="radio" name="exportFormat" value="csv" style="accent-color:var(--primary);">
+                <span>CSV (.csv)</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- 6. Submit Button & Status -->
+          <div style="text-align:right;">
+            <button type="submit" id="btnDoExport" class="btn btn-accent btn-lg" style="width:100%; justify-content:center; font-weight:700; font-size:1rem; padding:0.75rem;">
+              <i data-lucide="download"></i> Export ข้อมูล
+            </button>
+          </div>
+
+          <div id="exportStatusMsg" style="margin-top:1rem; display:none; text-align:center; font-weight:600; font-size:0.9rem;"></div>
+        </form>
+      </div>
+    </section>
 
     <!-- Employees Section -->
     <section id="p-employees" class="admin-page" style="display:none">
@@ -1746,6 +1884,7 @@
         'tab-teams': API.PERMS.VIEW_EMPLOYEES,
         'tab-departments': API.PERMS.MANAGE_STRUCTURE,
         'tab-reports': API.PERMS.VIEW_REPORTS,
+        'tab-export': API.PERMS.VIEW_REPORTS,
         'tab-audit': API.PERMS.VIEW_REPORTS,
         'tab-usage': API.PERMS.VIEW_REPORTS,
         'tab-settings': API.PERMS.MANAGE_SETTINGS,
@@ -1881,7 +2020,8 @@
         'branches': { t: 'จัดการสาขา', d: 'ตั้งค่าข้อมูลสาขาและที่ตั้ง' },
         'audit': { t: 'ประวัติกิจกรรมระบบ', d: 'ตรวจสอบความเคลื่อนไหวและการทำงานของระบบ' },
         'usage': { t: 'ประวัติการเบิกใช้', d: 'ตรวจสอบข้อมูลการเบิกใช้พัสดุรายทีมและรายบุคคล' },
-        'tech-requests': { t: 'เบิกของทีมช่าง', d: 'ตรวจสอบและจ่ายพัสดุเข้าคลังย่อยของช่างประจำทีม' }
+        'tech-requests': { t: 'เบิกของทีมช่าง', d: 'ตรวจสอบและจ่ายพัสดุเข้าคลังย่อยของช่างประจำทีม' },
+        'export': { t: 'Data Export Hub', d: 'ศูนย์รวมการส่งออกข้อมูลระบบในที่เดียว' }
       };
 
       if (titles[page]) {
@@ -1898,6 +2038,7 @@
         'tech-requests': loadTechRequests,
         'inventory': loadInventory,
         'reports': loadReports,
+        'export': loadExportHubPage,
         'employees': loadAdminEmployees,
         'permissions': loadPermissionsPage,
         'teams': loadTeams,
@@ -5453,6 +5594,795 @@
         showToast('เกิดข้อผิดพลาด: ' + (err.message || err), 'error');
       });
     }
+
+    // ─── DATA EXPORT HUB & MULTI-SELECT HELPERS ──────────────────
+    // ponytail: lightweight multi-select dropdown implementation without framework overhead
+    var msState = {};
+
+    // ─── DATA EXPORT HUB & MULTI-SELECT HELPERS ──────────────────
+    // ponytail: lightweight searchable multi-select dropdown and datepicker helpers
+    var msState = {};
+    var fpExportInstances = {};
+
+    function initExportDatePickers() {
+      if (typeof flatpickr === 'function') {
+        var thaiLocale = {
+          firstDayOfWeek: 1,
+          weekdays: {
+            shorthand: ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'],
+            longhand: ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์']
+          },
+          months: {
+            shorthand: ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'],
+            longhand: ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม']
+          },
+          rangeSeparator: ' ถึง '
+        };
+
+        var commonConfig = {
+          dateFormat: 'd-m-Y',
+          allowInput: true,
+          disableMobile: true,
+          theme: 'dark',
+          locale: (typeof flatpickr.l10ns !== 'undefined' && flatpickr.l10ns.th) ? flatpickr.l10ns.th : thaiLocale
+        };
+        if (!fpExportInstances['exportStartDate']) {
+          fpExportInstances['exportStartDate'] = flatpickr('#exportStartDate', commonConfig);
+        }
+        if (!fpExportInstances['exportEndDate']) {
+          fpExportInstances['exportEndDate'] = flatpickr('#exportEndDate', commonConfig);
+        }
+      }
+    }
+
+    function openDatePicker(id) {
+      if (fpExportInstances[id]) {
+        fpExportInstances[id].open();
+      } else {
+        var el = document.getElementById(id);
+        if (el) {
+          if (typeof el.showPicker === 'function') {
+            try { el.showPicker(); } catch (e) { el.focus(); }
+          } else {
+            el.focus();
+          }
+        }
+      }
+    }
+
+    function renderMultiSelect(containerId, options, placeholder, enableSearch) {
+      msState[containerId] = options || [];
+      var el = document.getElementById(containerId);
+      if (!el) return;
+
+      var opts = options || [];
+      var selected = opts.filter(function(o) { return o.selected; }).map(function(o) { return o.value; });
+      var labelText = placeholder || 'เลือกทั้งหมด';
+      if (selected.length === 0 || selected.includes('ALL')) {
+        labelText = 'ทั้งหมด (' + opts.length + ')';
+      } else if (selected.length === 1) {
+        var match = opts.find(function(o) { return o.value === selected[0]; });
+        labelText = match ? match.label : selected[0];
+      } else {
+        labelText = 'เลือก ' + selected.length + ' รายการ';
+      }
+
+      var showSearch = enableSearch !== undefined ? enableSearch : (opts.length > 6);
+
+      var html = '<button type="button" class="ms-trigger" onclick="toggleMultiSelect(\'' + containerId + '\', event)">'
+        + '<span>' + escapeHTML(labelText) + '</span>'
+        + '<i data-lucide="chevron-down" style="width:16px;height:16px;"></i>'
+        + '</button>'
+        + '<div id="' + containerId + '-dd" class="ms-dropdown" style="display:none;" onclick="event.stopPropagation()">';
+
+      if (showSearch) {
+        html += '<div class="ms-search-box">'
+          + '<div class="ms-search-input-wrap">'
+          + '<i data-lucide="search" class="ms-search-icon"></i>'
+          + '<input type="text" class="input input-sm ms-search-input" placeholder="พิมพ์ค้นหา..." oninput="filterMultiSelect(\'' + containerId + '\', this.value)" onclick="event.stopPropagation()">'
+          + '</div>'
+          + '</div>';
+      }
+
+      html += '<div class="ms-options-list">'
+        + '<label class="ms-option ms-option-all" style="font-weight:600; border-bottom:1px solid var(--border); padding-bottom:0.4rem; margin-bottom:0.3rem;">'
+        + '<input type="checkbox" onchange="toggleMultiSelectAll(\'' + containerId + '\', this.checked)" ' + (selected.includes('ALL') || selected.length === opts.length || selected.length === 0 ? 'checked' : '') + '> '
+        + '<span>[เลือกทั้งหมด]</span>'
+        + '</label>';
+
+      opts.forEach(function(opt) {
+        var isChecked = selected.includes('ALL') || selected.length === 0 || selected.includes(opt.value);
+        html += '<label class="ms-option" data-search="' + escapeHTML((String(opt.label) + ' ' + String(opt.value)).toLowerCase()) + '">'
+          + '<input type="checkbox" class="ms-opt-cb" data-value="' + escapeHTML(opt.value) + '" ' + (isChecked ? 'checked' : '') + ' onchange="updateMultiSelectVal(\'' + containerId + '\')"> '
+          + '<span>' + escapeHTML(opt.label) + '</span>'
+          + '</label>';
+      });
+
+      html += '<div class="ms-no-results" style="display:none;">ไม่พบข้อมูลที่ค้นหา</div>';
+      html += '</div></div>';
+
+      el.innerHTML = html;
+      refreshIcons();
+    }
+
+    function filterMultiSelect(containerId, query) {
+      var container = document.getElementById(containerId);
+      if (!container) return;
+      var q = String(query || '').trim().toLowerCase();
+      var options = container.querySelectorAll('.ms-option:not(.ms-option-all)');
+      var visibleCount = 0;
+
+      options.forEach(function(opt) {
+        var searchTxt = opt.getAttribute('data-search') || opt.textContent.toLowerCase();
+        if (!q || searchTxt.indexOf(q) !== -1) {
+          opt.style.display = 'flex';
+          visibleCount++;
+        } else {
+          opt.style.display = 'none';
+        }
+      });
+
+      var noResults = container.querySelector('.ms-no-results');
+      if (noResults) {
+        noResults.style.display = (visibleCount === 0 && q.length > 0) ? 'block' : 'none';
+      }
+    }
+
+    function toggleMultiSelect(containerId, e) {
+      if (e) e.stopPropagation();
+      var dd = document.getElementById(containerId + '-dd');
+      if (!dd) return;
+      var isOpen = dd.style.display !== 'none';
+      document.querySelectorAll('.ms-dropdown').forEach(function(d) { d.style.display = 'none'; });
+      dd.style.display = isOpen ? 'none' : 'block';
+
+      if (!isOpen) {
+        var searchInp = dd.querySelector('.ms-search-input');
+        if (searchInp) {
+          searchInp.value = '';
+          filterMultiSelect(containerId, '');
+          setTimeout(function() { searchInp.focus(); }, 50);
+        }
+      }
+    }
+
+    function toggleMultiSelectAll(containerId, checked) {
+      var container = document.getElementById(containerId);
+      if (!container) return;
+      var cbs = container.querySelectorAll('.ms-opt-cb');
+      cbs.forEach(function(cb) {
+        // Only toggle visible checkboxes if filtering is active
+        var parentOption = cb.closest('.ms-option');
+        if (!parentOption || parentOption.style.display !== 'none') {
+          cb.checked = checked;
+        }
+      });
+      updateMultiSelectVal(containerId);
+    }
+
+    function updateMultiSelectVal(containerId) {
+      var container = document.getElementById(containerId);
+      if (!container) return;
+      var cbs = container.querySelectorAll('.ms-opt-cb');
+      var total = cbs.length;
+      var checkedCbs = container.querySelectorAll('.ms-opt-cb:checked');
+      var selectedVals = [];
+      checkedCbs.forEach(function(cb) { selectedVals.push(cb.getAttribute('data-value')); });
+
+      var allCb = container.querySelector('.ms-option-all input[type="checkbox"]');
+      if (allCb) {
+        allCb.checked = (selectedVals.length === total);
+      }
+
+      var triggerSpan = container.querySelector('.ms-trigger span');
+      if (triggerSpan) {
+        if (selectedVals.length === 0 || selectedVals.length === total) {
+          triggerSpan.textContent = 'ทั้งหมด (' + total + ')';
+        } else if (selectedVals.length === 1) {
+          var optObj = (msState[containerId] || []).find(function(o) { return String(o.value) === String(selectedVals[0]); });
+          triggerSpan.textContent = optObj ? optObj.label : selectedVals[0];
+        } else {
+          triggerSpan.textContent = 'เลือก ' + selectedVals.length + ' รายการ';
+        }
+      }
+    }
+
+    function getMultiSelectValues(containerId) {
+      var container = document.getElementById(containerId);
+      if (!container) return ['ALL'];
+      var cbs = container.querySelectorAll('.ms-opt-cb');
+      var checkedCbs = container.querySelectorAll('.ms-opt-cb:checked');
+      if (checkedCbs.length === 0 || checkedCbs.length === cbs.length) {
+        return ['ALL'];
+      }
+      var vals = [];
+      checkedCbs.forEach(function(cb) { vals.push(cb.getAttribute('data-value')); });
+      return vals;
+    }
+
+    document.addEventListener('click', function() {
+      document.querySelectorAll('.ms-dropdown').forEach(function(d) { d.style.display = 'none'; });
+    });
+
+    function setExportDateShortcut(type) {
+      var startInput = document.getElementById('exportStartDate');
+      var endInput = document.getElementById('exportEndDate');
+      if (!startInput || !endInput) return;
+
+      var now = new Date();
+      var formatDate = function(d) {
+        var year = d.getFullYear();
+        var month = String(d.getMonth() + 1).padStart(2, '0');
+        var day = String(d.getDate()).padStart(2, '0');
+        return day + '-' + month + '-' + year;
+      };
+
+      var startVal = '';
+      var endVal = '';
+
+      if (type === 'today') {
+        var todayStr = formatDate(now);
+        startVal = todayStr;
+        endVal = todayStr;
+      } else if (type === '7days') {
+        endVal = formatDate(now);
+        var past7 = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6);
+        startVal = formatDate(past7);
+      } else if (type === 'month') {
+        endVal = formatDate(now);
+        var firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+        startVal = formatDate(firstDay);
+      } else if (type === 'all') {
+        startVal = '';
+        endVal = '';
+      }
+
+      startInput.value = startVal;
+      endInput.value = endVal;
+
+      if (fpExportInstances['exportStartDate']) {
+        fpExportInstances['exportStartDate'].setDate(startVal, true);
+      }
+      if (fpExportInstances['exportEndDate']) {
+        fpExportInstances['exportEndDate'].setDate(endVal, true);
+      }
+    }
+
+    function onExportDataTypeChange() {
+      var dataType = document.getElementById('exportDataType').value;
+      var statusOptions = [];
+
+      if (dataType === 'orders') {
+        statusOptions = [
+          { value: 'pending', label: 'รออนุมัติ (Pending)' },
+          { value: 'approved', label: 'อนุมัติแล้ว (Approved)' },
+          { value: 'ready', label: 'พร้อมจ่ายของ (Ready)' },
+          { value: 'dispatched', label: 'จ่ายของแล้ว (Dispatched)' },
+          { value: 'received', label: 'รับของแล้ว/เสร็จสิ้น (Received)' },
+          { value: 'rejected', label: 'ปฏิเสธ (Rejected)' }
+        ];
+      } else if (dataType === 'products_stock') {
+        statusOptions = [
+          { value: 'normal', label: 'ปกติ (Normal)' },
+          { value: 'low_stock', label: 'สต๊อกต่ำ (Low Stock)' },
+          { value: 'out_of_stock', label: 'สินค้าหมด (Out of Stock)' }
+        ];
+      } else if (dataType === 'inventory_logs') {
+        statusOptions = [
+          { value: 'issue', label: 'เบิกใช้งาน (Issue)' },
+          { value: 'transfer_in', label: 'โอนเข้า (Transfer In)' },
+          { value: 'transfer_out', label: 'โอนออก (Transfer Out)' },
+          { value: 'return', label: 'คืน (Return)' },
+          { value: 'add', label: 'เพิ่มสต๊อก (Add)' },
+          { value: 'deduct', label: 'ตัดสต๊อก (Deduct)' },
+          { value: 'adjust', label: 'ปรับปรุงสต๊อก (Adjust)' }
+        ];
+      } else if (dataType === 'audit_logs') {
+        statusOptions = [
+          { value: 'info', label: 'ข้อมูลทั่วไป (Info)' },
+          { value: 'warning', label: 'คำเตือน (Warning)' },
+          { value: 'error', label: 'ข้อผิดพลาด (Error)' }
+        ];
+      } else if (dataType === 'employees') {
+        statusOptions = [
+          { value: 'active', label: 'ใช้งานปกติ (Active)' },
+          { value: 'inactive', label: 'ระงับการใช้งาน (Inactive)' }
+        ];
+      }
+
+      renderMultiSelect('ms-exportStatus', statusOptions, 'เลือกสถานะทั้งหมด');
+    }
+
+    function onExportScopeTypeChange() {
+      var scopeType = document.getElementById('exportScopeType').value;
+      var wrap = document.getElementById('exportScopeTargetWrap');
+      var label = document.getElementById('exportScopeTargetLabel');
+      if (!wrap || !label) return;
+
+      if (scopeType === 'ALL') {
+        wrap.style.display = 'none';
+        return;
+      }
+
+      wrap.style.display = 'block';
+      var options = [];
+
+      if (scopeType === 'TEAM') {
+        label.innerHTML = '<i data-lucide="users" style="width:14px;height:14px;"></i> เลือกทีมช่าง (Team Scope)';
+        if (allAdminTeams && allAdminTeams.length > 0) {
+          options = allAdminTeams.map(function(t) {
+            return { value: t.teamId || t.name, label: t.name || t.teamId };
+          });
+        } else if (allAdminEmployees && allAdminEmployees.length > 0) {
+          var teamSet = {};
+          allAdminEmployees.forEach(function(e) {
+            if (e.teamId) teamSet[e.teamId] = e.teamId;
+            if (e.team) teamSet[e.team] = e.team;
+          });
+          options = Object.keys(teamSet).map(function(t) { return { value: t, label: t }; });
+        }
+      } else if (scopeType === 'INDIVIDUAL') {
+        label.innerHTML = '<i data-lucide="user-check" style="width:14px;height:14px;"></i> เลือกพนักงาน (Individual Scope)';
+        if (allAdminEmployees && allAdminEmployees.length > 0) {
+          options = allAdminEmployees.map(function(e) {
+            return { value: e.employeeId || e.id, label: (e.name || e.employeeName || e.employeeId) + ' (' + (e.department || 'ไม่ระบุ') + ')' };
+          });
+        }
+      }
+
+      renderMultiSelect('ms-exportScopeTarget', options, 'เลือกทั้งหมด', true);
+    }
+
+    function loadExportHubPage() {
+      initExportDatePickers();
+      Promise.all([
+        API.getReportData('Departments').catch(function() { return { data: [] }; }),
+        API.getTeams().catch(function() { return { data: [] }; }),
+        API.getEmployees().catch(function() { return { data: [] }; })
+      ]).then(function(results) {
+        if (results[0] && results[0].data) allAdminDepartments = results[0].data;
+        if (results[1] && results[1].data) allAdminTeams = results[1].data;
+        if (results[2] && results[2].data) allAdminEmployees = results[2].data;
+
+        var deptOptions = (allAdminDepartments || []).map(function(d) {
+          var dName = d.name || d.departmentId || '';
+          return { value: dName, label: dName };
+        });
+        renderMultiSelect('ms-exportDept', deptOptions, 'เลือกทุกแผนก');
+
+        onExportDataTypeChange();
+        onExportScopeTypeChange();
+        refreshIcons();
+      }).catch(function(e) {
+        console.warn('Failed to load options for export hub:', e);
+      });
+    }
+
+    function normalizeExportDate(rawDate) {
+      if (!rawDate) return '';
+      if (typeof rawDate === 'string') {
+        var dmyMatch = rawDate.trim().match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/);
+        if (dmyMatch) {
+          var d = dmyMatch[1].padStart(2, '0');
+          var m = dmyMatch[2].padStart(2, '0');
+          var y = dmyMatch[3];
+          return y + '-' + m + '-' + d;
+        }
+        if (/^\d{4}-\d{2}-\d{2}/.test(rawDate)) {
+          return rawDate.substring(0, 10);
+        }
+      }
+      try {
+        var dt = new Date(rawDate);
+        if (!isNaN(dt.getTime())) {
+          var y = dt.getFullYear();
+          var m = String(dt.getMonth() + 1).padStart(2, '0');
+          var day = String(dt.getDate()).padStart(2, '0');
+          return y + '-' + m + '-' + day;
+        }
+      } catch (e) {}
+      return String(rawDate).substring(0, 10);
+    }
+
+    function handleExportSubmit(e) {
+      if (e) e.preventDefault();
+
+      var dataType = document.getElementById('exportDataType').value;
+      var startDate = normalizeExportDate(document.getElementById('exportStartDate').value);
+      var endDate = normalizeExportDate(document.getElementById('exportEndDate').value);
+      var departments = getMultiSelectValues('ms-exportDept');
+      var statuses = getMultiSelectValues('ms-exportStatus');
+      var scopeType = document.getElementById('exportScopeType').value;
+      var scopeTargets = getMultiSelectValues('ms-exportScopeTarget');
+
+      var formatRadio = document.querySelector('input[name="exportFormat"]:checked');
+      var format = formatRadio ? formatRadio.value : 'xlsx';
+
+      exportDataHub({
+        dataType: dataType,
+        startDate: startDate,
+        endDate: endDate,
+        departments: departments,
+        statuses: statuses,
+        scopeType: scopeType,
+        scopeTargets: scopeTargets,
+        format: format
+      });
+    }
+
+    function exportDataHub(params) {
+      // ponytail: self-contained export processor for admin panel
+      params = params || {};
+      var dataType = params.dataType || 'orders';
+      var startDate = params.startDate || '';
+      var endDate = params.endDate || '';
+      var format = params.format || 'xlsx';
+
+      var departments = Array.isArray(params.departments) ? params.departments : (params.department && params.department !== 'ALL' ? [params.department] : ['ALL']);
+      var statuses = Array.isArray(params.statuses) ? params.statuses : (params.status && params.status !== 'ALL' ? [params.status] : ['ALL']);
+      var scopeType = params.scopeType || 'ALL';
+      var scopeTargets = Array.isArray(params.scopeTargets) ? params.scopeTargets : (params.scopeTarget && params.scopeTarget !== 'ALL' ? [params.scopeTarget] : ['ALL']);
+
+      var btn = document.getElementById('btnDoExport');
+      var statusEl = document.getElementById('exportStatusMsg');
+
+      if (startDate && endDate && startDate > endDate) {
+        if (typeof showToast === 'function') showToast('วันที่เริ่มต้นต้องไม่มากกว่าวันที่สิ้นสุด', 'error');
+        if (statusEl) {
+          statusEl.style.display = 'block';
+          statusEl.style.color = 'var(--danger)';
+          statusEl.textContent = 'ไม่สามารถ Export ข้อมูลได้: วันที่เริ่มต้นต้องไม่มากกว่าวันที่สิ้นสุด';
+        }
+        return Promise.reject('วันที่เริ่มต้นต้องไม่มากกว่าวันที่สิ้นสุด');
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<div class="spinner" style="width:16px;height:16px;border-width:2px"></div> กำลังเตรียมข้อมูล...';
+      }
+      if (statusEl) {
+        statusEl.style.display = 'block';
+        statusEl.style.color = 'var(--text2)';
+        statusEl.textContent = 'กำลังเตรียมข้อมูล...';
+      }
+
+      var promise;
+      if (dataType === 'orders') {
+        promise = API.getAllOrders(true).then(function (res) {
+          var rawOrders = res.data || res.orders || [];
+          var rows = [];
+
+          rawOrders.forEach(function (o) {
+            var dateStr = normalizeExportDate(o.createdAt || o.orderDate || o.date || '');
+            if (startDate && (!dateStr || dateStr < startDate)) return;
+            if (endDate && (!dateStr || dateStr > endDate)) return;
+
+            if (departments.length > 0 && !departments.includes('ALL')) {
+              var oDept = String(o.department || '').trim().toLowerCase();
+              if (!departments.some(function (d) { return String(d).trim().toLowerCase() === oDept; })) return;
+            }
+
+            if (statuses.length > 0 && !statuses.includes('ALL')) {
+              var oStatus = String(o.status || '').toLowerCase().trim();
+              var matched = statuses.some(function (st) {
+                var s = String(st).toLowerCase().trim();
+                if (s === oStatus) return true;
+                if ((s === 'completed' || s === 'received') && (oStatus === 'completed' || oStatus === 'received')) return true;
+                return false;
+              });
+              if (!matched) return;
+            }
+
+            if (scopeType === 'TEAM' && scopeTargets.length > 0 && !scopeTargets.includes('ALL')) {
+              var oTeam = String(o.teamId || o.team || '').trim().toLowerCase();
+              if (!scopeTargets.some(function (t) { return String(t).trim().toLowerCase() === oTeam; })) return;
+            } else if (scopeType === 'INDIVIDUAL' && scopeTargets.length > 0 && !scopeTargets.includes('ALL')) {
+              var oEmpId = String(o.employeeId || o.requesterId || o.user || '').trim().toLowerCase();
+              if (!scopeTargets.some(function (emp) { return String(emp).trim().toLowerCase() === oEmpId; })) return;
+            }
+
+            var items = Array.isArray(o.items) && o.items.length > 0 ? o.items : [{}];
+            items.forEach(function (it) {
+              var pId = String(it.productId || it.id || '').trim();
+              var unitPrice = Number(it.price || it.unitPrice || 0);
+              if (!unitPrice && pId && typeof allAdminProducts !== 'undefined' && allAdminProducts) {
+                var foundProd = allAdminProducts.find(function (p) { return String(p.productId || p.id) === pId; });
+                if (foundProd) unitPrice = Number(foundProd.price) || 0;
+              }
+              var qty = Number(it.quantity || it.qty || 0);
+              var itemTotal = Number(it.total || it.totalPrice || (unitPrice * qty));
+
+              var approver = o.approvedBy || o.approverName || o.approver || '';
+              var approvedDate = o.approvedAt || o.approvalDate || o.approvedDate || '';
+              var isApprovedOrDone = ['Approved', 'Ready', 'READY', 'Dispatched', 'Received'].indexOf(o.status) !== -1;
+              if (!approver && isApprovedOrDone) approver = 'ผู้ดูแลระบบ';
+              if (!approvedDate && isApprovedOrDone) approvedDate = o.createdAt || o.date || '';
+
+              rows.push({
+                'รหัสใบเบิก': o.orderId || o.id || '',
+                'วันที่เบิก': o.createdAt || o.date || '',
+                'ผู้ขอเบิก': o.employeeName || o.requesterName || o.userName || o.user || '',
+                'รหัสพนักงาน': o.employeeId || o.requesterId || '',
+                'แผนก': o.department || '',
+                'ทีม': o.teamId || o.team || '',
+                'สถานะ': o.statusLabel || o.status || '',
+                'รหัสสินค้า': pId,
+                'ชื่อสินค้า': it.productName || it.name || '',
+                'จำนวน': qty,
+                'ราคาต่อชิ้น': unitPrice,
+                'ราคารวม': itemTotal,
+                'ผู้อนุมัติ': approver,
+                'วันที่อนุมัติ': approvedDate
+              });
+            });
+          });
+
+          return rows;
+        });
+      } else if (dataType === 'products_stock') {
+        promise = API.getProducts().then(function (res) {
+          var rawProds = res.data || res.products || [];
+          var rows = [];
+
+          rawProds.forEach(function (p) {
+            if (departments.length > 0 && !departments.includes('ALL')) {
+              var pDept = String(p.department || '').trim().toLowerCase();
+              if (!departments.some(function (d) { return String(d).trim().toLowerCase() === pDept; })) return;
+            }
+
+            if (statuses.length > 0 && !statuses.includes('ALL')) {
+              var stock = Number(p.stock) || 0;
+              var minStock = Number(p.minStock) || 0;
+              var pStatus = 'normal';
+              if (stock <= 0) pStatus = 'out_of_stock';
+              else if (stock <= minStock) pStatus = 'low_stock';
+
+              var rawStatus = String(p.status || '').toLowerCase().trim();
+              var matched = statuses.some(function (st) {
+                var s = String(st).toLowerCase().trim();
+                return s === pStatus || s === rawStatus || (s === 'normal' && (rawStatus === 'ปกติ' || rawStatus === 'active')) || (s === 'out_of_stock' && rawStatus === 'สินค้าหมด') || (s === 'low_stock' && rawStatus === 'สต๊อกต่ำ');
+              });
+              if (!matched) return;
+            }
+
+            if (scopeType === 'TEAM' && scopeTargets.length > 0 && !scopeTargets.includes('ALL')) {
+              var pTeam = String(p.teamId || p.team || '').trim().toLowerCase();
+              if (!scopeTargets.some(function (t) { return String(t).trim().toLowerCase() === pTeam; })) return;
+            }
+
+            var unitPrice = Number(p.price) || 0;
+            var stockQty = Number(p.stock) || 0;
+            var totalValue = unitPrice * stockQty;
+
+            rows.push({
+              'รหัสสินค้า': p.productId || p.id || '',
+              'บาร์โค้ด/SKU': p.sku || p.code || p.productId || '',
+              'ชื่อสินค้า': p.name || p.productName || '',
+              'หมวดหมู่': p.categoryName || p.category || p.categoryId || '',
+              'ราคาต่อชิ้น': unitPrice,
+              'จำนวนสต็อก': stockQty,
+              'มูลค่ารวมสต็อก': totalValue,
+              'สต็อกขั้นต่ำ': Number(p.minStock) || 0,
+              'ที่ตั้ง': p.location || '',
+              'ทีม': p.teamId || p.team || '',
+              'สถานะ': p.status || (stockQty <= 0 ? 'สินค้าหมด' : (stockQty <= Number(p.minStock) ? 'สต๊อกต่ำ' : 'ปกติ'))
+            });
+          });
+
+          return rows;
+        });
+      } else if (dataType === 'inventory_logs') {
+        promise = API.getInventoryLogs({ limit: 5000 }).then(function (res) {
+          var rawLogs = res.data || [];
+          var rows = [];
+
+          var actionMap = {
+            'issue': 'เบิกใช้งาน',
+            'transfer_out': 'โอนออก',
+            'transfer_in': 'โอนเข้า',
+            'return': 'คืน',
+            'add': 'เพิ่มสต๊อก',
+            'deduct': 'ตัดสต๊อก',
+            'adjust': 'ปรับปรุงสต๊อก',
+            'reserve': 'จองสต๊อก',
+            'cancel': 'ยกเลิก'
+          };
+
+          rawLogs.forEach(function (l) {
+            var dateStr = normalizeExportDate(l.date || l.timestamp || '');
+            if (startDate && (!dateStr || dateStr < startDate)) return;
+            if (endDate && (!dateStr || dateStr > endDate)) return;
+
+            if (departments.length > 0 && !departments.includes('ALL')) {
+              var lDept = String(l.department || '').trim().toLowerCase();
+              if (!departments.some(function (d) { return String(d).trim().toLowerCase() === lDept; })) return;
+            }
+
+            if (statuses.length > 0 && !statuses.includes('ALL')) {
+              var lAction = String(l.action || '').toLowerCase().trim();
+              if (!statuses.some(function (st) { return String(st).toLowerCase().trim() === lAction; })) return;
+            }
+
+            if (scopeType === 'TEAM' && scopeTargets.length > 0 && !scopeTargets.includes('ALL')) {
+              var lTeam = String(l.teamId || l.team || '').trim().toLowerCase();
+              if (!scopeTargets.some(function (t) { return String(t).trim().toLowerCase() === lTeam; })) return;
+            } else if (scopeType === 'INDIVIDUAL' && scopeTargets.length > 0 && !scopeTargets.includes('ALL')) {
+              var lEmpId = String(l.employeeId || l.userId || l.user || '').trim().toLowerCase();
+              if (!scopeTargets.some(function (emp) { return String(emp).trim().toLowerCase() === lEmpId; })) return;
+            }
+
+            var actLabel = actionMap[l.action] || l.action || '';
+            rows.push({
+              'รหัส Log': l.logId || l.id || '',
+              'รหัสสินค้า': l.productId || '',
+              'ชื่อสินค้า': l.productName || '',
+              'กิจกรรม': actLabel,
+              'จำนวน': Number(l.quantity) || 0,
+              'ผู้ทำรายการ': l.userName || l.user || '',
+              'แผนก': l.department || '',
+              'ทีม': l.teamId || l.team || '',
+              'ที่ตั้ง': l.location || '',
+              'รหัสอ้างอิง': l.referenceId || l.orderId || '',
+              'วันที่และเวลา': l.date || l.timestamp || ''
+            });
+          });
+
+          return rows;
+        });
+      } else if (dataType === 'audit_logs') {
+        promise = API.getReportData('auditActivities').then(function (res) {
+          var rawLogs = (res.data && res.data.logs) ? res.data.logs : [];
+          var rows = [];
+
+          rawLogs.forEach(function (l) {
+            var dateStr = normalizeExportDate(l.timestamp || l.date || '');
+            if (startDate && (!dateStr || dateStr < startDate)) return;
+            if (endDate && (!dateStr || dateStr > endDate)) return;
+
+            if (scopeType === 'INDIVIDUAL' && scopeTargets.length > 0 && !scopeTargets.includes('ALL')) {
+              var lUser = String(l.user || l.userId || '').trim().toLowerCase();
+              if (!scopeTargets.some(function (emp) { return String(emp).trim().toLowerCase() === lUser; })) return;
+            }
+
+            var detailText = typeof l.detail === 'object' ? JSON.stringify(l.detail) : (l.detail || '');
+            rows.push({
+              'รหัส Log': l.logId || l.id || '',
+              'ผู้ใช้งาน': l.user || '',
+              'กิจกรรม': l.action || '',
+              'รายละเอียด': detailText,
+              'รหัสอ้างอิง': l.referenceId || '',
+              'วันที่และเวลา': l.timestamp || l.date || ''
+            });
+          });
+
+          return rows;
+        });
+      } else if (dataType === 'employees') {
+        promise = API.getEmployees().then(function (res) {
+          var rawEmps = res.data || [];
+          var rows = [];
+
+          rawEmps.forEach(function (e) {
+            if (departments.length > 0 && !departments.includes('ALL')) {
+              var eDept = String(e.department || '').trim().toLowerCase();
+              if (!departments.some(function (d) { return String(d).trim().toLowerCase() === eDept; })) return;
+            }
+
+            if (statuses.length > 0 && !statuses.includes('ALL')) {
+              var eStatus = String(e.status || 'active').toLowerCase().trim();
+              var matched = statuses.some(function (st) {
+                var s = String(st).toLowerCase().trim();
+                return s === eStatus || (s === 'active' && (eStatus === 'active' || eStatus === 'ปกติ' || !e.status)) || (s === 'inactive' && (eStatus === 'inactive' || eStatus === 'ระงับการใช้งาน' || eStatus === 'suspended'));
+              });
+              if (!matched) return;
+            }
+
+            if (scopeType === 'TEAM' && scopeTargets.length > 0 && !scopeTargets.includes('ALL')) {
+              var eTeam = String(e.teamId || e.team || '').trim().toLowerCase();
+              if (!scopeTargets.some(function (t) { return String(t).trim().toLowerCase() === eTeam; })) return;
+            } else if (scopeType === 'INDIVIDUAL' && scopeTargets.length > 0 && !scopeTargets.includes('ALL')) {
+              var eEmpId = String(e.employeeId || e.id || '').trim().toLowerCase();
+              if (!scopeTargets.some(function (emp) { return String(emp).trim().toLowerCase() === eEmpId; })) return;
+            }
+
+            rows.push({
+              'รหัสพนักงาน': e.employeeId || e.id || '',
+              'ชื่อ-นามสกุล': e.name || e.employeeName || '',
+              'แผนก': e.department || '',
+              'ทีม': e.teamId || e.team || '',
+              'ตำแหน่ง': e.position || '',
+              'อีเมล': e.email || '',
+              'เบอร์โทรศัพท์': e.phone || '',
+              'สถานะ': e.status || ''
+            });
+          });
+
+          return rows;
+        });
+      } else {
+        promise = Promise.reject('ประเภทข้อมูลไม่ถูกต้อง');
+      }
+
+      return promise.then(function (rows) {
+        if (!rows || rows.length === 0) {
+          if (typeof showToast === 'function') showToast('ไม่พบข้อมูลตามเงื่อนไขที่เลือก', 'warning');
+          if (statusEl) {
+            statusEl.style.display = 'block';
+            statusEl.style.color = 'var(--warning)';
+            statusEl.textContent = 'ไม่พบข้อมูลตามเงื่อนไขที่เลือก';
+          }
+          return;
+        }
+
+        var baseNames = {
+          'orders': 'Orders',
+          'products_stock': 'Products_Stock',
+          'inventory_logs': 'Inventory_Logs',
+          'audit_logs': 'Audit_Logs',
+          'employees': 'Employees'
+        };
+        var baseName = baseNames[dataType] || 'Export';
+        var dateSuffix = (startDate && endDate) ? ('_' + startDate + '_to_' + endDate) : '_All_Time';
+        var ext = (format === 'csv') ? '.csv' : '.xlsx';
+        var filename = baseName + dateSuffix + ext;
+
+        if (format === 'csv') {
+          var headers = Object.keys(rows[0]);
+          var csvContent = "\uFEFF"; // UTF-8 BOM
+          csvContent += headers.map(function(h) { return '"' + String(h).replace(/"/g, '""') + '"'; }).join(",") + "\n";
+
+          rows.forEach(function (row) {
+            var line = headers.map(function (h) {
+              var val = row[h] === null || row[h] === undefined ? "" : String(row[h]);
+              return '"' + val.replace(/"/g, '""') + '"';
+            }).join(",");
+            csvContent += line + "\n";
+          });
+
+          var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+          var link = document.createElement("a");
+          var url = URL.createObjectURL(blob);
+          link.href = url;
+          link.download = filename;
+          link.style.display = 'none';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        } else {
+          if (typeof XLSX === 'undefined') {
+            throw new Error('ไม่พบไลบรารี XLSX');
+          }
+          var wb = XLSX.utils.book_new();
+          var ws = XLSX.utils.json_to_sheet(rows);
+          XLSX.utils.book_append_sheet(wb, ws, baseName.substring(0, 31));
+          XLSX.writeFile(wb, filename);
+        }
+
+        if (typeof showToast === 'function') showToast('Export สำเร็จ', 'success');
+        if (statusEl) {
+          statusEl.style.display = 'block';
+          statusEl.style.color = 'var(--success)';
+          statusEl.textContent = 'Export สำเร็จ (' + rows.length + ' รายการ)';
+        }
+      }).catch(function (err) {
+        console.error('Export Error:', err);
+        var errText = typeof err === 'string' ? err : (err.message || 'เกิดข้อผิดพลาดในการดึงข้อมูล');
+        if (typeof showToast === 'function') showToast('ไม่สามารถ Export ข้อมูลได้: ' + errText, 'error');
+        if (statusEl) {
+          statusEl.style.display = 'block';
+          statusEl.style.color = 'var(--danger)';
+          statusEl.textContent = 'ไม่สามารถ Export ข้อมูลได้: ' + errText;
+        }
+      }).finally(function () {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<i data-lucide="download"></i> Export ข้อมูล';
+          refreshIcons();
+        }
+      });
+    }
+
+
 
   </script>
 </body>

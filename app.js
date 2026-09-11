@@ -2644,3 +2644,402 @@ document.addEventListener('click', function(e) {
     dropdown.classList.remove('active');
   }
 });
+
+function normalizeExportDate(rawDate) {
+  if (!rawDate) return '';
+  if (typeof rawDate === 'string') {
+    var dmyMatch = rawDate.trim().match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/);
+    if (dmyMatch) {
+      var d = dmyMatch[1].padStart(2, '0');
+      var m = dmyMatch[2].padStart(2, '0');
+      var y = dmyMatch[3];
+      return y + '-' + m + '-' + d;
+    }
+    if (/^\d{4}-\d{2}-\d{2}/.test(rawDate)) {
+      return rawDate.substring(0, 10);
+    }
+  }
+  try {
+    var dt = new Date(rawDate);
+    if (!isNaN(dt.getTime())) {
+      var y = dt.getFullYear();
+      var m = String(dt.getMonth() + 1).padStart(2, '0');
+      var day = String(dt.getDate()).padStart(2, '0');
+      return y + '-' + m + '-' + day;
+    }
+  } catch (e) {}
+  return String(rawDate).substring(0, 10);
+}
+
+// ─── DATA EXPORT HUB ─────────────────────────────────────────
+function exportDataHub(params) {
+  // ponytail: unified export runner supporting date range, multi-select dept/status, scope team/individual
+  params = params || {};
+  var dataType = params.dataType || 'orders';
+  var startDate = params.startDate || '';
+  var endDate = params.endDate || '';
+  var format = params.format || 'xlsx';
+
+  var departments = Array.isArray(params.departments) ? params.departments : (params.department && params.department !== 'ALL' ? [params.department] : ['ALL']);
+  var statuses = Array.isArray(params.statuses) ? params.statuses : (params.status && params.status !== 'ALL' ? [params.status] : ['ALL']);
+  var scopeType = params.scopeType || 'ALL';
+  var scopeTargets = Array.isArray(params.scopeTargets) ? params.scopeTargets : (params.scopeTarget && params.scopeTarget !== 'ALL' ? [params.scopeTarget] : ['ALL']);
+
+  var btn = document.getElementById('btnDoExport');
+  var statusEl = document.getElementById('exportStatusMsg');
+
+  if (startDate && endDate && startDate > endDate) {
+    if (typeof showToast === 'function') showToast('วันที่เริ่มต้นต้องไม่มากกว่าวันที่สิ้นสุด', 'error');
+    if (statusEl) {
+      statusEl.style.display = 'block';
+      statusEl.style.color = 'var(--danger)';
+      statusEl.textContent = 'ไม่สามารถ Export ข้อมูลได้: วันที่เริ่มต้นต้องไม่มากกว่าวันที่สิ้นสุด';
+    }
+    return Promise.reject('วันที่เริ่มต้นต้องไม่มากกว่าวันที่สิ้นสุด');
+  }
+
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner" style="width:16px;height:16px;border-width:2px"></div> กำลังเตรียมข้อมูล...';
+  }
+  if (statusEl) {
+    statusEl.style.display = 'block';
+    statusEl.style.color = 'var(--text2)';
+    statusEl.textContent = 'กำลังเตรียมข้อมูล...';
+  }
+
+  var promise;
+  if (dataType === 'orders') {
+    promise = API.getAllOrders(true).then(function (res) {
+      var rawOrders = res.data || res.orders || [];
+      var rows = [];
+
+      rawOrders.forEach(function (o) {
+        var dateStr = normalizeExportDate(o.createdAt || o.orderDate || o.date || '');
+        if (startDate && (!dateStr || dateStr < startDate)) return;
+        if (endDate && (!dateStr || dateStr > endDate)) return;
+
+        if (departments.length > 0 && !departments.includes('ALL')) {
+          var oDept = String(o.department || '').trim().toLowerCase();
+          if (!departments.some(function (d) { return String(d).trim().toLowerCase() === oDept; })) return;
+        }
+
+        if (statuses.length > 0 && !statuses.includes('ALL')) {
+          var oStatus = String(o.status || '').toLowerCase().trim();
+          var matched = statuses.some(function (st) {
+            var s = String(st).toLowerCase().trim();
+            if (s === oStatus) return true;
+            if ((s === 'completed' || s === 'received') && (oStatus === 'completed' || oStatus === 'received')) return true;
+            return false;
+          });
+          if (!matched) return;
+        }
+
+        if (scopeType === 'TEAM' && scopeTargets.length > 0 && !scopeTargets.includes('ALL')) {
+          var oTeam = String(o.teamId || o.team || '').trim().toLowerCase();
+          if (!scopeTargets.some(function (t) { return String(t).trim().toLowerCase() === oTeam; })) return;
+        } else if (scopeType === 'INDIVIDUAL' && scopeTargets.length > 0 && !scopeTargets.includes('ALL')) {
+          var oEmpId = String(o.employeeId || o.requesterId || o.user || '').trim().toLowerCase();
+          if (!scopeTargets.some(function (emp) { return String(emp).trim().toLowerCase() === oEmpId; })) return;
+        }
+
+        var items = Array.isArray(o.items) && o.items.length > 0 ? o.items : [{}];
+        items.forEach(function (it) {
+          var pId = String(it.productId || it.id || '').trim();
+          var unitPrice = Number(it.price || it.unitPrice || 0);
+          if (!unitPrice && pId && typeof allProducts !== 'undefined' && allProducts) {
+            var foundProd = allProducts.find(function (p) { return String(p.productId || p.id) === pId; });
+            if (foundProd) unitPrice = Number(foundProd.price) || 0;
+          }
+          var qty = Number(it.quantity || it.qty || 0);
+          var itemTotal = Number(it.total || it.totalPrice || (unitPrice * qty));
+
+          var approver = o.approvedBy || o.approverName || o.approver || '';
+          var approvedDate = o.approvedAt || o.approvalDate || o.approvedDate || '';
+          var isApprovedOrDone = ['Approved', 'Ready', 'READY', 'Dispatched', 'Received'].indexOf(o.status) !== -1;
+          if (!approver && isApprovedOrDone) approver = 'ผู้ดูแลระบบ';
+          if (!approvedDate && isApprovedOrDone) approvedDate = o.createdAt || o.date || '';
+
+          rows.push({
+            'รหัสใบเบิก': o.orderId || o.id || '',
+            'วันที่เบิก': o.createdAt || o.date || '',
+            'ผู้ขอเบิก': o.employeeName || o.requesterName || o.userName || o.user || '',
+            'รหัสพนักงาน': o.employeeId || o.requesterId || '',
+            'แผนก': o.department || '',
+            'ทีม': o.teamId || o.team || '',
+            'สถานะ': o.statusLabel || o.status || '',
+            'รหัสสินค้า': pId,
+            'ชื่อสินค้า': it.productName || it.name || '',
+            'จำนวน': qty,
+            'ราคาต่อชิ้น': unitPrice,
+            'ราคารวม': itemTotal,
+            'ผู้อนุมัติ': approver,
+            'วันที่อนุมัติ': approvedDate
+          });
+        });
+      });
+
+      return rows;
+    });
+  } else if (dataType === 'products_stock') {
+    promise = API.getProducts().then(function (res) {
+      var rawProds = res.data || res.products || [];
+      var rows = [];
+
+      rawProds.forEach(function (p) {
+        if (departments.length > 0 && !departments.includes('ALL')) {
+          var pDept = String(p.department || '').trim().toLowerCase();
+          if (!departments.some(function (d) { return String(d).trim().toLowerCase() === pDept; })) return;
+        }
+
+        if (statuses.length > 0 && !statuses.includes('ALL')) {
+          var stock = Number(p.stock) || 0;
+          var minStock = Number(p.minStock) || 0;
+          var pStatus = 'normal';
+          if (stock <= 0) pStatus = 'out_of_stock';
+          else if (stock <= minStock) pStatus = 'low_stock';
+
+          var rawStatus = String(p.status || '').toLowerCase().trim();
+          var matched = statuses.some(function (st) {
+            var s = String(st).toLowerCase().trim();
+            return s === pStatus || s === rawStatus || (s === 'normal' && (rawStatus === 'ปกติ' || rawStatus === 'active')) || (s === 'out_of_stock' && rawStatus === 'สินค้าหมด') || (s === 'low_stock' && rawStatus === 'สต๊อกต่ำ');
+          });
+          if (!matched) return;
+        }
+
+        if (scopeType === 'TEAM' && scopeTargets.length > 0 && !scopeTargets.includes('ALL')) {
+          var pTeam = String(p.teamId || p.team || '').trim().toLowerCase();
+          if (!scopeTargets.some(function (t) { return String(t).trim().toLowerCase() === pTeam; })) return;
+        }
+
+        var unitPrice = Number(p.price) || 0;
+        var stockQty = Number(p.stock) || 0;
+        var totalValue = unitPrice * stockQty;
+
+        rows.push({
+          'รหัสสินค้า': p.productId || p.id || '',
+          'บาร์โค้ด/SKU': p.sku || p.code || p.productId || '',
+          'ชื่อสินค้า': p.name || p.productName || '',
+          'หมวดหมู่': p.categoryName || p.category || p.categoryId || '',
+          'ราคาต่อชิ้น': unitPrice,
+          'จำนวนสต็อก': stockQty,
+          'มูลค่ารวมสต็อก': totalValue,
+          'สต็อกขั้นต่ำ': Number(p.minStock) || 0,
+          'ที่ตั้ง': p.location || '',
+          'ทีม': p.teamId || p.team || '',
+          'สถานะ': p.status || (stockQty <= 0 ? 'สินค้าหมด' : (stockQty <= Number(p.minStock) ? 'สต๊อกต่ำ' : 'ปกติ'))
+        });
+      });
+
+      return rows;
+    });
+  } else if (dataType === 'inventory_logs') {
+    promise = API.getInventoryLogs({ limit: 5000 }).then(function (res) {
+      var rawLogs = res.data || [];
+      var rows = [];
+
+      var actionMap = {
+        'issue': 'เบิกใช้งาน',
+        'transfer_out': 'โอนออก',
+        'transfer_in': 'โอนเข้า',
+        'return': 'คืน',
+        'add': 'เพิ่มสต๊อก',
+        'deduct': 'ตัดสต๊อก',
+        'adjust': 'ปรับปรุงสต๊อก',
+        'reserve': 'จองสต๊อก',
+        'cancel': 'ยกเลิก'
+      };
+
+      rawLogs.forEach(function (l) {
+        var dateStr = normalizeExportDate(l.date || l.timestamp || '');
+        if (startDate && (!dateStr || dateStr < startDate)) return;
+        if (endDate && (!dateStr || dateStr > endDate)) return;
+
+        if (departments.length > 0 && !departments.includes('ALL')) {
+          var lDept = String(l.department || '').trim().toLowerCase();
+          if (!departments.some(function (d) { return String(d).trim().toLowerCase() === lDept; })) return;
+        }
+
+        if (statuses.length > 0 && !statuses.includes('ALL')) {
+          var lAction = String(l.action || '').toLowerCase().trim();
+          if (!statuses.some(function (st) { return String(st).toLowerCase().trim() === lAction; })) return;
+        }
+
+        if (scopeType === 'TEAM' && scopeTargets.length > 0 && !scopeTargets.includes('ALL')) {
+          var lTeam = String(l.teamId || l.team || '').trim().toLowerCase();
+          if (!scopeTargets.some(function (t) { return String(t).trim().toLowerCase() === lTeam; })) return;
+        } else if (scopeType === 'INDIVIDUAL' && scopeTargets.length > 0 && !scopeTargets.includes('ALL')) {
+          var lEmpId = String(l.employeeId || l.userId || l.user || '').trim().toLowerCase();
+          if (!scopeTargets.some(function (emp) { return String(emp).trim().toLowerCase() === lEmpId; })) return;
+        }
+
+        var actLabel = actionMap[l.action] || l.action || '';
+        rows.push({
+          'รหัส Log': l.logId || l.id || '',
+          'รหัสสินค้า': l.productId || '',
+          'ชื่อสินค้า': l.productName || '',
+          'กิจกรรม': actLabel,
+          'จำนวน': Number(l.quantity) || 0,
+          'ผู้ทำรายการ': l.userName || l.user || '',
+          'แผนก': l.department || '',
+          'ทีม': l.teamId || l.team || '',
+          'ที่ตั้ง': l.location || '',
+          'รหัสอ้างอิง': l.referenceId || l.orderId || '',
+          'วันที่และเวลา': l.date || l.timestamp || ''
+        });
+      });
+
+      return rows;
+    });
+  } else if (dataType === 'audit_logs') {
+    promise = API.getReportData('auditActivities').then(function (res) {
+      var rawLogs = (res.data && res.data.logs) ? res.data.logs : [];
+      var rows = [];
+
+      rawLogs.forEach(function (l) {
+        var dateStr = normalizeExportDate(l.timestamp || l.date || '');
+        if (startDate && (!dateStr || dateStr < startDate)) return;
+        if (endDate && (!dateStr || dateStr > endDate)) return;
+
+        if (scopeType === 'INDIVIDUAL' && scopeTargets.length > 0 && !scopeTargets.includes('ALL')) {
+          var lUser = String(l.user || l.userId || '').trim().toLowerCase();
+          if (!scopeTargets.some(function (emp) { return String(emp).trim().toLowerCase() === lUser; })) return;
+        }
+
+        var detailText = typeof l.detail === 'object' ? JSON.stringify(l.detail) : (l.detail || '');
+        rows.push({
+          'รหัส Log': l.logId || l.id || '',
+          'ผู้ใช้งาน': l.user || '',
+          'กิจกรรม': l.action || '',
+          'รายละเอียด': detailText,
+          'รหัสอ้างอิง': l.referenceId || '',
+          'วันที่และเวลา': l.timestamp || l.date || ''
+        });
+      });
+
+      return rows;
+    });
+  } else if (dataType === 'employees') {
+    promise = API.getEmployees().then(function (res) {
+      var rawEmps = res.data || [];
+      var rows = [];
+
+      rawEmps.forEach(function (e) {
+        if (departments.length > 0 && !departments.includes('ALL')) {
+          var eDept = String(e.department || '').trim().toLowerCase();
+          if (!departments.some(function (d) { return String(d).trim().toLowerCase() === eDept; })) return;
+        }
+
+        if (statuses.length > 0 && !statuses.includes('ALL')) {
+          var eStatus = String(e.status || 'active').toLowerCase().trim();
+          var matched = statuses.some(function (st) {
+            var s = String(st).toLowerCase().trim();
+            return s === eStatus || (s === 'active' && (eStatus === 'active' || eStatus === 'ปกติ' || !e.status)) || (s === 'inactive' && (eStatus === 'inactive' || eStatus === 'ระงับการใช้งาน' || eStatus === 'suspended'));
+          });
+          if (!matched) return;
+        }
+
+        if (scopeType === 'TEAM' && scopeTargets.length > 0 && !scopeTargets.includes('ALL')) {
+          var eTeam = String(e.teamId || e.team || '').trim().toLowerCase();
+          if (!scopeTargets.some(function (t) { return String(t).trim().toLowerCase() === eTeam; })) return;
+        } else if (scopeType === 'INDIVIDUAL' && scopeTargets.length > 0 && !scopeTargets.includes('ALL')) {
+          var eEmpId = String(e.employeeId || e.id || '').trim().toLowerCase();
+          if (!scopeTargets.some(function (emp) { return String(emp).trim().toLowerCase() === eEmpId; })) return;
+        }
+
+        rows.push({
+          'รหัสพนักงาน': e.employeeId || e.id || '',
+          'ชื่อ-นามสกุล': e.name || e.employeeName || '',
+          'แผนก': e.department || '',
+          'ทีม': e.teamId || e.team || '',
+          'ตำแหน่ง': e.position || '',
+          'อีเมล': e.email || '',
+          'เบอร์โทรศัพท์': e.phone || '',
+          'สถานะ': e.status || ''
+        });
+      });
+
+      return rows;
+    });
+  } else {
+    promise = Promise.reject('ประเภทข้อมูลไม่ถูกต้อง');
+  }
+
+  return promise.then(function (rows) {
+    if (!rows || rows.length === 0) {
+      if (typeof showToast === 'function') showToast('ไม่พบข้อมูลตามเงื่อนไขที่เลือก', 'warning');
+      if (statusEl) {
+        statusEl.style.display = 'block';
+        statusEl.style.color = 'var(--warning)';
+        statusEl.textContent = 'ไม่พบข้อมูลตามเงื่อนไขที่เลือก';
+      }
+      return;
+    }
+
+    var baseNames = {
+      'orders': 'Orders',
+      'products_stock': 'Products_Stock',
+      'inventory_logs': 'Inventory_Logs',
+      'audit_logs': 'Audit_Logs',
+      'employees': 'Employees'
+    };
+    var baseName = baseNames[dataType] || 'Export';
+    var dateSuffix = (startDate && endDate) ? ('_' + startDate + '_to_' + endDate) : '_All_Time';
+    var ext = (format === 'csv') ? '.csv' : '.xlsx';
+    var filename = baseName + dateSuffix + ext;
+
+    if (format === 'csv') {
+      var headers = Object.keys(rows[0]);
+      var csvContent = "\uFEFF"; // UTF-8 BOM
+      csvContent += headers.map(function(h) { return '"' + String(h).replace(/"/g, '""') + '"'; }).join(",") + "\n";
+
+      rows.forEach(function (row) {
+        var line = headers.map(function (h) {
+          var val = row[h] === null || row[h] === undefined ? "" : String(row[h]);
+          return '"' + val.replace(/"/g, '""') + '"';
+        }).join(",");
+        csvContent += line + "\n";
+      });
+
+      var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      var link = document.createElement("a");
+      var url = URL.createObjectURL(blob);
+      link.href = url;
+      link.download = filename;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      if (typeof XLSX === 'undefined') {
+        throw new Error('ไม่พบไลบรารี XLSX');
+      }
+      var wb = XLSX.utils.book_new();
+      var ws = XLSX.utils.json_to_sheet(rows);
+      XLSX.utils.book_append_sheet(wb, ws, baseName);
+      XLSX.writeFile(wb, filename);
+    }
+
+    if (typeof showToast === 'function') showToast('Export สำเร็จ', 'success');
+    if (statusEl) {
+      statusEl.style.display = 'block';
+      statusEl.style.color = 'var(--success)';
+      statusEl.textContent = 'Export สำเร็จ';
+    }
+  }).catch(function (err) {
+    console.error('Export Error:', err);
+    var errText = typeof err === 'string' ? err : (err.message || 'เกิดข้อผิดพลาดในการดึงข้อมูล');
+    if (typeof showToast === 'function') showToast('ไม่สามารถ Export ข้อมูลได้: ' + errText, 'error');
+    if (statusEl) {
+      statusEl.style.display = 'block';
+      statusEl.style.color = 'var(--danger)';
+      statusEl.textContent = 'ไม่สามารถ Export ข้อมูลได้: ' + errText;
+    }
+  }).finally(function () {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<i data-lucide="download"></i> Export ข้อมูล';
+      if (typeof refreshIcons === 'function') refreshIcons();
+    }
+  });
+}
