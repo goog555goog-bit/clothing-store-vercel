@@ -819,7 +819,7 @@ function renderProductGrid(pageNum) {
       + '<div class="product-name" style="cursor:pointer" onclick="openProductDetail(\'' + escapeHTML(p.productId) + '\')">' + escapeHTML(p.name) + '</div>'
       + '<div class="product-stock"><span class="product-stock-dot' + (outOfStock ? ' out' : '') + '"></span>' + (outOfStock ? '<span style="color:var(--danger)">หมดสต็อก</span>' : 'คงเหลือ: ' + Number(p.stock) + ' ชิ้น') + '</div>'
       + '<div class="flex flex-wrap items-center justify-between gap-2" style="margin-top:auto">'
-      + '<div class="product-price">' + (hasPermission('view_prices') ? '฿' + Number(p.price).toLocaleString() : '***') + '</div>'
+      + '<div class="product-price">' + formatProductPriceRange(p) + '</div>'
       + (hasPermission('can_request')
         ? '<button class="btn btn-sm ' + (outOfStock ? 'btn-outline' : 'btn-primary') + '" '
         + (outOfStock ? 'disabled' : 'onclick="' + (p.sizes ? 'openProductDetail(\'' + escapeHTML(p.productId) + '\')' : 'addToCart(\'' + escapeHTML(p.productId) + '\', event)') + '"')
@@ -833,6 +833,32 @@ function renderProductGrid(pageNum) {
 
   renderPaginationControls(totalPages, currentProductPage, 'productPagination', 'renderProductGrid');
   refreshIcons();
+}
+
+function formatProductPriceRange(p) {
+  if (!p) return '฿0';
+  if (!hasPermission('view_prices')) return '***';
+  var basePrice = Number(p.price) || 0;
+  if (!p.variantPrice) return '฿' + basePrice.toLocaleString();
+
+  var vp = p.variantPrice;
+  if (typeof vp === 'string' && vp.startsWith('{')) {
+    try { vp = JSON.parse(vp); } catch (e) { }
+  }
+  if (typeof vp !== 'object' || vp === null) return '฿' + basePrice.toLocaleString();
+
+  var prices = [basePrice];
+  for (var k in vp) {
+    if (vp[k] !== undefined && vp[k] !== '' && !isNaN(Number(vp[k]))) {
+      prices.push(Number(vp[k]));
+    }
+  }
+  var min = Math.min.apply(null, prices);
+  var max = Math.max.apply(null, prices);
+  if (min === max) {
+    return '฿' + min.toLocaleString();
+  }
+  return '฿' + min.toLocaleString() + ' - ฿' + max.toLocaleString();
 }
 
 function openProductDetail(id) {
@@ -862,7 +888,7 @@ function openProductDetail(id) {
     + '<h2 style="font-size:1.5rem;font-weight:800;letter-spacing:-1px">' + p.name + '</h2>'
     + '<div style="color:var(--text3);font-size:0.9rem;margin-top:0.25rem">หมวดหมู่: ' + (cat ? cat.name : '-') + ' | SKU: ' + p.productId + '</div>'
     + '</div>'
-    + '<div class="product-price" style="font-size:1.8rem">' + (hasPermission('view_prices') ? '฿' + Number(p.price).toLocaleString() : '***') + '</div>'
+    + '<div id="detail-product-price" class="product-price" style="font-size:1.8rem">' + (hasPermission('view_prices') ? formatProductPriceRange(p) : '***') + '</div>'
     + '</div>'
     + (hasPermission('can_request')
       ? ''
@@ -927,9 +953,21 @@ function openProductDetail(id) {
           var sStock = vStock[s] !== undefined ? Number(vStock[s]) : -1;
           var sOut = sStock === 0;
 
+          var sizePriceTag = '';
+          if (p.variantPrice && hasPermission('view_prices')) {
+            var vpObj = {};
+            try { vpObj = (typeof p.variantPrice === 'string' && p.variantPrice.startsWith('{')) ? JSON.parse(p.variantPrice) : p.variantPrice; } catch (e) { }
+            if (vpObj && vpObj[s] !== undefined && vpObj[s] !== '' && !isNaN(Number(vpObj[s]))) {
+              var customP = Number(vpObj[s]);
+              if (customP !== Number(p.price)) {
+                sizePriceTag = ' <span style="font-size:0.75rem; opacity:0.85; margin-left:4px">(฿' + customP.toLocaleString() + ')</span>';
+              }
+            }
+          }
+
           return '<div class="choice-chip' + (sOut ? ' out-of-stock' : '') + '" '
             + 'onclick="if(!this.classList.contains(\'out-of-stock\')) selectProductSize(this, \'' + escapeHTML(s) + '\', \'' + escapeHTML(p.productId) + '\')">'
-            + '<span>' + s + '</span>'
+            + '<span>' + s + sizePriceTag + '</span>'
             + (sOut ? '<div class="badge-soldout">หมด</div>' : '')
             + '</div>';
         }).join('')
@@ -1023,6 +1061,22 @@ function selectProductSize(el, size, productId) {
       if (statusEl) {
         var dot = statusEl.querySelector('div');
         if (dot) dot.style.background = sStock > 0 ? 'var(--accent)' : 'var(--danger)';
+      }
+
+      // Update price display for this size
+      var priceEl = document.getElementById('detail-product-price');
+      if (priceEl && hasPermission('view_prices')) {
+        var sizePrice = Number(p.price) || 0;
+        if (p.variantPrice) {
+          var vpObj = {};
+          try {
+            vpObj = (typeof p.variantPrice === 'string' && p.variantPrice.startsWith('{')) ? JSON.parse(p.variantPrice) : p.variantPrice;
+          } catch (e) { }
+          if (vpObj && vpObj[size] !== undefined && vpObj[size] !== '' && !isNaN(Number(vpObj[size]))) {
+            sizePrice = Number(vpObj[size]);
+          }
+        }
+        priceEl.textContent = '฿' + sizePrice.toLocaleString();
       }
 
       // Highlight in grid

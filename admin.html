@@ -1055,11 +1055,21 @@
         </div>
         <div id="pf-size-input-wrapper" class="form-group" style="display:none; padding-left:1.5rem; border-left:2px solid rgba(255,255,255,0.1)">
           <label class="form-label" style="font-size:0.8rem">พิมพ์ไซส์ (คั่นด้วยคอมม่า เช่น S, M, L, XL)</label>
-          <input id="pf-sizes" class="form-input" placeholder="S, M, L, XL" oninput="generateSizeStockInputs()">
+          <input id="pf-sizes" class="form-input" placeholder="S, M, L, XL" oninput="generateSizeStockInputs(); generateSizePriceInputs();">
           <div id="size-stock-container" style="margin-top:1rem; display:none">
             <label class="form-label" style="font-size:0.8rem; color:var(--text3)">กำหนดสต็อกแยกตามไซส์</label>
             <div id="size-stock-list" class="flex flex-wrap gap-2"
               style="padding:0.5rem; background:rgba(255,255,255,0.02); border-radius:8px"></div>
+          </div>
+          <div id="pf-variant-price-wrapper" style="margin-top:0.75rem; display:none">
+            <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; width:max-content; margin-bottom:0.4rem">
+              <input type="checkbox" id="pf-has-variant-price" onchange="toggleVariantPriceInput(this.checked)">
+              <span style="font-size:0.85rem; font-weight:500; color:var(--accent)">กำหนดราคาแยกตามไซส์ (ราคาแต่ละไซส์ไม่เท่ากัน)</span>
+            </label>
+            <div id="size-price-container" style="display:none; margin-top:0.4rem; padding:0.6rem; background:rgba(234,179,8,0.04); border:1px solid rgba(234,179,8,0.2); border-radius:8px">
+              <div style="font-size:0.75rem; color:var(--text3); margin-bottom:0.4rem">ระบุราคาเฉพาะไซส์ที่ต่างออกไป (ไซส์ที่ราคาเท่าเดิม สามารถเว้นว่างไว้ได้)</div>
+              <div id="size-price-list" class="flex flex-wrap gap-2"></div>
+            </div>
           </div>
         </div>
         <div class="form-group">
@@ -1077,8 +1087,16 @@
         </div>
 
         <div class="flex flex-wrap gap-2">
-          <div class="form-group" style="flex:1"><label class="form-label">ราคา *</label><input id="pf-price"
-              class="form-input" type="number" placeholder="0" min="0" step="0.01"></div>
+          <div class="form-group" style="flex:1">
+            <label class="form-label">ราคาหลัก (บาท) *</label>
+            <input id="pf-price" class="form-input" type="number" placeholder="0" min="0" step="0.01" oninput="onBasePriceChange()">
+            <div id="pf-free-warning" style="display:none; margin-top:0.4rem; padding:0.4rem 0.6rem; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.2); border-radius:6px;">
+              <label style="display:flex; align-items:center; gap:0.4rem; cursor:pointer; margin:0; font-size:0.8rem; color:var(--danger)">
+                <input type="checkbox" id="pf-is-free">
+                <span>ยืนยัน: สินค้านี้เป็นพัสดุแจกฟรี / สวัสดิการ (0 บาท)</span>
+              </label>
+            </div>
+          </div>
           <div class="form-group" style="flex:1"><label class="form-label">สต๊อก</label><input id="pf-stock"
               class="form-input" type="number" placeholder="0" min="0"></div>
         </div>
@@ -2228,10 +2246,20 @@
     }
 
     function renderTrendsChart(res) {
-      if (!res.success || !res.data) return;
+      if (!res) return;
       if (typeof Chart === 'undefined') return;
       var canvas = document.getElementById('trendsChart');
       if (!canvas) return;
+
+      var trendData = (res.data && typeof res.data === 'object' && !Array.isArray(res.data)) ? res.data : res;
+      var labels = trendData.labels || res.labels || [];
+      var orderCounts = trendData.orderCounts || res.orderCounts || [];
+      var volumes = trendData.volumes || res.volumes || (Array.isArray(res.data) ? res.data : (Array.isArray(trendData) ? trendData : []));
+
+      if (labels.length === 0) return;
+      if (orderCounts.length === 0 && volumes.length > 0) {
+        orderCounts = volumes.map(function (v) { return v > 0 ? 1 : 0; });
+      }
 
       var ctx = canvas.getContext('2d');
       if (window.trendsChartInstance) window.trendsChartInstance.destroy();
@@ -2239,11 +2267,11 @@
       window.trendsChartInstance = new Chart(ctx, {
         type: 'line',
         data: {
-          labels: res.data.labels,
+          labels: labels,
           datasets: [
             {
               label: 'จำนวนใบเบิก',
-              data: res.data.orderCounts,
+              data: orderCounts,
               borderColor: '#6366f1',
               backgroundColor: 'rgba(99, 102, 241, 0.1)',
               fill: true,
@@ -2251,7 +2279,7 @@
             },
             {
               label: 'ยอดการเบิก (฿)',
-              data: hasPermission('view_prices') ? res.data.volumes : res.data.volumes.map(function () { return 0; }),
+              data: (typeof hasPermission === 'function' && !hasPermission('view_prices')) ? volumes.map(function () { return 0; }) : volumes,
               borderColor: '#10b981',
               backgroundColor: 'transparent',
               borderDash: [5, 5],
@@ -2717,12 +2745,36 @@
       document.getElementById('pf-stock').value = product ? product.stock : '';
       document.getElementById('pf-min').value = product ? product.minStock || '5' : '5';
       document.getElementById('pf-sizes').value = product ? (product.sizes || '') : '';
+
+      var isFree = product ? (product.isFreeAllowed === true || product.isFreeAllowed === 'true' || product.isFreeAllowed === 'TRUE') : false;
+      document.getElementById('pf-is-free').checked = isFree;
+      onBasePriceChange();
       
       var hasSizes = product && product.sizes && product.sizes.trim() !== '';
       document.getElementById('pf-has-sizes').checked = hasSizes;
       toggleSizeInput(hasSizes);
 
       generateSizeStockInputs(product ? product.variantStock : null);
+
+      var hasVariantPrice = false;
+      var vPrice = null;
+      if (product && product.variantPrice) {
+        if (typeof product.variantPrice === 'object' && product.variantPrice !== null && Object.keys(product.variantPrice).length > 0) {
+          hasVariantPrice = true;
+          vPrice = product.variantPrice;
+        } else if (typeof product.variantPrice === 'string' && product.variantPrice.trim().startsWith('{')) {
+          try {
+            var parsed = JSON.parse(product.variantPrice);
+            if (parsed && Object.keys(parsed).length > 0) {
+              hasVariantPrice = true;
+              vPrice = parsed;
+            }
+          } catch (e) { }
+        }
+      }
+      document.getElementById('pf-has-variant-price').checked = hasVariantPrice;
+      toggleVariantPriceInput(hasVariantPrice);
+      generateSizePriceInputs(vPrice);
 
       document.getElementById('pf-img').value = product ? product.imageUrl : '';
       updateImagePreview(document.getElementById('pf-img').value);
@@ -2746,14 +2798,30 @@
     function toggleSizeInput(show) {
       var wrapper = document.getElementById('pf-size-input-wrapper');
       var sizeInput = document.getElementById('pf-sizes');
+      var vpWrapper = document.getElementById('pf-variant-price-wrapper');
       if (show) {
         wrapper.style.display = 'block';
+        if (vpWrapper) vpWrapper.style.display = 'block';
         if (!sizeInput.value) sizeInput.value = 'S, M, L, XL';
       } else {
         wrapper.style.display = 'none';
+        if (vpWrapper) vpWrapper.style.display = 'none';
         sizeInput.value = '';
+        document.getElementById('pf-has-variant-price').checked = false;
+        toggleVariantPriceInput(false);
       }
       generateSizeStockInputs();
+      generateSizePriceInputs();
+    }
+
+    function toggleVariantPriceInput(show) {
+      var container = document.getElementById('size-price-container');
+      if (container) {
+        container.style.display = show ? 'block' : 'none';
+      }
+      if (show) {
+        generateSizePriceInputs();
+      }
     }
 
     function generateSizeStockInputs(variantStock) {
@@ -2790,6 +2858,57 @@
       calculateTotalStock();
     }
 
+    function generateSizePriceInputs(variantPrice) {
+      var sizesStr = document.getElementById('pf-sizes').value;
+      var container = document.getElementById('size-price-container');
+      var list = document.getElementById('size-price-list');
+      var basePrice = document.getElementById('pf-price').value;
+
+      if (!sizesStr.trim() || !document.getElementById('pf-has-sizes').checked) {
+        if (container) container.style.display = 'none';
+        return;
+      }
+
+      var currentPrices = {};
+      if (variantPrice === undefined || variantPrice === null) {
+        var existingInputs = document.querySelectorAll('.pf-size-price-input');
+        existingInputs.forEach(function (inp) {
+          var sz = inp.getAttribute('data-size');
+          if (inp.value !== '') currentPrices[sz] = inp.value;
+        });
+      } else if (typeof variantPrice === 'string' && variantPrice.startsWith('{')) {
+        try { currentPrices = JSON.parse(variantPrice); } catch (e) { }
+      } else if (typeof variantPrice === 'object' && variantPrice !== null) {
+        currentPrices = variantPrice;
+      }
+
+      var sizes = sizesStr.split(',').map(function (s) { return s.trim(); }).filter(function (s) { return s !== ''; });
+      list.innerHTML = sizes.map(function (s) {
+        var val = currentPrices[s] !== undefined ? currentPrices[s] : '';
+        var placeholder = basePrice ? basePrice : 'ราคาหลัก';
+        return '<div style="display:flex; flex-direction:column; gap:2px; min-width:70px">' +
+          '<span style="font-size:0.7rem; font-weight:600">' + s + '</span>' +
+          '<input type="number" class="pf-size-price-input form-input" style="padding:4px 8px; font-size:0.85rem" data-size="' + s + '" value="' + val + '" placeholder="' + placeholder + '" min="0" step="0.01">' +
+          '</div>';
+      }).join('');
+    }
+
+    function onBasePriceChange() {
+      var val = document.getElementById('pf-price').value;
+      var freeWarning = document.getElementById('pf-free-warning');
+      var freeCheck = document.getElementById('pf-is-free');
+      if (val !== '' && Number(val) === 0) {
+        if (freeWarning) freeWarning.style.display = 'block';
+      } else {
+        if (freeWarning) freeWarning.style.display = 'none';
+        if (freeCheck) freeCheck.checked = false;
+      }
+      var inputs = document.querySelectorAll('.pf-size-price-input');
+      inputs.forEach(function (inp) {
+        inp.placeholder = val ? val : 'ราคาหลัก';
+      });
+    }
+
     function calculateTotalStock() {
       var inputs = document.querySelectorAll('.pf-size-stock-input');
       var total = 0;
@@ -2803,7 +2922,6 @@
 
       if (inputs.length > 0) {
         document.getElementById('pf-stock').value = total;
-        // Hidden field to store JSON? Or just collect it in saveProduct
         document.getElementById('pf-stock').setAttribute('data-variant-json', JSON.stringify(vStock));
       }
     }
@@ -2830,7 +2948,6 @@
       if (p) {
         openProductModal(p);
       } else {
-        // Fallback if not in cache
         API.getProducts().then(function (res) {
           var p2 = (res.data || []).filter(function (x) { return String(x.productId || x.id) === String(id); })[0];
           if (p2) openProductModal(p2);
@@ -2839,19 +2956,69 @@
     }
 
     function saveProduct() {
+      var priceVal = document.getElementById('pf-price').value.trim();
+      var isFree = document.getElementById('pf-is-free').checked;
+
+      var hasSizes = document.getElementById('pf-has-sizes').checked;
+      var hasVariantPrice = hasSizes && document.getElementById('pf-has-variant-price').checked;
+      var variantPriceObj = {};
+
+      if (hasVariantPrice) {
+        var priceInputs = document.querySelectorAll('.pf-size-price-input');
+        priceInputs.forEach(function (inp) {
+          var s = inp.getAttribute('data-size');
+          var p = inp.value.trim();
+          if (p !== '' && !isNaN(Number(p))) {
+            var np = Number(p);
+            if (np >= 0) {
+              variantPriceObj[s] = np;
+            }
+          }
+        });
+      }
+
+      // ดึงราคาไซส์ที่ถูกที่สุดมาเป็นราคาหลักให้อัตโนมัติเมื่อแอดมินเว้นว่าง
+      var variantPrices = Object.values(variantPriceObj);
+      if (priceVal === '' && hasVariantPrice && variantPrices.length > 0) {
+        var minVariantPrice = Math.min.apply(null, variantPrices);
+        priceVal = String(minVariantPrice);
+        document.getElementById('pf-price').value = minVariantPrice;
+        showToast('ดึงราคาต่ำสุด (฿' + minVariantPrice.toLocaleString() + ') เป็นราคาหลักให้อัตโนมัติ', 'info');
+      }
+
+      var basePrice = Number(priceVal);
+
+      if (!document.getElementById('pf-name').value.trim() || priceVal === '' || isNaN(basePrice)) {
+        showToast('กรุณากรอกข้อมูลให้ครบถ้วนและถูกต้อง', 'warning');
+        return;
+      }
+
+      if (basePrice < 0) {
+        showToast('ราคาไม่สามารถติดลบได้', 'warning');
+        return;
+      }
+
+      if (basePrice === 0 && !isFree) {
+        showToast('หากสินค้าราคา 0 บาท กรุณาติ๊กยืนยันว่าเป็นพัสดุแจกฟรี/สวัสดิการ', 'warning');
+        return;
+      }
+
+      var variantPriceStr = Object.keys(variantPriceObj).length > 0 ? JSON.stringify(variantPriceObj) : '';
+
       var data = {
         oldProductId: document.getElementById('pf-old-id').value.trim(),
         productId: document.getElementById('pf-id').value.trim(),
         name: document.getElementById('pf-name').value.trim(),
         categoryId: document.getElementById('pf-cat').value,
-        price: Number(document.getElementById('pf-price').value),
+        price: basePrice,
         stock: Number(document.getElementById('pf-stock').value),
         minStock: Number(document.getElementById('pf-min').value),
-        sizes: document.getElementById('pf-sizes').value.trim(),
-        variantStock: document.getElementById('pf-stock').getAttribute('data-variant-json') || '',
+        sizes: hasSizes ? document.getElementById('pf-sizes').value.trim() : '',
+        variantStock: hasSizes ? (document.getElementById('pf-stock').getAttribute('data-variant-json') || '') : '',
+        variantPrice: variantPriceStr,
+        isFreeAllowed: (basePrice === 0 && isFree) ? true : false,
         imageUrl: document.getElementById('pf-img').value.trim()
       };
-      if (!data.name || isNaN(data.price)) { showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warning'); return; }
 
       var btn = document.getElementById('saveProductBtn');
       var oldHtml = btn.innerHTML;

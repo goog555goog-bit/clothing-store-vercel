@@ -28,12 +28,17 @@ var Cart = {
       }
     }
 
-    // Re-verify stock with global products cache if available
+    // Re-verify stock & price with global products cache if available
     var currentStoreStock = Number(product.stock);
+    var currentPrice = Number(product.price);
+    var vpSource = product.variantPrice;
+
     if (typeof allProducts !== 'undefined' && allProducts) {
       var freshP = allProducts.find(function (p) { return String(p.productId) === String(product.productId); });
       if (freshP) {
         currentStoreStock = Number(freshP.stock);
+        if (freshP.price !== undefined) currentPrice = Number(freshP.price);
+        if (freshP.variantPrice) vpSource = freshP.variantPrice;
         if (size && freshP.variantStock) {
           var vStock = {};
           try { vStock = (typeof freshP.variantStock === 'string' && freshP.variantStock.startsWith('{')) ? JSON.parse(freshP.variantStock) : freshP.variantStock; } catch(e) {}
@@ -46,8 +51,17 @@ var Cart = {
       if (vStock[size] !== undefined) currentStoreStock = Number(vStock[size]);
     }
 
+    if (size && vpSource) {
+      var vPrices = {};
+      try { vPrices = (typeof vpSource === 'string' && vpSource.startsWith('{')) ? JSON.parse(vpSource) : vpSource; } catch(e) {}
+      if (vPrices && vPrices[size] !== undefined && vPrices[size] !== '' && !isNaN(Number(vPrices[size]))) {
+        currentPrice = Number(vPrices[size]);
+      }
+    }
+
     if (existing) {
       existing.maxStock = currentStoreStock;
+      existing.price = currentPrice;
       if (existing.qty >= currentStoreStock) {
         showToast('หยิบถึงขีดจำกัดสต๊อกแล้ว (' + currentStoreStock + ')', 'warning');
         return;
@@ -61,7 +75,7 @@ var Cart = {
       items.push({
         productId: product.productId,
         name: product.name,
-        price: Number(product.price),
+        price: currentPrice,
         img: product.imageUrl || '',
         maxStock: currentStoreStock,
         size: size,
@@ -224,15 +238,27 @@ var Cart = {
         var p = allProducts.find(function (x) { return String(x.productId) === String(items[i].productId); });
         if (p) {
           var currentStock = Number(p.stock);
+          var currentPrice = Number(p.price);
           var size = items[i].size || '';
           if (size && p.variantStock) {
             var vStock = {};
             try { vStock = (typeof p.variantStock === 'string' && p.variantStock.startsWith('{')) ? JSON.parse(p.variantStock) : p.variantStock; } catch(e) {}
             if (vStock[size] !== undefined) currentStock = Number(vStock[size]);
           }
+          if (size && p.variantPrice) {
+            var vPrices = {};
+            try { vPrices = (typeof p.variantPrice === 'string' && p.variantPrice.startsWith('{')) ? JSON.parse(p.variantPrice) : p.variantPrice; } catch(e) {}
+            if (vPrices && vPrices[size] !== undefined && vPrices[size] !== '' && !isNaN(Number(vPrices[size]))) {
+              currentPrice = Number(vPrices[size]);
+            }
+          }
           if (items[i].maxStock !== currentStock) {
             items[i].maxStock = currentStock;
             if (items[i].qty > currentStock) items[i].qty = Math.max(1, currentStock); // adjust qty if it exceeds new max
+            hasChanges = true;
+          }
+          if (items[i].price !== currentPrice) {
+            items[i].price = currentPrice;
             hasChanges = true;
           }
         }
